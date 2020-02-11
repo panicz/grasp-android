@@ -25,7 +25,7 @@ public class SlayerActivity extends Activity
 	return a > b ? a : b;
     }
 
-    Logger log = new Logger(130);
+    Logger log = new Logger(120);
     
     enum EditingMode {
 	Idle,

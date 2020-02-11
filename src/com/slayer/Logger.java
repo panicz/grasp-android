@@ -11,6 +11,7 @@ class Logger {
 	new LinkedList<String>();
     int max_size;
     public void log(Object... entries) {
+
 	StringBuilder result =
 	    new StringBuilder();
 	for(int i = 0;
