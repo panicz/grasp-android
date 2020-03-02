@@ -1,10 +1,8 @@
-package com.slayer;
+package com.GRASP;
 
-
-import java.io.Serializable;
 import java.lang.Math;
 
-class Vector implements Serializable {
+class Vector {
     public float x;
     public float y;
     public Vector(Point from, Point to) {

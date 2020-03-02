@@ -1,0 +1,71 @@
+package com.GRASP;
+
+import android.graphics.Canvas;
+
+class IdleBox implements Box {
+    public Impassive impassive = new Impassive();
+    
+    @Override
+    public ActionResult onSingleTap(float x, float y) {
+	return ActionIgnore;
+    }
+
+    @Override
+    public ActionResult onDoubleTap(float x, float y) {
+	return ActionIgnore;
+    }
+
+    @Override
+    public ActionResult onHold(float x, float y) {
+	return ActionIgnore;
+    }
+
+    @Override
+    public ActionResult onPress(float x, float y,
+				int finger) {
+	return ActionIgnore;
+    }
+
+    @Override
+    public ActionResult onUnpress(float x, float y,
+				  int finger) {
+	return ActionIgnore;
+    }
+    
+    @Override
+    public ActionResult onRelease(float x, float y,
+				  int finger) {
+	return ActionIgnore;
+    }
+
+    @Override
+    public void onKeyUp(int code) {}
+
+    @Override
+    public void onKeyDown(int code) {}
+
+    @Override
+    public ActionResult onMotion(float [] x, float [] y,
+				 boolean [] finger,
+				 int max_finger) {
+	return ActionIgnore;
+    }
+
+    @Override
+    public void draw(Canvas canvas) {}
+
+    @Override
+    public boolean contains(float x, float y) {
+	return false;
+    }
+
+    @Override
+    public float getWidth() {
+	return 0;
+    }
+
+    @Override
+    public float getHeight() {
+	return 0;
+    }
+}

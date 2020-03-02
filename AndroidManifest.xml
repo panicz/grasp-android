@@ -1,19 +1,26 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.slayer"
+    package="com.GRASP"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0" 
+    android:installLocation="preferExternal">
 
-  <uses-sdk android:minSdkVersion="14"
-	    android:targetSdkVersion="23" />
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="23" />
 
+    <uses-permission
+	android:name="android.permission.WAKE_LOCK" />
+    <uses-permission
+	android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    
     <application
-        android:icon="@drawable/slayer"
-        android:label="SLAYER"
+        android:icon="@drawable/mani"
+        android:label="GRASP"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".SlayerActivity"
-	    android:configChanges="keyboard|keyboardHidden|orientation"
-            android:label="SlayeR" >
+            android:name=".GRASP"
+            android:label="GRASP" 
+            android:configChanges="keyboard|keyboardHidden|orientation">
             <intent-filter>
               <action
 		  android:name="android.intent.action.MAIN" />

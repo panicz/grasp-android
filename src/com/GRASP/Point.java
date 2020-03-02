@@ -1,10 +1,6 @@
-package com.slayer;
+package com.GRASP;
 
-
-import java.io.Serializable;
-
-
-class Point implements Serializable {
+class Point {
 
     public float x;
     public float y;
