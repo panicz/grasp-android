@@ -23,7 +23,8 @@ class ListBox extends MultiBox {
 				48,
 				Color.BLACK,
 				320,
-				60);
+				60,
+				insensitive);
 	    }
 	    else {
 		GRASP.Log("attempted to put "

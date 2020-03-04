@@ -32,8 +32,8 @@ class Stage extends MultiBox {
 				 "first", "second",
 				 "third", "fourth",
 				 "fifth"));
-	*/
 	
+	*/
     }
 
     @Override
@@ -59,10 +59,38 @@ class Stage extends MultiBox {
 	return ActionProcess;
     }
 
-    Box recognize(Shape shape) {
+    class CreateBox implements TouchHandler {
+	Stage stage;
 	
+	public CreateBox(Stage stage) {
+	    this.stage = stage;
+	}
 	
-	return null;
+	@Override
+	public ActionResult action(float x, float y) {
+	    // dodajemy do sceny
+	    // nowego multiboxa
+	    return ActionProcess;
+	}
+    };
+
+    class AddShape implements TouchHandler {
+	Stage stage;
+	public AddShape(Stage stage) {
+	    this.stage = stage;
+	}
+
+	@Override
+	public ActionResult action(float x, float y) {
+	    
+	    return ActionProcess;
+	}
+    }
+    
+    Box recognize(Shape shape, float x, float y) {
+	return new
+	    ListBox(x, y, "Box",
+		    "Shape");
     }
 
     @Override
@@ -70,7 +98,8 @@ class Stage extends MultiBox {
 				  int finger) {
 
 	if (shape != null) {
-	    obscuring = recognize(shape);
+	    obscuring = recognize(shape, x, y);
+	    parentView.invalidate();
 	    return ActionProcess;
 	}
 	else {

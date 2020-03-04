@@ -26,6 +26,19 @@ interface Box {
     interface TouchHandler {
 	public ActionResult action(float x, float y);
     };
+
+    interface MotionHandler {
+	public ActionResult action(float [] x, float [] y,
+				   boolean [] fingers,
+				   int max_finger);
+    };
+    
+    class GestureHandler {
+	public TouchHandler onSingleTap;
+	public TouchHandler onDoubleTap;
+	public TouchHandler onHold;
+	public MotionHandler onMotion;
+    };
     
     public static ActionResult ActionIgnore
 	= new ActionResult(ActionStatus.Ignored);
@@ -36,6 +49,14 @@ interface Box {
     public class Impassive implements TouchHandler {
 	@Override
 	public ActionResult action(float x, float y) {
+	    return ActionIgnore;
+	}
+    }
+
+    public class Untouchable implements MotionHandler {
+	public ActionResult action(float [] x, float [] y,
+				   boolean [] fingers,
+				   int max_finger) {
 	    return ActionIgnore;
 	}
     }

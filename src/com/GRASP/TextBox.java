@@ -8,7 +8,7 @@ import android.graphics.Typeface;
 
 import java.lang.Math;
 
-class TextBox extends IdleBox {
+class TextBox extends GestureBox {
 
     Paint paint;
     String text;
@@ -43,8 +43,9 @@ class TextBox extends IdleBox {
 		   int fontsize,
 		   int color,
 		   float min_width,
-		   float min_height) {
-
+		   float min_height,
+		   GestureHandler gesture) {
+       	super(gesture);
 	paint = new Paint();
 	paint.setTypeface(font);
 	paint.setTextSize(fontsize);
@@ -71,27 +72,6 @@ class TextBox extends IdleBox {
     @Override
     public float getHeight() {
 	return total_height;
-    }
-
-    TouchHandler singleTapHandler = impassive;
-    
-    @Override
-    public ActionResult onSingleTap(float x, float y) {
-	return singleTapHandler.action(x, y);
-    }
-
-    TouchHandler doubleTapHandler = impassive;
-
-    @Override
-    public ActionResult onDoubleTap(float x, float y) {
-	return singleTapHandler.action(x, y);
-    }
-
-    TouchHandler holdHandler = impassive;
-
-    @Override
-    public ActionResult onHold(float x, float y) {	
-	return holdHandler.action(x, y);
     }
 
     @Override

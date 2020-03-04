@@ -3,7 +3,6 @@ package com.GRASP;
 import android.graphics.Canvas;
 
 class IdleBox implements Box {
-    public Impassive impassive = new Impassive();
     
     @Override
     public ActionResult onSingleTap(float x, float y) {

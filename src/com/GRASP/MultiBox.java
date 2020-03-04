@@ -9,7 +9,7 @@ import android.graphics.RectF;
 import android.graphics.Paint;
 
 
-class MultiBox implements Box {
+class MultiBox extends GestureBox {
     protected RectF area;
     protected Paint paint = new Paint();
     protected ArrayList<Box> children =
