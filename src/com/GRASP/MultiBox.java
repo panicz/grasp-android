@@ -15,6 +15,10 @@ class MultiBox extends GestureBox {
     protected ArrayList<Box> children =
 	new ArrayList<Box>();
 
+    public void addChild(Box c) {
+	children.add(c);
+    }
+    
     @Override
     public ActionResult onSingleTap(float x, float y) {
 	ActionResult result = ActionIgnore;
@@ -146,6 +150,13 @@ class MultiBox extends GestureBox {
 	float r = area.width();
 	float b = area.height();
 
+	paint.setColor(Color.WHITE);
+	
+	canvas.drawRect(l, t, r, b, paint);
+
+	paint.setColor(Color.BLACK);
+	paint.setStrokeWidth(4);
+
 	canvas.drawLine(l, t, r, t, paint);
 	canvas.drawLine(r, t, r, b, paint);
 	canvas.drawLine(r, b, l, b, paint);
@@ -166,19 +177,12 @@ class MultiBox extends GestureBox {
 	return area.contains(x, y);
     }
 
-    protected void init() {
-	paint.setColor(Color.BLACK);
-	paint.setStrokeWidth(4);
-    }
-    
     public MultiBox(float l, float t, float r, float b) {
-	init();
 	area = new RectF(l, t, r, b);
 	//GRASP.Log("new "+this+"@"+l+", "+t);
     }
 
     public MultiBox(float l, float t, Box ... bs) {
-	init();
 	area = new RectF(l, t, l, t);
 	for (Box b : bs) {
 	    children.add(b);

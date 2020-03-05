@@ -45,6 +45,7 @@ class TextBox extends GestureBox {
 		   float min_width,
 		   float min_height,
 		   GestureHandler gesture) {
+	
        	super(gesture);
 	paint = new Paint();
 	paint.setTypeface(font);
@@ -76,9 +77,7 @@ class TextBox extends GestureBox {
 
     @Override
     public boolean contains(float x, float y) {
-	//GRASP.Log("checking "+x+", "+y+" against "+text);
 	return 0 < x && x < total_width
 	    && 0 < y && y < total_height;
     }
-
 }

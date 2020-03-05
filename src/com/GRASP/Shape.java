@@ -50,6 +50,17 @@ class Shape extends IdleBox {
 	paint.setColor(Color.BLACK);
 	paint.setStrokeWidth(4);
     }
+
+    @Override
+    public float getWidth() {
+	return right - left;
+    }
+
+    @Override
+    public float getHeight() {
+	return bottom - top;
+    }
+
     
     final public void drawDeriv(Canvas canvas,
 				Paint paint,
@@ -70,6 +81,19 @@ class Shape extends IdleBox {
 	    canvas.drawLine(p1.x, p1.y, p2.x, p2.y,paint);
 	    //canvas.drawCircle(p2.x, p2.y, 5, paint);
 	}
+    }
+
+    public Shape toOrigin() {
+	for (DerivPoint dp : points) {
+	    dp.point.x -= left;
+	    dp.point.y -= top;
+	}
+	right -= left;
+	bottom -= top;
+	
+	left = 0;
+	top = 0;
+	return this;
     }
     
     public void add(Point p) {

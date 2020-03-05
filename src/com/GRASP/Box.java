@@ -32,12 +32,32 @@ interface Box {
 				   boolean [] fingers,
 				   int max_finger);
     };
+
+    class LogTouch implements TouchHandler {
+	String message;
+	LogTouch(String message) {
+	    this.message = message;
+	}
+	public ActionResult action(float x, float y) {
+	    GRASP.Log(message+" at ("+(int)x+", "+(int)y);
+	    return ActionProcess;
+	}
+    };
     
     class GestureHandler {
 	public TouchHandler onSingleTap;
 	public TouchHandler onDoubleTap;
 	public TouchHandler onHold;
 	public MotionHandler onMotion;
+	public GestureHandler(TouchHandler onSingleTap,
+			      TouchHandler onDoubleTap,
+			      TouchHandler onHold,
+			      MotionHandler onMotion) {
+	    this.onSingleTap = onSingleTap;
+	    this.onDoubleTap = onDoubleTap;
+	    this.onHold = onHold;
+	    this.onMotion = onMotion;
+	}
     };
     
     public static ActionResult ActionIgnore
@@ -53,11 +73,27 @@ interface Box {
 	}
     }
 
+    public class Positive implements TouchHandler {
+	@Override
+	public ActionResult action(float x, float y) {
+	    return ActionProcess;
+	}
+    }
+
+    
     public class Untouchable implements MotionHandler {
 	public ActionResult action(float [] x, float [] y,
 				   boolean [] fingers,
 				   int max_finger) {
 	    return ActionIgnore;
+	}
+    }
+
+    public class Caressing implements MotionHandler {
+	public ActionResult action(float [] x, float [] y,
+				   boolean [] fingers,
+				   int max_finger) {
+	    return ActionProcess;
 	}
     }
     
