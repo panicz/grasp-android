@@ -58,30 +58,21 @@ class GestureBox extends IdleBox {
     public GestureBox() {}
 
     public GestureBox(GestureHandler handler) {
-	GRASP.Log("setting gesture to "+handler);
 	gesture = handler;
     }
     
     @Override
     public ActionResult onSingleTap(float x, float y) {
-	GRASP.Log("gesture.onSingleTap = "
-		  +gesture.onSingleTap);
 	return gesture.onSingleTap.action(x, y);
     }
 
     @Override
     public ActionResult onDoubleTap(float x, float y) {
-	GRASP.Log("gesture.onDoubleTap = "
-		  +gesture.onDoubleTap);
-
 	return gesture.onDoubleTap.action(x, y);
     }
 
     @Override
     public ActionResult onHold(float x, float y) {
-	GRASP.Log("gesture.onHold = "
-		  +gesture.onHold);
-
 	return gesture.onHold.action(x, y);
     }
     

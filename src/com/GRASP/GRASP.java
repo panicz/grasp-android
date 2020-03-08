@@ -69,9 +69,12 @@ public class GRASP
 	    int p = event.getPointerId(i);
 	    if (!finger[p]) {
 		finger[p] = true;
-		desktop.stage.onPress(event.getX(i),
+		if(desktop.stage.onPress(event.getX(i),
 				      event.getY(i),
-				      p);
+				      p).status
+		   != Box.ActionStatus.Ignored) {
+		    desktop.invalidate();
+		}
 	    }
 	    break;
 	}
@@ -81,12 +84,15 @@ public class GRASP
 	case MotionEvent.ACTION_OUTSIDE: {
 	    int i = event.getActionIndex();
 	    int p = event.getPointerId(i);
-
+	    //Log(MotionEvent.actionToString(action));
 	    if (finger[p]) {
 		finger[p] = false;
-		desktop.stage.onRelease(event.getX(i),
-					event.getY(i),
-					p);
+		if(desktop.stage.onRelease(event.getX(i),
+					   event.getY(i),
+					   p).status
+		   != Box.ActionStatus.Ignored) {
+		    desktop.invalidate();
+		}
 	    }
 	    break;
 	}
@@ -102,12 +108,19 @@ public class GRASP
 		y[p] = event.getY(i);
 		if (!finger[p]) {
 		    finger[p] = true;
-		    desktop.stage.onPress(x[p], y[p], p);
+		    if(desktop.stage
+		       .onPress(x[p], y[p], p).status
+		       != Box.ActionStatus.Ignored) {
+			desktop.invalidate();
+		    }
 		}
 		max_finger = Math.max(max_finger, p);
 	    }
-	    desktop.stage.onMotion(x, y, finger,
-				   max_finger);
+	    if(desktop.stage.onMotion(x, y, finger,
+				      max_finger).status
+	       != Box.ActionStatus.Ignored) {
+		desktop.invalidate();
+	    }
 	    break;
 	}
 	default:
@@ -166,9 +179,12 @@ public class GRASP
 	    //Log("onDown: " + event.toString());
 	    if (!finger[0]) {
 		finger[0] = true;
-		desktop.stage.onPress(event.getX(0),
-				      event.getY(0),
-				      0);
+		if(desktop.stage.onPress(event.getX(0),
+					 event.getY(0),
+					 0).status
+		   != Box.ActionStatus.Ignored) {
+		    desktop.invalidate();
+		}
 	    }
 	}
         return true;
@@ -211,22 +227,28 @@ public class GRASP
     public boolean onSingleTapUp(MotionEvent event) {
 	if (finger[0]) {
 	    finger[0] = false;
-	    desktop.stage.onRelease(event.getX(0),
-				    event.getY(0),
-				    0);
+	    if(desktop.stage.onRelease(event.getX(0),
+				       event.getY(0),
+				       0).status
+	       != Box.ActionStatus.Ignored) {
+		desktop.invalidate();
+	    }
 	}
         return true;
     }
 
     @Override
     public boolean onDoubleTap(MotionEvent e) {
-        //Log("onDoubleTap: " + e.toString());
+        //Log("doubleTap");
 	desktop.stage.onUnpress(e.getX(),
 				e.getY(),
 				0);
 	
-	desktop.stage.onDoubleTap(e.getX(),
-				  e.getY());
+	if(desktop.stage.onDoubleTap(e.getX(),
+				     e.getY()).status
+	   != Box.ActionStatus.Ignored) {
+	    desktop.invalidate();
+	}
 	double_tap_ms = System.currentTimeMillis();
         return true;
     }
@@ -240,12 +262,17 @@ public class GRASP
     public boolean onSingleTapConfirmed(MotionEvent e) {
 	
 	// Log("onSingleTapConfirmed: "+ e.toString());
+	//Log("singleTap");
+
 	desktop.stage.onUnpress(e.getX(),
 				e.getY(),
 				0);
 	
-	desktop.stage.onSingleTap(e.getX(),
-				  e.getY());
+	if(desktop.stage.onSingleTap(e.getX(),
+				     e.getY()).status
+	   != Box.ActionStatus.Ignored) {
+	    desktop.invalidate();
+	}
 
         return true;
     }

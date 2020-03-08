@@ -26,27 +26,29 @@ class Stage extends MultiBox {
     @Override
     public ActionResult onPress(float x, float y,
 				int finger) {
-	if (obscuring != null) {
+	if (obscuring != null && finger == 0) {
 	    if (obscuring.contains(x, y)) {
 		return obscuring.onPress(x, y, finger);
 	    }
 	    else {
+		GRASP.Log("reset");
 		obscuring = null;
 	    }
 	} else {
 	    ActionResult result =
 		super.onPress(x, y, finger);
-	    if (result.status != ActionStatus.Ignored) {
-		return result;
+	    if (result.status ==
+		ActionStatus.ReturnedBox) {
+		obscuring = result.box;
+		//parentView.invalidate();
 	    }
-
-	    if (finger > 0) {
+	    else if (finger > 0) {
 		shape = null;
 	    }
 	    else {
 		shape = new Shape();
 		shape.add(x, y);
-		parentView.invalidate();
+		//parentView.invalidate();
 	    }
 	}
 	return ActionProcess;
@@ -65,12 +67,13 @@ class Stage extends MultiBox {
 	    // nowego multiboxa,
 	    if (shape != null) {
 		addChild(
-		    new MultiBox(shape.left,
-				 shape.top,
-				 shape.right,
-				 shape.bottom));
+		    new Flex(shape.left,
+			     shape.top,
+			     shape.right,
+			     shape.bottom));
 		shape = null;
 		obscuring = null;
+		//stage.parentView.invalidate();
 	    }
 
 	    return ActionProcess;
@@ -96,12 +99,33 @@ class Stage extends MultiBox {
 		
 		stage.shape = null;
 		stage.obscuring = null;
+		//stage.parentView.invalidate();
 	    }
 	    return ActionProcess;
 	}
     }
 
     TouchHandler addShape;
+
+    class CancelShape implements TouchHandler {
+	Stage stage;
+	public CancelShape(Stage stage) {
+	    this.stage = stage;
+	}
+
+	@Override
+	public ActionResult action(float x, float y) {
+	    if (stage.shape != null) {
+		stage.shape = null;
+		stage.obscuring = null;
+		//stage.parentView.invalidate();
+	    }
+	    return ActionProcess;
+	}
+    }
+
+    TouchHandler cancelShape;
+
     
     Box recognize(Shape shape, float x, float y) {
 	return new
@@ -115,16 +139,25 @@ class Stage extends MultiBox {
 			       addShape,
 			       positive,
 			       positive,
+			       caressing),
+		    new Button("Cancel",
+			       cancelShape,
+			       positive,
+			       positive,
 			       caressing));
     }
 
     @Override
     public ActionResult onRelease(float x, float y,
 				  int finger) {
-
 	if (shape != null && obscuring == null) {
 	    obscuring = recognize(shape, x, y);
-	    parentView.invalidate();
+	    //parentView.invalidate();
+	    return ActionProcess;
+	}
+	else if (obscuring != null) {
+	    GRASP.Log(""+obscuring);
+	    obscuring.onRelease(x, y, finger);
 	    return ActionProcess;
 	}
 	else {
@@ -143,13 +176,21 @@ class Stage extends MultiBox {
 				 int max_finger) {
 	if (shape != null && finger[0]) {
 	    shape.add(x[0], y[0]);
-	    parentView.invalidate();
+	    //parentView.invalidate();
 
 	    return ActionProcess;
 	}
+	else if (obscuring != null) {
+	    return obscuring.onMotion(x, y,
+				      finger,
+				      max_finger);
+	}
 	else {
+	    /*
 	    return super.onMotion(x, y, finger,
 				  max_finger);
+	    */
+	    return ActionIgnore;
 	}
     }
 
@@ -188,6 +229,8 @@ class Stage extends MultiBox {
 	parentView = parent;
 	createBox = new CreateBox(this);
 	addShape = new AddShape(this);
+	cancelShape = new CancelShape(this);
+
 	/*
 	children.add(new ListBox(50,300,
 				 "first", "second",
