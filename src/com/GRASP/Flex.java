@@ -18,7 +18,7 @@ class Flex extends MultiBox {
 	super(l, t, r, b);
 	self = new ActionResult(this);
     }
-
+    
     float start_x, start_y;
     
     @Override
@@ -34,13 +34,17 @@ class Flex extends MultiBox {
 	    return self;
 	}
 	else if (result.status ==
-		 ActionStatus.ReturnedBox
-		 && result.box instanceof MultiBox) {
-	    MultiBox mbox = (MultiBox) result.box;
-	    mbox.area.right -= area.left;
-	    mbox.area.left -= area.left;
-	    mbox.area.bottom -= area.top;
-	    mbox.area.top -= area.top;
+		 ActionStatus.ReturnedBox) {
+	    if(result.box instanceof MultiBox) {
+		MultiBox mbox = (MultiBox) result.box;
+		mbox.area.right -= area.left;
+		mbox.area.left -= area.left;
+		mbox.area.bottom -= area.top;
+		mbox.area.top -= area.top;
+	    }
+	    if (children.contains(result.box)) {
+		children.remove(result.box);
+	    }
 	    return result;
 	} else {
 	    return result;

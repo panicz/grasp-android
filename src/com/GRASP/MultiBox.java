@@ -15,7 +15,28 @@ class MultiBox extends GestureBox {
     protected ArrayList<Box> children =
 	new ArrayList<Box>();
 
+    @Override
     public void addChild(Box c) {
+	if (c == this) {
+	    GRASP.Log("attempted to add "+c+" to itself");
+	    return;
+	}
+	/*
+	if (c instanceof MultiBox) {
+	    MultiBox m = (MultiBox) c;
+	    m.area.left -= area.left;
+	    m.area.right -= area.right;
+	    m.area.top -= area.top;
+	    m.area.bottom -= area.bottom;
+	}
+	*/
+	for (Box k : children) {
+	    if (k.accepts(c)) {
+		k.addChild(c);
+		return;
+	    }
+	}
+
 	children.add(c);
     }
     

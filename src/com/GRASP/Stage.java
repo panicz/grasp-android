@@ -26,7 +26,10 @@ class Stage extends MultiBox {
     @Override
     public ActionResult onPress(float x, float y,
 				int finger) {
+	//GRASP.Log("stage pressed");
 	if (obscuring != null && finger == 0) {
+	    GRASP.Log("obscuring is "+obscuring);
+	    
 	    if (obscuring.contains(x, y)) {
 		return obscuring.onPress(x, y, finger);
 	    }
@@ -40,6 +43,9 @@ class Stage extends MultiBox {
 	    if (result.status ==
 		ActionStatus.ReturnedBox) {
 		obscuring = result.box;
+		if (children.contains(obscuring)) {
+		    children.remove(obscuring);
+		}
 		//parentView.invalidate();
 	    }
 	    else if (finger > 0) {
@@ -156,8 +162,17 @@ class Stage extends MultiBox {
 	    return ActionProcess;
 	}
 	else if (obscuring != null) {
-	    GRASP.Log(""+obscuring);
-	    obscuring.onRelease(x, y, finger);
+	    //GRASP.Log("release "+obscuring);
+	    for (Box child : children) {
+		if (child.contains(x, y)
+		    && child.accepts(obscuring)) {
+		    child.addChild(obscuring);
+		    obscuring = null;
+		    return ActionProcess;
+		}
+	    }
+	    addChild(obscuring);
+	    obscuring = null;
 	    return ActionProcess;
 	}
 	else {

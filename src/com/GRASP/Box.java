@@ -121,6 +121,10 @@ interface Box {
 
     public boolean contains(float x, float y);
 
+    public boolean accepts(Box b);
+
+    public void addChild(Box c);
+    
     public void onKeyDown(int key);
 
     public void onKeyUp(int key);
