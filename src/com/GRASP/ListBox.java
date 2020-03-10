@@ -43,7 +43,7 @@ class ListBox extends MultiBox {
 				    area.height(),
 				    b);
     
-	addChild(lag);
+	addChild(lag, 0, 0);
 	area.bottom += lag.getHeight();
 	area.right = Math.max(area.right,
 			      area.left

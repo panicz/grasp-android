@@ -59,12 +59,12 @@ class IdleBox implements Box {
     }
 
     @Override
-    public boolean accepts(Box b) {
+    public boolean accepts(Box b, float x, float y) {
 	return false;
     }
 
     @Override
-    public void addChild(Box c) {}
+    public void addChild(Box c, float x, float y) {}
     
     @Override
     public float getWidth() {

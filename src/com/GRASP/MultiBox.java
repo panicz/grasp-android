@@ -16,23 +16,26 @@ class MultiBox extends GestureBox {
 	new ArrayList<Box>();
 
     @Override
-    public void addChild(Box c) {
+    public void addChild(Box c, float x, float y) {
 	if (c == this) {
 	    GRASP.Log("attempted to add "+c+" to itself");
 	    return;
 	}
-	/*
-	if (c instanceof MultiBox) {
-	    MultiBox m = (MultiBox) c;
-	    m.area.left -= area.left;
-	    m.area.right -= area.right;
-	    m.area.top -= area.top;
-	    m.area.bottom -= area.bottom;
-	}
-	*/
+		
 	for (Box k : children) {
-	    if (k.accepts(c)) {
-		k.addChild(c);
+	    if (k.accepts(c, x-area.left, y-area.top)) {
+		if (c instanceof MultiBox
+		    && k instanceof MultiBox) {
+		    MultiBox m = (MultiBox) c;
+		    MultiBox n = (MultiBox) k;
+		    m.area.left -= n.area.left;
+		    m.area.top -= n.area.top;
+		    m.area.right -= n.area.left;
+		    m.area.bottom -= n.area.top;
+		}
+		k.addChild(c,
+			   x-area.left,
+			   y-area.top);
 		return;
 	    }
 	}
@@ -49,6 +52,7 @@ class MultiBox extends GestureBox {
 	    if (child.contains(x, y)) {
 		result = child.onSingleTap(x, y);
 		if(result.status != ActionStatus.Ignored){
+		    //GRASP.Log("tap passed to "+child);
 		    break;
 		}
 	    }
@@ -65,6 +69,7 @@ class MultiBox extends GestureBox {
 	    if (child.contains(x, y)) {
 		result = child.onDoubleTap(x, y);
 		if(result.status != ActionStatus.Ignored){
+		    //GRASP.Log("dbtap passed to "+child);
 		    break;
 		}
 	    }
@@ -81,6 +86,7 @@ class MultiBox extends GestureBox {
 	    if (child.contains(x, y)) {
 		result = child.onHold(x, y);
 		if(result.status != ActionStatus.Ignored){
+		  //GRASP.Log("onhold passed to "+child);
 		    break;
 		}
 	    }
@@ -98,6 +104,7 @@ class MultiBox extends GestureBox {
 	    if (child.contains(x, y)) {
 		result = child.onPress(x, y, finger);
 		if(result.status != ActionStatus.Ignored){
+		    //GRASP.Log("press passed to "+child);
 		    break;
 		}
 	    }
@@ -114,7 +121,7 @@ class MultiBox extends GestureBox {
 	y -= area.top;
 	for (Box child : children) {
 	    if (child.contains(x, y)) {
-		result = child.onPress(x, y, finger);
+		result = child.onUnpress(x, y, finger);
 		if(result.status != ActionStatus.Ignored){
 		    break;
 		}
@@ -187,7 +194,7 @@ class MultiBox extends GestureBox {
 	    child.draw(canvas);
 	}
 	canvas.translate(-area.left, -area.top);
-	//canvas.clipOutRect(area);
+	//anvas.clipOutRect(area);
     }
 
     @Override

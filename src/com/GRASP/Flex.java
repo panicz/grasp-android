@@ -35,14 +35,17 @@ class Flex extends MultiBox {
 	}
 	else if (result.status ==
 		 ActionStatus.ReturnedBox) {
+	    /*
 	    if(result.box instanceof MultiBox) {
 		MultiBox mbox = (MultiBox) result.box;
-		mbox.area.right -= area.left;
-		mbox.area.left -= area.left;
-		mbox.area.bottom -= area.top;
-		mbox.area.top -= area.top;
-	    }
+		mbox.area.right += area.left;
+		mbox.area.left += area.left;
+		mbox.area.bottom += area.top;
+		mbox.area.top += area.top;
+		}*/
 	    if (children.contains(result.box)) {
+		//GRASP.Log("removing "+result.box
+		//	  +" from "+this);
 		children.remove(result.box);
 	    }
 	    return result;
@@ -69,4 +72,20 @@ class Flex extends MultiBox {
 	    return ActionIgnore;
 	}
     }
+
+    @Override
+    public boolean accepts(Box b, float x, float y) {
+	return b instanceof Flex
+	    && super.contains(x, y);
+    }
+
+    @Override
+    public ActionResult onHold(float x, float y) {
+	ActionResult result = super.onHold(x, y);
+	if (result.status == ActionStatus.Ignored) {
+	    return ActionProcess;
+	}
+	return result;
+    }
+
 }

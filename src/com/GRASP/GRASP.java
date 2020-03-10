@@ -67,7 +67,7 @@ public class GRASP
 	case MotionEvent.ACTION_POINTER_DOWN: {
 	    int i = event.getActionIndex();
 	    int p = event.getPointerId(i);
-	    Log(MotionEvent.actionToString(action));
+	    //Log(MotionEvent.actionToString(action));
 
 	    if (!finger[p]) {
 		finger[p] = true;
@@ -206,6 +206,7 @@ public class GRASP
     @Override
     public void onLongPress(MotionEvent event) {
 	//Log("onLongPress: " + event.toString());
+	
 	desktop.stage.onUnpress(event.getX(),
 				event.getY(),
 				0);
@@ -216,6 +217,7 @@ public class GRASP
 	    log.clear();
 	    desktop.invalidate();
 	}
+	
     }
 
     @Override

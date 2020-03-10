@@ -28,13 +28,13 @@ class Stage extends MultiBox {
 				int finger) {
 	//GRASP.Log("stage pressed");
 	if (obscuring != null && finger == 0) {
-	    GRASP.Log("obscuring is "+obscuring);
+	    //GRASP.Log("obscuring is "+obscuring);
 	    
 	    if (obscuring.contains(x, y)) {
 		return obscuring.onPress(x, y, finger);
 	    }
 	    else {
-		GRASP.Log("reset");
+		//GRASP.Log("reset");
 		obscuring = null;
 	    }
 	} else {
@@ -43,6 +43,8 @@ class Stage extends MultiBox {
 	    if (result.status ==
 		ActionStatus.ReturnedBox) {
 		obscuring = result.box;
+		//GRASP.Log("obscuring = "+obscuring);
+
 		if (children.contains(obscuring)) {
 		    children.remove(obscuring);
 		}
@@ -76,7 +78,8 @@ class Stage extends MultiBox {
 		    new Flex(shape.left,
 			     shape.top,
 			     shape.right,
-			     shape.bottom));
+			     shape.bottom),
+		    x, y);
 		shape = null;
 		obscuring = null;
 		//stage.parentView.invalidate();
@@ -101,7 +104,8 @@ class Stage extends MultiBox {
 		float top = stage.shape.top;
 		addChild(new
 			 ListBox(left, top,
-				 stage.shape.toOrigin()));
+				 stage.shape.toOrigin()),
+			 x, y);
 		
 		stage.shape = null;
 		stage.obscuring = null;
@@ -163,15 +167,16 @@ class Stage extends MultiBox {
 	}
 	else if (obscuring != null) {
 	    //GRASP.Log("release "+obscuring);
+	    /*
 	    for (Box child : children) {
 		if (child.contains(x, y)
-		    && child.accepts(obscuring)) {
-		    child.addChild(obscuring);
+		    && child.accepts(obscuring, x, y)) {
+		    child.addChild(obscuring, x, y);
 		    obscuring = null;
 		    return ActionProcess;
 		}
-	    }
-	    addChild(obscuring);
+		}*/
+	    addChild(obscuring, x, y);
 	    obscuring = null;
 	    return ActionProcess;
 	}
@@ -232,7 +237,14 @@ class Stage extends MultiBox {
     @Override
     public ActionResult onHold(float x, float y) {
 	if (obscuring != null) {
-	    return obscuring.onHold(x, y);
+	    
+	    ActionResult result =
+		obscuring.onHold(x, y);
+	    if (result.status
+		== ActionStatus.ReturnedBox) {
+		
+	    }
+	    return result;
 	}
 	else {
 	    return super.onHold(x, y);
