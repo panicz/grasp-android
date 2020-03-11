@@ -33,6 +33,20 @@ interface Box {
 				   int max_finger);
     };
 
+    public class ObscuringLayer {
+	public Box box;
+	public TouchHandler off_touch;
+	public ObscuringLayer(Box b, TouchHandler h) {
+	    box = b;
+	    off_touch = h;
+	}
+	
+	public ObscuringLayer(Box b) {
+	    box = b;
+	}
+
+    };
+    
     class LogTouch implements TouchHandler {
 	String message;
 	LogTouch(String message) {

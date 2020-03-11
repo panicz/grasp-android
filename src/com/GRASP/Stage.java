@@ -10,8 +10,8 @@ import java.util.Iterator;
 
 class Stage extends MultiBox {
 
-    protected Deque<Box> obscuring =
-	new ArrayDeque<Box>();
+    protected Deque<ObscuringLayer> obscuring =
+	new ArrayDeque<ObscuringLayer>();
     //protected Box obscuring = null;
     protected Shape shape = null;
     protected View parentView = null;
@@ -23,12 +23,40 @@ class Stage extends MultiBox {
 	    shape.draw(canvas);
 	}
 
-	Iterator<Box> layer = obscuring.iterator();
+	Iterator<ObscuringLayer> layer =
+	    obscuring.iterator();
 
 	while (layer.hasNext()) {
-	    layer.next().draw(canvas);
+	    layer.next().box.draw(canvas);
 	}
     }
+
+    class RemoveLayer implements TouchHandler {
+	ObscuringLayer layer;
+	Stage stage;
+	public ActionResult action(float x, float y) {
+	    stage.obscuring.remove(layer);
+	    return ActionProcess;
+	}
+
+	public RemoveLayer(ObscuringLayer l, Stage s) {
+	    layer = l;
+	    stage = s;
+	}
+    };
+    
+    ObscuringLayer offTouchRemoves(Box b, Stage s) {
+	ObscuringLayer l = new ObscuringLayer(b);
+	l.off_touch = new RemoveLayer(l, s);
+	return l;
+    }
+
+    ObscuringLayer offTouchIgnored(Box b) {
+	ObscuringLayer l = new ObscuringLayer(b);
+	l.off_touch = positive;
+	return l;
+    }
+    
         
     @Override
     public ActionResult onPress(float x, float y,
@@ -37,20 +65,22 @@ class Stage extends MultiBox {
 	if (!obscuring.isEmpty() && finger == 0) {
 	    //GRASP.Log("obscuring is "+obscuring);
 	    
-	    Box top = obscuring.peekLast();
-	    if (top.contains(x, y)) {
-		return top.onPress(x, y, finger);
+	    ObscuringLayer top = obscuring.peekLast();
+	    if (top.box.contains(x, y)) {
+		return top.box.onPress(x, y, finger);
 	    }
 	    else {
 		//GRASP.Log("reset");
-		obscuring.pollLast();
+		//obscuring.pollLast();
+		top.off_touch.action(x, y);
 	    }
 	} else {
 	    ActionResult result =
 		super.onPress(x, y, finger);
 	    if (result.status ==
 		ActionStatus.ReturnedBox) {
-		obscuring.addLast(result.box);
+		obscuring
+		    .addLast(offTouchIgnored(result.box));
 		//GRASP.Log("obscuring = "+obscuring);
 
 		if (children.contains(result.box)) {
@@ -169,7 +199,11 @@ class Stage extends MultiBox {
     public ActionResult onRelease(float x, float y,
 				  int finger) {
 	if (shape != null && obscuring.isEmpty()) {
-	    obscuring.addLast(recognize(shape, x, y));
+	    obscuring
+		.addLast(offTouchRemoves(recognize(shape,
+						   x,
+						   y),
+					 this));
 	    //parentView.invalidate();
 	    return ActionProcess;
 	}
@@ -184,7 +218,7 @@ class Stage extends MultiBox {
 		    return ActionProcess;
 		}
 		}*/
-	    addChild(obscuring.pollLast(), x, y);
+	    addChild(obscuring.pollLast().box, x, y);
 	    return ActionProcess;
 	}
 	else {
@@ -210,6 +244,7 @@ class Stage extends MultiBox {
 	else if (!obscuring.isEmpty()) {
 	    return obscuring
 		.peekLast()
+		.box
 		.onMotion(x, y, finger, max_finger);
 	}
 	else {
@@ -226,6 +261,7 @@ class Stage extends MultiBox {
 	if (!obscuring.isEmpty()) {
 	    return obscuring
 		.peekLast()
+		.box
 		.onSingleTap(x, y);
 	}
 	else {
@@ -238,6 +274,7 @@ class Stage extends MultiBox {
 	if (!obscuring.isEmpty()) {
 	    return obscuring
 		.peekLast()
+		.box
 		.onDoubleTap(x, y);
 	}
 	else {
@@ -250,7 +287,7 @@ class Stage extends MultiBox {
 	if (!obscuring.isEmpty()) {
 	    
 	    ActionResult result =
-		obscuring.peekLast().onHold(x, y);
+		obscuring.peekLast().box.onHold(x, y);
 	    if (result.status
 		== ActionStatus.ReturnedBox) {
 		
