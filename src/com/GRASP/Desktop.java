@@ -2,11 +2,11 @@ package com.GRASP;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.RectF;
+//import android.graphics.RectF;
 import android.util.DisplayMetrics;
-import android.view.MotionEvent;
+//import android.view.MotionEvent;
 import android.view.View;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 
 
 class Desktop extends View {

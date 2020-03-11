@@ -1,8 +1,8 @@
 package com.GRASP;
 
 
-import android.graphics.Canvas;
-import android.view.View;
+//import android.graphics.Canvas;
+//import android.view.View;
 
 
 class Flex extends MultiBox {

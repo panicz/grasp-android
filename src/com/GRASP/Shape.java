@@ -1,11 +1,11 @@
 package com.GRASP;
 
 
-import java.io.Serializable;
+//import java.io.Serializable;
 import java.lang.Math;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Collections;
+//import java.util.Comparator;
+//import java.util.Collections;
 
 import android.graphics.Color;
 
@@ -74,7 +74,7 @@ class Shape extends IdleBox {
     }
     
     final public void draw(Canvas canvas) {
-	float h = paint.getTextSize()+1;
+	//float h = paint.getTextSize()+1;
 	for(int i = 1; i < points.size(); i++) {
 	    Point p1 = points.get(i-1).point;
 	    Point p2 = points.get(i).point;
@@ -166,9 +166,9 @@ class Shape extends IdleBox {
 	Vector v2 = new Vector(p2, p3);
 	Vector n1 = v1.normalized();
 	Vector n2 = v2.normalized();
-	float s = n1.cross(n2);
-	float c = n1.dot(n2);
-	float d = (float) Math.atan2(s, c);
+	//float s = n1.cross(n2);
+	//float c = n1.dot(n2);
+	//float d = (float) Math.atan2(s, c);
 	return n1.cross(n2);
     }
 	

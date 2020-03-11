@@ -3,11 +3,16 @@ package com.GRASP;
 
 import android.graphics.Canvas;
 import android.view.View;
+import java.util.Deque;
+import java.util.ArrayDeque;
+import java.util.Iterator;
 
 
 class Stage extends MultiBox {
 
-    protected Box obscuring = null;
+    protected Deque<Box> obscuring =
+	new ArrayDeque<Box>();
+    //protected Box obscuring = null;
     protected Shape shape = null;
     protected View parentView = null;
     
@@ -17,9 +22,11 @@ class Stage extends MultiBox {
 	if (shape != null) {
 	    shape.draw(canvas);
 	}
-	
-	if (obscuring != null) {
-	    obscuring.draw(canvas);
+
+	Iterator<Box> layer = obscuring.iterator();
+
+	while (layer.hasNext()) {
+	    layer.next().draw(canvas);
 	}
     }
         
@@ -27,26 +34,27 @@ class Stage extends MultiBox {
     public ActionResult onPress(float x, float y,
 				int finger) {
 	//GRASP.Log("stage pressed");
-	if (obscuring != null && finger == 0) {
+	if (!obscuring.isEmpty() && finger == 0) {
 	    //GRASP.Log("obscuring is "+obscuring);
 	    
-	    if (obscuring.contains(x, y)) {
-		return obscuring.onPress(x, y, finger);
+	    Box top = obscuring.peekLast();
+	    if (top.contains(x, y)) {
+		return top.onPress(x, y, finger);
 	    }
 	    else {
 		//GRASP.Log("reset");
-		obscuring = null;
+		obscuring.pollLast();
 	    }
 	} else {
 	    ActionResult result =
 		super.onPress(x, y, finger);
 	    if (result.status ==
 		ActionStatus.ReturnedBox) {
-		obscuring = result.box;
+		obscuring.addLast(result.box);
 		//GRASP.Log("obscuring = "+obscuring);
 
-		if (children.contains(obscuring)) {
-		    children.remove(obscuring);
+		if (children.contains(result.box)) {
+		    children.remove(result.box);
 		}
 		//parentView.invalidate();
 	    }
@@ -81,8 +89,8 @@ class Stage extends MultiBox {
 			     shape.bottom),
 		    x, y);
 		shape = null;
-		obscuring = null;
-		//stage.parentView.invalidate();
+		obscuring.pollLast();
+
 	    }
 
 	    return ActionProcess;
@@ -108,7 +116,7 @@ class Stage extends MultiBox {
 			 x, y);
 		
 		stage.shape = null;
-		stage.obscuring = null;
+		stage.obscuring.pollLast();
 		//stage.parentView.invalidate();
 	    }
 	    return ActionProcess;
@@ -127,7 +135,7 @@ class Stage extends MultiBox {
 	public ActionResult action(float x, float y) {
 	    if (stage.shape != null) {
 		stage.shape = null;
-		stage.obscuring = null;
+		stage.obscuring.pollLast();
 		//stage.parentView.invalidate();
 	    }
 	    return ActionProcess;
@@ -160,12 +168,12 @@ class Stage extends MultiBox {
     @Override
     public ActionResult onRelease(float x, float y,
 				  int finger) {
-	if (shape != null && obscuring == null) {
-	    obscuring = recognize(shape, x, y);
+	if (shape != null && obscuring.isEmpty()) {
+	    obscuring.addLast(recognize(shape, x, y));
 	    //parentView.invalidate();
 	    return ActionProcess;
 	}
-	else if (obscuring != null) {
+	else if (!obscuring.isEmpty()) {
 	    //GRASP.Log("release "+obscuring);
 	    /*
 	    for (Box child : children) {
@@ -176,8 +184,7 @@ class Stage extends MultiBox {
 		    return ActionProcess;
 		}
 		}*/
-	    addChild(obscuring, x, y);
-	    obscuring = null;
+	    addChild(obscuring.pollLast(), x, y);
 	    return ActionProcess;
 	}
 	else {
@@ -200,10 +207,10 @@ class Stage extends MultiBox {
 
 	    return ActionProcess;
 	}
-	else if (obscuring != null) {
-	    return obscuring.onMotion(x, y,
-				      finger,
-				      max_finger);
+	else if (!obscuring.isEmpty()) {
+	    return obscuring
+		.peekLast()
+		.onMotion(x, y, finger, max_finger);
 	}
 	else {
 	    /*
@@ -216,8 +223,10 @@ class Stage extends MultiBox {
 
     @Override
     public ActionResult onSingleTap(float x, float y) {
-	if (obscuring != null) {
-	    return obscuring.onSingleTap(x, y);
+	if (!obscuring.isEmpty()) {
+	    return obscuring
+		.peekLast()
+		.onSingleTap(x, y);
 	}
 	else {
 	    return super.onSingleTap(x, y);
@@ -226,8 +235,10 @@ class Stage extends MultiBox {
 
     @Override
     public ActionResult onDoubleTap(float x, float y) {
-	if (obscuring != null) {
-	    return obscuring.onDoubleTap(x, y);
+	if (!obscuring.isEmpty()) {
+	    return obscuring
+		.peekLast()
+		.onDoubleTap(x, y);
 	}
 	else {
 	    return super.onDoubleTap(x, y);
@@ -236,10 +247,10 @@ class Stage extends MultiBox {
 
     @Override
     public ActionResult onHold(float x, float y) {
-	if (obscuring != null) {
+	if (!obscuring.isEmpty()) {
 	    
 	    ActionResult result =
-		obscuring.onHold(x, y);
+		obscuring.peekLast().onHold(x, y);
 	    if (result.status
 		== ActionStatus.ReturnedBox) {
 		

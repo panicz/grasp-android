@@ -3,23 +3,21 @@ package com.GRASP;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.content.Context;
+
+//import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.GestureDetector;
 //import android.support.v4.view.GestureDetectorCompat;
-import android.view.View.OnTouchListener;
+//import android.view.View.OnTouchListener;
 import android.view.View.OnKeyListener;
 import android.view.KeyEvent;
-
-import android.widget.TextView;
 import android.graphics.Typeface;
 import android.graphics.Color;
 import android.view.Window;
 import android.view.WindowManager;
 import java.lang.System;
-import java.util.Arrays;
+//import java.util.Arrays;
 
 
 @TargetApi(5)
