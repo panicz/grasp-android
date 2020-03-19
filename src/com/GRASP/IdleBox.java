@@ -38,10 +38,14 @@ class IdleBox implements Box {
     }
 
     @Override
-    public void onKeyUp(int code) {}
+    public ActionResult onKeyUp(int code) {
+	return ActionIgnore;
+    }
 
     @Override
-    public void onKeyDown(int code) {}
+    public ActionResult onKeyDown(int code) {
+	return ActionIgnore;
+    }
 
     @Override
     public ActionResult onMotion(float [] x, float [] y,

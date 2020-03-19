@@ -139,9 +139,9 @@ interface Box {
 
     public void addChild(Box c, float x, float y);
     
-    public void onKeyDown(int key);
+    public ActionResult onKeyDown(int key);
 
-    public void onKeyUp(int key);
+    public ActionResult onKeyUp(int key);
 
     public float getWidth();
 

@@ -112,8 +112,8 @@ class Shape extends IdleBox {
 	    Point p3 = points.get(l-2).point;
 	    float d = deriv(p1, p2, p3);
 	    
-	    if (false && Math.abs(d) <= 0.15
-		|| p1.distanceTo(p2) <= 7) {
+	    if (false && (Math.abs(d) <= 0.15
+			  || p1.distanceTo(p2) <= 7)) {
 		p2.x = x;
 		p2.y = y;
 	    }

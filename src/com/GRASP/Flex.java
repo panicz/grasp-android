@@ -13,6 +13,11 @@ class Flex extends MultiBox {
     // (przytrzymujemy i wybieramy dostepne
     // opcje)
     ActionResult self;
+    GestureHandler reaction =
+	new GestureHandler(impassive,
+			   impassive,
+			   impassive,
+			   untouchable);
     
     public Flex(float l, float t, float r, float b) {
 	super(l, t, r, b);
@@ -47,6 +52,9 @@ class Flex extends MultiBox {
 		//GRASP.Log("removing "+result.box
 		//	  +" from "+this);
 		children.remove(result.box);
+		if (input_receiver == result.box) {
+		    input_receiver = null;
+		}
 	    }
 	    return result;
 	} else {
@@ -57,6 +65,13 @@ class Flex extends MultiBox {
     public ActionResult onMotion(float [] x, float [] y,
 				 boolean [] finger,
 				 int max_fingers) {
+	ActionResult result =
+	    reaction.onMotion.action(x, y, finger,
+				     max_fingers);
+	if (result.status != ActionStatus.Ignored) {
+	    return result;
+	}
+	
 	if (max_fingers == 0 && finger[0]) {
 	    float dx = x[0] - start_x;
 	    float dy = y[0] - start_y;
@@ -79,13 +94,71 @@ class Flex extends MultiBox {
 	    && super.contains(x, y);
     }
 
+    Box specialize(Box me, float x, float y) {
+	return new
+	    ListBox(x, y,
+		    new Button("Text",
+			       new LogTouch("Text"),
+			       positive,
+			       positive,
+			       caressing),
+		    new Button("Button",
+			       new LogTouch("Button"),
+			       positive,
+			       positive,
+			       caressing),
+		    new Button("Code",
+			       new LogTouch("Code"),
+			       positive,
+			       positive,
+			       caressing));
+    }
+
     @Override
-    public ActionResult onHold(float x, float y) {
-	ActionResult result = super.onHold(x, y);
+    public ActionResult onSingleTap(float x, float y) {
+	ActionResult result
+	    = reaction.onSingleTap.action(x, y);
 	if (result.status == ActionStatus.Ignored) {
-	    return ActionProcess;
+	    result = super.onSingleTap(x, y);
 	}
 	return result;
     }
 
+    @Override
+    public ActionResult onDoubleTap(float x, float y) {
+	ActionResult result
+	    = reaction.onDoubleTap.action(x, y);
+	if (result.status == ActionStatus.Ignored) {
+	    result = super.onDoubleTap(x, y);
+	}
+	return result;
+    }
+
+    @Override
+    public ActionResult onHold(float x, float y) {
+	
+	ActionResult result
+	    = reaction.onHold.action(x, y);
+	if (result.status == ActionStatus.Ignored) {
+	    result = super.onHold(x, y);
+	}
+	if (result.status == ActionStatus.Ignored) {
+	    //GRASP.Log("hold creates options list");
+	    return new ActionResult(specialize(this,
+					       x, y));
+	}
+	else if (result.status ==
+		 ActionStatus.ReturnedBox
+		 && result.box instanceof MultiBox) {
+	    MultiBox m = (MultiBox) result.box;
+	    //GRASP.Log("hold passes "+m+" above");
+	    m.area.left += area.left;
+	    m.area.right += area.left;
+	    m.area.top += area.top;
+	    m.area.bottom += area.top;
+	}
+	return result;
+    }
+
+    
 }

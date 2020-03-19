@@ -14,9 +14,12 @@ class MultiBox extends GestureBox {
     protected Paint paint = new Paint();
     protected ArrayList<Box> children =
 	new ArrayList<Box>();
+    protected Box input_receiver = null;
 
     @Override
     public void addChild(Box c, float x, float y) {
+	//GRASP.Log(""+this+".addChild("+c+","+x+","+y+")");
+	
 	if (c == this) {
 	    GRASP.Log("attempted to add "+c+" to itself");
 	    return;
@@ -33,13 +36,14 @@ class MultiBox extends GestureBox {
 		    m.area.right -= n.area.left;
 		    m.area.bottom -= n.area.top;
 		}
+		input_receiver = k;
 		k.addChild(c,
 			   x-area.left,
 			   y-area.top);
 		return;
 	    }
 	}
-
+	input_receiver = c;
 	children.add(c);
     }
     
@@ -220,13 +224,23 @@ class MultiBox extends GestureBox {
 			 b.getWidth());
 	}
     }
+
+    @Override
+    public ActionResult onKeyDown(int key) {
+	if (input_receiver != null) {
+	    return input_receiver.onKeyDown(key);
+	}
+	return ActionIgnore;
+    }
+
+    @Override
+    public ActionResult onKeyUp(int key) {
+	if (input_receiver != null) {
+	    return input_receiver.onKeyUp(key);
+	}
+	return ActionIgnore;
+    }
     
-    @Override
-    public void onKeyUp(int code) {}
-
-    @Override
-    public void onKeyDown(int code) {}
-
     @Override
     public float getWidth() {
 	return area.width();
