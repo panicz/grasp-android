@@ -7,22 +7,39 @@ import android.util.DisplayMetrics;
 //import android.view.MotionEvent;
 import android.view.View;
 //import java.util.ArrayList;
+import android.view.inputmethod.InputMethodManager;
 
 
 class Desktop extends View {
 
     public Box stage;
+    Context context;
     public Desktop(Context context) {
 	super(context);
 
+	this.context = context;
 	DisplayMetrics metrics =
-	    context.getResources().getDisplayMetrics();
+	    context
+	    .getResources()
+	    .getDisplayMetrics();
 	stage =
 	    new Stage(this,
 		      0, 0,
 		      (float) metrics.widthPixels,
 		      (float) metrics.heightPixels);
 	
+    }
+
+    public void showKeyboard() {
+	if (requestFocus()) {
+	    InputMethodManager imm = (InputMethodManager)
+                context
+		.getSystemService(Context
+				  .INPUT_METHOD_SERVICE);
+	    imm.showSoftInput(this,
+			      InputMethodManager
+			      .SHOW_IMPLICIT);
+	}
     }
     
     @Override

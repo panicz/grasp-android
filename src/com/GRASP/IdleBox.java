@@ -1,8 +1,25 @@
 package com.GRASP;
 
 import android.graphics.Canvas;
+import android.view.KeyEvent;
+
 
 class IdleBox implements Box {
+
+    public static class ShowKeyboard
+	implements TouchHandler {
+	@Override
+	public ActionResult action(float x, float y) {
+	    if (GRASP.desktop != null) {
+		GRASP.desktop.showKeyboard();
+	    }
+	    return ActionProcess;
+	}
+    }
+
+    public static TouchHandler showKeyboard
+	= new ShowKeyboard();
+
     
     @Override
     public ActionResult onSingleTap(float x, float y) {
@@ -38,12 +55,12 @@ class IdleBox implements Box {
     }
 
     @Override
-    public ActionResult onKeyUp(int code) {
+    public ActionResult onKeyUp(KeyEvent event) {
 	return ActionIgnore;
     }
 
     @Override
-    public ActionResult onKeyDown(int code) {
+    public ActionResult onKeyDown(KeyEvent event) {
 	return ActionIgnore;
     }
 

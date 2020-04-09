@@ -1,11 +1,18 @@
 package com.GRASP;
+import android.graphics.Canvas;
+import android.view.KeyEvent;
+
+import android.graphics.Paint;
+//import android.graphics.TextPaint;
+import android.graphics.Color;
+import android.graphics.Typeface;
 
 
 //import android.graphics.Canvas;
 //import android.view.View;
 
 
-class Flex extends MultiBox {
+public class Flex extends MultiBox {
     // 1. mozliwosc rozciagania (prawy dolny rog)
     // 2. mozliwosc przesuwania  i umieszczania
     //  (lewy gorny rog)
@@ -18,6 +25,24 @@ class Flex extends MultiBox {
 			   impassive,
 			   impassive,
 			   untouchable);
+
+    TypeHandler onTypeKey = criticize;
+
+    DrawingMethod visualization = null;
+
+    Object data = null;
+    
+
+    
+    @Override
+    public void draw(Canvas canvas) {
+	super.draw(canvas);
+	if (visualization != null) {
+	    canvas.translate(area.left, area.top);
+	    visualization.draw(this, canvas);
+	    canvas.translate(-area.left, -area.top);
+	}
+    }
     
     public Flex(float l, float t, float r, float b) {
 	super(l, t, r, b);
@@ -94,30 +119,66 @@ class Flex extends MultiBox {
 	    && super.contains(x, y);
     }
 
-    Box specialize(Box me, float x, float y) {
-	return new
-	    ListBox(x, y,
-		    new Button("Text",
-			       new LogTouch("Text"),
-			       positive,
-			       positive,
-			       caressing),
-		    new Button("Button",
-			       new LogTouch("Button"),
-			       positive,
-			       positive,
-			       caressing),
-		    new Button("Code",
-			       new LogTouch("Code"),
-			       positive,
-			       positive,
-			       caressing));
+    
+
+    /*
+    class FlexToButton implements TouchHandler {
+	public Flex target;
+	public ListBox source;
+	
+	@Override
+	public ActionResult action(float x, float y) {
+	    // trzeba odpowiednio ustawic wartosci
+	    // callbackow targetu
+
+	    // pokaz ekran konfiguracji
+	    target.reaction.onHold = ...;
+
+	    // wywolaj customowa funkcje 
+	    target.reaction.onSingleTap = ...;
+
+	    // wywolaj customowa funkcje
+	    target.reaction.onDoubleTap = ...;
+	    
+	    return ActionProcess;
+	}
+	}    */
+
+    public FlexText flexText = new FlexText();
+    
+    Box specialize(Flex me, float x, float y) {
+	Button text =
+	    new Button("Text",
+		       showKeyboard,
+		       positive,
+		       positive,
+		       caressing);
+	Button button =
+	    new Button("Button",
+		       new LogTouch("Button"),
+		       positive,
+		       positive,
+		       caressing);
+	Button code =
+	    new Button("Code",
+		       new LogTouch("Code"),
+		       positive,
+		       positive,
+		       caressing);
+	    
+	Box options = new ListBox(x, y, text,
+				  button, code);
+	
+	text.action.onSingleTap
+	    = new FlexText.FlexToText(me);
+	
+	return options;
     }
 
     @Override
     public ActionResult onSingleTap(float x, float y) {
-	ActionResult result
-	    = reaction.onSingleTap.action(x, y);
+	ActionResult result =
+	    reaction.onSingleTap.action(x, y);
 	if (result.status == ActionStatus.Ignored) {
 	    result = super.onSingleTap(x, y);
 	}
@@ -126,8 +187,8 @@ class Flex extends MultiBox {
 
     @Override
     public ActionResult onDoubleTap(float x, float y) {
-	ActionResult result
-	    = reaction.onDoubleTap.action(x, y);
+	ActionResult result =
+	    reaction.onDoubleTap.action(x, y);
 	if (result.status == ActionStatus.Ignored) {
 	    result = super.onDoubleTap(x, y);
 	}
@@ -136,9 +197,8 @@ class Flex extends MultiBox {
 
     @Override
     public ActionResult onHold(float x, float y) {
-	
-	ActionResult result
-	    = reaction.onHold.action(x, y);
+	ActionResult result =
+	    reaction.onHold.action(x, y);
 	if (result.status == ActionStatus.Ignored) {
 	    result = super.onHold(x, y);
 	}
@@ -156,6 +216,35 @@ class Flex extends MultiBox {
 	    m.area.right += area.left;
 	    m.area.top += area.top;
 	    m.area.bottom += area.top;
+	}
+	return result;
+    }
+
+    @Override
+    public ActionResult onKeyDown(KeyEvent event) {
+	ActionResult result = super.onKeyDown(event);
+	if(result.status == ActionStatus.Ignored) {
+	    /*	    if (event.isPrintingKey()) {
+		int u = event.getUnicodeChar();
+		GRASP.Log(Character.toString((char)u));
+	    }
+	    else {
+		GRASP
+		    .Log(KeyEvent
+			 .keyCodeToString(event
+					  .getKeyCode()));
+					  }*/
+	    return onTypeKey.action(event);
+	}
+	return result;
+    }
+
+    @Override
+    public ActionResult onKeyUp(KeyEvent event) {
+	ActionResult result = super.onKeyUp(event);
+	if(result.status == ActionStatus.Ignored) {
+
+	    return ActionProcess;
 	}
 	return result;
     }

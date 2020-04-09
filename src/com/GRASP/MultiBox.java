@@ -3,6 +3,7 @@ package com.GRASP;
 import android.graphics.Canvas;
 import java.util.ArrayList;
 import android.graphics.Color;
+import android.view.KeyEvent;
 
 import android.graphics.RectF;
 
@@ -226,17 +227,17 @@ class MultiBox extends GestureBox {
     }
 
     @Override
-    public ActionResult onKeyDown(int key) {
+    public ActionResult onKeyDown(KeyEvent event) {
 	if (input_receiver != null) {
-	    return input_receiver.onKeyDown(key);
+	    return input_receiver.onKeyDown(event);
 	}
 	return ActionIgnore;
     }
 
     @Override
-    public ActionResult onKeyUp(int key) {
+    public ActionResult onKeyUp(KeyEvent event) {
 	if (input_receiver != null) {
-	    return input_receiver.onKeyUp(key);
+	    return input_receiver.onKeyUp(event);
 	}
 	return ActionIgnore;
     }

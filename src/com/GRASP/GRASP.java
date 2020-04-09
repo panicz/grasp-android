@@ -291,10 +291,16 @@ public class GRASP
 			 KeyEvent event) {
 	switch (event.getAction()) {
         case KeyEvent.ACTION_DOWN:
-	    desktop.stage.onKeyDown(event.getKeyCode());
+	    if (desktop.stage.onKeyDown(event).status
+		!= Box.ActionStatus.Ignored) {
+		desktop.invalidate();
+	    }
             break;
         case KeyEvent.ACTION_UP:
-	    desktop.stage.onKeyUp(event.getKeyCode());
+	    if (desktop.stage.onKeyUp(event).status
+		!= Box.ActionStatus.Ignored) {
+		desktop.invalidate();
+	    }
             break;
         }
 

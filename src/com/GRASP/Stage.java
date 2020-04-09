@@ -282,7 +282,11 @@ class Stage extends MultiBox {
 	if (!obscuring.isEmpty()) {
 	    ObscuringLayer top = obscuring.peekLast();
 	    if(top.box.contains(x, y)) {
-		return top.box.onSingleTap(x, y);
+		if(top.box.onSingleTap(x, y).status
+		   == ActionStatus.Ignored) {
+		    obscuring.pollLast();
+		}
+		return ActionProcess;
 	    }
 	    else {
 		return top.off_touch.action(x, y);
@@ -298,7 +302,11 @@ class Stage extends MultiBox {
 	if (!obscuring.isEmpty()) {
 	    ObscuringLayer top = obscuring.peekLast();
 	    if(top.box.contains(x, y)) {
-		return top.box.onDoubleTap(x, y);
+		if (top.box.onDoubleTap(x, y).status
+		    == ActionStatus.Ignored) {
+		    obscuring.pollLast();
+		}
+		return ActionProcess;
 	    }
 	    else {
 		return top.off_touch.action(x, y);

@@ -6,6 +6,9 @@ class GestureBox extends IdleBox {
     public Untouchable untouchable = new Untouchable();
     public Positive positive = new Positive();
     public Caressing caressing = new Caressing();
+
+    public Acclaim acclaim = new Acclaim();
+    public Criticize criticize = new Criticize();
     
     public GestureHandler insensitive =
 	new GestureHandler(impassive,
@@ -18,7 +21,6 @@ class GestureBox extends IdleBox {
 			   positive,
 			   positive,
 			   caressing);   
-
 
     public GestureHandler verbose =
 	new GestureHandler(new LogTouch("tap"),

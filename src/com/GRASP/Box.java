@@ -3,6 +3,8 @@ package com.GRASP;
 //import android.view.MotionEvent;
 //import android.graphics.RectF;
 import android.graphics.Canvas;
+import android.view.KeyEvent;
+
 
 interface Box {
     public enum ActionStatus {
@@ -23,16 +25,24 @@ interface Box {
 	}
     };
 
-    interface TouchHandler {
+    public interface TouchHandler {
 	public ActionResult action(float x, float y);
     };
 
-    interface MotionHandler {
+    public interface MotionHandler {
 	public ActionResult action(float [] x, float [] y,
 				   boolean [] fingers,
 				   int max_finger);
     };
 
+    public interface DrawingMethod {
+	public void draw(Box box, Canvas canvas);
+    };
+    
+    public interface TypeHandler {
+	public ActionResult action(KeyEvent event);
+    };
+    
     public class ObscuringLayer {
 	public Box box;
 	public TouchHandler off_touch;
@@ -94,6 +104,19 @@ interface Box {
 	}
     }
 
+    public class Criticize implements TypeHandler {
+	@Override
+	public ActionResult action(KeyEvent event) {
+	    return ActionIgnore;
+	}
+    }
+
+    public class Acclaim implements TypeHandler {
+	@Override
+	public ActionResult action(KeyEvent event) {
+	    return ActionProcess;
+	}
+    }
     
     public class Untouchable implements MotionHandler {
 	public ActionResult action(float [] x, float [] y,
@@ -139,9 +162,9 @@ interface Box {
 
     public void addChild(Box c, float x, float y);
     
-    public ActionResult onKeyDown(int key);
+    public ActionResult onKeyDown(KeyEvent event);
 
-    public ActionResult onKeyUp(int key);
+    public ActionResult onKeyUp(KeyEvent event);
 
     public float getWidth();
 
