@@ -69,9 +69,11 @@ public class GRASP
 
 	    if (!finger[p]) {
 		finger[p] = true;
-		if(desktop.stage.onPress(event.getX(i),
-				      event.getY(i),
-				      p).status
+		if(desktop
+		   .stage
+		   .onPress(event.getX(i),
+			    event.getY(i),
+			    p).status
 		   != Box.ActionStatus.Ignored) {
 		    desktop.invalidate();
 		}
@@ -102,6 +104,7 @@ public class GRASP
 	    
 	case MotionEvent.ACTION_MOVE: {
 	    int max_finger = -1;
+	    
 	    for (int i = 0; i < pointerCount; ++i) {
 		int p = event.getPointerId(i);
 		x[p] = event.getX(i);

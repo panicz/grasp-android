@@ -80,9 +80,21 @@ class IdleBox implements Box {
     }
 
     @Override
+    public boolean is_embeddable() {
+	return false;
+    }
+    
+    @Override
     public boolean accepts(Box b, float x, float y) {
 	return false;
     }
+
+    @Override
+    public ActionResult onDragOver(Box b,
+				   float x, float y) {
+	return ActionIgnore;
+    }
+
 
     @Override
     public void addChild(Box c, float x, float y) {}

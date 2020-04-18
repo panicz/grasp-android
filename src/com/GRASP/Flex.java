@@ -30,10 +30,8 @@ public class Flex extends MultiBox {
 
     DrawingMethod visualization = null;
 
-    Object data = null;
-    
+    Object data = null;    
 
-    
     @Override
     public void draw(Canvas canvas) {
 	super.draw(canvas);
@@ -166,11 +164,11 @@ public class Flex extends MultiBox {
 		       positive,
 		       caressing);
 	    
-	Box options = new ListBox(x, y, text,
+	ListBox options = new ListBox(x, y, text,
 				  button, code);
 	
 	text.action.onSingleTap
-	    = new FlexText.FlexToText(me);
+	    = new FlexText.FlexToText(me, options);
 	
 	return options;
     }
@@ -249,5 +247,43 @@ public class Flex extends MultiBox {
 	return result;
     }
 
+    @Override
+    public void onDragIn(Box b, float x, float y) {
+       
+    }
+
+    @Override
+    public void onDragOut(Box b, float x, float y) {
+	
+    }
+
+    @Override
+    public ActionResult onDragOver(Box b,
+				   float x, float y) {
+	ActionResult result = super.onDragOver(b, x, y);
+	if (result.status == ActionStatus.Ignored) {
+	    if (b instanceof Flex) {
+		Flex box = (Flex) b;
+		
+	    }
+	    return self;
+	}
+	else if (result.status ==
+		 ActionStatus.ReturnedBox) {
+	    if (result.box instanceof Flex) {
+		Flex child = (Flex) result.box;
+		// powinnismy dostosowac rozmiar
+	    }
+	    return self;
+	}
+	else {
+	    return self;
+	}
+    }
     
+    @Override
+    public boolean is_embeddable() {
+	return true;
+    }
+
 }

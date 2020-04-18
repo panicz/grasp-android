@@ -12,7 +12,7 @@ import android.view.inputmethod.InputMethodManager;
 
 class Desktop extends View {
 
-    public Box stage;
+    public Stage stage;
     Context context;
     public Desktop(Context context) {
 	super(context);
@@ -26,8 +26,7 @@ class Desktop extends View {
 	    new Stage(this,
 		      0, 0,
 		      (float) metrics.widthPixels,
-		      (float) metrics.heightPixels);
-	
+		      (float) metrics.heightPixels);	
     }
 
     public void showKeyboard() {

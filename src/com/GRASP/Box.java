@@ -153,13 +153,18 @@ interface Box {
     public ActionResult onMotion(float [] x, float [] y,
 				 boolean [] finger,
 				 int max_finger);
-    
+
+    public ActionResult onDragOver(Box b,
+				   float x, float y);
+				   
     public void draw(Canvas canvas);
 
     public boolean contains(float x, float y);
 
     public boolean accepts(Box b, float x, float y);
 
+    public boolean is_embeddable();
+    
     public void addChild(Box c, float x, float y);
     
     public ActionResult onKeyDown(KeyEvent event);

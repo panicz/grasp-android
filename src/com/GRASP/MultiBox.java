@@ -173,6 +173,49 @@ class MultiBox extends GestureBox {
 	return result;
     }
 
+    public Box underbox = null;
+
+    public void onDragIn(Box b, float x, float y) {
+	// to be overridden by Flex
+    }
+
+    public void onDragOut(Box b, float x, float y) {
+	// to be overridden by Flex
+    }
+    
+    @Override
+    public ActionResult onDragOver(Box b,
+				   float x, float y) {
+	x -= area.left;
+	y -= area.top;
+
+	if (underbox != null
+	    && underbox.contains(x, y)) {
+	    return underbox.onDragOver(b, x, y);
+	}
+	else {
+	    if (underbox != null
+		&& underbox instanceof MultiBox) {
+		MultiBox m = (MultiBox) underbox;
+		m.onDragOut(b, x, y);
+		underbox = null;
+	    }
+	 	
+	    for (Box child : children) {
+		if (child.contains(x, y)) {
+		    underbox = child;
+		    if (underbox instanceof MultiBox) {
+			MultiBox m = (MultiBox) underbox;
+			m.onDragIn(b, x, y);
+		    }
+		    return underbox.onDragOver(b, x, y);
+		}
+	    }
+	}
+	return ActionIgnore;
+    }
+
+
     @Override
     public void draw(Canvas canvas) {
 	//canvas.clipRect(area);

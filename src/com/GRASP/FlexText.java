@@ -18,13 +18,18 @@ class FlexText extends IdleBox {
 	public int cursor = 0;
 	public int selection = 0;
 	public Paint paint;
+	public Flex target;
+	public int hmargin = 12;
+	public int vmargin = 12;
 	// assert 0 <= cursor < caption.length()
 	// assert 0 <= cursor + selection
 	//  < caption.length()
-	public TextData(Typeface font,
+	public TextData(Flex flex,
+			Typeface font,
 			int fontsize,
 			int color,
 			int bgcolor) {
+	    target = flex;
 	    paint = new Paint();
 	    paint.setTypeface(font);
 	    paint.setTextSize(fontsize);
@@ -33,8 +38,9 @@ class FlexText extends IdleBox {
 	    //paint.bgcolor = bgcolor;
 	}
 
-	public TextData() {
-	    this(GRASP.default_font, 36,
+	public TextData(Flex flex) {
+	    this(flex,
+		 GRASP.default_font, 36,
 		 Color.BLACK, Color.WHITE);
 	}
 
@@ -48,88 +54,101 @@ class FlexText extends IdleBox {
 
 	public void draw(Canvas c) {
 
+	    String prefix, selected, suffix;
+	    float prefix_width, selection_width,
+		suffix_width;
+	    
 	    if (selection < 0) {
 			
-		String prefix = caption
+		prefix = caption
 		    .substring(0,
 			       cursor
 			       +selection);
 		c.drawText(prefix,
-			   0, paint.getTextSize(),
+			   hmargin,
+			   vmargin+paint.getTextSize(),
 			   paint);
 		//draw cursor
 		invertColors();
 
-		float prefix_width =
+		prefix_width =
 		    paint.measureText(prefix);
 			
-		String selected = caption
+		selected = caption
 		    .substring(cursor
 			       +selection,
 			       cursor);
 
 		c.drawText(selected,
-			   prefix_width,
-			   paint.getTextSize(),
+			   hmargin+prefix_width,
+			   vmargin+paint.getTextSize(),
 			   paint);
 
 		invertColors();
 			
-		float selection_width =
+		selection_width =
 		    paint.measureText(selected);
 
-		String suffix = caption
+		suffix = caption
 		    .substring(cursor);
 
 		c.drawText(suffix,
-			   prefix_width
+			   hmargin+prefix_width
 			   +selection_width,
-			   paint.getTextSize(),
+			   vmargin+paint.getTextSize(),
 			   paint);
+
+		suffix_width =
+		    paint.measureText(suffix);
+
 	    }
 	    else /*if (t.selection >= 0)*/ {
-		String prefix = caption
+		prefix = caption
 		    .substring(0,
 			       cursor);
 		c.drawText(prefix,
-			   0, paint.getTextSize(),
+			   hmargin,
+			   vmargin+paint.getTextSize(),
 			   paint);
 		invertColors();
 			
-		float prefix_width =
+		prefix_width =
 		    paint.measureText(prefix);
 			
-		String selected = caption
+		selected = caption
 		    .substring(cursor,
 			       cursor
 			       +selection);
 
 		c.drawText(selected,
-			   prefix_width,
-			   paint.getTextSize(),
+			   hmargin+prefix_width,
+			   vmargin+paint.getTextSize(),
 			   paint);
 
 		invertColors();
 		//draw cursor
 			
-		float selection_width =
+		selection_width =
 		    paint.measureText(selected);
 			
-		String suffix = caption
+		suffix = caption
 		    .substring(cursor
 			       +selection);
 
 		c.drawText(suffix,
-			   prefix_width
+			   hmargin+prefix_width
 			   +selection_width,
-			   paint.getTextSize(),
+			   vmargin+paint.getTextSize(),
 			   paint);
 
+		suffix_width =
+		    paint.measureText(suffix);
 	    }
-	}	
+	}
     }
 
-    public static class DrawText implements DrawingMethod {
+    public static class DrawText
+	implements DrawingMethod {
 	@Override
 	public void draw(Box b, Canvas c) {
 	    if (b instanceof Flex) {
@@ -261,6 +280,18 @@ class FlexText extends IdleBox {
 		    break;
 		}
 	    }
+
+	    edit.target.area.right =
+		edit.target.area.left
+		+ 2*edit.hmargin
+		+ edit.paint
+		.measureText(edit.caption.toString());
+	    edit.target.area.bottom =
+		edit.target.area.top
+		+ 2*edit.vmargin
+		+ edit.paint.getTextSize();
+
+	    
 	    return ActionProcess;
 	}
 
@@ -271,9 +302,10 @@ class FlexText extends IdleBox {
 
     public static DrawingMethod drawText = new DrawText();
 
-    public static class FlexToText implements TouchHandler {
+    public static class FlexToText
+	implements TouchHandler {
 	public Flex target;
-	//public ListBox source;
+	public ListBox source;
 	
 	@Override
 	public ActionResult action(float x, float y) {
@@ -283,19 +315,31 @@ class FlexText extends IdleBox {
 	    target.reaction.onSingleTap =
 		showKeyboard;
 	    
-	    target.data = new TextData();
+	    target.data = new TextData(target);
 	    
 	    target.onTypeKey =
 		new EditText((TextData) target.data);
 
 	    target.visualization = drawText;
+
+	    if (GRASP.desktop != null) {
+		if(GRASP.desktop.stage != null) {
+		    
+		    GRASP.desktop
+			.stage
+			.obscuring.remove(source);
+		}
+		GRASP.desktop.showKeyboard();
+	    }
+
+	    // chcemy usunac obiekt "source"
 	    
-	    return Box.ActionProcess;
+	    return ActionProcess;
 	}
 
-	public FlexToText(Flex parent){//,ListBox remove){
+	public FlexToText(Flex parent, ListBox remove) {
 	    target = parent;
-	    // source = remove;
+	    source = remove;
 	}
     }
 

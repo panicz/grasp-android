@@ -7,33 +7,26 @@ import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 
-
 class Stage extends MultiBox {
 
-    class ObscuringLayers extends ArrayDeque<ObscuringLayer> {
-	@Override
-	public void addLast(ObscuringLayer x) {
-	    super.addLast(x);
-	    //GRASP.Log("addLast("+x.box+");"+super.size());
-	}
-	@Override
-	public boolean remove(Object x) {
-	    boolean result = super.remove(x);
-	    /*if(x instanceof ObscuringLayer) {
-		GRASP.Log("remove("+((ObscuringLayer)x).box+")="+result+";"
-			  +super.size());
-			  }*/
+    public class ObscuringLayers
+	extends ArrayDeque<ObscuringLayer> {
+	public boolean remove(Box b) {
+	    boolean result = false;
+	    Iterator<ObscuringLayer> iter =
+		super.iterator();
+	    while (iter.hasNext()) {
+		ObscuringLayer p = iter.next();
+		if (p.box==b) {
+		    iter.remove();
+		    result = true;
+		}
+	    }
 	    return result;
-	}
-	@Override
-	public ObscuringLayer pollLast() {
-	    ObscuringLayer x = super.pollLast();
-	    //GRASP.Log("pollLast()="+x.box+";"+super.size());
-	    return x;
 	}
     };
     
-    protected Deque<ObscuringLayer> obscuring =
+    public ObscuringLayers obscuring =
 	new ObscuringLayers();
     //protected Box obscuring = null;
     protected Shape shape = null;
@@ -53,6 +46,7 @@ class Stage extends MultiBox {
 	    layer.next().box.draw(canvas);
 	}
     }
+    
     class RemoveLayer implements TouchHandler {
 	ObscuringLayer layer;
 	Stage stage;
@@ -227,7 +221,9 @@ class Stage extends MultiBox {
 	}
 	else if (!obscuring.isEmpty()) {
 	    ObscuringLayer top = obscuring.pollLast();
-	    addChild(top.box, x, y);
+	    if (top.box.is_embeddable()) {
+		addChild(top.box, x, y);
+	    }
 	    return ActionProcess;
 	}
 	else {
@@ -323,7 +319,7 @@ class Stage extends MultiBox {
 	if (!obscuring.isEmpty()) {
 	    ObscuringLayer top = obscuring.peekLast();
 	    if(top.box.contains(x, y)) {
-		result = ActionIgnore;//top.box.onHold(x, y);
+		result = top.box.onHold(x, y);
 	    }
 	    else {
 		result = top.off_touch.action(x, y);
@@ -337,6 +333,7 @@ class Stage extends MultiBox {
 	    obscuring
 		.addLast(offTouchRemoves(result.box,
 					 this));
+	    GRASP.Log("stack "+obscuring);
 	}
 	else if (result.status
 		 == ActionStatus.Ignored) {
