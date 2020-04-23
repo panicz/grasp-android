@@ -174,4 +174,7 @@ interface Box {
     public float getWidth();
 
     public float getHeight();
+
+    public void moveBy(float dx, float dy);
+
 };

@@ -95,13 +95,9 @@ public class Flex extends MultiBox {
 	    return result;
 	}
 	
-	if (max_fingers == 0 && finger[0]) {
-	    float dx = x[0] - start_x;
-	    float dy = y[0] - start_y;
-	    area.left += dx;
-	    area.right += dx;
-	    area.top += dy;
-	    area.bottom += dy;
+	if (max_fingers >= 0 && finger[0]) {
+	    moveBy(x[0] - start_x,
+		   y[0] - start_y);
 	    start_x = x[0];
 	    start_y = y[0];
 	    return ActionProcess;
@@ -113,6 +109,7 @@ public class Flex extends MultiBox {
 
     @Override
     public boolean accepts(Box b, float x, float y) {
+	GRASP.Log(area+" vs "+x+", "+y);
 	return b instanceof Flex
 	    && super.contains(x, y);
     }
@@ -210,10 +207,7 @@ public class Flex extends MultiBox {
 		 && result.box instanceof MultiBox) {
 	    MultiBox m = (MultiBox) result.box;
 	    //GRASP.Log("hold passes "+m+" above");
-	    m.area.left += area.left;
-	    m.area.right += area.left;
-	    m.area.top += area.top;
-	    m.area.bottom += area.top;
+	    m.moveBy(area.left, area.top);
 	}
 	return result;
     }
@@ -247,6 +241,7 @@ public class Flex extends MultiBox {
 	return result;
     }
 
+    /*
     @Override
     public void onDragIn(Box b, float x, float y) {
        
@@ -255,7 +250,7 @@ public class Flex extends MultiBox {
     @Override
     public void onDragOut(Box b, float x, float y) {
 	
-    }
+    }*/
 
     @Override
     public ActionResult onDragOver(Box b,

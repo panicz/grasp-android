@@ -18,9 +18,26 @@ class MultiBox extends GestureBox {
     protected Box input_receiver = null;
 
     @Override
+    public void moveBy(float dx, float dy) {
+	area.left += dx;
+	area.top += dy;
+	area.right += dx;
+	area.bottom += dy;
+    }
+    
+    @Override
     public void addChild(Box c, float x, float y) {
-	//GRASP.Log(""+this+".addChild("+c+","+x+","+y+")");
-	
+	if (underbox != null
+	    && underbox instanceof MultiBox) {
+	    MultiBox m = (MultiBox) underbox;
+	    if (m.accepts(c, x-area.left, y-area.top)) {
+		c.moveBy(-m.area.left, -m.area.top);
+		input_receiver = underbox;
+		m.addChild(c, x-area.left, y-area.top);
+		return;
+	    }
+	}
+	/*
 	if (c == this) {
 	    GRASP.Log("attempted to add "+c+" to itself");
 	    return;
@@ -32,10 +49,7 @@ class MultiBox extends GestureBox {
 		    && k instanceof MultiBox) {
 		    MultiBox m = (MultiBox) c;
 		    MultiBox n = (MultiBox) k;
-		    m.area.left -= n.area.left;
-		    m.area.top -= n.area.top;
-		    m.area.right -= n.area.left;
-		    m.area.bottom -= n.area.top;
+		    m.moveBy(-n.area.left, -n.area.top);
 		}
 		input_receiver = k;
 		k.addChild(c,
@@ -43,7 +57,7 @@ class MultiBox extends GestureBox {
 			   y-area.top);
 		return;
 	    }
-	}
+	    }*/
 	input_receiver = c;
 	children.add(c);
     }
@@ -175,12 +189,24 @@ class MultiBox extends GestureBox {
 
     public Box underbox = null;
 
+    public void clearUnderbox() {
+	if (underbox != null
+	    && underbox instanceof MultiBox) {
+	    MultiBox u = (MultiBox) underbox;
+	    u.clearUnderbox();
+	}
+	underbox = null;
+    }
+    
     public void onDragIn(Box b, float x, float y) {
 	// to be overridden by Flex
+	GRASP.Log(b+" is over "+this);
+
     }
 
     public void onDragOut(Box b, float x, float y) {
 	// to be overridden by Flex
+	GRASP.Log(b+" is no longer over "+this);
     }
     
     @Override

@@ -28,7 +28,6 @@ class Stage extends MultiBox {
     
     public ObscuringLayers obscuring =
 	new ObscuringLayers();
-    //protected Box obscuring = null;
     protected Shape shape = null;
     protected View parentView = null;
     
@@ -77,17 +76,13 @@ class Stage extends MultiBox {
     @Override
     public ActionResult onPress(float x, float y,
 				int finger) {
-	//GRASP.Log("stage pressed");
 	if (!obscuring.isEmpty() && finger == 0) {
-	    //GRASP.Log("obscuring is "+obscuring);
 	    
 	    ObscuringLayer top = obscuring.peekLast();
 	    if (top.box.contains(x, y)) {
 		return top.box.onPress(x, y, finger);
 	    }
 	    else {
-		//GRASP.Log("reset");
-		//obscuring.pollLast();
 		top.off_touch.action(x, y);
 	    }
 	} else if(obscuring.isEmpty()) {
@@ -97,12 +92,10 @@ class Stage extends MultiBox {
 		ActionStatus.ReturnedBox) {
 		obscuring
 		    .addLast(offTouchIgnored(result.box));
-		//GRASP.Log("obscuring = "+obscuring);
 
 		if (children.contains(result.box)) {
 		    children.remove(result.box);
 		}
-		//parentView.invalidate();
 	    }
 	    else if (finger > 0) {
 		shape = null;
@@ -110,7 +103,6 @@ class Stage extends MultiBox {
 	    else {
 		shape = new Shape();
 		shape.add(x, y);
-		//parentView.invalidate();
 	    }
 	}
 	return ActionProcess;
@@ -154,14 +146,13 @@ class Stage extends MultiBox {
 
 		float left = stage.shape.left;
 		float top = stage.shape.top;
-		addChild(new
-			 ListBox(left, top,
-				 stage.shape.toOrigin()),
+		addChild(new ListBox(left, top,
+				     stage.shape
+				     .toOrigin()),
 			 x, y);
 		
 		stage.shape = null;
 		stage.obscuring.pollLast();
-		//stage.parentView.invalidate();
 	    }
 	    return ActionProcess;
 	}
@@ -180,7 +171,6 @@ class Stage extends MultiBox {
 	    if (stage.shape != null) {
 		stage.shape = null;
 		stage.obscuring.pollLast();
-		//stage.parentView.invalidate();
 	    }
 	    return ActionProcess;
 	}
@@ -216,15 +206,48 @@ class Stage extends MultiBox {
 	    Box b = recognize(shape, x, y);
 
 	    obscuring.addLast(offTouchRemoves(b, this));
-	    //parentView.invalidate();
 	    return ActionProcess;
 	}
 	else if (!obscuring.isEmpty()) {
+	    
+	    ObscuringLayer top = obscuring.peekLast();
+	    if (underbox != null
+		&& underbox instanceof MultiBox) {
+		MultiBox u = (MultiBox) underbox;
+		if (top.box.is_embeddable()
+		    && (u.accepts(top.box,
+				  x,//-u.area.left,
+				  y//-u.area.top
+				  ))) {
+		    GRASP.Log("adding to underbox");
+		    obscuring.pollLast();
+		    top.box.moveBy(-u.area.left, -u.area.top);
+		    underbox.addChild(top.box, x, y);
+		    clearUnderbox();
+		    return ActionProcess;
+		}
+		GRASP.Log("unable to add to underbox");
+
+		return ActionIgnore;
+	    }
+	    else if(top.box.is_embeddable()) {
+		obscuring.pollLast();
+		addChild(top.box, x, y);
+		GRASP.Log("adding to stage");
+
+		return ActionProcess;
+	    }
+	    GRASP.Log("unable to add to stage");
+
+	    return ActionIgnore;
+		/*
 	    ObscuringLayer top = obscuring.pollLast();
 	    if (top.box.is_embeddable()) {
 		addChild(top.box, x, y);
 	    }
+	    
 	    return ActionProcess;
+		*/
 	}
 	else {
 	    ActionResult result =
@@ -254,15 +277,17 @@ class Stage extends MultiBox {
 				 int max_finger) {
 	if (shape != null && finger[0]) {
 	    shape.add(x[0], y[0]);
-	    //parentView.invalidate();
 
 	    return ActionProcess;
 	}
 	else if (!obscuring.isEmpty()) {
-	    return obscuring
-		.peekLast()
-		.box
+	    ObscuringLayer top =
+		obscuring.peekLast();
+	    onDragOver(top.box, x[0], y[0]);
+	    
+	    return top.box
 		.onMotion(x, y, finger, max_finger);
+	    
 	}
 	else {
 	    /*
@@ -350,14 +375,6 @@ class Stage extends MultiBox {
 	createBox = new CreateBox(this);
 	addShape = new AddShape(this);
 	cancelShape = new CancelShape(this);
-
-	/*
-	children.add(new ListBox(50,300,
-				 "first", "second",
-				 "third", "fourth",
-				 "fifth"));
-	
-	*/
     }
     
 }

@@ -108,4 +108,8 @@ class IdleBox implements Box {
     public float getHeight() {
 	return 0;
     }
+
+    @Override
+    public void moveBy(float dx, float dy) {}
+
 }
