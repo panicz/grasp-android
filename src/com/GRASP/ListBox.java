@@ -9,6 +9,10 @@ import android.graphics.Color;
 
 class ListBox extends MultiBox {
 
+    @Override
+    public void afterElementAdded(Box target, int index) {
+    }
+    
     public void addObject(Object x) {
 	Box b;
 	if (x instanceof Box) {

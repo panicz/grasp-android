@@ -5,7 +5,6 @@ package com.GRASP;
 import android.graphics.Canvas;
 import android.view.KeyEvent;
 
-
 interface Box {
     public enum ActionStatus {
 	Ignored,
@@ -164,13 +163,19 @@ interface Box {
     public boolean accepts(Box b, float x, float y);
 
     public boolean is_embeddable();
+
+    public boolean precedes(Box b);
     
-    public void addChild(Box c, float x, float y);
+    public ActionResult addChild(Box c, float x, float y);
     
     public ActionResult onKeyDown(KeyEvent event);
 
     public ActionResult onKeyUp(KeyEvent event);
 
+    public ActionResult next();
+
+    public ActionResult prev();
+    
     public float getWidth();
 
     public float getHeight();

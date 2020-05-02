@@ -95,9 +95,25 @@ class IdleBox implements Box {
 	return ActionIgnore;
     }
 
+    @Override
+    public ActionResult next() {
+	return ActionIgnore;
+    }
 
     @Override
-    public void addChild(Box c, float x, float y) {}
+    public ActionResult prev() {
+	return ActionIgnore;
+    }
+
+    @Override
+    public boolean precedes(Box b) {
+	return false;
+    }
+    
+    @Override
+    public ActionResult addChild(Box c, float x, float y){
+	return ActionIgnore;
+    }
     
     @Override
     public float getWidth() {

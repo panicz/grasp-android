@@ -219,25 +219,25 @@ class Stage extends MultiBox {
 				  x,//-u.area.left,
 				  y//-u.area.top
 				  ))) {
-		    GRASP.Log("adding to underbox");
+		    //GRASP.Log("adding to underbox");
 		    obscuring.pollLast();
 		    top.box.moveBy(-u.area.left, -u.area.top);
 		    underbox.addChild(top.box, x, y);
 		    clearUnderbox();
 		    return ActionProcess;
 		}
-		GRASP.Log("unable to add to underbox");
+		//GRASP.Log("unable to add to underbox");
 
 		return ActionIgnore;
 	    }
 	    else if(top.box.is_embeddable()) {
 		obscuring.pollLast();
 		addChild(top.box, x, y);
-		GRASP.Log("adding to stage");
+		//GRASP.Log("adding to stage");
 
 		return ActionProcess;
 	    }
-	    GRASP.Log("unable to add to stage");
+	    //GRASP.Log("unable to add to stage");
 
 	    return ActionIgnore;
 		/*

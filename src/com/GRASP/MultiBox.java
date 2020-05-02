@@ -16,7 +16,11 @@ class MultiBox extends GestureBox {
     protected ArrayList<Box> children =
 	new ArrayList<Box>();
     protected Box input_receiver = null;
-
+    public float horizontal_margin = 25;
+    public float vertical_margin = 25;
+    
+    protected ActionResult self;
+    
     @Override
     public void moveBy(float dx, float dy) {
 	area.left += dx;
@@ -24,42 +28,121 @@ class MultiBox extends GestureBox {
 	area.right += dx;
 	area.bottom += dy;
     }
+
+    /*
+     *    A.top == B.top
+     * && A.left < B.left
+     *
+     *   +---+   +---+
+     *   | A |   | B |
+     *   +---+   +---+
+     *
+     * -----------------
+     *
+     *    A.top < B.top
+     * && A.left < B.left
+     *
+     *   +---+
+     *   | A |   +---+
+     *   +---+   | B |
+     *           +---+
+     *
+     * -----------------
+     *
+     *           +---+
+     *   +---+   | B |
+     *   | A |   +---+
+     *   +---+
+     *
+     * -----------------
+     *
+     *  +-------+
+     *  |       | +---+
+     *  |   A   | | B |
+     *  |       | +---+
+     *  +-------+
+     *
+     * -----------------
+     *
+     *         +-------+
+     *  +---+  |       |
+     *  | A |  |   B   |
+     *  +---+  |       |
+     *         +-------+
+     *
+     */
     
     @Override
-    public void addChild(Box c, float x, float y) {
+    public boolean precedes(Box b) {
+	if (b instanceof MultiBox) {
+	    MultiBox m = (MultiBox) b;
+	    // albo sa na tej samej wysokosci
+	    // i ten jest na lewo of tamtego,
+	    // albo ten jest powyzej tamtego
+	    return area.top < m.area.top
+		|| (area.top == m.area.top
+		    && area.left < m.area.left);
+	}
+	return false;
+    }
+
+    public void afterElementAdded(Box target, int index) {
+	if (target instanceof MultiBox) {
+	    MultiBox t = (MultiBox) target;
+	    if (area.left + t.area.right
+		> area.right - horizontal_margin) {
+		area.right = area.left
+		    + t.area.right
+		    + horizontal_margin;
+	    }
+
+	    if (area.top + t.area.bottom
+		> area.bottom - vertical_margin) {
+		area.bottom = area.top
+		    + t.area.bottom
+		    + vertical_margin;
+	    }
+
+	}
+    }
+    
+    public int addElement(Box element,float x, float y) {
+	int i;
+	for (i = 0; i < children.size(); ++i) {
+	    if (element.precedes(children.get(i))) {
+		break;
+	    }
+	}
+	children.add(i, element);
+	afterElementAdded(element, i);
+	return i;
+    }
+    
+    @Override
+    public ActionResult addChild(Box c, float x, float y){
 	if (underbox != null
 	    && underbox instanceof MultiBox) {
 	    MultiBox m = (MultiBox) underbox;
 	    if (m.accepts(c, x-area.left, y-area.top)) {
 		c.moveBy(-m.area.left, -m.area.top);
 		input_receiver = underbox;
-		m.addChild(c, x-area.left, y-area.top);
-		return;
+		ActionResult result =
+		    m.addChild(c,
+			       x-area.left,
+			       y-area.top);
+		afterElementAdded(m,
+				  children.indexOf(m));
+		return result;
 	    }
 	}
-	/*
-	if (c == this) {
-	    GRASP.Log("attempted to add "+c+" to itself");
-	    return;
-	}
-		
-	for (Box k : children) {
-	    if (k.accepts(c, x-area.left, y-area.top)) {
-		if (c instanceof MultiBox
-		    && k instanceof MultiBox) {
-		    MultiBox m = (MultiBox) c;
-		    MultiBox n = (MultiBox) k;
-		    m.moveBy(-n.area.left, -n.area.top);
-		}
-		input_receiver = k;
-		k.addChild(c,
-			   x-area.left,
-			   y-area.top);
-		return;
-	    }
-	    }*/
+	
+	//if (true || accepts(c, x, y)) {
 	input_receiver = c;
-	children.add(c);
+	addElement(c, x, y);
+	return self;
+	    //}
+
+	    //return ActionIgnore;
     }
     
     @Override
@@ -200,13 +283,13 @@ class MultiBox extends GestureBox {
     
     public void onDragIn(Box b, float x, float y) {
 	// to be overridden by Flex
-	GRASP.Log(b+" is over "+this);
+	//GRASP.Log(b+" is over "+this);
 
     }
 
     public void onDragOut(Box b, float x, float y) {
 	// to be overridden by Flex
-	GRASP.Log(b+" is no longer over "+this);
+	//GRASP.Log(b+" is no longer over "+this);
     }
     
     @Override
@@ -281,11 +364,13 @@ class MultiBox extends GestureBox {
 
     public MultiBox(float l, float t, float r, float b) {
 	area = new RectF(l, t, r, b);
+	self = new ActionResult(this);
 	//GRASP.Log("new "+this+"@"+l+", "+t);
     }
 
     public MultiBox(float l, float t, Box ... bs) {
 	area = new RectF(l, t, l, t);
+	self = new ActionResult(this);
 	for (Box b : bs) {
 	    children.add(b);
 	    area.bottom += b.getHeight();

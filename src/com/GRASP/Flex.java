@@ -19,7 +19,7 @@ public class Flex extends MultiBox {
     // 3. mozliwosc zmiany rodzaju pudelka
     // (przytrzymujemy i wybieramy dostepne
     // opcje)
-    ActionResult self;
+
     GestureHandler reaction =
 	new GestureHandler(impassive,
 			   impassive,
@@ -44,7 +44,6 @@ public class Flex extends MultiBox {
     
     public Flex(float l, float t, float r, float b) {
 	super(l, t, r, b);
-	self = new ActionResult(this);
     }
     
     float start_x, start_y;
@@ -109,7 +108,7 @@ public class Flex extends MultiBox {
 
     @Override
     public boolean accepts(Box b, float x, float y) {
-	GRASP.Log(area+" vs "+x+", "+y);
+	//GRASP.Log(area+" vs "+x+", "+y);
 	return b instanceof Flex
 	    && super.contains(x, y);
     }
