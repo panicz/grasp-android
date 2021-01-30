@@ -29,12 +29,10 @@ abstract class Split extends Interactions {
     @Override
     public Interactions splitHorizontallyBy(RectF line) {
 	if (firstPanel.canBeSplittedHorizontallyBy(line)) {
-	    GRASP.log("splitting upper" +this.toString());
 	    firstPanel = firstPanel
 		.splitHorizontallyBy(line);
 	}
 	if (secondPanel.canBeSplittedHorizontallyBy(line)) {
-	    GRASP.log("splitting lower"+this.toString());
 	    secondPanel = secondPanel
 		.splitHorizontallyBy(line);
 	}
@@ -44,12 +42,10 @@ abstract class Split extends Interactions {
     @Override
     public Interactions splitVerticallyBy(RectF line) {
 	if (firstPanel.canBeSplittedVerticallyBy(line)) {
-	    GRASP.log("splitting left"+this.toString());
 	    firstPanel = firstPanel
 		.splitVerticallyBy(line);
 	}
 	if (secondPanel.canBeSplittedVerticallyBy(line)) {
-	    GRASP.log("splitting right"+this.toString());
 	    secondPanel = secondPanel
 		.splitVerticallyBy(line);
 	}
