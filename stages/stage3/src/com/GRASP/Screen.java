@@ -36,7 +36,7 @@ class Screen extends View {
     List<Shape> segments = new ArrayList<Shape>();
     Shape shape = null;
 
-    public Deque<PopUp> choices = new ArrayDeque<PopUp>();
+    PopUp popup = null;
 
     void presentPopUp(List<Shape> segments,
 		      float x, float y) {
@@ -125,10 +125,9 @@ class Screen extends View {
 	    cancelDrawingShape();
 	}
 
-	if (!choices.isEmpty()) {
-	    PopUp top = choices.getLast();
-	    skim[p] = top.skim(x[p], y[p],
-			       width, height);
+	if (popup != null) {
+	    skim[p] = popup.skim(x[p], y[p],
+				 width, height);
 	    return true;
 	}
 
@@ -182,8 +181,9 @@ class Screen extends View {
 	finger[p] = false;
 
 	if (skim[p] != null) {
-	    skim[p].to(this, x[p], y[p], vx, vy);
+	    popup = skim[p].to(this, x[p], y[p], vx, vy);
 	    skim[p] = null;
+	    invalidate();
 	    return true;
 	}
 	
@@ -214,12 +214,8 @@ class Screen extends View {
 	/* co sie dzieje przy kliknieciu? */
 	float x = e.getX();
 	float y = e.getY();
-	if (!choices.isEmpty()) {
-	    PopUp top = choices.pop();
-	    PopUp result = top.onClick(x, y);
-	    if (result != null) {
-		choices.push(result);
-	    }
+	if (popup != null) {
+	    popup = popup.onClick(x, y);
 	    return true;
 	}
 	return false;
@@ -247,11 +243,10 @@ class Screen extends View {
 
 	cancelDrawingShape();
 
-	if (choices.isEmpty()) {
-	    PopUp choice = view.choices(x, y);
-	    if (choice != null) {
-		setReasonableLocation(choice, x, y);
-		choices.push(choice);
+	if (popup == null) {
+	    popup = view.choices(x, y);
+	    if (popup != null) {
+		setReasonableLocation(popup, x, y);
 		return true;
 	    }
 	}
@@ -286,13 +281,12 @@ class Screen extends View {
 	    shape.draw(canvas);
 	}
 
-	Iterator<PopUp> choice = choices.iterator();
-	while (choice.hasNext()) {
+	if (popup != null) {
 	    GRASP.paint.setAlpha(64);
 	    canvas.drawRect(0, 0, width, height,
 			    GRASP.paint);
 	    GRASP.paint.setAlpha(255);
-	    choice.next().draw(canvas);
+	    popup.draw(canvas);
 	}
     }
     

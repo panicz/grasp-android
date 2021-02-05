@@ -75,10 +75,11 @@ abstract class Split extends Interactions implements Skim {
     }
 
     @Override
-    public void to(Screen screen,
+    public PopUp to(Screen screen,
 			   float x, float y,
 			   float vx, float vy) {
 	screen.view = screen.view.finishResizing(this, vx, vy);
+	return null;
     }
 
 }

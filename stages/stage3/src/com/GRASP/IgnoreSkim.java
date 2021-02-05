@@ -5,6 +5,8 @@ class IgnoreSkim implements Skim {
     @Override
     public void through(float x, float y, float dx, float dy){}
     @Override
-    public void to(Screen screen, float x, float y,
-		   float vx, float vy){}
+    public PopUp to(Screen screen, float x, float y,
+		   float vx, float vy) {
+	return null;
+    }
 };

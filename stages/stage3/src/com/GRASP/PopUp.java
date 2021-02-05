@@ -71,7 +71,6 @@ class PopUp {
 				 : Color.WHITE);
 	    GRASP.paint.setAlpha(200);
 
-
 	    canvas.drawRect(left+margin,
 			    top+radius+margin
 			    +i*Button.height+2,
@@ -97,11 +96,18 @@ class PopUp {
     }
 
     public PopUp onClick(float x, float y) {
-	if (left <= x && x <= left+width
-	    && top <= y && y <= top+height) {
+	switch(area(x, y)) {		
+	case BottomLeft:		
+	case BottomRight:
+	case Top:
 	    return this;
-	}
-	else {
+
+	case Inside:
+	    return buttons[button_index(y)]
+		.action.perform();
+	    
+	case Outside:
+	default:
 	    return null;
 	}
     }
@@ -156,8 +162,10 @@ class PopUp {
 	}
 
 	@Override
-	public void to(Screen screen, float x, float y,
-		       float vx, float vy){}
+	public PopUp to(Screen screen, float x, float y,
+		       float vx, float vy){
+	    return target;
+	}
 
     };
 
@@ -177,8 +185,10 @@ class PopUp {
 	}
 
 	@Override
-	public void to(Screen screen, float x, float y,
-		       float vx, float vy){}
+	public PopUp to(Screen screen, float x, float y,
+		       float vx, float vy) {
+	    return null;
+	}
     };
 
     class ResizeBottomRight implements Skim {
@@ -196,10 +206,17 @@ class PopUp {
 	}
 
 	@Override
-	public void to(Screen screen, float x, float y,
-		       float vx, float vy){}
+	public PopUp to(Screen screen, float x, float y,
+		       float vx, float vy) {
+	    return null;
+	}
     };
 
+    public int button_index(float y) {
+	return (int)
+	    ((y - top - radius - margin)/Button.height);
+    }
+    
     class Highlight implements Skim {
 	PopUp target;
 
@@ -214,19 +231,31 @@ class PopUp {
 		target.highlighted = -1;
 	    }
 	    else {
-		target.highlighted = (int)
-		    ((y - target.top - PopUp.radius
-		      - PopUp.margin)/Button.height);
+		target.highlighted =
+		    target.button_index(y);
 	    }
 	}
 
 	@Override
-	public void to(Screen screen, float x, float y,
-		       float vx, float vy){}
+	public PopUp to(Screen screen, float x, float y,
+		       float vx, float vy) {
+
+	    int highlighted = target.button_index(y);
+	    if(highlighted != target.highlighted) {
+		target.highlighted = highlighted;
+	    }
+	    
+	    if (0 <= highlighted
+		&& highlighted < target.buttons.length) {
+		GRASP.log(target.buttons[highlighted].label
+			  +"("+highlighted+")");
+		return target.buttons[highlighted]
+		    .action.perform();
+	    }
+	    return target;
+	}
     };
 
-       
-    
     public Skim skim(float x, float y,
 		     float w, float h) {
 	switch(area(x, y)) {
