@@ -195,19 +195,19 @@ class Editor extends Interactions {
 	// 	
 	
 	return new
-	    PopUp(is_pinned
-		  ? new Button("Unpin",
-			       new UnpinDocument(this))
-		  : new Button("Pin",
-			       new PinDocument(this)),
-		  new Button("Switch to",
-			     new SwitchDocument(this)),
-		  new Button("Open",
-			     new OpenDocument(this)),
-		  new Button("Save",
-			     new SaveDocument(this)),
-		  new Button("Save as",
-			     new SaveDocumentAs(this)));
+	    Choices(is_pinned
+		    ? new Button("Unpin",
+				 new UnpinDocument(this))
+		    : new Button("Pin",
+				 new PinDocument(this)),
+		    new Button("Switch to",
+			       new SwitchDocument(this)),
+		    new Button("Open",
+			       new OpenDocument(this)),
+		    new Button("Save",
+			       new SaveDocument(this)),
+		    new Button("Save as",
+			       new SaveDocumentAs(this)));
     }
 
 }

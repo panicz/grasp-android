@@ -1,13 +1,27 @@
 package com.GRASP;
+import android.os.SystemClock;
 
 class Point {
-
+    public static long start_ns =
+	SystemClock.elapsedRealtimeNanos();
+    
     public float x;
     public float y;
+    public float z;
+    public Point(float left, float top, float depth) {
+	x = left;
+	y = top;
+	z = depth;
+    }
+
+
     public Point(float left, float top) {
 	x = left;
 	y = top;
+	z = (SystemClock.elapsedRealtimeNanos()
+	     - start_ns)*0.000000001f;
     }
+
     public float distanceTo(Point p) {
 	float dx = p.x - x;
 	float dy = p.y - y;

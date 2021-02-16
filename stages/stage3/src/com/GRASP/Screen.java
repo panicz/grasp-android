@@ -8,8 +8,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.ArrayDeque;
+//import java.util.Deque;
+//import java.util.ArrayDeque;
 import java.util.Iterator;
 
 import android.view.inputmethod.InputMethodManager;
@@ -33,14 +33,90 @@ class Screen extends View {
     float[] x = new float[10];
     float[] y = new float[10];
 
-    List<Shape> segments = new ArrayList<Shape>();
-    Shape shape = null;
+    public List<Shape> segments = new ArrayList<Shape>();
+    public Shape shape = null;
+    public RectF shape_area = new
+	RectF(Float.POSITIVE_INFINITY,
+	      Float.POSITIVE_INFINITY,
+	      Float.NEGATIVE_INFINITY,
+	      Float.NEGATIVE_INFINITY);
 
-    PopUp popup = null;
+    public PopUp popup = null;
+    public Recognizer recognize;
 
-    void presentPopUp(List<Shape> segments,
-		      float x, float y) {
+    class ClearCurrentSymbolAction implements Action {
+	Screen screen;
+	public ClearCurrentSymbolAction(Screen screen) {
+	    this.screen = screen;
+	}
+
+	public PopUp perform() {
+	    screen.cancelDrawingShape();
+	    return null;
+	}
+    }
+
+    class AddExistingSymbolAction implements Action {
+	Screen screen;
+	public AddExistingSymbolAction(Screen screen) {
+	    this.screen = screen;
+	}
+
+	public PopUp perform() {
+	    List<String> existing_symbols =
+		screen.recognize.known_symbols();
+
+	    List<Button> buttons = new ArrayList<Button>();
 	
+	    Iterator<String> it =
+		existing_symbols.iterator();
+
+	    while (it.hasNext()) {
+		String symbol = it.next();
+		buttons
+		    .add(new
+			 Button(symbol,
+				recognize.store(symbol,
+						segments)));
+	    }
+	    return new Choices(buttons);
+	}
+    }
+    
+    void suggestShapeActions(float x, float y) {
+	List<Recognizer.Rank> candidates =
+	    recognize.candidates(segments);
+
+	List<Button> buttons = new ArrayList<Button>();
+	
+	Iterator<Recognizer.Rank> it =
+	    candidates.iterator();
+
+	while (it.hasNext()) {
+	    Recognizer.Rank rank = it.next();
+	    buttons.add(new Button(rank.name,
+				   new SymbolAction(rank.name,
+						    this)));
+	}
+
+	buttons
+	    .add(new
+		 Button("Clear",
+			new
+			ClearCurrentSymbolAction(this)));
+	buttons
+	    .add(new
+		 Button("Existing symbol",
+			new
+			AddExistingSymbolAction(this)));
+	buttons
+	    .add(new
+		 Button("New symbol",
+			new
+			CreateNewSymbolAction(this)));
+	popup = new Choices(buttons);
+
+	setReasonableLocation(popup, x, y);
     }
     
     void startDrawingShape() {
@@ -50,6 +126,10 @@ class Screen extends View {
     void cancelDrawingShape() {
 	shape = null;
 	segments.clear();
+	shape_area.left = Float.POSITIVE_INFINITY;
+	shape_area.top = Float.POSITIVE_INFINITY;
+	shape_area.right = Float.NEGATIVE_INFINITY;
+	shape_area.bottom = Float.NEGATIVE_INFINITY;
     }
 
     boolean isShapeBeingDrawn() {
@@ -61,7 +141,20 @@ class Screen extends View {
 	    && (shape.rect.width() > 4
 		|| shape.rect.height() > 4)) {
 	    segments.add(shape);
+	    if (shape.rect.left < shape_area.left) {
+		shape_area.left = shape.rect.left;
+	    }
+	    if (shape.rect.right > shape_area.right) {
+		shape_area.right = shape.rect.right;
+	    }
+	    if (shape.rect.top < shape_area.top) {
+		shape_area.top = shape.rect.top;
+	    }
+	    if (shape.rect.bottom > shape_area.bottom) {
+		shape_area.bottom = shape.rect.bottom;
+	    }
 	}
+	
 	shape = null;
     }
     
@@ -69,6 +162,7 @@ class Screen extends View {
 	super(source);
 
 	activity = source;
+	recognize = new Recognizer(activity);
 	DisplayMetrics metrics =
 	    source
 	    .getResources()
@@ -126,9 +220,14 @@ class Screen extends View {
 	}
 
 	if (popup != null) {
-	    skim[p] = popup.skim(x[p], y[p],
-				 width, height);
-	    return true;
+	    if (popup.area(x[p], y[p]) == PopUp.Area.Outside) {
+		popup = null;
+	    }
+	    else {
+		skim[p] = popup.skim(x[p], y[p],
+				     width, height);
+		return true;
+	    }
 	}
 
 	Split split = view.splitUnder(x[p], y[p]);
@@ -157,11 +256,10 @@ class Screen extends View {
 
 	    if (skim[p] != null) {
 		skim[p].through(xp, yp, xp-x[p], yp-y[p]);
-		invalidate();
 	    }
 
 	    x[p] = xp;
-	    y[p] = yp;	    
+	    y[p] = yp;
 	}
 	
 	if (max_finger == 0
@@ -169,7 +267,6 @@ class Screen extends View {
 	    && isShapeBeingDrawn()) {
 	    shape.add(x[0], y[0]);
 	    GRASP._log.update("("+x[0]+", "+y[0]+")");
-	    invalidate();
 	}
 	return true;
     }
@@ -183,7 +280,6 @@ class Screen extends View {
 	if (skim[p] != null) {
 	    popup = skim[p].to(this, x[p], y[p], vx, vy);
 	    skim[p] = null;
-	    invalidate();
 	    return true;
 	}
 	
@@ -191,11 +287,12 @@ class Screen extends View {
 	    
 	    if (segments.isEmpty()
 		&& splittedView(shape.rect)) {
+	       
 		return true;
 	    }
 	    
 	    finalizeShapeSegment();
-	    presentPopUp(segments, x[p], y[p]);
+	    suggestShapeActions(x[p], y[p]);
 	}
 	
 	return true;
@@ -223,18 +320,35 @@ class Screen extends View {
 
     void setReasonableLocation(PopUp choice,
 			       float x, float y) {
-	if (!isShapeBeingDrawn()) {
+	if (segments.isEmpty()) {
 	    choice.top = y - Button.height/2
 		- PopUp.radius - PopUp.margin;
 	    choice.left = x - choice.width + 70;
 	}
 	else {
-	    // sprawdzmy, czy 
+	    choice.left = (shape_area.right - choice.width)/2;
+	    if (shape_area.bottom < height/2) {
+		choice.top = shape_area.bottom + 70;
+	    }
+	    else {
+		choice.top = shape_area.top
+		    - choice.height - 70;
+	    }
 	    
 	}
-	
+	if (choice.left+choice.width > width) {
+	    choice.left -= choice.left+choice.width - width;
+	}
+	if (choice.top+choice.height > height) {
+	    choice.top -= choice.top+choice.height - height;
+	}
+	if (choice.left < 0) {
+	    choice.left = 0;
+	}
+	if (choice.top < 0) {
+	    choice.top = 0;
+	}
     }
-
     
     public boolean onLongPress(MotionEvent event) {
 	/* co sie dzieje przy przytrzymaniu?*/
@@ -250,7 +364,6 @@ class Screen extends View {
 		return true;
 	    }
 	}
-	
 	return false;
     } 
     

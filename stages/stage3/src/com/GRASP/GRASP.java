@@ -90,14 +90,17 @@ public class GRASP
     // ze wzgledu na ograniczenia techniczne, zdarzenia
     // tapniecia (w tym podwojnego) i przytrzymania
     // moga dzialac tylko dla pierwszego palca
-    
+
+    boolean invalidating(boolean result) {
+	if (result) {
+	    edit.invalidate();
+	}
+	return result;
+    }
+     
     @Override
     public boolean onDown(MotionEvent event) {
-	if(edit.onDown(event)) {
-	    edit.invalidate();
-	    return true;
-	}
-	return false;
+	return invalidating(edit.onDown(event));
     }
 
     
@@ -105,11 +108,7 @@ public class GRASP
     public boolean onFling(MotionEvent _,
 			   MotionEvent event,
 			   float vx, float vy) {
-	if(edit.onUp(event, vx, vy)) {
-	    edit.invalidate();
-	    return true;
-	}
-	return false;
+	return invalidating(edit.onUp(event, vx, vy));
     }
 
     @Override
@@ -127,7 +126,7 @@ public class GRASP
 			    float distanceY) {
         return false;
     }
-
+   
     @Override
     public void onShowPress(MotionEvent event) {}
 
@@ -143,20 +142,12 @@ public class GRASP
 
     @Override
     public boolean onDoubleTapEvent(MotionEvent e) {
-        if(edit.onDoubleTap(e)) {
-	    edit.invalidate();
-	    return true;
-	}
-	return false;
+        return invalidating(edit.onDoubleTap(e));
     }
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-	if(edit.onSingleTap(e)) {
-	    edit.invalidate();
-	    return true;
-	}
-	return false;
+	return invalidating(edit.onSingleTap(e));
     }
 
     @Override
@@ -167,17 +158,16 @@ public class GRASP
 	int action = event.getActionMasked();
 	switch(action) {
 	case MotionEvent.ACTION_DOWN:	    
-	case MotionEvent.ACTION_POINTER_DOWN: 
-	    return edit.onDown(event);
+	case MotionEvent.ACTION_POINTER_DOWN:
+	    return invalidating(edit.onDown(event));
 
 	case MotionEvent.ACTION_UP:
 	case MotionEvent.ACTION_POINTER_UP:
-	case MotionEvent.ACTION_OUTSIDE: {
-	    return edit.onUp(event, 0, 0);
-	}
+	case MotionEvent.ACTION_OUTSIDE: 
+	    return invalidating(edit.onUp(event, 0, 0));
 
 	case MotionEvent.ACTION_MOVE:
-	    return edit.onMotion(event);
+	    return invalidating(edit.onMotion(event));
 
 	case MotionEvent.ACTION_CANCEL: 
 	default: 
@@ -185,7 +175,7 @@ public class GRASP
 	    break;
 	}
 	    
-	return true;
+	return false;
     }
 
     

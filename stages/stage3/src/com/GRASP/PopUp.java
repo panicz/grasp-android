@@ -2,9 +2,9 @@ package com.GRASP;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import java.util.List;
 
-
-class PopUp {
+abstract class PopUp {
 
     public enum Area {
 	Outside,
@@ -18,99 +18,28 @@ class PopUp {
     public static final float margin = 5.0f;
     
     public float left, top, width, height;
-    public Button [] buttons = new Button[0];
 
-    public int highlighted = -1;
-    
-    public PopUp(float x, float y, float w, float h) {
+    protected PopUp(float x, float y, float w, float h) {
 	left = x;
 	top = y;
 	width = w;
 	height = h;
     }
 
-    public PopUp(Button... buttons) {
-	this.buttons = buttons;
-	left = 0;
-	top = 0;
-	width = 300;
-	height = Button.height * buttons.length
-	    + 2*(radius+margin);
-    }    
-    
+    abstract void drawContents(Canvas canvas);
+
     public void draw(Canvas canvas) {
+	GRASP.paint.setColor(Color.BLACK);
 	GRASP.paint.setAlpha(64);
 
 	canvas.drawRoundRect(left, top,
 			     left+width, top+height,
 			     radius, radius,
 			     GRASP.paint);
-	GRASP.paint.setColor(Color.WHITE);
-	GRASP.paint.setAlpha(200);
-
-
-	/*
-	canvas.drawRect(left+margin, top+radius+margin,
-			left+width-margin,
-			top+height-radius-margin,
-			GRASP.paint);
-
-	GRASP.paint.setColor(Color.BLACK);
-	GRASP.paint.setTextSize(18);
-	canvas.drawText("("+(int)left+", "+(int)top+", "
-			+(int)width+", "+(int)height+")",
-			left+8,
-			top + height/2.0f - 18,
-			GRASP.paint);
-	*/
-	GRASP.paint.setTextSize(48);
-
-	for (int i = 0; i < buttons.length; ++i) {
-	    GRASP.paint.setColor(i == highlighted
-				 ? Color.BLACK
-				 : Color.WHITE);
-	    GRASP.paint.setAlpha(200);
-
-	    canvas.drawRect(left+margin,
-			    top+radius+margin
-			    +i*Button.height+2,
-			    left+width-margin,
-			    top+radius+margin
-			    +(i+1)*Button.height-2,
-			    GRASP.paint);
-	    GRASP.paint.setColor(i == highlighted
-				 ? Color.WHITE
-				 : Color.BLACK);
-	    GRASP.paint.setAlpha(200);
-
-	    canvas.drawText(buttons[i].label,
-			    left+margin+6,
-			    top+radius-16
-			    +(i+1)*Button.height,
-			    GRASP.paint);
-
-	}
-	GRASP.paint.setColor(Color.BLACK);
-	GRASP.paint.setAlpha(255);
-
+	drawContents(canvas);
     }
 
-    public PopUp onClick(float x, float y) {
-	switch(area(x, y)) {		
-	case BottomLeft:		
-	case BottomRight:
-	case Top:
-	    return this;
-
-	case Inside:
-	    return buttons[button_index(y)]
-		.action.perform();
-	    
-	case Outside:
-	default:
-	    return null;
-	}
-    }
+    abstract public PopUp onClick(float x, float y);
 
     public Area area(float x, float y) {
 	if (x < left || left + width < x
@@ -212,69 +141,8 @@ class PopUp {
 	}
     };
 
-    public int button_index(float y) {
-	return (int)
-	    ((y - top - radius - margin)/Button.height);
-    }
     
-    class Highlight implements Skim {
-	PopUp target;
-
-	public Highlight(PopUp target) {
-	    this.target = target;
-	}
-
-	@Override
-	public void through(float x, float y,
-			    float dx, float dy) {
-	    if (target.area(x, y) != PopUp.Area.Inside) {
-		target.highlighted = -1;
-	    }
-	    else {
-		target.highlighted =
-		    target.button_index(y);
-	    }
-	}
-
-	@Override
-	public PopUp to(Screen screen, float x, float y,
-		       float vx, float vy) {
-
-	    int highlighted = target.button_index(y);
-	    if(highlighted != target.highlighted) {
-		target.highlighted = highlighted;
-	    }
-	    
-	    if (0 <= highlighted
-		&& highlighted < target.buttons.length) {
-		GRASP.log(target.buttons[highlighted].label
-			  +"("+highlighted+")");
-		return target.buttons[highlighted]
-		    .action.perform();
-	    }
-	    return target;
-	}
-    };
-
-    public Skim skim(float x, float y,
-		     float w, float h) {
-	switch(area(x, y)) {
-		
-	case BottomLeft:
-	    //return new ResizeBottomLeft(this);
-		
-	case BottomRight:
-	    //return new ResizeBottomRight(this);
-
-	case Top:
-	    return new MoveAround(this, w, h);
-
-	    
-	case Inside:
-	case Outside:
-	default:
-	    return new Highlight(this);
-	}
-    }
+    abstract public Skim skim(float x, float y,
+			      float w, float h);
     
 }
