@@ -44,7 +44,8 @@ public class GRASP
 
     
     static String evt(MotionEvent e) {
-	return MotionEvent.actionToString(e.getActionMasked());
+	return MotionEvent
+	    .actionToString(e.getActionMasked());
     }
 
     @Override

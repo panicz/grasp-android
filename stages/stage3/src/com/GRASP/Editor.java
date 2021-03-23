@@ -184,16 +184,7 @@ class Editor extends Interactions {
 
     
     @Override
-    public PopUp choices(float x, float y) {
-		
-	//operations = new PopUp(x, y, 280, 300);
-	// Pin Document
-	// Switch to
-	// Open
-	// Save
-	// Save as
-	// 	
-	
+    public PopUp choices(float x, float y) {	
 	return new
 	    Choices(is_pinned
 		    ? new Button("Unpin",

@@ -8,13 +8,15 @@ class Choices extends PopUp {
     public Button [] buttons = new Button[0];
 
     public int highlighted = -1;
-        
+
+    public final int text_size = 48;
+    
     public Choices(Button... buttons) {
 	super(0, 0, 300, Button.height * buttons.length
 	      + 2*(radius+margin));
 	this.buttons = buttons;
 
-	GRASP.paint.setTextSize(48);
+	GRASP.paint.setTextSize(text_size);
 	for (int i = 0; i < buttons.length; ++i) {
 	    float w = 4*margin 
 		+ GRASP.paint.measureText(buttons[i].label);
@@ -32,23 +34,7 @@ class Choices extends PopUp {
     public void drawContents(Canvas canvas) {
 	GRASP.paint.setColor(Color.WHITE);
 	GRASP.paint.setAlpha(200);
-
-
-	/*
-	  canvas.drawRect(left+margin, top+radius+margin,
-	  left+width-margin,
-	  top+height-radius-margin,
-	  GRASP.paint);
-
-	  GRASP.paint.setColor(Color.BLACK);
-	  GRASP.paint.setTextSize(18);
-	  canvas.drawText("("+(int)left+", "+(int)top+", "
-	  +(int)width+", "+(int)height+")",
-	  left+8,
-	  top + height/2.0f - 18,
-	  GRASP.paint);
-	*/
-	GRASP.paint.setTextSize(48);
+	GRASP.paint.setTextSize(text_size);
 
 	for (int i = 0; i < buttons.length; ++i) {
 	    GRASP.paint.setColor(i == highlighted

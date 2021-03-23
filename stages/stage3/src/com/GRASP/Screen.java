@@ -66,7 +66,8 @@ class Screen extends View {
 	    List<String> existing_symbols =
 		screen.recognize.known_symbols();
 
-	    List<Button> buttons = new ArrayList<Button>();
+	    List<Button> buttons =
+		new ArrayList<Button>();
 	
 	    Iterator<String> it =
 		existing_symbols.iterator();
@@ -76,10 +77,21 @@ class Screen extends View {
 		buttons
 		    .add(new
 			 Button(symbol,
-				recognize.store(symbol,
-						segments)));
+				recognize
+				.store(symbol,
+				       segments)));
 	    }
 	    return new Choices(buttons);
+	}
+    }
+
+    class CreateNewSymbolAction implements Action {
+	public CreateNewSymbolAction(Screen screen) {
+
+	}
+
+	public PopUp perform() {
+	    return null;
 	}
     }
     
@@ -94,9 +106,11 @@ class Screen extends View {
 
 	while (it.hasNext()) {
 	    Recognizer.Rank rank = it.next();
-	    buttons.add(new Button(rank.name,
-				   new SymbolAction(rank.name,
-						    this)));
+	    buttons.add(new
+			Button(rank.name,
+			       new SymbolAction(rank
+						.name,
+						this)));
 	}
 
 	buttons
@@ -171,7 +185,8 @@ class Screen extends View {
 	width = (float) metrics.widthPixels;
 	height = (float) metrics.heightPixels;
 
-	view = new Editor(0, 0, width, height, null, 0, 0);
+	view = new Editor(0, 0, width, height,
+			  null, 0, 0);
     }
 
     Skim [] skim = new Skim[] {
@@ -180,10 +195,9 @@ class Screen extends View {
     };
     
     boolean splittedView(RectF rect) {
-	/*
+	/**
 	 * a horizontal line makes a VerticalSplit,
-	 * while a vertical line makes a 
-	 * HorizontalSplit
+	 * while a vertical line makes a HorizontalSplit
 	 */
 	if (shape.isHorizontalLine()
 	    && view.canBeSplittedVerticallyBy(rect)) {
@@ -220,7 +234,8 @@ class Screen extends View {
 	}
 
 	if (popup != null) {
-	    if (popup.area(x[p], y[p]) == PopUp.Area.Outside) {
+	    if (popup.area(x[p], y[p])
+		== PopUp.Area.Outside) {
 		popup = null;
 	    }
 	    else {
@@ -235,7 +250,8 @@ class Screen extends View {
 	    skim[p] = split;
 	    cancelDrawingShape();
 	}
-	else if (n == 1 && p == 0 && !isShapeBeingDrawn()) {
+	else if (n == 1 && p == 0
+		 && !isShapeBeingDrawn()) {
 	    startDrawingShape();
 	}
 	
@@ -252,7 +268,8 @@ class Screen extends View {
 	    float xp = event.getX(i);
 	    float yp = event.getY(i);
 	    assert(finger[p]);
-	    max_finger = (p > max_finger) ? p : max_finger;
+	    max_finger = (p > max_finger)
+		? p : max_finger;
 
 	    if (skim[p] != null) {
 		skim[p].through(xp, yp, xp-x[p], yp-y[p]);
@@ -271,7 +288,8 @@ class Screen extends View {
 	return true;
     }
     
-    public boolean onUp(MotionEvent event,float vx, float vy) {
+    public boolean onUp(MotionEvent event,
+			float vx, float vy) {
 	int i = event.getActionIndex();
 	int p = event.getPointerId(i);
 	assert(finger[p]);
@@ -286,8 +304,7 @@ class Screen extends View {
 	if (isShapeBeingDrawn() && p == 0) {
 	    
 	    if (segments.isEmpty()
-		&& splittedView(shape.rect)) {
-	       
+		&& splittedView(shape.rect)) {	       
 		return true;
 	    }
 	    
@@ -326,7 +343,8 @@ class Screen extends View {
 	    choice.left = x - choice.width + 70;
 	}
 	else {
-	    choice.left = (shape_area.right - choice.width)/2;
+	    choice.left =
+		(shape_area.right - choice.width)/2;
 	    if (shape_area.bottom < height/2) {
 		choice.top = shape_area.bottom + 70;
 	    }
@@ -337,10 +355,12 @@ class Screen extends View {
 	    
 	}
 	if (choice.left+choice.width > width) {
-	    choice.left -= choice.left+choice.width - width;
+	    choice.left -= choice.left+choice.width
+		- width;
 	}
 	if (choice.top+choice.height > height) {
-	    choice.top -= choice.top+choice.height - height;
+	    choice.top -= choice.top+choice.height
+		- height;
 	}
 	if (choice.left < 0) {
 	    choice.left = 0;
@@ -402,5 +422,4 @@ class Screen extends View {
 	    popup.draw(canvas);
 	}
     }
-    
 }
