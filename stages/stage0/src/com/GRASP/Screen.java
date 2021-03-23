@@ -3,6 +3,8 @@ package com.GRASP;
 import android.content.Context;
 import android.graphics.Canvas;
 //import android.graphics.RectF;
+import android.graphics.Paint;
+
 import android.util.DisplayMetrics;
 //import android.view.MotionEvent;
 import android.view.View;
@@ -16,6 +18,8 @@ class Screen extends View {
 
     float width;
     float height;
+
+    Widget main_widget;
     
     public Screen(GRASP source) {
 	super(source);
@@ -27,7 +31,19 @@ class Screen extends View {
 	    .getDisplayMetrics();
 
 	width = (float) metrics.widthPixels;
-	height = (float) metrics.heightPixels;	
+	height = (float) metrics.heightPixels;
+	
+	main_widget =
+	    (new Below(new TextLine("text A"),
+		       new TextLine("text B"),
+		       new TextLine("text C"),
+		       new TextLine("text D"),
+		       new TextLine("text E"),
+		       new TextLine("text F")))
+	    .clippedTo(100, 200)
+	    //.scrolledBy(40, 100)
+	    //.displacedBy(20, 100)
+	    ;
     }
 
     public void showKeyboard() {
@@ -45,8 +61,11 @@ class Screen extends View {
     @Override
     protected void onDraw(Canvas canvas) {
 	canvas.drawRGB(255, 255, 255);
-	if (activity._log != null) {
-	    activity._log.draw(canvas, 0, 0);
+
+	main_widget.render(canvas, 0, 0, width, height);
+	
+	if (Utils.logger != null) {
+	    Utils.logger.draw(canvas, 0, 0);
 	}
     }
 }

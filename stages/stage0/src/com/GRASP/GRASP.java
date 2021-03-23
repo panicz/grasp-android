@@ -19,10 +19,6 @@ import android.view.WindowManager;
 import java.lang.System;
 //import java.util.Arrays;
 
-import java.lang.Math;
-
-import java.lang.Package;
-
 @TargetApi(5)
 public class GRASP
     extends Activity
@@ -33,11 +29,10 @@ public class GRASP
 {
     public Typeface default_font = null;
     GestureDetector gestureDetector;
-    public Logger _log = null;
-    static View view;    
+
+    View view;    
     public void log(String s) {
-	_log.log((System.currentTimeMillis())+": "+s);
-	view.invalidate();
+	Utils.log((System.currentTimeMillis())+": "+s);
     }
 
     static String evt(MotionEvent e) {
@@ -52,17 +47,21 @@ public class GRASP
 			     .FLAG_FULLSCREEN,
 			     WindowManager.LayoutParams
 			     .FLAG_FULLSCREEN);
-
+	Utils.assets = getAssets();
+	
 	default_font =
 	    Typeface
-	    .createFromAsset(getAssets(),
-			     "DroidSans.ttf");
+	    .createFromAsset(Utils.assets, "DroidSans.ttf");
 
-	_log = new Logger(120, default_font, 12,
-			  Color.BLACK);
+	if (Utils.logger == null) {
+	    Utils.logger =
+		new Logger(120, default_font, 12,
+			   Color.BLACK);
+	}
 
 	view = new Screen(this);
-
+	Utils.view = view;
+	
         setContentView(view);
 	
 	gestureDetector = new GestureDetector(this,this);
