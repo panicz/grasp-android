@@ -4,21 +4,6 @@
  (rnrs base))
 
 (define (read-sequence/eof? sequence)
-  "Check whether the `current-input-port' contains 
-a given `sequence' of characters. If it does, 
-the characters are read from the port. Otherwise,
-the contents of the port remains unchanged.
-
-If the `end-of-file' object is encountered, but
-the characters read so far matched the required ones,
-the characters read so far are returned as the result
-(in a newly allocated list). Otherwise, the original
-`sequence' object is returned on success, and the
-`#false' value is returned on failure.
-
-This function is used mainly for checking for 
-both opening and closing delimitets of delimited 
-comments."
   (if (null? sequence)
       sequence
       (let ((c (read-char))
@@ -101,6 +86,7 @@ and other objects. Like with `define-type', they have
 no effect, but it might change in the future.
 ")
 
+
 (define-type Source
   #:whitespace Natural
   #:start Natural
@@ -113,7 +99,6 @@ no effect, but it might change in the future.
    Boolean
    Char
    String))
-
 
 (define-type SExpression
   (extend Atom
@@ -149,6 +134,7 @@ no effect, but it might change in the future.
 	 ((Char ...) (Char ...) Natural
 	  -> (Char ...) Natural))
 
+
 (define* (skip-comment suffix chars #:= '() position #:= 0)
   (cond
    ((eof-object? (peek-char))
@@ -163,9 +149,6 @@ no effect, but it might change in the future.
     (skip-comment suffix
 		  `(,(read-char) . ,chars)
 		  (+ position 1)))))
-
-(define (part input size)
-  (list->string (reverse (take input size))))
 
 (declare skip-whitespace (current-input-port) :
 	 ((Char ...) Natural -> (Char ...) Natural))
