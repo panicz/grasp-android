@@ -5,12 +5,12 @@ import android.graphics.RectF;
 class VerticalSplit extends Split {
 
     public VerticalSplit(float x, float y, float w, float h,
-			 Interactions top,
-			 Interactions bottom) {
+			 Panel top,
+			 Panel bottom) {
 	super(x, y, w, h, top, bottom);
     }
 
-    public VerticalSplit(Interactions panel,
+    public VerticalSplit(Panel panel,
 			 RectF rect) {
 	super(panel.left(), panel.top(),
 	      panel.width(), panel.height(),
@@ -34,7 +34,7 @@ class VerticalSplit extends Split {
     }
 
     @Override
-    public Interactions copy() {
+    public Panel copy() {
 	return new VerticalSplit(left(), top(),
 				 width(), height(),
 				 firstPanel, secondPanel);
@@ -75,7 +75,7 @@ class VerticalSplit extends Split {
 
     
     @Override
-    public Interactions
+    public Panel
 	finishResizing(Split s, float vx, float vy) {
 	if (s == this) {
 	    if (vy > closing_threshold

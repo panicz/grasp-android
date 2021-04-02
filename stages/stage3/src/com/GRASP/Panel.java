@@ -2,7 +2,7 @@ package com.GRASP;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 
-abstract class Interactions {
+abstract class Panel {
     static final float near_edge = 60;
 
     protected float _left;
@@ -40,7 +40,7 @@ abstract class Interactions {
     }
     
     
-    public Interactions(float x, float y, float w, float h) {
+    public Panel(float x, float y, float w, float h) {
 	_left = x;
 	_top = y;
 	_width = w;
@@ -49,7 +49,7 @@ abstract class Interactions {
 	_bottom = y+h;
     }
 
-    public abstract Interactions copy();
+    public abstract Panel copy();
     
     public abstract boolean
 	canBeSplittedVerticallyBy(RectF line);
@@ -63,17 +63,17 @@ abstract class Interactions {
 
     public abstract void scrollBy(float x, float y);
     
-    public abstract Interactions
+    public abstract Panel
 	splitHorizontallyBy(RectF line);
 
-    public abstract Interactions
+    public abstract Panel
 	splitVerticallyBy(RectF line);
     
     public abstract void render(Canvas canvas);
 
     public abstract String toString();
 
-    public Interactions
+    public Panel
 	finishResizing(Split s, float vx, float vy) {
 	return this;
     }

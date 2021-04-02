@@ -5,12 +5,12 @@ import android.graphics.RectF;
 class HorizontalSplit extends Split {
 
     public HorizontalSplit(float x, float y, float w, float h,
-			   Interactions left_panel,
-			   Interactions right_panel) {
+			   Panel left_panel,
+			   Panel right_panel) {
 	super(x, y, w, h, left_panel, right_panel);
     }
     
-    public HorizontalSplit(Interactions panel,
+    public HorizontalSplit(Panel panel,
 			   RectF rect) {
 	super(panel.left(), panel.top(),
 	      panel.width(), panel.height(),
@@ -34,7 +34,7 @@ class HorizontalSplit extends Split {
     }
 
     @Override
-    public Interactions copy() {
+    public Panel copy() {
 	return new HorizontalSplit(left(), top(),
 				   width(), height(),
 				   firstPanel, secondPanel);
@@ -75,7 +75,7 @@ class HorizontalSplit extends Split {
 
     
     @Override
-    public Interactions
+    public Panel
 	finishResizing(Split s, float vx, float vy) {
 	
 	if (s == this) {

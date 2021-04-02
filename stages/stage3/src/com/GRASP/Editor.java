@@ -4,7 +4,7 @@ import android.graphics.RectF;
 //import java.lang.Math;
 
 
-class Editor extends Interactions {
+class Editor extends Panel {
 
     Document document;
 
@@ -39,7 +39,7 @@ class Editor extends Interactions {
     }
     
     @Override
-    public Interactions copy() {
+    public Panel copy() {
 	return new Editor(left(), top(), width(), height(),
 			  document,
 			  horizontal_scroll,
@@ -63,12 +63,12 @@ class Editor extends Interactions {
     }
 
     @Override
-    public Interactions splitHorizontallyBy(RectF line) {
+    public Panel splitHorizontallyBy(RectF line) {
 	return new HorizontalSplit(this, line);
     }
 
     @Override
-    public Interactions splitVerticallyBy(RectF line) {
+    public Panel splitVerticallyBy(RectF line) {
 	return new VerticalSplit(this, line);
     }
 

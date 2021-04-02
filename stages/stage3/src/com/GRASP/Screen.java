@@ -16,7 +16,7 @@ import android.view.inputmethod.InputMethodManager;
 
 class Screen extends View {
 
-    public Interactions view;
+    public Panel view;
 
     GRASP activity;
     
@@ -309,7 +309,7 @@ class Screen extends View {
 	    }
 	    
 	    finalizeShapeSegment();
-	    suggestShapeActions(x[p], y[p]);
+	    //suggestShapeActions(x[p], y[p]);
 	}
 	
 	return true;
