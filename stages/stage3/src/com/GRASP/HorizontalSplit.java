@@ -154,17 +154,5 @@ class HorizontalSplit extends Split {
 
 	secondPanel.setWidth(w2_);
     }
-
-    @Override
-    public PopUp choices(float x, float y) {
-	if (x < firstPanel.right()) {
-	    return firstPanel.choices(x, y);
-	}
-	if (x > secondPanel.left()) {
-	    return secondPanel.choices(x, y);
-	}
-	return super.choices(x, y);
-    }
-
     
 }

@@ -78,5 +78,4 @@ abstract class Panel {
 	return this;
     }
 
-    public abstract PopUp choices(float x, float y);
 };

@@ -1,7 +1,7 @@
 package com.GRASP;
 import android.graphics.RectF;
 
-abstract class Split extends Panel implements Skim {
+abstract class Split extends Panel implements Drag {
     protected static final float bar_width = 20.0f;
     protected static final float closing_threshold = 5000.0f;
     
@@ -63,23 +63,16 @@ abstract class Split extends Panel implements Skim {
     
 
     @Override
-    public PopUp choices(float x, float y) {
-	// powinnismy zwracac opcje dla layoutow
-	return null;
-    }
-
-    @Override
     public void through(float x, float y,
 			float dx, float dy) {
 	resizeBy(dx, dy);
     }
 
     @Override
-    public PopUp to(Screen screen,
-			   float x, float y,
-			   float vx, float vy) {
+    public void to(Screen screen,
+		   float x, float y,
+		   float vx, float vy) {
 	screen.view = screen.view.finishResizing(this, vx, vy);
-	return null;
     }
 
 }

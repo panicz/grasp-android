@@ -151,16 +151,4 @@ class VerticalSplit extends Split {
 			   + bar_width);
 	secondPanel.setHeight(h2_);
     }    
-
-    @Override
-    public PopUp choices(float x, float y) {
-	if (y < firstPanel.bottom()) {
-	    return firstPanel.choices(x, y);
-	}
-	if (y > secondPanel.top()) {
-	    return secondPanel.choices(x, y);
-	}
-	return super.choices(x, y);
-    }
-
 }

@@ -14,8 +14,6 @@ class Editor extends Panel {
     String id;
 
     static int instances = 0;
-
-    PopUp operations;
     
     @Override
     public String toString() {
@@ -101,104 +99,5 @@ class Editor extends Panel {
 			GRASP.paint);
     }
 
-    class PinDocument implements Action {
-	Editor target;
-	public PinDocument(Editor target) {
-	    this.target = target;
-	}
-	
-	@Override
-	public PopUp perform() {
-	    target.is_pinned = true;
-	    return null;
-	}
-    };
-
-    class UnpinDocument implements Action {
-	Editor target;
-	public UnpinDocument(Editor target) {
-	    this.target = target;
-	}
-	
-	@Override
-	public PopUp perform() {
-	    target.is_pinned = false;
-	    return null;
-	}
-    };
-
-    
-    class SwitchDocument implements Action {
-	Editor target;
-	public SwitchDocument(Editor target) {
-	    this.target = target;
-	}
-	
-	@Override
-	public PopUp perform() {
-	    // powinnnismy zwrocic PopUp
-	    // ze wszystkimi otwartymi dokumentami
-	    return null;
-	}
-    };
-
-    class OpenDocument implements Action {
-	Editor target;
-	public OpenDocument(Editor target) {
-	    this.target = target;
-	}
-	
-	@Override
-	public PopUp perform() {
-	    return null;	    
-	}
-    };
-
-    
-    class SaveDocument implements Action {
-	Editor target;
-	public SaveDocument(Editor target) {
-	    this.target = target;
-	}
-	
-	@Override
-	public PopUp perform() {
-	    return null;	    
-	}
-    };
-
-    class SaveDocumentAs implements Action {
-	Editor target;
-	public SaveDocumentAs(Editor target) {
-	    this.target = target;
-	}
-	
-	@Override
-	public PopUp perform() {
-	    // powinnnismy zwrocic PopUp
-	    // z wyborem sciezki
-	    // i polem tekstowym
-	    return null;
-	}
-    };
-
-    
-    @Override
-    public PopUp choices(float x, float y) {	
-	return new
-	    Choices(is_pinned
-		    ? new Button("Unpin",
-				 new UnpinDocument(this))
-		    : new Button("Pin",
-				 new PinDocument(this)),
-		    new Button("Switch to",
-			       new SwitchDocument(this)),
-		    new Button("Open",
-			       new OpenDocument(this)),
-		    new Button("Save",
-			       new SaveDocument(this)),
-		    new Button("Save as",
-			       new SaveDocumentAs(this)));
-    }
 
 }

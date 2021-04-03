@@ -40,98 +40,6 @@ class Screen extends View {
 	      Float.POSITIVE_INFINITY,
 	      Float.NEGATIVE_INFINITY,
 	      Float.NEGATIVE_INFINITY);
-
-    public PopUp popup = null;
-    public Recognizer recognize;
-
-    class ClearCurrentSymbolAction implements Action {
-	Screen screen;
-	public ClearCurrentSymbolAction(Screen screen) {
-	    this.screen = screen;
-	}
-
-	public PopUp perform() {
-	    screen.cancelDrawingShape();
-	    return null;
-	}
-    }
-
-    class AddExistingSymbolAction implements Action {
-	Screen screen;
-	public AddExistingSymbolAction(Screen screen) {
-	    this.screen = screen;
-	}
-
-	public PopUp perform() {
-	    List<String> existing_symbols =
-		screen.recognize.known_symbols();
-
-	    List<Button> buttons =
-		new ArrayList<Button>();
-	
-	    Iterator<String> it =
-		existing_symbols.iterator();
-
-	    while (it.hasNext()) {
-		String symbol = it.next();
-		buttons
-		    .add(new
-			 Button(symbol,
-				recognize
-				.store(symbol,
-				       segments)));
-	    }
-	    return new Choices(buttons);
-	}
-    }
-
-    class CreateNewSymbolAction implements Action {
-	public CreateNewSymbolAction(Screen screen) {
-
-	}
-
-	public PopUp perform() {
-	    return null;
-	}
-    }
-    
-    void suggestShapeActions(float x, float y) {
-	List<Recognizer.Rank> candidates =
-	    recognize.candidates(segments);
-
-	List<Button> buttons = new ArrayList<Button>();
-	
-	Iterator<Recognizer.Rank> it =
-	    candidates.iterator();
-
-	while (it.hasNext()) {
-	    Recognizer.Rank rank = it.next();
-	    buttons.add(new
-			Button(rank.name,
-			       new SymbolAction(rank
-						.name,
-						this)));
-	}
-
-	buttons
-	    .add(new
-		 Button("Clear",
-			new
-			ClearCurrentSymbolAction(this)));
-	buttons
-	    .add(new
-		 Button("Existing symbol",
-			new
-			AddExistingSymbolAction(this)));
-	buttons
-	    .add(new
-		 Button("New symbol",
-			new
-			CreateNewSymbolAction(this)));
-	popup = new Choices(buttons);
-
-	setReasonableLocation(popup, x, y);
-    }
     
     void startDrawingShape() {
 	shape = new Shape();
@@ -176,7 +84,7 @@ class Screen extends View {
 	super(source);
 
 	activity = source;
-	recognize = new Recognizer(activity);
+
 	DisplayMetrics metrics =
 	    source
 	    .getResources()
@@ -189,7 +97,7 @@ class Screen extends View {
 			  null, 0, 0);
     }
 
-    Skim [] skim = new Skim[] {
+    Drag [] drag = new Drag[] {
 	null, null, null, null, null,
 	null, null, null, null, null
     };
@@ -233,21 +141,9 @@ class Screen extends View {
 	    cancelDrawingShape();
 	}
 
-	if (popup != null) {
-	    if (popup.area(x[p], y[p])
-		== PopUp.Area.Outside) {
-		popup = null;
-	    }
-	    else {
-		skim[p] = popup.skim(x[p], y[p],
-				     width, height);
-		return true;
-	    }
-	}
-
 	Split split = view.splitUnder(x[p], y[p]);
 	if (split != null) {
-	    skim[p] = split;
+	    drag[p] = split;
 	    cancelDrawingShape();
 	}
 	else if (n == 1 && p == 0
@@ -271,8 +167,8 @@ class Screen extends View {
 	    max_finger = (p > max_finger)
 		? p : max_finger;
 
-	    if (skim[p] != null) {
-		skim[p].through(xp, yp, xp-x[p], yp-y[p]);
+	    if (drag[p] != null) {
+		drag[p].through(xp, yp, xp-x[p], yp-y[p]);
 	    }
 
 	    x[p] = xp;
@@ -295,9 +191,9 @@ class Screen extends View {
 	assert(finger[p]);
 	finger[p] = false;
 
-	if (skim[p] != null) {
-	    popup = skim[p].to(this, x[p], y[p], vx, vy);
-	    skim[p] = null;
+	if (drag[p] != null) {
+	    drag[p].to(this, x[p], y[p], vx, vy);
+	    drag[p] = null;
 	    return true;
 	}
 	
@@ -325,51 +221,10 @@ class Screen extends View {
     }
 
     public boolean onSingleTap(MotionEvent e) {
-	/* co sie dzieje przy kliknieciu? */
-	float x = e.getX();
-	float y = e.getY();
-	if (popup != null) {
-	    popup = popup.onClick(x, y);
-	    return true;
-	}
 	return false;
     }
 
-    void setReasonableLocation(PopUp choice,
-			       float x, float y) {
-	if (segments.isEmpty()) {
-	    choice.top = y - Button.height/2
-		- PopUp.radius - PopUp.margin;
-	    choice.left = x - choice.width + 70;
-	}
-	else {
-	    choice.left =
-		(shape_area.right - choice.width)/2;
-	    if (shape_area.bottom < height/2) {
-		choice.top = shape_area.bottom + 70;
-	    }
-	    else {
-		choice.top = shape_area.top
-		    - choice.height - 70;
-	    }
-	    
-	}
-	if (choice.left+choice.width > width) {
-	    choice.left -= choice.left+choice.width
-		- width;
-	}
-	if (choice.top+choice.height > height) {
-	    choice.top -= choice.top+choice.height
-		- height;
-	}
-	if (choice.left < 0) {
-	    choice.left = 0;
-	}
-	if (choice.top < 0) {
-	    choice.top = 0;
-	}
-    }
-    
+
     public boolean onLongPress(MotionEvent event) {
 	/* co sie dzieje przy przytrzymaniu?*/
 	float x = event.getX();
@@ -377,13 +232,6 @@ class Screen extends View {
 
 	cancelDrawingShape();
 
-	if (popup == null) {
-	    popup = view.choices(x, y);
-	    if (popup != null) {
-		setReasonableLocation(popup, x, y);
-		return true;
-	    }
-	}
 	return false;
     } 
     
@@ -414,12 +262,5 @@ class Screen extends View {
 	    shape.draw(canvas);
 	}
 
-	if (popup != null) {
-	    GRASP.paint.setAlpha(64);
-	    canvas.drawRect(0, 0, width, height,
-			    GRASP.paint);
-	    GRASP.paint.setAlpha(255);
-	    popup.draw(canvas);
-	}
     }
 }
