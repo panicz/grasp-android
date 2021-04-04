@@ -14,9 +14,9 @@ import java.util.Iterator;
 
 import android.view.inputmethod.InputMethodManager;
 
-class Screen extends View {
+class Screen extends View implements Layers {
 
-    public Panel view;
+    public Panel panel;
 
     GRASP activity;
     
@@ -93,7 +93,7 @@ class Screen extends View {
 	width = (float) metrics.widthPixels;
 	height = (float) metrics.heightPixels;
 
-	view = new Editor(0, 0, width, height,
+	panel = new Editor(0, 0, width, height,
 			  null, 0, 0);
     }
 
@@ -108,17 +108,15 @@ class Screen extends View {
 	 * while a vertical line makes a HorizontalSplit
 	 */
 	if (shape.isHorizontalLine()
-	    && view.canBeSplittedVerticallyBy(rect)) {
-	    view = view.splitVerticallyBy(rect);
-	    //GRASP.log(view.toString());
+	    && panel.canBeSplittedVerticallyBy(rect)) {
+	    panel = panel.splitVerticallyBy(rect);
 	    cancelDrawingShape();
 	    return true;
 	}
 	
 	if(shape.isVerticalLine()
-	   && view.canBeSplittedHorizontallyBy(rect)) {
-	    view = view.splitHorizontallyBy(rect);
-	    //GRASP.log(view.toString());
+	   && panel.canBeSplittedHorizontallyBy(rect)) {
+	    panel = panel.splitHorizontallyBy(rect);
 	    cancelDrawingShape();
 	    return true;
 	}
@@ -141,14 +139,17 @@ class Screen extends View {
 	    cancelDrawingShape();
 	}
 
-	Split split = view.splitUnder(x[p], y[p]);
-	if (split != null) {
-	    drag[p] = split;
+	Drag d = panel.onPress(p, x[p], y[p]);
+	if (d != null) {
+	    drag[p] = d;
 	    cancelDrawingShape();
+	    return true;
 	}
-	else if (n == 1 && p == 0
-		 && !isShapeBeingDrawn()) {
+		
+	if (n == 1 && p == 0
+	    && !isShapeBeingDrawn()) {
 	    startDrawingShape();
+	    return true;
 	}
 	
 	return true;
@@ -168,7 +169,7 @@ class Screen extends View {
 		? p : max_finger;
 
 	    if (drag[p] != null) {
-		drag[p].through(xp, yp, xp-x[p], yp-y[p]);
+		drag[p].move(this, xp, yp, xp-x[p], yp-y[p]);
 	    }
 
 	    x[p] = xp;
@@ -192,7 +193,7 @@ class Screen extends View {
 	finger[p] = false;
 
 	if (drag[p] != null) {
-	    drag[p].to(this, x[p], y[p], vx, vy);
+	    drag[p].drop(this, x[p], y[p], vx, vy);
 	    drag[p] = null;
 	    return true;
 	}
@@ -224,7 +225,6 @@ class Screen extends View {
 	return false;
     }
 
-
     public boolean onLongPress(MotionEvent event) {
 	/* co sie dzieje przy przytrzymaniu?*/
 	float x = event.getX();
@@ -252,7 +252,7 @@ class Screen extends View {
 	canvas.drawRGB(255, 255, 255);
 	GRASP._log.draw(canvas, 0, 0);
 	
-	view.render(canvas);
+	panel.render(canvas);
 
 	for (Shape segment : segments) {
 	    segment.draw(canvas);
@@ -262,5 +262,14 @@ class Screen extends View {
 	    shape.draw(canvas);
 	}
 
+    }
+
+    // Layers' methods:
+    
+    @Override
+    public void finishResizingPanels(Split s,
+				     float vx,
+				     float vy) {
+	panel = panel.finishResizing(s, vx, vy);
     }
 }

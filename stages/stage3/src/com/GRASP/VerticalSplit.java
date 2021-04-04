@@ -58,16 +58,16 @@ class VerticalSplit extends Split {
     }
 
     @Override
-    public Split splitUnder(float x, float y) {
+    public Drag onPress(int finger, float x, float y) {
 	
 	if (firstPanel.bottom() < y && y < secondPanel.top()) {
 	    return this;
 	}
 	if (y <= firstPanel.bottom()) {
-	    return firstPanel.splitUnder(x, y);
+	    return firstPanel.onPress(finger, x, y);
 	}
 	if (y >= secondPanel.top()) {
-	    return secondPanel.splitUnder(x, y);
+	    return secondPanel.onPress(finger, x, y);
 	}
 	assert(false);
 	return null;

@@ -60,19 +60,19 @@ abstract class Split extends Panel implements Drag {
     }
     
     public abstract void resizeBy(float dx, float dy);
-    
 
     @Override
-    public void through(float x, float y,
-			float dx, float dy) {
+    public void move(Layers layers,
+		     float x, float y,
+		     float dx, float dy) {
 	resizeBy(dx, dy);
     }
 
     @Override
-    public void to(Screen screen,
-		   float x, float y,
-		   float vx, float vy) {
-	screen.view = screen.view.finishResizing(this, vx, vy);
+    public void drop(Layers layers,
+		     float x, float y,
+		     float vx, float vy) {
+	layers.finishResizingPanels(this, vx, vy);
     }
 
 }

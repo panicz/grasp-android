@@ -58,16 +58,16 @@ class HorizontalSplit extends Split {
     }
 
     @Override
-    public Split splitUnder(float x, float y) {
+    public Drag onPress(int finger, float x, float y) {
 	
 	if (firstPanel.right() < x && x < secondPanel.left()) {
 	    return this;
 	}
 	if (x <= firstPanel.right()) {
-	    return firstPanel.splitUnder(x, y);
+	    return firstPanel.onPress(finger, x, y);
 	}
 	if (x >= secondPanel.left()) {
-	    return secondPanel.splitUnder(x, y);
+	    return secondPanel.onPress(finger, x, y);
 	}
 	assert(false);
 	return null;

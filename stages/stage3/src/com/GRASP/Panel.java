@@ -57,7 +57,7 @@ abstract class Panel {
     public abstract boolean
 	canBeSplittedHorizontallyBy(RectF line);
     
-    public Split splitUnder(float x, float y) {
+    public Drag onPress(int finger, float x, float y) {
 	return null;
     }
 
