@@ -20,4 +20,10 @@ class SAtom extends SExp {
     public String toString() {
 	return name;
     }
+
+    @Override
+    public Bit toBit() {
+	return new Atom(name);
+    }
+
 }

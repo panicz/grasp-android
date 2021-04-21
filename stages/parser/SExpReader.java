@@ -119,12 +119,14 @@ class SExpReader {
 	    }
 	    else if(c == '.' && is_delimiter(input.peek())) {
 		SExp tail = read_expression();
-
+		String ultimate_whitespace = skip_whitespace();
+		c = input.read();
+		assert(c == ')' || c == -1);
 		return new SDotted(initial_whitespace,
 				   expressions,
 				   whitespace/*before dot*/,
 				   tail,
-				   skip_whitespace());
+				   ultimate_whitespace);
 	    }
 	    else {
 		input.unread(c);

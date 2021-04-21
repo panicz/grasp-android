@@ -5,4 +5,5 @@ abstract class SExp {
     //public abstract int width();
     //public abstract int height();
     protected abstract StringBuilder buildString(StringBuilder sb);
+    public abstract Bit toBit();
 }

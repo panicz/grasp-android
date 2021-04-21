@@ -26,4 +26,12 @@ class SDotted extends SList {
 	result.append(')');
 	return result;
     }
+
+    @Override
+    public Bit toBit() {
+	Box box = (Box) super.toBit();
+	// ...
+	return box;
+    }
+
 }
