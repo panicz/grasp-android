@@ -10,7 +10,8 @@ class Editor extends Panel {
 
     float horizontal_scroll = 0.0f;
     float vertical_scroll = 0.0f;
-
+    float scale = 1.0f;
+    
     String id;
 
     static int instances = 0;
@@ -21,7 +22,6 @@ class Editor extends Panel {
     }
 
     public boolean is_pinned = false;
-    
     
     public Editor(float x, float y, float w, float h,
 		  Document doc, float hscroll, float vscroll) {
@@ -77,7 +77,9 @@ class Editor extends Panel {
     }
     
     @Override
-    public void render(Canvas canvas) {
+    public void render(Canvas canvas,
+		       float clip_left, float clip_top,
+		       float clip_width, float clip_height) {
 	String pos = "("+(int)left()+", "+(int)top()+")";
 	GRASP.paint.setTextSize(18);
 	canvas.drawText(pos,
@@ -99,5 +101,26 @@ class Editor extends Panel {
 			GRASP.paint);
     }
 
+    @Override
+    public Drag onPress(Layers layers,
+			int finger,
+			float x, float y) {
+	return null;
+	/*
+	Location source = document
+	    .locationOfElementAtPosition
+	    (x + horizontal_scroll,
+	     y + vertical_scroll);
+	if (source == null) {
+	    return null;
+	}
 
+	Element target = document
+	    .takeElementFromLocation(source);
+
+	return new MoveAround(layers.add(target));
+	*/
+    }
+
+    
 }

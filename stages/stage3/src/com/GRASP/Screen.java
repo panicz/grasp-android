@@ -139,7 +139,7 @@ class Screen extends View implements Layers {
 	    cancelDrawingShape();
 	}
 
-	Drag d = panel.onPress(p, x[p], y[p]);
+	Drag d = panel.onPress(this, p, x[p], y[p]);
 	if (d != null) {
 	    drag[p] = d;
 	    cancelDrawingShape();
@@ -252,7 +252,7 @@ class Screen extends View implements Layers {
 	canvas.drawRGB(255, 255, 255);
 	GRASP._log.draw(canvas, 0, 0);
 	
-	panel.render(canvas);
+	panel.render(canvas, 0, 0, width, height);
 
 	for (Shape segment : segments) {
 	    segment.draw(canvas);

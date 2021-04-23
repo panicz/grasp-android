@@ -2,7 +2,7 @@ package com.GRASP;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 
-abstract class Panel {
+abstract class Panel implements Widget {
     static final float near_edge = 60;
 
     protected float _left;
@@ -14,8 +14,17 @@ abstract class Panel {
 
     public float left() { return _left; }
     public float top() { return _top; }
-    public float width() { return _width; }
-    public float height() { return _height; }
+    
+    @Override
+    public float width() {
+	return _width;
+    }
+    
+    @Override
+    public float height() {
+	return _height;
+    }
+    
     public float right() { return _right; }
     public float bottom() { return _bottom; }
 
@@ -57,7 +66,9 @@ abstract class Panel {
     public abstract boolean
 	canBeSplittedHorizontallyBy(RectF line);
     
-    public Drag onPress(int finger, float x, float y) {
+    public Drag onPress(Layers layers,
+			int finger,
+			float x, float y) {
 	return null;
     }
 
@@ -69,8 +80,6 @@ abstract class Panel {
     public abstract Panel
 	splitVerticallyBy(RectF line);
     
-    public abstract void render(Canvas canvas);
-
     public abstract String toString();
 
     public Panel

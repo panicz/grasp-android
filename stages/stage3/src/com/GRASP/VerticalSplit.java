@@ -41,14 +41,24 @@ class VerticalSplit extends Split {
     }
 
     @Override
-    public void render(Canvas canvas) {
-	firstPanel.render(canvas);
+    public void render(Canvas canvas,
+		       float clip_left, float clip_top,
+		       float clip_width, float clip_height) {
+	firstPanel.render(canvas,
+			  clip_left,
+			  clip_top,
+			  firstPanel.width(),
+			  firstPanel.height());
 	canvas.drawRect(firstPanel.left(),
 			firstPanel.bottom(),
 			firstPanel.right(),
 			secondPanel.top(),
 			GRASP.paint);
-	secondPanel.render(canvas); 
+	secondPanel.render(canvas,
+			   secondPanel.left(),
+			   secondPanel.top(),
+			   secondPanel.width(),
+			   secondPanel.height()); 
     }
 
     @Override
@@ -58,16 +68,18 @@ class VerticalSplit extends Split {
     }
 
     @Override
-    public Drag onPress(int finger, float x, float y) {
+    public Drag onPress(Layers layers,
+			int finger,
+			float x, float y) {
 	
 	if (firstPanel.bottom() < y && y < secondPanel.top()) {
 	    return this;
 	}
 	if (y <= firstPanel.bottom()) {
-	    return firstPanel.onPress(finger, x, y);
+	    return firstPanel.onPress(layers, finger, x, y);
 	}
 	if (y >= secondPanel.top()) {
-	    return secondPanel.onPress(finger, x, y);
+	    return secondPanel.onPress(layers, finger, x, y);
 	}
 	assert(false);
 	return null;

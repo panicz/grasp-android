@@ -41,14 +41,22 @@ class HorizontalSplit extends Split {
     }
     
     @Override
-    public void render(Canvas canvas) {
-	firstPanel.render(canvas);
+    public void render(Canvas canvas,
+		       float clip_left, float clip_top,
+		       float clip_width, float clip_height) {
+	firstPanel.render(canvas,
+			  clip_left, clip_top,
+			  firstPanel.width(),
+			  firstPanel.height());
 	canvas.drawRect(firstPanel.right(),
 			firstPanel.top(),
 			secondPanel.left(),
 			firstPanel.bottom(),
 			GRASP.paint);
-	secondPanel.render(canvas); 
+	secondPanel.render(canvas, secondPanel.left(),
+			   secondPanel.top(),
+			   secondPanel.width(),
+			   secondPanel.height()); 
     }
 
     @Override
@@ -58,16 +66,18 @@ class HorizontalSplit extends Split {
     }
 
     @Override
-    public Drag onPress(int finger, float x, float y) {
+    public Drag onPress(Layers layers,
+			int finger,
+			float x, float y) {
 	
 	if (firstPanel.right() < x && x < secondPanel.left()) {
 	    return this;
 	}
 	if (x <= firstPanel.right()) {
-	    return firstPanel.onPress(finger, x, y);
+	    return firstPanel.onPress(layers, finger, x, y);
 	}
 	if (x >= secondPanel.left()) {
-	    return secondPanel.onPress(finger, x, y);
+	    return secondPanel.onPress(layers, finger, x, y);
 	}
 	assert(false);
 	return null;
