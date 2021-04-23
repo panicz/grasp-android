@@ -1,0 +1,55 @@
+22.04.2021
+
+Mamy juz:
+- parsowanie
+- konwersje s-wyrazen do bitow (na razie bez list kropkowanych)
+
+Co teraz chcemy miec:
+- rysowanie bitow i spiecie tego z GRASP
+- ale przy okazji tez scrollowanie i zoomowanie ekranu
+- oraz oczywiscie mozliwosc edycji dokumentow (na razie tyle
+ze chcemy moc wyciagac elementy z innych elementow
+i wkladac je w elementy, ale docelowo rowniez kopiowac
+elementy, tworzyc nowe elementy, kasowac elementy ...)
+- oraz wczytywania i zapisywania
+
+- jest jeszcze taka kwestia, ze mialoby sens robienie listy
+dwukierunkowej elementow, dzieki czemu podczas scrollowania
+nie trzeba by bylo kazdorazowo przegladac listy od poczatku,
+a tylko jej lokalne otoczenie
+
+
+zaleznosci:
+- wczytywanie i zapisywanie wymaga wyswietlania listy plikow
+i nawigacji po katalogach, ktore z kolei sa blokowane przez
+architekture widgetow
+
+- wydaje sie, ze na razie mozemy zrobic wyswietlanie
+jakiegos wybranego dokumentu
+
+teraz jak to wplesc w architekture?
+
+Mamy sobie funkcje Editor::render oraz pole Editor::document.
+
+Document mogloby miec typ 'Box'. Wowczas Editor::render
+robiloby tyle, ze by odpowiednio ustawialo macierz i przyciecie
+plotna i przekazywalo odpowiednie parametry do Box::render,
+ktore renderowaloby swoje elementy rekurencyjnie.
+
+Box::render powinien wywolac Interline::render, ktora przesunie
+odpowidnio macierz i zrobi Line::render, ktora wywola...
+fajnie by to bylo robic rekurencyjnie, ale niestety JVM nie
+ma TCO. Zatem trzeba przeiterowac w petli for, w ktorej bedziemy
+kazdorazowo zdejmowac macierz ze stosu j kumulowac
+przesuniecie
+
+
+najpierw jednak zaczniemy od przeniesienia wszystkiego do
+katalogu stage3, zeby moc dalej nad tym pracowac
+
+
+cons: A [A] -> [A]
+
+class Construction a 
+   cons: A B -> B
+  bg: B -> AG
