@@ -36,11 +36,6 @@ class TextLine extends Widget {
     public void render(Canvas canvas,
 		       float clip_left, float clip_top,
 		       float clip_width, float clip_height) {
-	log("rendering text "+text+", clip: "
-	    +(int)clip_left+", "
-	    +(int)clip_top+", "
-	    +(int)clip_width+", "
-	    +(int)clip_height);
 	canvas.drawText(text, 0, paint.getTextSize(), paint);
     }
     //Skim skim(float x, float y);
@@ -55,4 +50,9 @@ class TextLine extends Widget {
 	return paint.getTextSize();
     }
 
+    @Override
+    public String toString() {
+	return text;
+    }
+    
 }

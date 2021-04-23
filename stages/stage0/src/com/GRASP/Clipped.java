@@ -11,7 +11,8 @@ class Clipped extends Widget {
 
     Widget target;
     
-    public Clipped(float width, float height, Widget target) {
+    public Clipped(float width, float height,
+		   Widget target) {
 	_width = width;
 	_height = height;
 	this.target = target;
@@ -21,9 +22,6 @@ class Clipped extends Widget {
     public void render(Canvas canvas,
 		       float clip_left, float clip_top,
 		       float clip_width, float clip_height) {
-	log("hscroll = "+hscroll+", vscroll = "+vscroll);
-	log("clip_left = "+clip_left+", "
-	    +"clip_top = "+clip_top);
 	canvas.save();
 	canvas.translate(-hscroll, -vscroll);
 	canvas.clipRect(hscroll, vscroll,
@@ -36,7 +34,6 @@ class Clipped extends Widget {
 		      min(_height, clip_height));
 	canvas.restore();
     }
-    //Skim skim(float x, float y);
 
     @Override
     public float width() {

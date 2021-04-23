@@ -41,8 +41,8 @@ class Screen extends View {
 		       new TextLine("text E"),
 		       new TextLine("text F")))
 	    .clippedTo(100, 200)
-	    //.scrolledBy(40, 100)
-	    //.displacedBy(20, 100)
+	    .scrolledBy(40, 80)
+	    .displacedBy(200, 100)
 	    ;
     }
 

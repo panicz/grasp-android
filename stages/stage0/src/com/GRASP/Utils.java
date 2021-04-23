@@ -34,7 +34,7 @@ class Utils {
 	}
 	
 	if (view != null) {
-	    view.invalidate();
+	    //view.invalidate();
 	}
 	
     }

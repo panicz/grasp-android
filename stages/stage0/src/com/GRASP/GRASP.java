@@ -32,7 +32,7 @@ public class GRASP
 
     View view;    
     public void log(String s) {
-	Utils.log((System.currentTimeMillis())+": "+s);
+	Utils.log(s);
     }
 
     static String evt(MotionEvent e) {
@@ -51,7 +51,8 @@ public class GRASP
 	
 	default_font =
 	    Typeface
-	    .createFromAsset(Utils.assets, "DroidSans.ttf");
+	    .createFromAsset(Utils.assets,
+			     "DroidSans.ttf");
 
 	if (Utils.logger == null) {
 	    Utils.logger =
@@ -76,12 +77,12 @@ public class GRASP
     public boolean onDown(MotionEvent event) {
 	int i = event.getActionIndex();
 	int finger = event.getPointerId(i);
-	log("onDown("+finger+")");
+	//log("onDown("+finger+")");
         return true;
     }
 
     public boolean onMotion(MotionEvent event) {
-	log("onMotion("+event+")");
+	//log("onMotion("+event+")");
 	return true;
     }
     
@@ -89,14 +90,14 @@ public class GRASP
     public boolean onFling(MotionEvent event1,
 			   MotionEvent event2,
 			   float vx, float vy) {
-	log("onFling("+evt(event1)+", "+evt(event2)+", "
-	    +vx+", "+vy+")");
+	/*log("onFling("+evt(event1)+", "+evt(event2)+", "
+	  +vx+", "+vy+")");*/
         return true;
     }
 
     @Override
     public void onLongPress(MotionEvent event) {
-	log("onLongPress("+event+")");
+	//log("onLongPress("+event+")");
     }
 
     @Override
@@ -124,13 +125,13 @@ public class GRASP
 
     @Override
     public boolean onDoubleTapEvent(MotionEvent e) {
-	log("onDoubleTapEvent("+evt(e)+")");
+	//log("onDoubleTapEvent("+evt(e)+")");
         return true;
     }
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-	log("onSingleTapConfirmed("+evt(e)+")");
+	//log("onSingleTapConfirmed("+evt(e)+")");
 	return true;
     }
 
@@ -156,7 +157,7 @@ public class GRASP
 
 	case MotionEvent.ACTION_CANCEL: 
 	default: 
-	    log("onTouchEvent("+evt(event)+")");
+	    //log("onTouchEvent("+evt(event)+")");
 	    break;
 	}
 	    
@@ -168,7 +169,7 @@ public class GRASP
 			 int keyCode,
 			 KeyEvent event) {
 	
-	log("onKey("+view+", "+keyCode+", "+event+")");
+	//log("onKey("+view+", "+keyCode+", "+event+")");
 	return true;
     }
 }
