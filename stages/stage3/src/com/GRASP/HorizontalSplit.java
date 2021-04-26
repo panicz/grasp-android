@@ -41,22 +41,27 @@ class HorizontalSplit extends Split {
     }
     
     @Override
-    public void render(Canvas canvas,
-		       float clip_left, float clip_top,
-		       float clip_width, float clip_height) {
-	firstPanel.render(canvas,
-			  clip_left, clip_top,
-			  firstPanel.width(),
-			  firstPanel.height());
-	canvas.drawRect(firstPanel.right(),
-			firstPanel.top(),
-			secondPanel.left(),
-			firstPanel.bottom(),
+    public void render(Canvas canvas) {
+	canvas.save();
+	canvas.drawRect(firstPanel.width(),
+			0,
+			firstPanel.width() + bar_width,
+			firstPanel.height(),
 			GRASP.paint);
-	secondPanel.render(canvas, secondPanel.left(),
-			   secondPanel.top(),
-			   secondPanel.width(),
-			   secondPanel.height()); 
+	
+	canvas.clipRect(0, 0,
+			firstPanel.width(),
+			firstPanel.height());
+	firstPanel.render(canvas);
+	canvas.restore();
+	
+	canvas.save();
+	canvas.translate((firstPanel.width() + bar_width), 0);
+	canvas.clipRect(0, 0,
+			secondPanel.width(),
+			secondPanel.height());
+	secondPanel.render(canvas);
+	canvas.restore();
     }
 
     @Override

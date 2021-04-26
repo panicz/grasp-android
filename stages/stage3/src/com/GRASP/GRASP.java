@@ -66,7 +66,7 @@ public class GRASP
 	    paint = new Paint();
 	    //;font = f;
 	    paint.setTypeface(default_font);
-	    paint.setColor(Color.BLACK);
+	    paint.setColor(Color.GRAY);
 	}
 
 	if (_log == null) {

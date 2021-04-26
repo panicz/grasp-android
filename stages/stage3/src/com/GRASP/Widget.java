@@ -21,16 +21,12 @@ import android.graphics.Canvas;
  *
  */
 
-
 interface Widget {
-    void render(Canvas canvas,
-		float clip_left, float clip_top,
-		float clip_width, float clip_height);
+    void render(Canvas canvas);
 
     float width();
     float height();
 }
-
 
 /*
  * main_widget =

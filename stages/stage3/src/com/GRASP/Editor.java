@@ -77,27 +77,29 @@ class Editor extends Panel {
     }
     
     @Override
-    public void render(Canvas canvas,
-		       float clip_left, float clip_top,
-		       float clip_width, float clip_height) {
+    public void render(Canvas canvas) {
+
+
+
+	
 	String pos = "("+(int)left()+", "+(int)top()+")";
 	GRASP.paint.setTextSize(18);
 	canvas.drawText(pos,
-			left() + width()/2.0f - 6*pos.length(),
-			top() + height()/2.0f - 36,
+			 width()/2.0f - 6*pos.length(),
+			 height()/2.0f - 36,
 			GRASP.paint);
 	
 	GRASP.paint.setTextSize(36);
 	canvas.drawText(id,
-			left() + width()/2.0f,
-			top() + height()/2.0f,
+		        width()/2.0f,
+		        height()/2.0f,
 			GRASP.paint);
 
 	String size = "("+(int)width()+", "+(int)height()+")";
 	GRASP.paint.setTextSize(18);
 	canvas.drawText(size,
-			left() + width()/2.0f,
-			top() + height()/2.0f + 36,
+			 width()/2.0f,
+			 height()/2.0f + 36,
 			GRASP.paint);
     }
 

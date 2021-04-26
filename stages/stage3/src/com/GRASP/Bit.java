@@ -1,8 +1,6 @@
 package com.GRASP;
 
-//package com.GRASP;
-
-//import android.graphics.Paint;
+import android.graphics.Canvas;
 
 /*
 
@@ -50,12 +48,11 @@ Line = Line :first-space Space
             :next-interline Interline;
 
 */
-abstract class Bit {
+abstract class Bit implements Widget {
     /*@NonNull*/ public Space following_space = null;
 
-    /*@Nullable*/ public Space previous_space = null;
+    public abstract void render(Canvas canvas);
 
-    
     public abstract float width();
     public abstract float height();
 }

@@ -252,7 +252,7 @@ class Screen extends View implements Layers {
 	canvas.drawRGB(255, 255, 255);
 	GRASP._log.draw(canvas, 0, 0);
 	
-	panel.render(canvas, 0, 0, width, height);
+	panel.render(canvas);
 
 	for (Shape segment : segments) {
 	    segment.draw(canvas);

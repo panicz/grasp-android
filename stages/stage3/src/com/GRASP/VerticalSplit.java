@@ -41,24 +41,29 @@ class VerticalSplit extends Split {
     }
 
     @Override
-    public void render(Canvas canvas,
-		       float clip_left, float clip_top,
-		       float clip_width, float clip_height) {
-	firstPanel.render(canvas,
-			  clip_left,
-			  clip_top,
-			  firstPanel.width(),
-			  firstPanel.height());
-	canvas.drawRect(firstPanel.left(),
-			firstPanel.bottom(),
-			firstPanel.right(),
-			secondPanel.top(),
+    public void render(Canvas canvas) {
+
+	canvas.save();
+
+	canvas.drawRect(0, firstPanel.height(),
+			firstPanel.width(),
+			firstPanel.height() + bar_width,
 			GRASP.paint);
-	secondPanel.render(canvas,
-			   secondPanel.left(),
-			   secondPanel.top(),
-			   secondPanel.width(),
-			   secondPanel.height()); 
+
+	
+	canvas.clipRect(0, 0,
+			firstPanel.width(),
+			firstPanel.height());
+	firstPanel.render(canvas);
+	canvas.restore();
+
+	canvas.save();
+	canvas.translate(0, (firstPanel.height() + bar_width));
+	canvas.clipRect(0, 0,
+			secondPanel.width(),
+			secondPanel.height());
+	secondPanel.render(canvas);
+	canvas.restore();
     }
 
     @Override
