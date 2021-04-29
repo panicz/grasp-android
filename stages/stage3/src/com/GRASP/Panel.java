@@ -67,7 +67,7 @@ abstract class Panel implements Widget {
     public abstract boolean
 	canBeSplittedHorizontallyBy(RectF line);
     
-    public Drag onPress(Layers layers,
+    public Drag onPress(Screen screen,
 			int finger,
 			float x, float y) {
 	return null;

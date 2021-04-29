@@ -71,7 +71,7 @@ class HorizontalSplit extends Split {
     }
 
     @Override
-    public Drag onPress(Layers layers,
+    public Drag onPress(Screen screen,
 			int finger,
 			float x, float y) {
 	
@@ -79,10 +79,10 @@ class HorizontalSplit extends Split {
 	    return this;
 	}
 	if (x <= firstPanel.right()) {
-	    return firstPanel.onPress(layers, finger, x, y);
+	    return firstPanel.onPress(screen, finger, x, y);
 	}
 	if (x >= secondPanel.left()) {
-	    return secondPanel.onPress(layers, finger, x, y);
+	    return secondPanel.onPress(screen, finger, x, y);
 	}
 	assert(false);
 	return null;

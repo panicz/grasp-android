@@ -122,14 +122,14 @@ class Editor extends Panel {
 	}
 
 	@Override
-	public void move(Layers layers, float x, float y,
+	public void move(Screen screen, float x, float y,
 			 float dx, float dy) {
 	    target.stretch_x[finger] = x;
 	    target.stretch_y[finger] = y;
 	}
 
 	@Override
-	public void drop(Layers layers, float x, float y,
+	public void drop(Screen screen, float x, float y,
 			 float vx, float vy) {
 	    target.stretching[finger] = false;
 	    Panel.stretches--;
@@ -165,7 +165,7 @@ class Editor extends Panel {
     }
 
     @Override
-    public Drag onPress(Layers layers,
+    public Drag onPress(Screen screen,
 			int finger,
 			float x, float y) {
 	if (GRASP.last_known_edit_instance.isOngoingDragAction()) {
@@ -184,7 +184,7 @@ class Editor extends Panel {
 	Element target = document
 	    .takeElementFromLocation(source);
 
-	return new MoveAround(layers.add(target));
+	return new MoveAround(screen.add(target));
 	*/
     }
 

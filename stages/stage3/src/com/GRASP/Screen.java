@@ -14,7 +14,7 @@ import java.util.Iterator;
 
 import android.view.inputmethod.InputMethodManager;
 
-class Screen extends View implements Layers {
+class Screen extends View {
 
     public Panel panel;
 
@@ -282,9 +282,6 @@ class Screen extends View implements Layers {
 
     }
 
-    // Layers' methods:
-    
-    @Override
     public void finishResizingPanels(Split s,
 				     float vx,
 				     float vy) {

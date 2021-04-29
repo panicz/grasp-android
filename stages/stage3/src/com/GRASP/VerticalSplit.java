@@ -73,7 +73,7 @@ class VerticalSplit extends Split {
     }
 
     @Override
-    public Drag onPress(Layers layers,
+    public Drag onPress(Screen screen,
 			int finger,
 			float x, float y) {
 	
@@ -81,10 +81,10 @@ class VerticalSplit extends Split {
 	    return this;
 	}
 	if (y <= firstPanel.bottom()) {
-	    return firstPanel.onPress(layers, finger, x, y);
+	    return firstPanel.onPress(screen, finger, x, y);
 	}
 	if (y >= secondPanel.top()) {
-	    return secondPanel.onPress(layers, finger, x, y);
+	    return secondPanel.onPress(screen, finger, x, y);
 	}
 	assert(false);
 	return null;
