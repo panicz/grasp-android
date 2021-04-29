@@ -38,7 +38,7 @@ public class GRASP
     public static Paint paint = null;
     
     public static void log(String s) {
-	_log.log((System.currentTimeMillis())+": "+s);
+	_log.log(s);
 	last_known_edit_instance.invalidate();
     }
 

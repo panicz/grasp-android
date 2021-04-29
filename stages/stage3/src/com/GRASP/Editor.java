@@ -12,7 +12,7 @@ class Editor extends Panel {
     float vertical_scroll = 0.0f;
     float scale = 1.0f;
     
-    String id;
+    public String id;
 
     static int instances = 0;
     
@@ -79,34 +79,98 @@ class Editor extends Panel {
     @Override
     public void render(Canvas canvas) {
 
+	canvas.save();
+	canvas.translate(horizontal_scroll,
+			 vertical_scroll);
 
-
-	
-	String pos = "("+(int)left()+", "+(int)top()+")";
-	GRASP.paint.setTextSize(18);
-	canvas.drawText(pos,
-			 width()/2.0f - 6*pos.length(),
-			 height()/2.0f - 36,
-			GRASP.paint);
 	
 	GRASP.paint.setTextSize(36);
 	canvas.drawText(id,
-		        width()/2.0f,
-		        height()/2.0f,
+		        GRASP.last_known_edit_instance.width/2.0f,
+		        GRASP.last_known_edit_instance.height/2.0f,
 			GRASP.paint);
+	
+	canvas.restore();
+    }
 
-	String size = "("+(int)width()+", "+(int)height()+")";
-	GRASP.paint.setTextSize(18);
-	canvas.drawText(size,
-			 width()/2.0f,
-			 height()/2.0f + 36,
-			GRASP.paint);
+
+    float [] pin_x = new float[10];
+    float [] pin_y = new float[10];
+    
+    float [] stretch_x = new float[10];
+    float [] stretch_y = new float[10];
+    
+    boolean[] stretching = new boolean[] {
+	false, false, false, false, false,
+	false, false, false, false, false
+    };
+
+    class Stretch implements Drag {
+
+	Editor target;
+	int finger;
+	
+	public Stretch(Editor target, int finger,
+		       float start_x, float start_y) {
+
+	    Panel.stretches++;
+	    this.finger = finger;
+	    this.target = target;
+	    target.stretching[finger] = true;
+	    target.pin_x[finger] = start_x;
+	    target.pin_y[finger] = start_y;
+	}
+
+	@Override
+	public void move(Layers layers, float x, float y,
+			 float dx, float dy) {
+	    target.stretch_x[finger] = x;
+	    target.stretch_y[finger] = y;
+	}
+
+	@Override
+	public void drop(Layers layers, float x, float y,
+			 float vx, float vy) {
+	    target.stretching[finger] = false;
+	    Panel.stretches--;
+	}
+	
+    }
+
+    @Override
+    public Drag stretchFrom(int finger, float x, float y) {
+	return new Stretch(this, finger, x, y);
+    }
+
+    @Override
+    public void stretch() {
+	for (int i = 0; i < Screen.fingers; ++i) {
+	    if (stretching[i]) {
+		float dx = stretch_x[i] - pin_x[i];
+		float dy = stretch_y[i] - pin_y[i];
+		
+		pin_x[i] = stretch_x[i];
+		pin_y[i] = stretch_y[i];
+
+		// normalnie bysmy pewnie sobie zebralu
+		// wszystkie punkty i obliczyli transformacje
+		// na podstawie SVD czy cos takiego,
+		// ale my po prostu policzymy przesuniecie
+		// na podstawie pierwszego punktu i chuj
+
+		scrollBy(dx, dy);
+		break;
+	    }
+	}
     }
 
     @Override
     public Drag onPress(Layers layers,
 			int finger,
 			float x, float y) {
+	if (Panel.stretches > 0) {
+	    return new Stretch(this, finger, x, y);
+	}
 	return null;
 	/*
 	Location source = document

@@ -23,7 +23,7 @@ class Screen extends View implements Layers {
     public float width;
     public float height;
 
-    static final int fingers = 10;
+    public static final int fingers = 10;
     
     boolean[] finger = new boolean[] {
 	false, false, false, false, false,
@@ -131,15 +131,19 @@ class Screen extends View implements Layers {
 	int n = event.getPointerCount();
 	assert(!finger[p]);
 	finger[p] = true;
-
+	
 	x[p] = event.getX(i);
 	y[p] = event.getY(i);
-	
-	if (p > 0 && isShapeBeingDrawn()) {
+
+	if (p > 0 && finger[0] && isShapeBeingDrawn()) {
+	    float x0 = x[0];
+	    float y0 = y[0];
 	    cancelDrawingShape();
+	    drag[0] = panel.at(x0, y0).stretchFrom(0, x0, y0);
 	}
 
 	Drag d = panel.onPress(this, p, x[p], y[p]);
+	
 	if (d != null) {
 	    drag[p] = d;
 	    cancelDrawingShape();
@@ -180,8 +184,13 @@ class Screen extends View implements Layers {
 	    && n == 1
 	    && isShapeBeingDrawn()) {
 	    shape.add(x[0], y[0]);
-	    GRASP._log.update("("+x[0]+", "+y[0]+")");
+	    //GRASP._log.update("("+x[0]+", "+y[0]+")");
 	}
+
+	if (Panel.stretches > 0) {
+	    panel.stretch();
+	}
+	
 	return true;
     }
     

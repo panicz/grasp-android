@@ -5,6 +5,8 @@ import android.graphics.RectF;
 abstract class Panel implements Widget {
     static final float near_edge = 60;
 
+    static int stretches = 0;
+    
     protected float _left;
     protected float _top;
     protected float _width;
@@ -46,8 +48,7 @@ abstract class Panel implements Widget {
     public void setHeight(float v) {
 	_height = v;
 	_bottom = _top + _height;
-    }
-    
+    }    
     
     public Panel(float x, float y, float w, float h) {
 	_left = x;
@@ -87,4 +88,12 @@ abstract class Panel implements Widget {
 	return this;
     }
 
+    public Panel at(float x, float y) {
+	return this;
+    }
+
+    public abstract Drag stretchFrom(int finger, float x, float y);
+    
+    public abstract void stretch();
+    
 };
