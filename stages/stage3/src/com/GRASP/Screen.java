@@ -101,6 +101,15 @@ class Screen extends View implements Layers {
 	null, null, null, null, null,
 	null, null, null, null, null
     };
+
+    public boolean isOngoingDragAction() {
+	for (int i = 0; i < fingers; ++i) {
+	    if (drag[i] != null) {
+		return true;
+	    }
+	}
+	return false;
+    }
     
     boolean splittedView(RectF rect) {
 	/**

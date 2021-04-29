@@ -168,7 +168,7 @@ class Editor extends Panel {
     public Drag onPress(Layers layers,
 			int finger,
 			float x, float y) {
-	if (Panel.stretches > 0) {
+	if (GRASP.last_known_edit_instance.isOngoingDragAction()) {
 	    return new Stretch(this, finger, x, y);
 	}
 	return null;
