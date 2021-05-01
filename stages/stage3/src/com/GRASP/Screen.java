@@ -94,7 +94,7 @@ class Screen extends View {
 	height = (float) metrics.heightPixels;
 
 	panel = new Editor(0, 0, width, height,
-			  null, 0, 0);
+			   new Document(), 0, 0);
     }
 
     Drag [] drag = new Drag[] {

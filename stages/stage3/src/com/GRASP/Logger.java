@@ -47,7 +47,6 @@ class Logger {
 	Iterator<String> it =
 	    lines.iterator();
 	int i = 1;
-	GRASP.paint.setTextSize(12);
 	float h = GRASP.paint.getTextSize()+1;
 	while (it.hasNext()) {
 	    canvas.drawText(it.next(),

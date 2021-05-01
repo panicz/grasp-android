@@ -83,13 +83,16 @@ class Editor extends Panel {
 	canvas.translate(horizontal_scroll,
 			 vertical_scroll);
 
-	
+
+	document.root.render(canvas);
+
+	/*
 	GRASP.paint.setTextSize(36);
 	canvas.drawText(id,
 		        GRASP.last_known_edit_instance.width/2.0f,
 		        GRASP.last_known_edit_instance.height/2.0f,
 			GRASP.paint);
-	
+	*/
 	canvas.restore();
     }
 
@@ -99,6 +102,9 @@ class Editor extends Panel {
     
     float [] stretch_x = new float[10];
     float [] stretch_y = new float[10];
+
+    float [] shift_x = new float[10];
+    float [] shift_y = new float[10];
     
     boolean[] stretching = new boolean[] {
 	false, false, false, false, false,
@@ -119,6 +125,9 @@ class Editor extends Panel {
 	    target.stretching[finger] = true;
 	    target.pin_x[finger] = start_x;
 	    target.pin_y[finger] = start_y;
+
+	    target.shift_x[finger] = 0;
+	    target.shift_y[finger] = 0;
 	}
 
 	@Override
@@ -146,19 +155,14 @@ class Editor extends Panel {
     public void stretch() {
 	for (int i = 0; i < Screen.fingers; ++i) {
 	    if (stretching[i]) {
-		float dx = stretch_x[i] - pin_x[i];
-		float dy = stretch_y[i] - pin_y[i];
+		scrollBy(shift_x[i], shift_y[i]);
+
+		shift_x[i] = stretch_x[i] - pin_x[i];
+		shift_y[i] = stretch_y[i] - pin_y[i];
 		
 		pin_x[i] = stretch_x[i];
 		pin_y[i] = stretch_y[i];
 
-		// normalnie bysmy pewnie sobie zebralu
-		// wszystkie punkty i obliczyli transformacje
-		// na podstawie SVD czy cos takiego,
-		// ale my po prostu policzymy przesuniecie
-		// na podstawie pierwszego punktu i chuj
-
-		scrollBy(dx, dy);
 		break;
 	    }
 	}

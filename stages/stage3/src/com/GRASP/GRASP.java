@@ -60,13 +60,15 @@ public class GRASP
 	default_font =
 	    Typeface
 	    .createFromAsset(getAssets(),
-			     "DroidSans.ttf");
+			     "LobsterTwo-Regular.otf");
 
 	if (paint == null) {
 	    paint = new Paint();
 	    //;font = f;
 	    paint.setTypeface(default_font);
 	    paint.setColor(Color.GRAY);
+	    paint.setTextSize(48);
+
 	}
 
 	if (_log == null) {
