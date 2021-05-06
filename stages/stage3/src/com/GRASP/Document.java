@@ -16,9 +16,9 @@ class Document implements Operations {
 	    Reader input = new
 		StringReader("\n"
 			     +"(define (! n)\n"
-			     +"  (if (= n 0)\n"
-			     +"    1\n"
-			     +"    (* n (! (- n 1)))))\n"
+			     +" (if (= n 0)\n"
+			     +"   1\n"
+			     +"  (* n (! (- n 1)))))\n"
 			     );
 	    SExpReader sexp =
 		new SExpReader(new PeekingReader(input, 4));

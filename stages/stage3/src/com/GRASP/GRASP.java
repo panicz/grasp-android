@@ -67,7 +67,8 @@ public class GRASP
 	    //;font = f;
 	    paint.setTypeface(default_font);
 	    paint.setColor(Color.GRAY);
-	    paint.setTextSize(48);
+	    paint.setTextSize(72);
+	    paint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
 	}
 

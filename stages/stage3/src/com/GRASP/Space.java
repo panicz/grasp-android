@@ -32,11 +32,11 @@ class Space {
 
     
     public Space(int columns) {
-	width = 8.0f*columns;
+	width = GRASP.paint.measureText("-")*columns;
     }
 
     public Space(int columns, Bit bit) {
-	width = 8.0f*columns;
+	width = GRASP.paint.measureText("-")*columns;
 	following_bit = bit;
     }
 

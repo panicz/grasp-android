@@ -1,6 +1,9 @@
 package com.GRASP;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.graphics.Path;
+
+
 //import java.lang.Math;
 
 
@@ -78,7 +81,7 @@ class Editor extends Panel {
     
     @Override
     public void render(Canvas canvas) {
-
+	
 	canvas.save();
 	canvas.translate(horizontal_scroll,
 			 vertical_scroll);
@@ -86,6 +89,7 @@ class Editor extends Panel {
 
 	document.root.render(canvas);
 
+	
 	/*
 	GRASP.paint.setTextSize(36);
 	canvas.drawText(id,

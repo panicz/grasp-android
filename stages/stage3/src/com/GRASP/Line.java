@@ -10,6 +10,12 @@ class Line {
 	    + ((next_interline == null)
 	       ? 0 : next_interline.onward_height());
     }
+
+    public float height() {
+	return (first_space == null)
+	    ? 0
+	    : first_space.maximum_height();
+    }
     
     public float width() {
 	return (first_space == null)

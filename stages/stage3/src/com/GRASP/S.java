@@ -17,7 +17,7 @@ class S {
     }
     
     public static int lines(String s) {
-	return 1 + S.count('\n', s);
+	return S.count('\n', s);//+1;
     }
 
     public static int ultimate_line_width(String s) {
