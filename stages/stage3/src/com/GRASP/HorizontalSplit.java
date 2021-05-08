@@ -22,8 +22,8 @@ class HorizontalSplit extends Split {
 	secondPanel.setWidth(width() - firstPanel.width()
 			     - bar_width);
 
-	secondPanel.scrollBy(firstPanel.width()
-			     + bar_width, 0);
+	secondPanel.scrollBy(-(firstPanel.width()
+			       + bar_width), 0);
 
 	/*
 	GRASP.log("HorizontalSplit("+(int)left+", "

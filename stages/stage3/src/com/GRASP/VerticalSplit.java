@@ -22,8 +22,8 @@ class VerticalSplit extends Split {
 	secondPanel.setHeight(height() - firstPanel.height()
 			      - bar_width);
 
-	secondPanel.scrollBy(0, firstPanel.height()
-			     + bar_width);
+	secondPanel.scrollBy(0, -(firstPanel.height()
+				  + bar_width));
 
 	/*
 	GRASP.log("VerticalSplit("+(int)left+", "+(int)top+", "

@@ -77,6 +77,9 @@ class Box extends Bit {
 	Interline interline;
 
 	float maximum_width = 0;
+
+	int previous_color = GRASP.paint.getColor();
+	GRASP.paint.setColor(previous_color + 0x111111);
 	
 	for (interline = first_interline;
 	     interline != null
@@ -90,6 +93,7 @@ class Box extends Bit {
 
 	    float accumulated_width = parenWidth;
 	    float maximum_height = 0;
+
 	    
 	    for (Space preceding_space = line.first_space;
 		 preceding_space != null
@@ -127,6 +131,7 @@ class Box extends Bit {
 	    
 	    accumulated_height += maximum_height;
 	}
+	
 	canvas.drawPath(leftParen(accumulated_height - 60),
 			GRASP.paint);
 	canvas.save();
@@ -134,6 +139,7 @@ class Box extends Bit {
 	canvas.drawPath(rightParen(accumulated_height - 60),
 			GRASP.paint);
 	canvas.restore();
+	GRASP.paint.setColor(previous_color);
     }
 
     
