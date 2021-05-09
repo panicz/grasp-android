@@ -30,12 +30,17 @@ public class GRASP
 	       OnKeyListener
 	    //   implements OnTouchListener
 {
-    public Typeface default_font = null;
+    public static Typeface symbols_font = null;
+    public static Typeface strings_font = null;
+    public static Typeface logs_font = null;
+
     GestureDetector gestureDetector;
     public static Logger _log = null;
     public Screen edit;
     public static Screen last_known_edit_instance = null;
     public static Paint paint = null;
+
+
     
     public static void log(String s) {
 	_log.log(s);
@@ -57,17 +62,32 @@ public class GRASP
 			     WindowManager.LayoutParams
 			     .FLAG_FULLSCREEN);
 
-	default_font =
-	    Typeface
-	    .createFromAsset(getAssets(),
-			     "LobsterTwo-Regular.otf");
+	if (symbols_font == null) {
+	    symbols_font =
+		Typeface
+		.createFromAsset(getAssets(),
+				 "LobsterTwo-Regular.otf");
+	}
+	
+	if (strings_font == null) {
+	    strings_font =
+		Typeface
+		.createFromAsset(getAssets(),
+				 "NotoSerif-Regular.ttf");
+	}
 
+	if (logs_font == null) {
+	    logs_font =
+		Typeface
+		.createFromAsset(getAssets(),
+				 "Oswald-Regular.ttf");
+	}
+	
 	if (paint == null) {
 	    paint = new Paint();
 	    //;font = f;
-	    paint.setTypeface(default_font);
+	    //paint.setTypeface(default_font);
 	    paint.setColor(0xff555555);
-	    paint.setTextSize(72);
 	    paint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
 	}

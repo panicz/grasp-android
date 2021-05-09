@@ -1,56 +1,3 @@
-8.04.2021: alternatywa (od stage 3)
-
-stage 3: przegladanie i edycja dokumentow
-stage 4: otwieranie i zapisywanie dokumentow
-stage 5: rysowanie ksztaltow, dodawanie ich
-do bazy danych, nadawanie im nazw, i kojarzenie
-z dzialaniami
-stage 6
-
-(define-type Whitespaced
-  #:whitespace String)
-
-
-(define-type ConcreteSyntaxTree
-  (extend
-   Whitespaced
-   (either
-    (List #:reverse-elements (ConcreteSyntaxTree ...)
-	  #:ultimate-whitespace String)
-
-    (ImproperList 
-          #:reverse-elements (ConcreteSyntaxTree ...)
-	  #:last-tail ConcreteSyntaxTree
-	  #:ultimate-whitespace String)
-
-    (Atom #:source-string String
-	  #:value Atom))))
-
-
-(define-type Document
-
-
-
-25.03.2021:
-
-nawigacja i edycja:
-
-1. polozenie kursora
-2. tworzenie pudelka [jako akcja]
-
-lewo, prawo, gora, dol, enter
-
-co robi enter?
-
-jezeli ekran jest pusty, to nic
-
-jezeli kursor jest na ekranie pomiedzy
-dwoma pudelkami, to przesuwa drugie
-pudelko ponizej
-
-
-
-
 Stages:
 
 stage 0: logging events
@@ -60,106 +7,26 @@ spanning from one side to another
 
 stage 2: the screen splits can be resized and discarded
 
-stage 3: shapes can be drawn and associated with names.
-
----------------------
-zachowanie (nietrywialnych) widgetow:
-
-do tej pory, jak mamy sobie guziki, to obslugujemy je
-za pomoca dzielenia czy odejmowania (czy cos)
-
-docelowo natomiast moglibysmy miec klase
-'widget' (czy cos takiego), albo moze lepiej
-wnętrze (w otulinie), gdzie założenie jest takie:
-- otulina przechowuje informacje o położeniu
-i rozmiarze, i przy renderowaniu obiektu zawsze
-zachowuje kontekst, robi clip, przesuwa współrzędne
-do 0, 0, wywołuje funkcję rysującą, i przywraca
-kontekst płótna
-
-rozważmy może taki widget, który bierze inny widget
-i wyświetla go przesunietego (coś jak iframe w html)
-
-widget może działać dwojako:
-- albo nakładamy na płótno przycięcie
-i przesunęcia (podejście naiwne),
-- albo dodatkowo informujemy sam ten widget
-o tym, który obszar renderujemy (co daje
-funkcji renderujacej 
-
-interface Widget {
-
-  // parametry dotycza tego, jaki maksymalny
-  // podzbior niniejszego widgetu zostanie wyrenderowany
-  // i w zwiazku z tym sluza jedynie do optymalizacji.
-  // (moga byc kompletnie olane przez implementację
-  // bez żadnych dostrzegalnych skutków poza wydajnością)
-  void render(Canvas canvas,
-              float shft_left, float shift_top,
-	      float rendered_width, float height);
-
-
-  Skim skim(float x, float y);
-  float width();
-  float height();
-}
-
-class Nest implements Widget {
-  Widget target;
-  float horizontal_scroll;
-  float vertical_scroll;
-  public Nest(Widget target,
-              float left, float top,
-	      float width, float height) {
-      
-  }
-
-  @Override
-  void render(Canvas canvas,
-              float horizontal_shft, float vertical_shift,
-	      float clip_width, float clip_height) {
-      canvas.save();
-      canvas.translate(left, top);
-      canvas.clipRect(0, 0, width, height);
-      target.render(canvas, ...);
-      canvas.restore();
-  }
-
-  @Override
-  Skim skim(float x, float y) {
-      
-  }
-
-  @Override
-  float width() {
-  }
-
-  @Override
-  float height() {
-  }
-}
-
-
-
----------------------
-
-stage 4: files can be edited with touch (e.g. expressions
+stage 3: files can be edited with touch (e.g. expressions
 can be moved from one view to another);
-expressions can be pinned (context menu)  and maximized
-(double tap). a pinned expression interprets touch
-actions in its own way.
 
-stage 5: lisp files can be imported and displayed in views.
+stage 4: lisp files can be imported and displayed in views.
 documents can be pinned. a pinned document doesn't let
 draw gestures, and intetprets the first finger as scroll.
 Widgets in a pinned document interpret actions in their own
 ways.
 
+stage 5: shapes can be drawn and associated with names.
+
 stage 6: expressions can be evaluated; certain kinds
 of expressions can be interpreted visually. an example:
 A* on graphs
 
-stage 7: support for cursors within expressions and
+stage 7: expressions can be pinned (context menu)  and maximized
+(double tap). a pinned expression interprets touch
+actions in its own way.
+
+stage 8: support for cursors within expressions and
 keyboard editing
 
-stage 8: undoing and history tracking
+stage 9: undoing and history tracking

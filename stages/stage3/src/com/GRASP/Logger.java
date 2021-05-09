@@ -44,6 +44,9 @@ class Logger {
     
     public void draw(Canvas canvas,
 		     float x, float y) {
+	GRASP.paint.setTypeface(GRASP.logs_font);
+	GRASP.paint.setTextSize(12);
+	
 	Iterator<String> it =
 	    lines.iterator();
 	int i = 1;

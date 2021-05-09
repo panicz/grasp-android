@@ -1,8 +1,13 @@
 package com.GRASP;
+import android.graphics.Paint;
+
 
 class Space {
     public float width;
     /*@Nullable*/ public Bit following_bit = null;
+
+    static Paint paint = null;
+
     
     public float maximum_height() {
 	if (following_bit == null) {
@@ -31,13 +36,20 @@ class Space {
     }
 
     
-    public Space(int columns) {
-	width = GRASP.paint.measureText("-")*columns;
-    }
-
     public Space(int columns, Bit bit) {
-	width = GRASP.paint.measureText("-")*columns;
+	if (paint == null) {
+	    paint = new Paint();
+	    paint.setTypeface(GRASP.symbols_font);
+	    paint.setTextSize(Atom.text_size);
+	}
+
+	width = paint.measureText("-")*columns;
 	following_bit = bit;
     }
 
+    public Space(int columns) {
+	this(columns, (Bit) null);
+    }
+
+    
 }

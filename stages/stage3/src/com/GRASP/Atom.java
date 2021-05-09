@@ -9,12 +9,17 @@ class Atom extends Bit {
     public static final float horizontal_margin = 8;
     public static final float vertical_margin = 20;
 
+
+    public static final float text_size = 72;
     static Paint paint = null;
     
     /*@NonNull*/ public String text;
 
     @Override
     public void render(Canvas canvas) {
+	GRASP.paint.setTypeface(GRASP.symbols_font);
+	GRASP.paint.setTextSize(text_size);
+
 	canvas.drawRoundRect(0.0f, 2*vertical_margin,
 			     width(), height(),
 			     5.0f, 5.0f, paint);
@@ -25,11 +30,11 @@ class Atom extends Bit {
     }
     
     @Override public float width() {
-	return GRASP.paint.measureText(text) + 2*horizontal_margin;
+	return paint.measureText(text) + 2*horizontal_margin;
     }
     
     @Override public float height() {
-	return GRASP.paint.getTextSize() + 2*vertical_margin;
+	return text_size + 2*vertical_margin;
     }
     
     public Atom(String value) {
@@ -38,6 +43,8 @@ class Atom extends Bit {
 	    paint = new Paint();
 	    paint.setColor(0xffeeeeee);
 	    paint.setStrokeWidth(4);
+	    paint.setTypeface(GRASP.symbols_font);
+	    paint.setTextSize(text_size);
 	}
     }
 }
