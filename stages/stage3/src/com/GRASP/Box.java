@@ -5,70 +5,12 @@ import android.graphics.Path;
 
 
 class Box extends Bit {
+
     /*@NonNull*/ public Interline first_interline = null;
 
     final static float parenWidth = 20;
     final static float parenBar = 20;
 
-    Path _leftParen = null;
-    float _leftParenHeight;
-    
-    Path _rightParen = null;
-    float _rightParenHeight;
-    
-    Path leftParen(float h) {
-
-	if(h != _leftParenHeight
-	   || _leftParen == null) {
-	    Path path = new Path();
-
-	    path.moveTo(20, 0);
-	    path.quadTo(5, 0, 0, 50);
-	    path.lineTo(10, 50);
-	    path.quadTo(10, 30, 20, 30);
-	    //path.lineTo(120, 100);
-	    path.close();
-
-	    path.addRect(0, 50, 10, h+50, Path.Direction.CCW);
-	    path.moveTo(20, h+100);
-	    path.quadTo(5, h+100, 0, h+50);
-	    path.lineTo(10, h+50);
-	    path.quadTo(10, h+70, 20, h+70);
-	    path.close();
-
-	    _leftParen = path;
-	    _leftParenHeight = h;
-	}
-	return _leftParen;
-    }
-
-    Path rightParen(float h) {
-	if(h != _rightParenHeight
-	   || _rightParen == null) {
-
-	    Path path = new Path();
-
-	    //path.moveTo(20, 0);
-	    path.quadTo(15, 0, 20, 50);
-	    path.lineTo(10, 50);
-	    path.quadTo(10, 30, 0, 30);
-	    //path.lineTo(120, 100);
-	    path.close();
-
-	    path.addRect(20, 50, 10, h+50, Path.Direction.CW);
-	    path.moveTo(0, h+100);
-	    path.quadTo(15, h+100, 20, h+50);
-	    path.lineTo(10, h+50);
-	    path.quadTo(10, h+70, 0, h+70);
-	    path.close();
-
-	    _rightParen = path;
-	    _rightParenHeight = h;
-	
-	}
-	return _rightParen;
-    }
-    
     @Override
     public void render(Canvas canvas) {
 
@@ -82,18 +24,30 @@ class Box extends Bit {
 	GRASP.paint.setColor(previous_color + 0x111111);
 	
 	for (interline = first_interline;
-	     interline != null
-		 && interline.following_line != null;
+	     interline != null;
 	     interline = interline.following_line.next_interline) {
+
+	    accumulated_height += interline.height;
+
+	    if(interline.following_line == null) {
+		break;
+	    }
+
+	    
 	    Line line = interline.following_line;
 
 	    float line_height = line.height();
 	    
-	    accumulated_height += interline.height;
-
 	    float accumulated_width = parenWidth;
 	    float maximum_height = 0;
 
+	    /*
+	    canvas.drawRect(accumulated_width,
+			    accumulated_height,
+			    accumulated_width+line.width(),
+			    accumulated_height+interline.height,
+			    GRASP.paint);
+	    */
 	    
 	    for (Space preceding_space = line.first_space;
 		 preceding_space != null
@@ -131,13 +85,17 @@ class Box extends Bit {
 	    
 	    accumulated_height += maximum_height;
 	}
+
 	
-	canvas.drawPath(leftParen(accumulated_height - 60),
-			GRASP.paint);
+
+	Paren.Left.render(canvas, GRASP.paint,
+			  accumulated_height - 60);
 	canvas.save();
 	canvas.translate(maximum_width, 0);
-	canvas.drawPath(rightParen(accumulated_height - 60),
-			GRASP.paint);
+
+	Paren.Right.render(canvas, GRASP.paint,
+			   accumulated_height - 60);
+	
 	canvas.restore();
 	GRASP.paint.setColor(previous_color);
     }

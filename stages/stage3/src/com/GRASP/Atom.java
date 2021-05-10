@@ -22,7 +22,7 @@ class Atom extends Bit {
 
 	canvas.drawRoundRect(0.0f, 2*vertical_margin,
 			     width(), height(),
-			     5.0f, 5.0f, paint);
+			     15.0f, 15.0f, paint);
 	canvas.drawText(text, horizontal_margin,
 			1.5f*vertical_margin
 			+ GRASP.paint.getTextSize(),
