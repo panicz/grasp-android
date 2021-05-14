@@ -34,12 +34,18 @@ class Paren {
 	public static void render(Canvas canvas,
 				  Paint paint,
 				  float height) {
-	    canvas.drawPath(TopCorner.instance, paint);
-	    canvas.drawRect(0, 50, 10, height+50, paint);
-	    canvas.save();
-	    canvas.translate(0, height+50);
-	    canvas.drawPath(BottomCorner.instance, paint);
-	    canvas.restore();
+	    if (height < 100) {
+		canvas.drawRect(0, 0, 10, height, paint);
+	    }
+	    else {
+		height -= 100;
+		canvas.drawPath(TopCorner.instance, paint);
+		canvas.drawRect(0, 50, 10, height+50, paint);
+		canvas.save();
+		canvas.translate(0, height+50);
+		canvas.drawPath(BottomCorner.instance, paint);
+		canvas.restore();
+	    }
 	}
     }
 
@@ -70,12 +76,18 @@ class Paren {
 	public static void render(Canvas canvas,
 				  Paint paint,
 				  float height) {
-	    canvas.drawPath(TopCorner.instance, paint);
-	    canvas.drawRect(10, 50, 20, height+50, paint);
-	    canvas.save();
-	    canvas.translate(0, height+50);
-	    canvas.drawPath(BottomCorner.instance, paint);
-	    canvas.restore();
+	    if (height < 100) {
+		canvas.drawRect(10, 0, 20, height, paint);
+	    }
+	    else {
+		height -= 100;
+		canvas.drawPath(TopCorner.instance, paint);
+		canvas.drawRect(10, 50, 20, height+50, paint);
+		canvas.save();
+		canvas.translate(0, height+50);
+		canvas.drawPath(BottomCorner.instance, paint);
+		canvas.restore();
+	    }
 	}
 	
     }

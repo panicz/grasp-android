@@ -236,11 +236,13 @@ class Screen extends View {
 	// zmaksymalizowane i przypiete do ekranu
 	// (chyba ze juz bylo przypiete -- w takim razie
 	// przywracamy kamere sprzed przypiecia)
+	//GRASP.log("dbl("+e.getX()+", "+e.getY()+")");
         return true;
     }
 
     public boolean onSingleTap(MotionEvent e) {
-	return false;
+	//GRASP.log("tap("+e.getX()+", "+e.getY()+")");
+	return true;
     }
 
     public boolean onLongPress(MotionEvent event) {
@@ -249,7 +251,7 @@ class Screen extends View {
 	float y = event.getY();
 
 	cancelDrawingShape();
-
+	GRASP._log.clear();
 	return false;
     } 
     

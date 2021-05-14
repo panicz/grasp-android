@@ -124,6 +124,7 @@ public class GRASP
      
     @Override
     public boolean onDown(MotionEvent event) {
+	//log("dwn");
 	return invalidating(edit.onDown(event));
     }
 
@@ -132,12 +133,12 @@ public class GRASP
     public boolean onFling(MotionEvent _,
 			   MotionEvent event,
 			   float vx, float vy) {
+	//log("fling");
 	return invalidating(edit.onUp(event, vx, vy));
     }
 
     @Override
     public void onLongPress(MotionEvent event) {
-	/* co sie dzieje przy przytrzymaniu?*/
 	if(edit.onLongPress(event)) {
 	    edit.invalidate();
 	}
@@ -161,12 +162,14 @@ public class GRASP
 
     @Override
     public boolean onDoubleTap(MotionEvent e) {
-        return false;
+	//log("2tap");
+        return invalidating(edit.onDoubleTap(e));
     }
 
     @Override
     public boolean onDoubleTapEvent(MotionEvent e) {
-        return invalidating(edit.onDoubleTap(e));
+	//log("2tape");
+	return false;
     }
 
     @Override
@@ -186,8 +189,15 @@ public class GRASP
 	    return invalidating(edit.onDown(event));
 
 	case MotionEvent.ACTION_UP:
-	case MotionEvent.ACTION_POINTER_UP:
-	case MotionEvent.ACTION_OUTSIDE: 
+	    //log("up");
+	    return invalidating(edit.onUp(event, 0, 0));
+
+	case MotionEvent.ACTION_POINTER_UP:	    
+	    //log("pup");
+	    return invalidating(edit.onUp(event, 0, 0));
+
+	case MotionEvent.ACTION_OUTSIDE:
+	    //log("up");
 	    return invalidating(edit.onUp(event, 0, 0));
 
 	case MotionEvent.ACTION_MOVE:

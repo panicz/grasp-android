@@ -20,12 +20,13 @@ class Atom extends Bit {
 	GRASP.paint.setTypeface(GRASP.symbols_font);
 	GRASP.paint.setTextSize(text_size);
 
-	canvas.drawRoundRect(0.0f, 2*vertical_margin,
-			     width(), height(),
+	canvas.drawRoundRect(0.0f, 30.0f,
+			     width(), height()-30.0f,
 			     15.0f, 15.0f, paint);
 	canvas.drawText(text, horizontal_margin,
-			1.5f*vertical_margin
-			+ GRASP.paint.getTextSize(),
+			(height()
+			 + GRASP.paint.getTextSize()
+			 - vertical_margin)/2,
 			GRASP.paint);
     }
     
@@ -47,4 +48,31 @@ class Atom extends Bit {
 	    paint.setTextSize(text_size);
 	}
     }
+
+    @Override
+    public String toString() {
+	return text;
+    }
+
+    @Override
+    protected StringBuilder buildString(StringBuilder result) {
+	result.append(text);
+	return result;
+    }
+
+    @Override
+    public Bit itemAt(float x, float y) {
+	return this;
+    }
+
+    @Override
+    public boolean insertAt(float x, float y, Bit item) {
+	return false;
+    }
+
+    @Override
+    public Bit takeFrom(float x, float y) {
+	return this;
+    }
+
 }

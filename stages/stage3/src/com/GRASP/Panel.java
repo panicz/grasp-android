@@ -81,8 +81,6 @@ abstract class Panel implements Widget {
     public abstract Panel
 	splitVerticallyBy(RectF line);
     
-    public abstract String toString();
-
     public Panel
 	finishResizing(Split s, float vx, float vy) {
 	return this;

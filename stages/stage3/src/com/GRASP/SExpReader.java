@@ -135,5 +135,11 @@ class SExpReader {
 		expressions.add(read_expression(whitespace));
 	    }
 	}
-    }    
+    }
+
+    public SExp read_expressions()
+	throws java.io.IOException {
+	return read_expressions(skip_whitespace());
+    }
+
 }

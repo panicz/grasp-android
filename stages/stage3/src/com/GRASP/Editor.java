@@ -15,15 +15,8 @@ class Editor extends Panel {
     float vertical_scroll = 0.0f;
     float scale = 1.0f;
     
-    public String id;
-
     static int instances = 0;
     
-    @Override
-    public String toString() {
-	return id;
-    }
-
     public boolean is_pinned = false;
     
     public Editor(float x, float y, float w, float h,
@@ -32,7 +25,6 @@ class Editor extends Panel {
 	document = doc;
 	horizontal_scroll = hscroll;
 	vertical_scroll = vscroll;
-	id = String.valueOf(++instances);
 	
 	// powinnismy zwracac opcje dla dokumentu
 	// albo ktoregos jego elementu
@@ -86,17 +78,7 @@ class Editor extends Panel {
 	canvas.translate(horizontal_scroll,
 			 vertical_scroll);
 
-
-	document.root.render(canvas);
-
-	
-	/*
-	GRASP.paint.setTextSize(36);
-	canvas.drawText(id,
-		        GRASP.last_known_edit_instance.width/2.0f,
-		        GRASP.last_known_edit_instance.height/2.0f,
-			GRASP.paint);
-	*/
+	document.root.renderContents(canvas);
 	canvas.restore();
     }
 
@@ -179,7 +161,30 @@ class Editor extends Panel {
 	if (GRASP.last_known_edit_instance.isOngoingDragAction()) {
 	    return new Stretch(this, finger, x, y);
 	}
-	return null;
+
+	Bit pressed =
+	    document.root.itemAt(x - horizontal_scroll,
+				 y - vertical_scroll);
+
+	if (pressed != document.root
+	    && pressed != null) {
+	    GRASP.log(pressed.toString());
+	}
+	/*	
+	GRASP.log("x: "+x+", y: "+y
+		  +", hscroll: "+horizontal_scroll
+		  +", vscroll: "+vertical_scroll);
+	*/
+	
+	Drag document_action =
+	    document.root.onPress(screen, finger,
+				  x - horizontal_scroll,
+				  y - vertical_scroll);
+	if (document_action != null) {
+	    return document_action;
+	}
+	
+	return null;	
 	/*
 	Location source = document
 	    .locationOfElementAtPosition

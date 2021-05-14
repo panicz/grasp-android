@@ -12,9 +12,10 @@ class Line {
     }
 
     public float height() {
-	return (first_space == null)
-	    ? 0
-	    : first_space.maximum_height();
+	return 
+	    ((first_space == null)
+	     ? 0
+	     : first_space.maximum_height());
     }
     
     public float width() {
