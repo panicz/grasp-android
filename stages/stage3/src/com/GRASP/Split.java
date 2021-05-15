@@ -99,5 +99,48 @@ abstract class Split extends Panel implements Drag {
 	secondPanel.stretch();
     }
 
+    @Override
+    public void translate(float x, float y) {}
+
+    protected Drag translate(Drag drag, float x, float y) {
+	if (drag == null) {
+	    return null;
+	}
+	drag.translate(x, y);
+	return drag;
+    }
+
+    @Override
+    public Drag onPress(Screen screen,
+			int finger,
+			float x, float y) {
+	return this;
+    }
+
+    @Override    
+    public void onClick(Screen screen,
+			int finger,
+			float x, float y) {}
+
+    @Override
+    public Drag onSecondPress(Screen screen,
+			      int finger,
+			      float x, float y) {
+	return null;
+    }
+
+    @Override
+    public void onDoubleClick(Screen screen,
+			      int finger,
+			      float x, float y) {
+    }
+
+    @Override
+    public Drag onHold(Screen screen,
+		       int finger,
+		       float x, float y) {
+	return null;
+    }
+
     
 }

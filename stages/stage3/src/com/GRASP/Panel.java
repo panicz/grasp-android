@@ -73,6 +73,27 @@ abstract class Panel implements Widget {
 	return null;
     }
 
+    public void onClick(Screen screen,
+			int finger,
+			float x, float y) {}
+
+    public Drag onSecondPress(Screen screen,
+			      int finger,
+			      float x, float y) {
+	return null;
+    }
+
+    public void onDoubleClick(Screen screen,
+			      int finger,
+			      float x, float y) {
+    }
+
+    public Drag onHold(Screen screen,
+		       int finger,
+		       float x, float y) {
+	return null;
+    }
+    
     public abstract void scrollBy(float x, float y);
     
     public abstract Panel

@@ -129,7 +129,9 @@ class Editor extends Panel {
 	    target.stretching[finger] = false;
 	    Panel.stretches--;
 	}
-	
+
+	@Override
+	public void translate(float x, float y) {}
     }
 
     @Override

@@ -78,19 +78,113 @@ class VerticalSplit extends Split {
 			float x, float y) {
 	
 	if (firstPanel.bottom() < y && y < secondPanel.top()) {
-	    return this;
+	    return translate(super
+			     .onPress(screen, finger,
+				      x, y-firstPanel.bottom()),
+			     0, firstPanel.bottom());
 	}
 	if (y <= firstPanel.bottom()) {
 	    return firstPanel.onPress(screen, finger, x, y);
 	}
 	if (y >= secondPanel.top()) {
-	    return secondPanel.onPress(screen, finger, x, y);
+	    return translate(secondPanel
+			     .onPress(screen, finger,
+				      x, y-secondPanel.top()),
+			     0, secondPanel.top());
 	}
 	assert(false);
 	return null;
     }
 
-    
+    @Override
+    public void onClick(Screen screen,
+			int finger,
+			float x, float y) {
+	if (firstPanel.bottom() < y && y < secondPanel.top()) {
+	    super.onClick(screen, finger,
+			  x, y-firstPanel.bottom());
+	    return;
+	}
+	if (y <= firstPanel.bottom()) {
+	    firstPanel.onClick(screen, finger, x, y);
+	    return;
+	}
+	if (y >= secondPanel.top()) {
+	    secondPanel.onClick(screen, finger,
+				x, y-secondPanel.top());
+	    return;
+	}
+	assert(false);
+    }
+
+
+    @Override
+    public Drag onSecondPress(Screen screen,
+			      int finger,
+			      float x, float y) {
+	if (firstPanel.bottom() < y && y < secondPanel.top()) {
+	    return translate(super
+			     .onSecondPress(screen, finger, x,
+					    y-firstPanel.bottom()),
+			     0, firstPanel.bottom());
+	}
+	if (y <= firstPanel.bottom()) {
+	    return firstPanel.onSecondPress(screen, finger, x, y);
+	}
+	if (y >= secondPanel.top()) {
+	    return translate(secondPanel
+			     .onSecondPress(screen, finger,
+					    x, y-secondPanel.top()),
+			     0, secondPanel.top());
+	}
+	assert(false);
+	return null;
+    }
+
+    @Override
+    public void onDoubleClick(Screen screen,
+			      int finger,
+			      float x, float y) {
+	if (firstPanel.bottom() < y && y < secondPanel.top()) {
+	    super.onDoubleClick(screen, finger,
+				x, y-firstPanel.bottom());
+	    return;
+	}
+	if (y <= firstPanel.bottom()) {
+	    firstPanel.onDoubleClick(screen, finger, x, y);
+	    return;
+	}
+	if (y >= secondPanel.top()) {
+	    secondPanel.onDoubleClick(screen, finger,
+				      x, y-secondPanel.top());
+	    return;
+	}
+	assert(false);
+    }
+
+    @Override
+    public Drag onHold(Screen screen,
+		       int finger,
+		       float x, float y) {
+	if (firstPanel.bottom() < y && y < secondPanel.top()) {
+	    return translate(super
+			     .onHold(screen, finger, x,
+				     y-firstPanel.bottom()),
+			     0, firstPanel.bottom());
+	}
+	if (y <= firstPanel.bottom()) {
+	    return firstPanel.onHold(screen, finger, x, y);
+	}
+	if (y >= secondPanel.top()) {
+	    return translate(secondPanel
+			     .onHold(screen, finger,
+				     x, y-secondPanel.top()),
+			     0, secondPanel.top());
+	}
+	assert(false);
+	return null;
+    }
+
     @Override
     public Panel
 	finishResizing(Split s, float vx, float vy) {
