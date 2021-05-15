@@ -1,3 +1,128 @@
+15.05.2021 zasadniczo itemAt jest juz zaimplementowane,
+natomiast z takeFrom jest pewien problem z przetestowaniem,
+ponieważ trzeba by to było jakoś podpiąć do interfejsu.
+
+i tutaj jest problem, bo trzeba w jakiś sposób propagować
+zdarzenia przez warstwy 'splitów'. w związku z czym musimy
+sobie zdefiniować, jakie zdarzenia w ogóle chcielibyśmy
+obsługiwać.
+
+Drag onPress()
+void onClick()
+Drag onSecondPress()
+void onDoubleClick()
+Drag onHold()
+
+13.05.2021 kolejnosc dzialan:
+
+najpierw chcielibysmy zaimplementowac funkcje, ktora dla
+okreslonej wspolrzednej zwraca nam Bit znajdujacy sie
+pod ta wspolrzedna, przy czym:
+- dla nawiasow, interlinii i spacji zwraca odpowiednie pudelko
+- dla atomow zwraca atom
+
+Bit itemAt(float x, float y)
+
+dodatkowo chcielibysmy miec metode
+
+bool insertAt(float x, float y, Bit item)
+
+
+ktora umieszcza dany element na okreslonej pozycji
+(albo zwraca false, jesli sie to nie uda, np. gdy x i y
+to posycja Atomu)
+
+oraz
+
+Bit takeFrom(float x, float y)
+
+ktore wyciagaja element spod wspolrzednej (x, y)
+
+
+12.05.2021 trzeba rozkminic interakcje:
+
+- chwytanie za nawiasy i atomy powinno powodowac wyciaganie
+odpowiedniego wyrazenia (a upuszczenie - umieszczenie wyrazenia
+w jakims miejscu)
+
+- rozciąganie przeciagniętego wyrażenia powoduje
+zmianę rozmiaru (na ile to możliwe)
+
+- podwojne klikniecie i rozpoczecie przeciagania (nawias
+lub atom) powinno spowodowac skopiowanie danego wyrazenia
+
+- szybkie wyrzucenie przeciaganego wyrazenia powinno spowodowac
+jego usuniecie
+
+- pojedyncze klikniecie na spacje albo interlinie powinno
+spowodowac umieszczenie w danym miejscu kursora. klikniecie
+na nawias albo atom powoduje jego zaznaczenie. klikniecie
+na zaznaczony atom umieszcza kursor miedzy literami
+
+- podwojne klikniecie nawiasu powinno spowodowac jego
+pokazanie/ukrycie
+
+- podwojne klikniecie wyrazenia powinno powodowac jego
+'reindentacje'
+
+- przytrzymane nad wyrazeniem powoduje wyswietlenie
+pop-upu z lista dostepnych akcji. na dokumencie bedzie
+to otwarcie, zapis, przelaczenie itd.
+na pustym pudelku bedzie to konwersja do specjalnego
+typu pudelka, i tak dalej (nie wiemy jakie sa wszystkie
+mozliwosci, ale chcemy raczej stworzyc mechanizm)
+
+dla wyrazen lispowych opcja powinna byc ekspansja (dla makr),
+redukcja albo ewaluacja
+
+dla argumentow funkcji opcja powinna byc zmiana nazwy
+
+dla rogów nawiasów możliwe jest przypięcie pinezki
+
+dla "pustego atomu" opcje dodania nowego albo wyboru
+istniejacego (z popularnych albo wedlug modulow/tagow)
+
+
+
+
+9.05.2021 plan dzialania:
+- trzeba wypracowac jakąś reprezentację dla dokumentów,
+żeby mogły miec więcej niż jedno wyrażenie z przeparsowanego
+stringa.
+- nastepnie trzeba zrobic tak, zeby zdarzenia dotyku
+byly propagowane do najbardziej odpowiedniego widgetu
+podrzednego
+- i trzeba troche dojsc do porzadku z tymi interliniami
+i tym, co jak jest wyswietlane
+
+7.05.2021
+
+kolejne kroki:
+- wcisniecie lewego nawiasu powinno powodowac wydobycie
+danego boxu z jego rodzica
+- podwojne wcisniecie lewego nawiasu powinno spowodowac
+stworzenie kopii
+- wcisniecie prawego nawiasu powinno powodowac zmiane
+rozmiaru
+- wcisniecie (tapniecie) atomu, interlinii albo pustej
+przestrzeni powinno spowodowac umieszczenie w danym
+miejscu kursora tekstowego
+- nawigacja za pomoca strzalek
+- 
+
+25.04.2021
+
+Spinanie parsera z edytorem:
+- dotykanie dwoma palcami powinno powodowac scrollowanie
+danego edytora (i ewentualnie jego zoomowanie)
+- kazdy edytor powinien domyslnie otwierac dokument
+ze StringReadera
+
+
+(a kiedy to juz bedzie gotowe, bedzie mozna pobawic sie
+w edycje dokumentow oraz otwieranie i zapisywanie plikow)
+
+
 22.04.2021
 
 Mamy juz:
