@@ -34,4 +34,15 @@ class Interline {
     public Interline(int lines) {
 	height = 16*lines;
     }
+
+    public Interline remove_following_line() {
+	if (following_line != null) {
+	    height += following_line.height()
+		+ following_line.next_interline.height;
+	    following_line =
+		following_line.next_interline.following_line;
+	}
+	return this;
+    }
+
 }

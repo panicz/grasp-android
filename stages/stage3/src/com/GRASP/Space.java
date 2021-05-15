@@ -51,5 +51,14 @@ class Space {
 	this(columns, (Bit) null);
     }
 
+    public Space remove_following_bit() {
+	if (following_bit != null) {
+	    width += following_bit.width()
+		+ following_bit.following_space.width;
+	    following_bit =
+		following_bit.following_space.following_bit;
+	}
+	return this;
+    }
     
 }

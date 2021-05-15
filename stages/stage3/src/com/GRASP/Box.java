@@ -139,7 +139,6 @@ class Box extends Bit {
 	
 	float accumulated_height = 0;
 	float maximum_width = 0;
-	//Interline interline;
 	
 	for (Interline interline = first_interline;
 	     interline != null;
@@ -204,13 +203,89 @@ class Box extends Bit {
     }
 
     @Override
-    public boolean insertAt(float x, float y, Bit item) {
-	return false;
-    }
-
-    @Override
     public Bit takeFrom(float x, float y) {
+	float accumulated_height = 0;
+	float maximum_width = 0;
+	
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line.next_interline) {
+
+	    accumulated_height += interline.height;
+
+	    if(interline.following_line == null) {
+		break;
+	    }
+	    
+	    Line line = interline.following_line;
+
+	    float line_height = line.height();
+	    
+	    float accumulated_width = parenWidth;
+	    float maximum_height = 0;
+	    
+	    for (Space preceding_space = line.first_space;
+		 preceding_space != null
+		     && preceding_space.following_bit != null;
+		 preceding_space =
+		     preceding_space.following_bit.following_space) {
+
+		Bit bit = preceding_space.following_bit;
+	       
+		accumulated_width += preceding_space.width;
+
+		float w = bit.width();
+		float h = bit.height();
+
+		assert(h <= line_height);
+		
+		if (h > maximum_height)  {
+		    maximum_height = h;
+		}
+
+		float rx = x - accumulated_width;
+		float ry = y - accumulated_height;
+		
+		if (0 <= rx && rx <= w
+		    && 0 <= ry && ry <= h) {
+		    Bit taken = bit.takeFrom(rx, ry);
+		    if (taken == bit) {
+			// robimy tak:
+			// scalamy ze soba preceding_space
+			// i bit.following_space
+			// a jezeli bit.following_space.following_bit
+			// == null i zarazem line.first_space
+			// == preceding_space, to scalamy
+			// interline z line.next_interline
+
+			// przy okazji operacje scalania
+			// powinny zapamietywac operacje edycji
+			// i/lub ich odwrotnosci
+			// najlepiej w postaci jakiejs
+			// serializowalnej reprezentacji
+			if(preceding_space.remove_following_bit()
+			   .following_bit == null
+			   && preceding_space == line.first_space) {
+			    interline.remove_following_line();
+			}
+		    }
+		    return taken;
+		}		
+		accumulated_width += w;
+	    }
+	    
+	    if (accumulated_width > maximum_width) {
+		maximum_width = accumulated_width;
+	    }
+	    accumulated_height += maximum_height;
+	}
+
 	return this;
     }
 
+    
+    @Override
+    public boolean insertAt(float x, float y, Bit item) {
+	return false;
+    }
 }
