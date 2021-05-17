@@ -18,7 +18,7 @@ class VerticalSplit extends Split {
 	float center = (rect.top + rect.bottom)/2.0f;
 	firstPanel.setHeight(center - top() - bar_width/2.0f);
 
-	secondPanel.setTop(center + bar_width/2.0f);
+	secondPanel.setTop(firstPanel.height() + bar_width);
 	secondPanel.setHeight(height() - firstPanel.height()
 			      - bar_width);
 
@@ -77,20 +77,23 @@ class VerticalSplit extends Split {
 			int finger,
 			float x, float y) {
 	
-	if (firstPanel.bottom() < y && y < secondPanel.top()) {
+	if (firstPanel.height() < y
+	    && y < firstPanel.height() + bar_width) {
 	    return translate(super
 			     .onPress(screen, finger,
-				      x, y-firstPanel.bottom()),
-			     0, firstPanel.bottom());
+				      x, y-firstPanel.height()),
+			     0, firstPanel.height());
 	}
-	if (y <= firstPanel.bottom()) {
+	if (y <= firstPanel.height()) {
 	    return firstPanel.onPress(screen, finger, x, y);
 	}
-	if (y >= secondPanel.top()) {
+	if (y >= firstPanel.height() + bar_width) {
 	    return translate(secondPanel
 			     .onPress(screen, finger,
-				      x, y-secondPanel.top()),
-			     0, secondPanel.top());
+				      x,
+				      y-firstPanel.height()-bar_width
+				      ),
+			     0, firstPanel.height()+bar_width);
 	}
 	assert(false);
 	return null;
@@ -100,18 +103,19 @@ class VerticalSplit extends Split {
     public void onClick(Screen screen,
 			int finger,
 			float x, float y) {
-	if (firstPanel.bottom() < y && y < secondPanel.top()) {
+	if (firstPanel.height() < y
+	    && y < firstPanel.height() + bar_width) {
 	    super.onClick(screen, finger,
-			  x, y-firstPanel.bottom());
+			  x, y-firstPanel.height());
 	    return;
 	}
-	if (y <= firstPanel.bottom()) {
+	if (y <= firstPanel.height()) {
 	    firstPanel.onClick(screen, finger, x, y);
 	    return;
 	}
-	if (y >= secondPanel.top()) {
+	if (y >= firstPanel.height() + bar_width) {
 	    secondPanel.onClick(screen, finger,
-				x, y-secondPanel.top());
+				x, y-firstPanel.height()-bar_width);
 	    return;
 	}
 	assert(false);
@@ -122,20 +126,23 @@ class VerticalSplit extends Split {
     public Drag onSecondPress(Screen screen,
 			      int finger,
 			      float x, float y) {
-	if (firstPanel.bottom() < y && y < secondPanel.top()) {
+	if (firstPanel.height() < y
+	    && y < firstPanel.height() + bar_width) {
 	    return translate(super
 			     .onSecondPress(screen, finger, x,
-					    y-firstPanel.bottom()),
-			     0, firstPanel.bottom());
+					    y-firstPanel.height()),
+			     0, firstPanel.height());
 	}
-	if (y <= firstPanel.bottom()) {
+	if (y <= firstPanel.height()) {
 	    return firstPanel.onSecondPress(screen, finger, x, y);
 	}
-	if (y >= secondPanel.top()) {
+	if (y >= (firstPanel.height()+bar_width)) {
 	    return translate(secondPanel
 			     .onSecondPress(screen, finger,
-					    x, y-secondPanel.top()),
-			     0, secondPanel.top());
+					    x,
+					    y-(firstPanel.height()
+					       +bar_width)),
+			     0, (firstPanel.height()+bar_width));
 	}
 	assert(false);
 	return null;
@@ -145,18 +152,20 @@ class VerticalSplit extends Split {
     public void onDoubleClick(Screen screen,
 			      int finger,
 			      float x, float y) {
-	if (firstPanel.bottom() < y && y < secondPanel.top()) {
+	if (firstPanel.height() < y
+	    && y < (firstPanel.height()+bar_width)) {
 	    super.onDoubleClick(screen, finger,
-				x, y-firstPanel.bottom());
+				x, y-firstPanel.height());
 	    return;
 	}
-	if (y <= firstPanel.bottom()) {
+	if (y <= firstPanel.height()) {
 	    firstPanel.onDoubleClick(screen, finger, x, y);
 	    return;
 	}
-	if (y >= secondPanel.top()) {
+	if (y >= (firstPanel.height()+bar_width)) {
 	    secondPanel.onDoubleClick(screen, finger,
-				      x, y-secondPanel.top());
+				      x, y-(firstPanel.height()
+					    +bar_width));
 	    return;
 	}
 	assert(false);
@@ -166,20 +175,22 @@ class VerticalSplit extends Split {
     public Drag onHold(Screen screen,
 		       int finger,
 		       float x, float y) {
-	if (firstPanel.bottom() < y && y < secondPanel.top()) {
+	if (firstPanel.height() < y
+	    && y < (firstPanel.height()+bar_width)) {
 	    return translate(super
 			     .onHold(screen, finger, x,
-				     y-firstPanel.bottom()),
-			     0, firstPanel.bottom());
+				     y-firstPanel.height()),
+			     0, firstPanel.height());
 	}
-	if (y <= firstPanel.bottom()) {
+	if (y <= firstPanel.height()) {
 	    return firstPanel.onHold(screen, finger, x, y);
 	}
-	if (y >= secondPanel.top()) {
+	if (y >= (firstPanel.height()+bar_width)) {
 	    return translate(secondPanel
 			     .onHold(screen, finger,
-				     x, y-secondPanel.top()),
-			     0, secondPanel.top());
+				     x, y-(firstPanel.height()
+					   +bar_width)),
+			     0, (firstPanel.height()+bar_width));
 	}
 	assert(false);
 	return null;
@@ -235,7 +246,7 @@ class VerticalSplit extends Split {
 	super.setTop(v);
 	firstPanel.setTop(v);
 	secondPanel.setTop(v + firstPanel.height()
-			   + bar_width);
+			       + bar_width);
     }
 
     @Override
@@ -258,8 +269,7 @@ class VerticalSplit extends Split {
 	
 	super.setHeight(h0_);
 	firstPanel.setHeight(h1_);
-	secondPanel.setTop(top() + firstPanel.height()
-			   + bar_width);
+	secondPanel.setTop(top() +firstPanel.height()+bar_width);
 	secondPanel.setHeight(h2_);
     }    
 }

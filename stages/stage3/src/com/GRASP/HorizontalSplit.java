@@ -74,20 +74,22 @@ class HorizontalSplit extends Split {
     public Drag onPress(Screen screen,
 			int finger,
 			float x, float y) {
-	if (firstPanel.right() < x && x < secondPanel.left()) {
+	if (firstPanel.width() < x
+	    && x < (firstPanel.width()+bar_width)) {
 	    return translate(super
 			     .onPress(screen, finger,
-				      x-firstPanel.right(), y),
-			     firstPanel.right(), 0);
+				      x-firstPanel.width(), y),
+			     firstPanel.width(), 0);
 	}
-	if (x <= firstPanel.right()) {
+	if (x <= firstPanel.width()) {
 	    return firstPanel.onPress(screen, finger, x, y);
 	}
-	if (x >= secondPanel.left()) {
+	if (x >= (firstPanel.width()+bar_width)) {
 	    return translate(secondPanel
 			     .onPress(screen, finger,
-				      x-secondPanel.left(), y),
-			     secondPanel.left(), 0);
+				      x-(firstPanel.width()
+					 +bar_width), y),
+			     (firstPanel.width()+bar_width), 0);
 	}
 	assert(false);
 	return null;
@@ -97,17 +99,18 @@ class HorizontalSplit extends Split {
     public void onClick(Screen screen,
 			int finger,
 			float x, float y) {
-	if (firstPanel.right() < x && x < secondPanel.left()) {
-	    super.onClick(screen, finger, x-firstPanel.right(), y);
+	if (firstPanel.width() < x
+	    && x < (firstPanel.width()+bar_width)) {
+	    super.onClick(screen, finger, x-firstPanel.width(), y);
 	    return;
 	}
-	if (x <= firstPanel.right()) {
+	if (x <= firstPanel.width()) {
 	    firstPanel.onClick(screen, finger, x, y);
 	    return;
 	}
-	if (x >= secondPanel.left()) {
+	if (x >= (firstPanel.width()+bar_width)) {
 	    secondPanel.onClick(screen, finger,
-				x-secondPanel.left(), y);
+				x-(firstPanel.width()+bar_width), y);
 	    return;
 	}
 	assert(false);
@@ -118,20 +121,22 @@ class HorizontalSplit extends Split {
     public Drag onSecondPress(Screen screen,
 			      int finger,
 			      float x, float y) {
-	if (firstPanel.right() < x && x < secondPanel.left()) {
+	if (firstPanel.width() < x
+	    && x < (firstPanel.width()+bar_width)) {
 	    return translate(super
 			     .onSecondPress(screen, finger,
-				      x-firstPanel.right(), y),
-			     firstPanel.right(), 0);
+				      x-firstPanel.width(), y),
+			     firstPanel.width(), 0);
 	}
-	if (x <= firstPanel.right()) {
+	if (x <= firstPanel.width()) {
 	    return firstPanel.onSecondPress(screen, finger, x, y);
 	}
-	if (x >= secondPanel.left()) {
+	if (x >= (firstPanel.width()+bar_width)) {
 	    return translate(secondPanel
 			     .onSecondPress(screen, finger,
-					    x-secondPanel.left(), y),
-			     secondPanel.left(), 0);
+					    x-(firstPanel.width()
+					       +bar_width), y),
+			     (firstPanel.width()+bar_width), 0);
 	}
 	assert(false);
 	return null;
@@ -141,18 +146,20 @@ class HorizontalSplit extends Split {
     public void onDoubleClick(Screen screen,
 			      int finger,
 			      float x, float y) {
-	if (firstPanel.right() < x && x < secondPanel.left()) {
+	if (firstPanel.width() < x
+	    && x < (firstPanel.width()+bar_width)) {
 	    super.onDoubleClick(screen, finger,
-				x-firstPanel.right(), y);
+				x-firstPanel.width(), y);
 	    return;
 	}
-	if (x <= firstPanel.right()) {
+	if (x <= firstPanel.width()) {
 	    firstPanel.onDoubleClick(screen, finger, x, y);
 	    return;
 	}
-	if (x >= secondPanel.left()) {
+	if (x >= (firstPanel.width()+bar_width)) {
 	    secondPanel.onDoubleClick(screen, finger,
-				      x-secondPanel.left(), y);
+				      x-(firstPanel.width()
+					 +bar_width), y);
 	    return;
 	}
 	assert(false);
@@ -162,20 +169,22 @@ class HorizontalSplit extends Split {
     public Drag onHold(Screen screen,
 		       int finger,
 		       float x, float y) {
-	if (firstPanel.right() < x && x < secondPanel.left()) {
+	if (firstPanel.width() < x
+	    && x < (firstPanel.width()+bar_width)) {
 	    return translate(super
 			     .onHold(screen, finger,
-				     x-firstPanel.right(), y),
-			     firstPanel.right(), 0);
+				     x-firstPanel.width(), y),
+			     firstPanel.width(), 0);
 	}
-	if (x <= firstPanel.right()) {
+	if (x <= firstPanel.width()) {
 	    return firstPanel.onHold(screen, finger, x, y);
 	}
-	if (x >= secondPanel.left()) {
+	if (x >= (firstPanel.width()+bar_width)) {
 	    return translate(secondPanel
 			     .onHold(screen, finger,
-					    x-secondPanel.left(), y),
-			     secondPanel.left(), 0);
+					    x-(firstPanel.width()
+					       +bar_width), y),
+			     (firstPanel.width()+bar_width), 0);
 	}
 	assert(false);
 	return null;	
