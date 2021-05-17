@@ -1,3 +1,37 @@
+
+
+16.05.2021 kolejny krok: trzeba okreslic warunki, w ktorych
+wymyślone poprzednio rodzaje zdarzeń będą generowane.
+
+zacznijmy od określenia warunków, w jakich są generowane
+zdarzenia:
+- tap
+- double tap
+- hold
+
+w przypadku double tap, mamy najpierw zdarzenia down, move* i up.
+po wciśnięciu, ale przed wygenerowaniem kolejnego zdarzenia
+'down', jest wygenerowane zdarzenie '2tap'. co więcej,
+jeżeli palec nie zostanie puszczony, to dodatkowo zostanie
+wygenerowane zdarzenue 'hold'.
+
+zdarzenie doubleClick chcemy generować, gdy zarejestrowaliśmy
+zdarzenie 'doubleTap', a w krótkim czasie po nim - zdarzenie 'up',
+zaś w międzyczasie nie było zdarzenia 'move' w dużej odległości
+
+zdarzenie secondPress chcemy generować, gdy zarejestrowaliśmy
+zdarzenie 'doubleTap', a po nim (przed zarejestrowaniem
+zdarzenia 'up') zdarzenie 'move' na dużą odległość
+
+zdarzenie onHold chcemy generować, gdy dostaliśmy zdarzenie
+onLongPress i ostatnie zdarzenie wciśnięcia nie było
+poprzedzone zdarzeniem doubleTap
+
+zdarzenie onClick to po prostu onTap, ale trzeba zapewnić,
+że wywołanie Down a po nim Up jest neutralbe dla historii
+i struktury dokumentu
+
+
 15.05.2021 zasadniczo itemAt jest juz zaimplementowane,
 natomiast z takeFrom jest pewien problem z przetestowaniem,
 ponieważ trzeba by to było jakoś podpiąć do interfejsu.

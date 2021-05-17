@@ -16,6 +16,8 @@ class Editor extends Panel {
     float scale = 1.0f;
     
     static int instances = 0;
+
+    int id;
     
     public boolean is_pinned = false;
     
@@ -25,10 +27,15 @@ class Editor extends Panel {
 	document = doc;
 	horizontal_scroll = hscroll;
 	vertical_scroll = vscroll;
-	
+	id = instances++;
 	// powinnismy zwracac opcje dla dokumentu
 	// albo ktoregos jego elementu
 
+    }
+
+    @Override
+    public String toString() {
+	return String.valueOf(id);
     }
     
     @Override
@@ -164,6 +171,7 @@ class Editor extends Panel {
 	    return new Stretch(this, finger, x, y);
 	}
 
+	/*	
 	Bit pressed =
 	    document.root.itemAt(x - horizontal_scroll,
 				 y - vertical_scroll);
@@ -172,7 +180,7 @@ class Editor extends Panel {
 	    && pressed != null) {
 	    GRASP.log(pressed.toString());
 	}
-	/*	
+
 	GRASP.log("x: "+x+", y: "+y
 		  +", hscroll: "+horizontal_scroll
 		  +", vscroll: "+vertical_scroll);
@@ -203,5 +211,37 @@ class Editor extends Panel {
 	*/
     }
 
+    @Override    
+    public void onClick(Screen screen,
+			int finger,
+			float x, float y) {
+	GRASP.log(toString()+" click");
+    }
+
+    @Override
+    public Drag onSecondPress(Screen screen,
+			      int finger,
+			      float x, float y) {
+	GRASP.log(toString()+" second press");
+	return null;
+    }
+
+    @Override
+    public void onDoubleClick(Screen screen,
+			      int finger,
+			      float x, float y) {
+	GRASP.log(toString()+" double click");
+
+    }
+
+    @Override
+    public Drag onHold(Screen screen,
+		       int finger,
+		       float x, float y) {
+	GRASP.log(toString()+" hold");
+	return null;
+    }
+
+    
     
 }

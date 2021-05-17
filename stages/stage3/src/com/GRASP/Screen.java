@@ -11,6 +11,7 @@ import java.util.ArrayList;
 //import java.util.Deque;
 //import java.util.ArrayDeque;
 import java.util.Iterator;
+import android.os.SystemClock;
 
 import android.view.inputmethod.InputMethodManager;
 
@@ -133,17 +134,47 @@ class Screen extends View {
 	return false;
     }
 
+    float double_start_x;
+    float double_start_y;
+    boolean double_pending = false;
+    boolean double_generated = false;
     
-    public boolean onDown(MotionEvent event) {
+    public boolean onDoubleTap(MotionEvent event) {
 	int i = event.getActionIndex();
 	int p = event.getPointerId(i);
 	int n = event.getPointerCount();
+	assert(n == 1 && p == 0);
+	// store the details of the event in order to decide
+	// whether to call 'onDoubleClick' or 'onSecondPress'
+	double_start_x = event.getX(i);
+	double_start_y = event.getY(i);
+
+
+	double_pending = true;
+	double_generated = false;
+        return true;
+    }
+    
+    public boolean onDown(MotionEvent event) {
+	
+	int i = event.getActionIndex();
+	int p = event.getPointerId(i);
+	int n = event.getPointerCount();
+	
 	assert(!finger[p]);
 	finger[p] = true;
 	
 	x[p] = event.getX(i);
 	y[p] = event.getY(i);
 
+	if (double_pending && n == 1 && p == 0) {
+	    // after receiving onDoubleTap event
+	    // the onDown event is generated anyway,
+	    // but in such circumstances we simply
+	    // ignore it
+	    return false;
+	}
+	
 	if (p > 0 && finger[0] && isShapeBeingDrawn()) {
 	    float x0 = x[0];
 	    float y0 = y[0];
@@ -151,6 +182,7 @@ class Screen extends View {
 	    drag[0] = panel.at(x0, y0).stretchFrom(0, x0, y0);
 	}
 
+	
 	Drag d = panel.onPress(this, p, x[p], y[p]);
 	
 	if (d != null) {
@@ -172,7 +204,22 @@ class Screen extends View {
 
 	int n = event.getPointerCount();
 	int max_finger = -1;
-	    
+
+	if (double_pending
+	    && !double_generated
+	    && n == 1) {
+	    float dx = event.getX();
+	    float dy = event.getY();
+	    if(Math.abs(dx-double_start_x) > 10
+	       && Math.abs(dy-double_start_y) > 10) {
+		Drag d = panel.onSecondPress(this, 0,
+					     double_start_x,
+					     double_start_y);
+		double_generated = true;
+		drag[0] = d;
+	    }
+	}
+	
 	for (int i = 0; i < n; ++i) {
 	    int p = event.getPointerId(i);
 	    float xp = event.getX(i);
@@ -210,6 +257,17 @@ class Screen extends View {
 	assert(finger[p]);
 	finger[p] = false;
 
+	if (p == 0) {
+	    if (double_pending && !double_generated) {
+		panel.onDoubleClick(this, 0,
+				    double_start_x,
+				    double_start_y);
+		double_generated = true;
+		assert(drag[0] == null);
+	    }
+	    double_pending = false;
+	}
+	
 	if (drag[p] != null) {
 	    drag[p].drop(this, x[p], y[p], vx, vy);
 	    drag[p] = null;
@@ -230,29 +288,25 @@ class Screen extends View {
 	return true;
     }
     
-    public boolean onDoubleTap(MotionEvent e) {
-	/* co sie dzieje przy podwojnym kliknieciu? */
-	// jezeli jest na wyrazeniu, wyrazenie zostaje
-	// zmaksymalizowane i przypiete do ekranu
-	// (chyba ze juz bylo przypiete -- w takim razie
-	// przywracamy kamere sprzed przypiecia)
-	//GRASP.log("dbl("+e.getX()+", "+e.getY()+")");
-        return true;
-    }
-
     public boolean onSingleTap(MotionEvent e) {
-	//GRASP.log("tap("+e.getX()+", "+e.getY()+")");
+	//GRASP.log("tap("+
+	panel.onClick(this, 0, e.getX(), e.getY());
 	return true;
     }
 
     public boolean onLongPress(MotionEvent event) {
-	/* co sie dzieje przy przytrzymaniu?*/
+	if (double_pending) {
+	    return false;
+	}
+
 	float x = event.getX();
 	float y = event.getY();
-
+	
 	cancelDrawingShape();
-	GRASP._log.clear();
-	return false;
+
+	panel.onHold(this, 0, x, y);
+	//GRASP._log.clear();
+	return true;
     } 
     
     public void showKeyboard() {
