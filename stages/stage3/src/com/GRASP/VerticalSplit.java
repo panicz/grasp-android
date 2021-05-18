@@ -271,5 +271,19 @@ class VerticalSplit extends Split {
 	firstPanel.setHeight(h1_);
 	secondPanel.setTop(top() +firstPanel.height()+bar_width);
 	secondPanel.setHeight(h2_);
-    }    
+    }
+
+    @Override
+    public Panel at(float x, float y) {
+	if (y <= firstPanel.height()) {
+	    return firstPanel.at(x, y);
+	}
+	else if (y >= firstPanel.height() + bar_width) {
+	    return secondPanel.at(x, y - (firstPanel.height()
+				       + bar_width));
+	}
+	return super.at(x, y - firstPanel.height());
+    }
+
+    
 }

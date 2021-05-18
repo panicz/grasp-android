@@ -77,14 +77,6 @@ abstract class Split extends Panel implements Drag {
 
     @Override
     public Panel at(float x, float y) {
-	if (firstPanel.left() <= x && x <= firstPanel.right()
-	    && firstPanel.top() <= y && y <= firstPanel.bottom()) {
-	    return firstPanel.at(x, y);
-	}
-	else if (secondPanel.left() <= x && x <= secondPanel.right()
-	    && secondPanel.top() <= y && y <= secondPanel.bottom()) {
-	    return secondPanel.at(x, y);
-	}
 	return this;
     }
 

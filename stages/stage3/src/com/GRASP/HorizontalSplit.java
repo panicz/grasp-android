@@ -270,5 +270,16 @@ class HorizontalSplit extends Split {
 
 	secondPanel.setWidth(w2_);
     }
-    
+
+    @Override
+    public Panel at(float x, float y) {
+	if (x <= firstPanel.width()) {
+	    return firstPanel.at(x, y);
+	}
+	else if (x >= firstPanel.width() + bar_width) {
+	    return secondPanel.at(x - (firstPanel.width()
+				       + bar_width), y);
+	}
+	return super.at(x - firstPanel.width(), y);
+    }
 }
