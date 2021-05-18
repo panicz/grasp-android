@@ -14,7 +14,10 @@ abstract class Panel implements Widget {
     protected float _right;
     protected float _bottom;
 
+    @Deprecated
     public float left() { return _left; }
+    
+    @Deprecated
     public float top() { return _top; }
     
     @Override
@@ -26,8 +29,11 @@ abstract class Panel implements Widget {
     public float height() {
 	return _height;
     }
-    
+
+    @Deprecated
     public float right() { return _right; }
+    
+    @Deprecated
     public float bottom() { return _bottom; }
 
     public void setLeft(float v) {
@@ -114,5 +120,7 @@ abstract class Panel implements Widget {
     public abstract Drag stretchFrom(int finger, float x, float y);
     
     public abstract void stretch();
+
+    //public abstract void insertAt(Bit bit, float x, float y);
     
 };
