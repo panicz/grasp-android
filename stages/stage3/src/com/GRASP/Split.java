@@ -96,13 +96,6 @@ abstract class Split extends Panel implements Drag {
 	return this;
     }
 
-    protected Drag translate(Drag drag, float x, float y) {
-	if (drag == null) {
-	    return null;
-	}
-	return drag.translate(x, y);
-    }
-
     @Override
     public Drag onPress(Screen screen,
 			int finger,

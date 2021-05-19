@@ -56,8 +56,7 @@ abstract class Panel implements Widget {
 	_bottom = _top + _height;
     }    
     
-    public Panel(float x, float y, float w, float h) {
-	_left = x;
+    public Panel(float x, float y, float w, float h) {	_left = x;
 	_top = y;
 	_width = w;
 	_height = h;
@@ -122,5 +121,11 @@ abstract class Panel implements Widget {
     public abstract void stretch();
 
     public abstract boolean insertAt(float x, float y, Bit bit);
-    
+
+    protected Drag translate(Drag drag, float x, float y) {
+	if (drag == null) {
+	    return null;
+	}
+	return drag.translate(x, y);
+    }
 };

@@ -173,7 +173,11 @@ class Editor extends Panel {
 	    return new Stretch(this, finger, x, y);
 	}
 
-	return document.root.dragAround(x, y);
+	return translate(document.root
+			 .dragAround(x - horizontal_scroll,
+				     y - vertical_scroll),
+			 horizontal_scroll,
+			 vertical_scroll);
 	
 	
 	/*	
