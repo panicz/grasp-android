@@ -138,7 +138,9 @@ class Editor extends Panel {
 	}
 
 	@Override
-	public void translate(float x, float y) {}
+	public Drag translate(float x, float y) {
+	    return this;
+	}
     }
 
     @Override
@@ -171,6 +173,9 @@ class Editor extends Panel {
 	    return new Stretch(this, finger, x, y);
 	}
 
+	return document.root.dragAround(x, y);
+	
+	
 	/*	
 	Bit pressed =
 	    document.root.itemAt(x - horizontal_scroll,
@@ -186,15 +191,8 @@ class Editor extends Panel {
 		  +", vscroll: "+vertical_scroll);
 	*/
 	
-	Drag document_action =
-	    document.root.onPress(screen, finger,
-				  x - horizontal_scroll,
-				  y - vertical_scroll);
-	if (document_action != null) {
-	    return document_action;
-	}
 	
-	return null;	
+	//return null;	
 	/*
 	Location source = document
 	    .locationOfElementAtPosition
@@ -218,11 +216,29 @@ class Editor extends Panel {
 	GRASP.log(toString()+" click");
     }
 
+    
+    
     @Override
     public Drag onSecondPress(Screen screen,
 			      int finger,
 			      float x, float y) {
-	GRASP.log(toString()+" second press");
+	Bit pressed =
+	    document.root.itemAt(x - horizontal_scroll,
+				 y - vertical_scroll);
+
+	if (pressed == document.root || pressed == null) {
+	    // TODO drugie klikniecie na pustce powinno
+	    // nas wprowadzac w tryb scrollowania
+	    return null;
+	}
+
+	/*
+	document.root.copyItemAt(x - horizontal_scroll,
+				 y - vertical_scroll);
+	*/	
+
+	GRASP.log(pressed.toString());
+	
 	return null;
     }
 
@@ -242,6 +258,9 @@ class Editor extends Panel {
 	return null;
     }
 
-    
+    @Override
+    public boolean insertAt(float x, float y, Bit bit) {
+	return document.root.insertAt(x, y, bit);
+    }
     
 }

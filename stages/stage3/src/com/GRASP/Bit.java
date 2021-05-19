@@ -63,6 +63,8 @@ abstract class Bit implements Widget {
     public abstract boolean insertAt(float x, float y, Bit item);
 
     public abstract Bit takeFrom(float x, float y);
+
+    public abstract DragAround dragAround(float x, float y);
 }
 
 

@@ -119,12 +119,6 @@ class Box extends Bit {
 	GRASP.paint.setColor(previous_color);
     }
 
-    //@Override
-    public Drag onPress(Screen screen,
-			int finger,
-			float x, float y) {
-	return null;
-    }
     
     @Override public float width() {
 	return 2*parenWidth+first_interline.maximum_width();
@@ -182,6 +176,9 @@ class Box extends Bit {
 		if (0 <= rx && rx <= w
 		    && 0 <= ry && ry <= h) {
 		    Bit result = bit.itemAt(rx, ry);
+		    GRASP.log("rx = "+rx+", ry = "+ry+", result = "
+			      +result);
+
 		    if (result == null) {
 			return this;
 		    }
@@ -283,6 +280,86 @@ class Box extends Bit {
 	return this;
     }
 
+    @Override
+    public DragAround dragAround(float x, float y) {
+	float accumulated_height = 0;
+	float maximum_width = 0;
+
+	if (x < parenWidth) {
+	    return new DragAround(this, 0, 0);
+	}
+	
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line.next_interline) {
+
+	    accumulated_height += interline.height;
+
+	    if(interline.following_line == null) {
+		break;
+	    }
+	    
+	    Line line = interline.following_line;
+
+	    float line_height = line.height();
+	    
+	    float accumulated_width = parenWidth;
+	    
+	    float maximum_height = 0;
+	    
+	    for (Space preceding_space = line.first_space;
+		 preceding_space != null
+		     && preceding_space.following_bit != null;
+		 preceding_space =
+		     preceding_space.following_bit.following_space) {
+
+		Bit bit = preceding_space.following_bit;
+	       
+		accumulated_width += preceding_space.width;
+
+		float w = bit.width();
+		float h = bit.height();
+
+		assert(h <= line_height);
+		
+		if (h > maximum_height)  {
+		    maximum_height = h;
+		}
+
+		float rx = x - accumulated_width;
+		float ry = y - accumulated_height;
+		
+		if (0 <= rx && rx <= w
+		    && 0 <= ry && ry <= h) {
+		    DragAround nested = bit.dragAround(rx, ry);
+		    if (nested != null) {
+			if (nested.target == bit
+			    && preceding_space.remove_following_bit()
+			    .following_bit == null
+			    && preceding_space == line.first_space) {
+			    interline.remove_following_line();
+			}
+			return (DragAround)
+			    nested.translate(accumulated_width,
+					     accumulated_height);
+		    }
+		    return null;
+		}
+		accumulated_width += w;
+	    }
+	    
+	    if (accumulated_width > maximum_width) {
+		maximum_width = accumulated_width;
+	    }
+	    accumulated_height += maximum_height;
+	}
+	if (maximum_width <= x && x < maximum_width + parenWidth) {
+	    return new DragAround(this, 0, 0);
+	}
+	return null;
+    }
+
+    
     
     @Override
     public boolean insertAt(float x, float y, Bit item) {

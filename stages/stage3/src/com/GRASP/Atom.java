@@ -62,6 +62,7 @@ class Atom extends Bit {
 
     @Override
     public Bit itemAt(float x, float y) {
+
 	return this;
     }
 
@@ -75,4 +76,9 @@ class Atom extends Bit {
 	return this;
     }
 
+    @Override
+    public DragAround dragAround(float x, float y) {
+	return new DragAround(this, 0, 0);
+    }
+    
 }

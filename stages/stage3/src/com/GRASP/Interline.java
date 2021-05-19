@@ -37,10 +37,15 @@ class Interline {
 
     public Interline remove_following_line() {
 	if (following_line != null) {
-	    height += following_line.height()
-		+ following_line.next_interline.height;
-	    following_line =
-		following_line.next_interline.following_line;
+	    height += following_line.height();
+	    Interline next_interline = following_line.next_interline;
+	    if (next_interline != null) {
+		height += next_interline.height;
+		following_line = next_interline.following_line;
+	    }
+	    else {
+		following_line = null;
+	    }
 	}
 	return this;
     }

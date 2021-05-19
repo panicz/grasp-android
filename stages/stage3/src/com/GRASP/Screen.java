@@ -8,8 +8,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import java.util.List;
 import java.util.ArrayList;
-//import java.util.Deque;
-//import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.ArrayDeque;
 import java.util.Iterator;
 import android.os.SystemClock;
 
@@ -41,6 +41,8 @@ class Screen extends View {
 	      Float.POSITIVE_INFINITY,
 	      Float.NEGATIVE_INFINITY,
 	      Float.NEGATIVE_INFINITY);
+
+    public Deque<Widget> overlay = new ArrayDeque<Widget>();
     
     void startDrawingShape() {
 	shape = new Shape();
@@ -149,7 +151,6 @@ class Screen extends View {
 	double_start_x = event.getX(i);
 	double_start_y = event.getY(i);
 
-
 	double_pending = true;
 	double_generated = false;
         return true;
@@ -181,9 +182,10 @@ class Screen extends View {
 	    cancelDrawingShape();
 	    drag[0] = panel.at(x0, y0).stretchFrom(0, x0, y0);
 	}
-
 	
 	Drag d = panel.onPress(this, p, x[p], y[p]);
+
+	GRASP.log("onPress: "+d);
 	
 	if (d != null) {
 	    drag[p] = d;
@@ -328,6 +330,12 @@ class Screen extends View {
 	
 	panel.render(canvas);
 
+	Iterator<Widget> it =  overlay.iterator();
+
+	while(it.hasNext()) {
+	    it.next().render(canvas);
+	}
+	
 	for (Shape segment : segments) {
 	    segment.draw(canvas);
 	}
@@ -335,7 +343,6 @@ class Screen extends View {
 	if (shape != null) {
 	    shape.draw(canvas);
 	}
-
     }
 
     public void finishResizingPanels(Split s,

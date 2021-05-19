@@ -282,4 +282,18 @@ class HorizontalSplit extends Split {
 	}
 	return super.at(x - firstPanel.width(), y);
     }
+
+    @Override
+    public boolean insertAt(float x, float y, Bit bit) {
+	if (x <= firstPanel.width()) {
+	    return firstPanel.insertAt(x, y, bit);
+	}
+	else if (x >= firstPanel.width() + bar_width) {
+	    return secondPanel.insertAt(x - (firstPanel.width()
+					     + bar_width), y,
+					bit);
+	}
+	return false;
+    }
+
 }

@@ -92,14 +92,15 @@ abstract class Split extends Panel implements Drag {
     }
 
     @Override
-    public void translate(float x, float y) {}
+    public Drag translate(float x, float y) {
+	return this;
+    }
 
     protected Drag translate(Drag drag, float x, float y) {
 	if (drag == null) {
 	    return null;
 	}
-	drag.translate(x, y);
-	return drag;
+	return drag.translate(x, y);
     }
 
     @Override

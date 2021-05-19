@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.*;
 
-class Document implements Operations {
+class Document {
     public String path = null;
     public static List<Document> openedDocuments =
 	new ArrayList<Document>();
@@ -22,7 +22,13 @@ class Document implements Operations {
 			     +"(e.g. (! 5) \u21d2 120)\n\n\n"
 			     +"(e.g.\n"
 			     +"  (= (! 5)\n"
-			     +"  (* 1 2 3 4 5)))\n"
+			     +"  (* 1 2 3 4 5)))\n\n"
+			     +"(define (! n)\n"
+			     +"  (let ((result 1))\n"
+			     +"  (while (is n > 1)\n"
+			     +"  (set! result (* n result))\n"
+			     +"  (set! n (- n 1))) \n"
+			     +"    result)))"
 			     );
 	    SExpReader sexp =
 		new SExpReader(new PeekingReader(input, 4));

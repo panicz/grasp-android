@@ -5,5 +5,5 @@ interface Drag {
 	      float dx, float dy);
     void drop(Screen screen, float x, float y,
 	      float vx, float vy);
-    void translate(float x, float y);
+    Drag translate(float x, float y);
 };
