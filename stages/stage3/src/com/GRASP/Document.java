@@ -28,7 +28,12 @@ class Document {
 			     +"  (while (is n > 1)\n"
 			     +"  (set! result (* n result))\n"
 			     +"  (set! n (- n 1))) \n"
-			     +"    result)))"
+			     +"    result))\n\n"
+			     +"(define (map f l)\n"
+			     +"  (match l\n"
+			     +"  (( ) ( ))\n"
+			     +"  ((cons h t)\n"
+			     +"   (cons (f h) (map f t)))))\n"
 			     );
 	    SExpReader sexp =
 		new SExpReader(new PeekingReader(input, 4));

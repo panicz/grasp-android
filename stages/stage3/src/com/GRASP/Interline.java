@@ -36,6 +36,7 @@ class Interline {
     }
 
     public Interline remove_following_line() {
+
 	if (following_line != null) {
 	    height += following_line.height();
 	    Interline next_interline = following_line.next_interline;
@@ -46,6 +47,7 @@ class Interline {
 	    else {
 		following_line = null;
 	    }
+
 	}
 	return this;
     }

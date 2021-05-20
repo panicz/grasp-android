@@ -58,11 +58,10 @@ abstract class Bit implements Widget {
 
     protected abstract StringBuilder buildString(StringBuilder sb);
 
-    public abstract Bit itemAt(float x, float y);
 
-    public abstract boolean insertAt(float x, float y, Bit item);
+    //public abstract boolean insertAt(float x, float y, Bit item);
 
-    public abstract Bit takeFrom(float x, float y);
+    //public abstract Bit takeFrom(float x, float y);
 
     public abstract DragAround dragAround(float x, float y);
 }

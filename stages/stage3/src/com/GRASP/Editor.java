@@ -173,27 +173,18 @@ class Editor extends Panel {
 	    return new Stretch(this, finger, x, y);
 	}
 
-	return translate(document.root
-			 .dragAround(x - horizontal_scroll,
-				     y - vertical_scroll),
-			 horizontal_scroll,
-			 vertical_scroll);
-	
-	
-	/*	
-	Bit pressed =
-	    document.root.itemAt(x - horizontal_scroll,
-				 y - vertical_scroll);
+	Drag drag = document.root
+	    .dragAround(x - horizontal_scroll,
+			y - vertical_scroll);
 
-	if (pressed != document.root
-	    && pressed != null) {
-	    GRASP.log(pressed.toString());
+	if (drag != null) {
+	    return translate(drag,
+			     horizontal_scroll,
+			     vertical_scroll);
 	}
 
-	GRASP.log("x: "+x+", y: "+y
-		  +", hscroll: "+horizontal_scroll
-		  +", vscroll: "+vertical_scroll);
-	*/
+	//GRASP.log(document.root.toString());
+	return null;
 	
 	
 	//return null;	
@@ -217,7 +208,7 @@ class Editor extends Panel {
     public void onClick(Screen screen,
 			int finger,
 			float x, float y) {
-	GRASP.log(toString()+" click");
+	//GRASP.log(toString()+" click");
     }
 
     
@@ -226,22 +217,6 @@ class Editor extends Panel {
     public Drag onSecondPress(Screen screen,
 			      int finger,
 			      float x, float y) {
-	Bit pressed =
-	    document.root.itemAt(x - horizontal_scroll,
-				 y - vertical_scroll);
-
-	if (pressed == document.root || pressed == null) {
-	    // TODO drugie klikniecie na pustce powinno
-	    // nas wprowadzac w tryb scrollowania
-	    return null;
-	}
-
-	/*
-	document.root.copyItemAt(x - horizontal_scroll,
-				 y - vertical_scroll);
-	*/	
-
-	GRASP.log(pressed.toString());
 	
 	return null;
     }
@@ -250,7 +225,7 @@ class Editor extends Panel {
     public void onDoubleClick(Screen screen,
 			      int finger,
 			      float x, float y) {
-	GRASP.log(toString()+" double click");
+	//GRASP.log(toString()+" double click");
 
     }
 
@@ -258,13 +233,13 @@ class Editor extends Panel {
     public Drag onHold(Screen screen,
 		       int finger,
 		       float x, float y) {
-	GRASP.log(toString()+" hold");
+	//GRASP.log(toString()+" hold");
 	return null;
     }
 
     @Override
     public boolean insertAt(float x, float y, Bit bit) {
-	return document.root.insertAt(x, y, bit);
+	return false;//document.root.insertAt(x, y, bit);
     }
     
 }

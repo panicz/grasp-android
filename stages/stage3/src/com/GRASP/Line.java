@@ -1,21 +1,22 @@
 package com.GRASP;
+import java.lang.Math;
+
 
 class Line {
     /*@Nullable*/ public Space first_space = null;
     /*@Nullable*/ public Interline next_interline = null;
     
     public float onward_height() {
-	return ((first_space == null)
-		? 0 : first_space.maximum_height())
+	return height()
 	    + ((next_interline == null)
 	       ? 0 : next_interline.onward_height());
     }
 
     public float height() {
-	return 
-	    ((first_space == null)
-	     ? 0
-	     : first_space.maximum_height());
+	return Math.max(Box.min_height,
+			((first_space == null)
+			 ? 0
+			 : first_space.maximum_height()));
     }
     
     public float width() {

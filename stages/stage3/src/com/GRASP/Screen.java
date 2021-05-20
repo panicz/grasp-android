@@ -185,8 +185,6 @@ class Screen extends View {
 	
 	Drag d = panel.onPress(this, p, x[p], y[p]);
 
-	GRASP.log("onPress: "+d);
-	
 	if (d != null) {
 	    drag[p] = d;
 	    cancelDrawingShape();

@@ -52,6 +52,7 @@ class Space {
     }
 
     public Space remove_following_bit() {
+
 	if (following_bit != null) {
 	    width += following_bit.width();
 	    Space following_space = following_bit.following_space;
@@ -63,6 +64,8 @@ class Space {
 		following_bit = null;
 	    }
 	}
+
+
 	return this;
     }
     
