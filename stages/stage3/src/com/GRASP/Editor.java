@@ -239,7 +239,7 @@ class Editor extends Panel {
 
     @Override
     public boolean insertAt(float x, float y, Bit bit) {
-	return false;//document.root.insertAt(x, y, bit);
+	return document.root.insertAt(x, y, bit);
     }
     
 }

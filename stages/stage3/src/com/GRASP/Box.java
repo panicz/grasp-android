@@ -213,5 +213,80 @@ class Box extends Bit {
 	return null;
     }
 
+    @Override
+    public boolean insertAt(float x, float y, Bit target) {
+       
+	float accumulated_height = 0;
+	float maximum_width = 0;
+	
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line.next_interline) {
+	    
+	    accumulated_height += interline.height;
+
+	    if (y < accumulated_height) {
+		// ... chcemy dodac do interlinii
+		return false;
+	    }
+
+	    
+	    if(interline.following_line == null) {
+		break;
+	    }
+	    
+	    Line line = interline.following_line;
+
+	    float line_height = line.height();
+
+	    if (y >= accumulated_height + line_height) {
+		accumulated_height += line_height;
+		continue;
+	    }
+	    
+	    float accumulated_width = parenWidth;
+	    
+	    for (Space preceding_space = line.first_space;
+		 preceding_space != null;
+		 preceding_space =
+		     preceding_space.following_bit.following_space) {
+
+		if (x <= accumulated_width + preceding_space.width) {
+		    return preceding_space
+			.insertAt(x - accumulated_width,
+				  y - accumulated_height,
+				  target);
+		}
+		
+		accumulated_width += preceding_space.width;
+		
+		Bit bit = preceding_space.following_bit;
+	       
+		if (bit == null) {
+		    break;
+		}
+		
+		float w = bit.width();
+		float h = bit.height();
+
+		float rx = x - accumulated_width;
+		float ry = y - accumulated_height;
+		
+		if (0 <= rx && rx <= w
+		    && 0 <= ry && ry <= h) {
+		    return bit.insertAt(rx, ry, target);
+		}
+		
+		accumulated_width += w;
+	    }
+	    if (accumulated_width > maximum_width) {
+		maximum_width = accumulated_width;
+	    }
+	    
+	    accumulated_height += line_height;
+	}
+	return false;
+    }
+    
     
 }

@@ -18,6 +18,7 @@ class DragAround implements Widget, Drag {
     @Override
     public void move(Screen screen, float x, float y,
 		     float dx, float dy) {
+	
 	this.x += dx;
 	this.y += dy;
     }
@@ -25,8 +26,8 @@ class DragAround implements Widget, Drag {
     @Override
     public void drop(Screen screen, float x, float y,
 		     float vx, float vy) {
-	//screen.panel.insertAt(target, x, y);
 	screen.overlay.removeLastOccurrence(this);
+	screen.panel.insertAt(x, y, target);
     }
 
     @Override

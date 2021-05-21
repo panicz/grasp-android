@@ -44,7 +44,7 @@ class SList extends SExp {
 	    String pws = sexp.preceding_whitespace;
 	    int interline_rows = S.lines(pws);
 	    int space_columns = S.ultimate_line_width(pws);
-	    Space space = new Space(space_columns, current_bit);
+	    Space space = new Space(16f*space_columns, current_bit);
 	    if (previous_bit == null) {
 		box.first_interline = new
 		    Interline(interline_rows, new Line(space));

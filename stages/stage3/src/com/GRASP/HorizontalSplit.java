@@ -288,5 +288,4 @@ class HorizontalSplit extends Split {
 	}
 	return false;
     }
-
 }

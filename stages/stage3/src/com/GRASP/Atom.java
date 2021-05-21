@@ -64,5 +64,10 @@ class Atom extends Bit {
     public DragAround dragAround(float x, float y) {
 	return new DragAround(this, 0, 0);
     }
-    
+
+    @Override
+    public boolean insertAt(float x, float y, Bit item) {
+	return false;
+    }
+
 }

@@ -2,7 +2,7 @@ package com.GRASP;
 import android.graphics.Paint;
 
 
-class Space {
+class Space implements Highlightable {
     public float width;
     /*@Nullable*/ public Bit following_bit = null;
 
@@ -36,14 +36,8 @@ class Space {
     }
 
     
-    public Space(int columns, Bit bit) {
-	if (paint == null) {
-	    paint = new Paint();
-	    paint.setTypeface(GRASP.symbols_font);
-	    paint.setTextSize(Atom.text_size);
-	}
-
-	width = paint.measureText("-")*columns;
+    public Space(float w, Bit bit) {
+	width = w;
 	following_bit = bit;
     }
 
@@ -51,10 +45,21 @@ class Space {
 	this(columns, (Bit) null);
     }
 
+    public boolean insertAt(float x, float y, Bit bit) {
+	assert(x >= 0);
+	assert(x <= width);
+	Space nextSpace = new Space(width-x, following_bit);
+	following_bit = bit;
+	width = x;
+	bit.following_space = nextSpace;
+	return true;
+    }
+    
     public Space remove_following_bit() {
 
 	if (following_bit != null) {
 	    width += following_bit.width();
+	    
 	    Space following_space = following_bit.following_space;
 	    if (following_space != null) {
 		width += following_space.width;
@@ -68,5 +73,22 @@ class Space {
 
 	return this;
     }
+
+    private float highlighted = Float.NaN;
     
+    @Override
+    public boolean is_highlighted() {
+	return !Float.isNaN(highlighted);
+    }
+
+    @Override
+    public void highlight(float x, float y) {
+	highlighted = x;
+    }
+
+    @Override
+    public void unhighlight() {
+	highlighted = Float.NaN;
+    }
+
 }

@@ -1,6 +1,6 @@
 package com.GRASP;
 
-class Interline {
+class Interline implements Highlightable {
     public float height;
     /*@Nullable*/ public Line following_line = null;
     
@@ -52,4 +52,21 @@ class Interline {
 	return this;
     }
 
+    private float highlighted = Float.NaN;
+    
+    @Override
+    public boolean is_highlighted() {
+	return !Float.isNaN(highlighted);
+    }
+
+    @Override
+    public void highlight(float x, float y) {
+	highlighted = x;
+    }
+
+    @Override
+    public void unhighlight() {
+	highlighted = Float.NaN;
+    }
+    
 }
