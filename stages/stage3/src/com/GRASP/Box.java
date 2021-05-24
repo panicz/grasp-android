@@ -57,7 +57,12 @@ class Box extends Bit {
 	for (Interline interline = first_interline;
 	     interline != null;
 	     interline = interline.following_line.next_interline) {
-	    
+
+	    /*
+	    canvas.drawRect(20,accumulated_height,
+			    40,accumulated_height+interline.height,
+			    GRASP.paint);
+	    */
 	    accumulated_height += interline.height;
 
 	    if(interline.following_line == null) {
@@ -74,7 +79,14 @@ class Box extends Bit {
 		 preceding_space != null;
 		 preceding_space =
 		     preceding_space.following_bit.following_space) {
-
+		/*
+		canvas.drawRect(accumulated_width,
+				accumulated_height,
+				accumulated_width
+				+preceding_space.width,
+				accumulated_height+20,
+				GRASP.paint);
+		*/
 		accumulated_width += preceding_space.width;
 		
 		Bit bit = preceding_space.following_bit;
@@ -187,11 +199,8 @@ class Box extends Bit {
 		    && 0 <= ry && ry <= h) {
 		    DragAround nested = bit.dragAround(rx, ry);
 		    if (nested != null) {
-			if (nested.target == bit
-			    && preceding_space.remove_following_bit()
-			    .following_bit == null
-			    && preceding_space == line.first_space) {
-			    //interline.remove_following_line();
+			if (nested.target == bit) {
+			    preceding_space.remove_following_bit();
 			}
 			return (DragAround)
 			    nested.translate(accumulated_width,
@@ -245,22 +254,26 @@ class Box extends Bit {
 	    }
 	    
 	    float accumulated_width = parenWidth;
-	    
-	    for (Space preceding_space = line.first_space;
-		 preceding_space != null;
-		 preceding_space =
-		     preceding_space.following_bit.following_space) {
 
-		if (x <= accumulated_width + preceding_space.width) {
-		    return preceding_space
+	    Space last_space, PreviousSpace = null;
+	    
+	    for (last_space = line.first_space;
+		 last_space != null;
+		 last_space =
+		     last_space.following_bit.following_space) {
+
+		if (x <= accumulated_width + last_space.width
+		    || last_space.following_bit == null
+		    ) {
+		    return last_space
 			.insertAt(x - accumulated_width,
 				  y - accumulated_height,
 				  target);
 		}
-		
-		accumulated_width += preceding_space.width;
-		
-		Bit bit = preceding_space.following_bit;
+
+		accumulated_width += last_space.width;
+	       
+		Bit bit = last_space.following_bit;
 	       
 		if (bit == null) {
 		    break;
@@ -276,8 +289,16 @@ class Box extends Bit {
 		    && 0 <= ry && ry <= h) {
 		    return bit.insertAt(rx, ry, target);
 		}
-		
+
 		accumulated_width += w;
+		rx -= w;
+		
+		if (bit.following_space == null) {
+		    bit.following_space = new Space(rx);
+		    return bit.following_space
+			.insertAt(rx, ry, target);
+		}
+		
 	    }
 	    if (accumulated_width > maximum_width) {
 		maximum_width = accumulated_width;

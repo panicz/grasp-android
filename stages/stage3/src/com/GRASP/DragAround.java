@@ -10,6 +10,7 @@ class DragAround implements Widget, Drag {
     
     public DragAround(Bit widget, float dx, float dy) {
 	target = widget;
+	assert(target.following_space == null);
 	x = dx;
 	y = dy;
 	GRASP.last_known_edit_instance.overlay.push(this);

@@ -85,7 +85,7 @@ class Editor extends Panel {
 	canvas.translate(horizontal_scroll,
 			 vertical_scroll);
 
-	document.root.renderContents(canvas);
+	document.render(canvas);
 	canvas.restore();
     }
 
@@ -173,8 +173,7 @@ class Editor extends Panel {
 	    return new Stretch(this, finger, x, y);
 	}
 
-	Drag drag = document.root
-	    .dragAround(x - horizontal_scroll,
+	Drag drag = document.dragAround(x - horizontal_scroll,
 			y - vertical_scroll);
 
 	if (drag != null) {
@@ -183,7 +182,7 @@ class Editor extends Panel {
 			     vertical_scroll);
 	}
 
-	//GRASP.log(document.root.toString());
+
 	return null;
 	
 	
@@ -239,8 +238,8 @@ class Editor extends Panel {
 
     @Override
     public boolean insertAt(float x, float y, Bit bit) {
-	return document.root.insertAt(x - horizontal_scroll,
-				      y - vertical_scroll, bit);
+	return document.insertAt(x - horizontal_scroll,
+				 y - vertical_scroll, bit);
     }
     
 }

@@ -1,5 +1,6 @@
 package com.GRASP;
 import android.graphics.Paint;
+import java.lang.Math;
 
 
 class Space implements Highlightable {
@@ -7,7 +8,6 @@ class Space implements Highlightable {
     /*@Nullable*/ public Bit following_bit = null;
 
     static Paint paint = null;
-
     
     public float maximum_height() {
 	if (following_bit == null) {
@@ -37,20 +37,22 @@ class Space implements Highlightable {
 
     
     public Space(float w, Bit bit) {
-	width = w;
+	width = Math.max(8, w);
 	following_bit = bit;
     }
 
-    public Space(int columns) {
-	this(columns, (Bit) null);
+    public Space(float w) {
+	this(w, (Bit) null);
     }
 
     public boolean insertAt(float x, float y, Bit bit) {
-	assert(x >= 0);
-	assert(x <= width);
-	Space nextSpace = new Space(width-x, following_bit);
+	
+	if(x < width || following_bit == null) {
+ 	    width = x;
+	}
+	Space nextSpace = new Space(width-x-bit.width(),
+				    following_bit);
 	following_bit = bit;
-	width = x;
 	bit.following_space = nextSpace;
 	return true;
     }
@@ -61,6 +63,7 @@ class Space implements Highlightable {
 	    width += following_bit.width();
 	    
 	    Space following_space = following_bit.following_space;
+	    following_bit.following_space = null;
 	    if (following_space != null) {
 		width += following_space.width;
 		following_bit = following_space.following_bit;

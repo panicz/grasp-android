@@ -2,13 +2,16 @@ package com.GRASP;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.*;
+import android.graphics.Canvas;
+import java.lang.StringBuilder;
 
-class Document {
+
+class Document extends Bit {
     public String path = null;
     public static List<Document> openedDocuments =
 	new ArrayList<Document>();
 
-    public Box root;
+    private Box root;
     
     public Document() {
 	openedDocuments.add(this);
@@ -45,5 +48,38 @@ class Document {
 	    GRASP.log(e.toString());
 	}
     }
+
+    @Override
+    public void render(Canvas canvas) {
+	root.renderContents(canvas);
+    }
+
+    @Override
+    public float width() {
+	return root.width();
+    }
+
+    @Override
+    public float height() {
+	return root.height();
+    }
+
+    @Override
+    protected StringBuilder buildString(StringBuilder sb) {
+	return root.buildString(sb);
+    }
+
+    @Override
+    public boolean insertAt(float x, float y, Bit item) {
+	return root.insertAt(x, y, item);
+    }
+
+    //public abstract Bit takeFrom(float x, float y);
+
+    @Override
+    public DragAround dragAround(float x, float y) {
+	return root.dragAround(x, y);
+    }
+
     
 }
