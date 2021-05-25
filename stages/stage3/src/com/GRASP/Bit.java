@@ -49,7 +49,7 @@ Line = Line :first-space Space
 
 */
 abstract class Bit implements Widget {
-    /*@NonNull*/ public Space following_space = null;
+    public Space following_space = null;
 
     public abstract void render(Canvas canvas);
 
@@ -58,7 +58,8 @@ abstract class Bit implements Widget {
 
     protected abstract StringBuilder buildString(StringBuilder sb);
 
-    public abstract boolean insertAt(float x, float y, Bit item);
+    public abstract boolean insertAt(float x, float y,
+				     DragAround item);
 
     //public abstract Bit takeFrom(float x, float y);
 

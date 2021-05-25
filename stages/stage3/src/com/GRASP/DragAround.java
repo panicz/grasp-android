@@ -28,7 +28,7 @@ class DragAround implements Widget, Drag {
     public void drop(Screen screen, float x, float y,
 		     float vx, float vy) {
 	screen.overlay.removeLastOccurrence(this);
-	screen.panel.insertAt(x, y, target);
+	screen.panel.insertAt(x, y, this);
     }
 
     @Override

@@ -70,7 +70,7 @@ class Document extends Bit {
     }
 
     @Override
-    public boolean insertAt(float x, float y, Bit item) {
+    public boolean insertAt(float x, float y, DragAround item) {
 	return root.insertAt(x, y, item);
     }
 

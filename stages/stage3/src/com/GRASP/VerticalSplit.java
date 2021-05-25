@@ -286,7 +286,7 @@ class VerticalSplit extends Split {
     }
 
     @Override
-    public boolean insertAt(float x, float y, Bit bit) {
+    public boolean insertAt(float x, float y, DragAround bit) {
 	if (y <= firstPanel.height()) {
 	    return firstPanel.insertAt(x, y, bit);
 	}
@@ -294,7 +294,11 @@ class VerticalSplit extends Split {
 	    return secondPanel.insertAt(x,
 					y - (firstPanel.height()
 					     + bar_width),
-					bit);
+					(DragAround)
+					translate(bit, 0,
+						  -(firstPanel
+						    .height()
+						    + bar_width)));
 	}
 	return false;
     }

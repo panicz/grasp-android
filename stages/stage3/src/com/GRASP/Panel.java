@@ -120,7 +120,8 @@ abstract class Panel implements Widget {
     
     public abstract void stretch();
 
-    public abstract boolean insertAt(float x, float y, Bit bit);
+    public abstract boolean insertAt(float x, float y,
+				     DragAround bit);
 
     protected Drag translate(Drag drag, float x, float y) {
 	if (drag == null) {

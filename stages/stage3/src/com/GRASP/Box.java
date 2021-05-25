@@ -223,7 +223,7 @@ class Box extends Bit {
     }
 
     @Override
-    public boolean insertAt(float x, float y, Bit target) {
+    public boolean insertAt(float x, float y, DragAround target) {
        
 	float accumulated_height = 0;
 	float maximum_width = 0;
@@ -268,7 +268,9 @@ class Box extends Bit {
 		    return last_space
 			.insertAt(x - accumulated_width,
 				  y - accumulated_height,
-				  target);
+				  (DragAround) target
+				  .translate(-accumulated_width,
+					     -accumulated_height));
 		}
 
 		accumulated_width += last_space.width;
@@ -287,7 +289,11 @@ class Box extends Bit {
 		
 		if (0 <= rx && rx <= w
 		    && 0 <= ry && ry <= h) {
-		    return bit.insertAt(rx, ry, target);
+		    return bit
+			.insertAt(rx, ry,
+				  (DragAround) target
+				  .translate(-accumulated_width,
+					     -accumulated_height));
 		}
 
 		accumulated_width += w;
@@ -296,7 +302,10 @@ class Box extends Bit {
 		if (bit.following_space == null) {
 		    bit.following_space = new Space(rx);
 		    return bit.following_space
-			.insertAt(rx, ry, target);
+			.insertAt(rx, ry,
+				  (DragAround) target
+				  .translate(-accumulated_width,
+					     -accumulated_height));
 		}
 		
 	    }
@@ -308,6 +317,4 @@ class Box extends Bit {
 	}
 	return false;
     }
-    
-    
 }

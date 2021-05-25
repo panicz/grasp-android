@@ -66,7 +66,7 @@ class Atom extends Bit {
     }
 
     @Override
-    public boolean insertAt(float x, float y, Bit item) {
+    public boolean insertAt(float x, float y, DragAround item) {
 	return false;
     }
 

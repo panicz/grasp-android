@@ -45,15 +45,15 @@ class Space implements Highlightable {
 	this(w, (Bit) null);
     }
 
-    public boolean insertAt(float x, float y, Bit bit) {
+    public boolean insertAt(float x, float y, DragAround bit) {
 	
-	if(x < width || following_bit == null) {
- 	    width = x;
+	if(bit.x < width || following_bit == null) {
+ 	    width = bit.x;
 	}
-	Space nextSpace = new Space(width-x-bit.width(),
+	Space nextSpace = new Space(width-bit.x-bit.width(),
 				    following_bit);
-	following_bit = bit;
-	bit.following_space = nextSpace;
+	following_bit = bit.target;
+	following_bit.following_space = nextSpace;
 	return true;
     }
     
