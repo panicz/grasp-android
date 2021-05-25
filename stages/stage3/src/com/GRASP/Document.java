@@ -13,31 +13,11 @@ class Document extends Bit {
 
     private Box root;
     
-    public Document() {
+    public Document(String text) {
 	openedDocuments.add(this);
 	try {
 	    Reader input = new
-		StringReader("\n"
-			     +"(define (! n)\n"
-			     +" (if (= n 0)\n"
-			     +"   1\n"
-			     +"  (* n (! (- n 1)))))\n\n\n"
-			     +"(e.g. (! 5) \u21d2 120)\n\n\n"
-			     +"(e.g.\n"
-			     +"  (= (! 5)\n"
-			     +"  (* 1 2 3 4 5)))\n\n"
-			     +"(define (! n)\n"
-			     +"  (let ((result 1))\n"
-			     +"  (while (is n > 1)\n"
-			     +"  (set! result (* n result))\n"
-			     +"  (set! n (- n 1))) \n"
-			     +"    result))\n\n"
-			     +"(define (map f l)\n"
-			     +"  (match l\n"
-			     +"  (( ) ( ))\n"
-			     +"  ((cons h t)\n"
-			     +"   (cons (f h) (map f t)))))\n"
-			     );
+		StringReader(text);
 	    SExpReader sexp =
 		new SExpReader(new PeekingReader(input, 4));
 	    SExp sexpr = sexp.read_expressions();
@@ -47,6 +27,10 @@ class Document extends Bit {
 	} catch (IOException e) {
 	    GRASP.log(e.toString());
 	}
+    }
+
+    public Document(Box box) {
+	root = box;
     }
 
     @Override
@@ -77,8 +61,18 @@ class Document extends Bit {
     //public abstract Bit takeFrom(float x, float y);
 
     @Override
-    public DragAround dragAround(float x, float y) {
-	return root.dragAround(x, y);
+    public DragAround dragAround(float x, float y, TakeBit take) {
+	return root.dragAround(x, y, take);
+    }
+
+    @Override
+    public Bit shallow_copy() {
+	return new Document(root);
+    }
+
+    @Override
+    public Bit deep_copy() {
+	return new Document((Box) root.deep_copy());
     }
 
     

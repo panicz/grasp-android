@@ -2,8 +2,8 @@ package com.GRASP;
 import android.graphics.RectF;
 
 abstract class Split extends Panel implements Drag {
-    protected static final float bar_width = 20.0f;
-    protected static final float closing_threshold = 5000.0f;
+    public static final float bar_width = 20.0f;
+    public static final float closing_threshold = 5000.0f;
     
     public Panel firstPanel;
     public Panel secondPanel;

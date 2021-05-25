@@ -26,13 +26,13 @@ class Interline implements Highlightable {
 	return remaining_width;
     }
 
-    public Interline(int lines, Line line) {
-	height = 16*lines;
+    public Interline(float h, Line line) {
+	height = h;
 	following_line = line;
     }
 
-    public Interline(int lines) {
-	height = 16*lines;
+    public Interline(float h) {
+	this(h, (Line) null);
     }
 
     public Interline remove_following_line() {
@@ -68,5 +68,13 @@ class Interline implements Highlightable {
     public void unhighlight() {
 	highlighted = Float.NaN;
     }
+
+    public Interline deep_copy() {
+	return new Interline(height,
+			     ((following_line == null)
+				 ? null
+				 : following_line.deep_copy()));
+    }
+
     
 }

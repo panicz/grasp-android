@@ -3,8 +3,8 @@ import java.lang.Math;
 
 
 class Line {
-    /*@Nullable*/ public Space first_space = null;
-    /*@Nullable*/ public Interline next_interline = null;
+    public Space first_space = null;
+    public Interline next_interline = null;
     
     public float onward_height() {
 	return height()
@@ -35,4 +35,16 @@ class Line {
 
 	return next_interline.following_line;
     }
+
+
+    public Line deep_copy() {
+	Line copy = new Line(first_space == null
+			     ? null
+			     : first_space.deep_copy());
+	if (next_interline != null) {
+	    copy.next_interline = next_interline.deep_copy();
+	}
+	return copy;
+    }
+
 }

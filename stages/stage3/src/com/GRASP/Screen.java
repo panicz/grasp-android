@@ -96,8 +96,29 @@ class Screen extends View {
 	width = (float) metrics.widthPixels;
 	height = (float) metrics.heightPixels;
 
-	panel = new Editor(0, 0, width, height,
-			   new Document(), 0, 0);
+	panel = new
+	    Editor(0, 0, width, height, new
+		   Document("\n"
+			    +"(define (! n)\n"
+			    +" (if (= n 0)\n"
+			    +"   1\n"
+			    +"  (* n (! (- n 1)))))\n\n\n"
+			    +"(e.g. (! 5) \u21d2 120)\n\n\n"
+			    +"(e.g.\n"
+			    +"  (= (! 5)\n"
+			    +"  (* 1 2 3 4 5)))\n\n"
+			    +"(define (! n)\n"
+			    +"  (let ((result 1))\n"
+			    +"  (while (is n > 1)\n"
+			    +"  (set! result (* n result))\n"
+			    +"  (set! n (- n 1))) \n"
+			    +"    result))\n\n"
+			    +"(define (map f l)\n"
+			    +"  (match l\n"
+			    +"  (( ) ( ))\n"
+			    +"  ((cons h t)\n"
+			    +"   (cons (f h) (map f t)))))\n"),
+		   0, 0);
     }
 
     Drag [] drag = new Drag[] {

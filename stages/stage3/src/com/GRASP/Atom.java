@@ -9,7 +9,6 @@ class Atom extends Bit {
     public static final float horizontal_margin = 8;
     public static final float vertical_margin = 20;
 
-
     public static final float text_size = 72;
     static Paint paint = null;
     
@@ -61,7 +60,8 @@ class Atom extends Bit {
     }
 
     @Override
-    public DragAround dragAround(float x, float y) {
+    public DragAround dragAround(float x, float y,
+				 TakeBit _) {
 	return new DragAround(this, 0, 0);
     }
 
@@ -70,4 +70,20 @@ class Atom extends Bit {
 	return false;
     }
 
+    @Override
+    public Bit shallow_copy() {
+	return new Atom(text);
+    }
+
+    @Override
+    public Bit deep_copy() {
+	Bit copy = new Atom(text);
+	if (following_space != null) {
+	    copy.following_space = following_space.deep_copy();
+	}
+	return copy;
+    }
+
+
+    
 }

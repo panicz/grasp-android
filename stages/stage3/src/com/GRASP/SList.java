@@ -47,7 +47,7 @@ class SList extends SExp {
 	    Space space = new Space(16f*space_columns, current_bit);
 	    if (previous_bit == null) {
 		box.first_interline = new
-		    Interline(interline_rows, new Line(space));
+		    Interline(16f*interline_rows, new Line(space));
 		current_line = box.first_interline.following_line;
 	    }
 	    else if(pws.contains("\n")) {
@@ -62,7 +62,7 @@ class SList extends SExp {
 	}
 
 	Interline last_interline = new
-		Interline(S.lines(ultimate_whitespace)); 
+		Interline(16f*S.lines(ultimate_whitespace)); 
 	
 	if(current_line == null) {
 	    box.first_interline = last_interline;

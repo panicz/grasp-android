@@ -1,12 +1,14 @@
 package com.GRASP;
 
 import android.graphics.Canvas;
+import java.lang.Math;
 
 class DragAround implements Widget, Drag {
 
     public Bit target;
     public float x;
     public float y;
+
     
     public DragAround(Bit widget, float dx, float dy) {
 	target = widget;
@@ -28,7 +30,9 @@ class DragAround implements Widget, Drag {
     public void drop(Screen screen, float x, float y,
 		     float vx, float vy) {
 	screen.overlay.removeLastOccurrence(this);
-	screen.panel.insertAt(x, y, this);
+	if (Math.sqrt(vx*vx + vy*vy) < Split.closing_threshold) {
+	    screen.panel.insertAt(x, y, this);
+	}
     }
 
     @Override

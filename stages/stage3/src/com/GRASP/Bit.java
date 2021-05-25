@@ -63,7 +63,12 @@ abstract class Bit implements Widget {
 
     //public abstract Bit takeFrom(float x, float y);
 
-    public abstract DragAround dragAround(float x, float y);
+    public abstract DragAround dragAround(float x, float y,
+					  TakeBit take);
+    
+    public abstract Bit shallow_copy();
+    public abstract Bit deep_copy();
+    
 }
 
 

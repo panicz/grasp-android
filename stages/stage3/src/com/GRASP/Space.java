@@ -5,7 +5,7 @@ import java.lang.Math;
 
 class Space implements Highlightable {
     public float width;
-    /*@Nullable*/ public Bit following_bit = null;
+    public Bit following_bit = null;
 
     static Paint paint = null;
     
@@ -45,10 +45,17 @@ class Space implements Highlightable {
 	this(w, (Bit) null);
     }
 
+
+    public Space deep_copy() {
+	return new Space(width, ((following_bit == null)
+				 ? null
+				 : following_bit.deep_copy()));
+    }
+    
     public boolean insertAt(float x, float y, DragAround bit) {
 	
 	if(bit.x < width || following_bit == null) {
- 	    width = bit.x;
+ 	    width = Math.max(8, bit.x);
 	}
 	Space nextSpace = new Space(width-bit.x-bit.width(),
 				    following_bit);
@@ -57,8 +64,9 @@ class Space implements Highlightable {
 	return true;
     }
     
-    public Space remove_following_bit() {
-
+    public Bit remove_following_bit() {
+	Bit removed = following_bit;
+	
 	if (following_bit != null) {
 	    width += following_bit.width();
 	    
@@ -73,8 +81,7 @@ class Space implements Highlightable {
 	    }
 	}
 
-
-	return this;
+	return removed;
     }
 
     private float highlighted = Float.NaN;
@@ -94,4 +101,7 @@ class Space implements Highlightable {
 	highlighted = Float.NaN;
     }
 
+
+
+    
 }

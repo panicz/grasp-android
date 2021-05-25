@@ -7,7 +7,7 @@ import java.lang.Math;
 
 class Box extends Bit {
 
-    /*@NonNull*/ public Interline first_interline = null;
+    public Interline first_interline = null;
 
     final static float parenWidth = 20;
     final static float parenBar = 20;
@@ -150,7 +150,8 @@ class Box extends Bit {
     }
 
     @Override
-    public DragAround dragAround(float x, float y) {
+    public DragAround dragAround(float x, float y,
+				 TakeBit take) {
 	float accumulated_height = 0;
 	float maximum_width = 0;
 
@@ -197,10 +198,12 @@ class Box extends Bit {
 		
 		if (0 <= rx && rx <= w
 		    && 0 <= ry && ry <= h) {
-		    DragAround nested = bit.dragAround(rx, ry);
+		    DragAround nested = bit.dragAround(rx, ry,
+						       take);
 		    if (nested != null) {
 			if (nested.target == bit) {
-			    preceding_space.remove_following_bit();
+			    nested.target=take.from(preceding_space);
+			    //preceding_space.remove_following_bit();
 			}
 			return (DragAround)
 			    nested.translate(accumulated_width,
@@ -317,4 +320,25 @@ class Box extends Bit {
 	}
 	return false;
     }
+
+
+    public Bit shallow_copy() {
+	Box copy = new Box();
+	copy.first_interline = first_interline;
+	return copy;
+    }
+
+    public Bit deep_copy() {
+	Box copy = new Box();
+	if(first_interline != null) {
+	    copy.first_interline = first_interline.deep_copy();
+	}
+	
+	if (following_space != null) {
+	    copy.following_space = following_space.deep_copy();
+	}
+
+	return copy;	
+    }
+
 }

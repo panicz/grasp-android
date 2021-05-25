@@ -165,6 +165,26 @@ class Editor extends Panel {
 	}
     }
 
+    class TakeOriginal implements TakeBit {
+	@Override
+	public Bit from(Space space) {
+	    return space.remove_following_bit();	    
+	}
+    }
+
+    TakeBit takeOriginal = new TakeOriginal();
+
+    class TakeCopy implements TakeBit {
+	@Override
+	public Bit from(Space space) {
+	    Bit copy = space.following_bit.shallow_copy();
+	    copy.following_space = null;
+	    return copy.deep_copy();
+	}
+    }
+
+    TakeBit takeCopy = new TakeCopy();
+    
     @Override
     public Drag onPress(Screen screen,
 			int finger,
@@ -174,7 +194,8 @@ class Editor extends Panel {
 	}
 
 	Drag drag = document.dragAround(x - horizontal_scroll,
-			y - vertical_scroll);
+					y - vertical_scroll,
+					takeOriginal);
 
 	if (drag != null) {
 	    return translate(drag,
@@ -216,7 +237,17 @@ class Editor extends Panel {
     public Drag onSecondPress(Screen screen,
 			      int finger,
 			      float x, float y) {
-	
+	Drag drag = document.dragAround(x - horizontal_scroll,
+					y - vertical_scroll,
+					takeCopy);
+
+	if (drag != null) {
+	    return translate(drag,
+			     horizontal_scroll,
+			     vertical_scroll);
+	}
+
+
 	return null;
     }
 
