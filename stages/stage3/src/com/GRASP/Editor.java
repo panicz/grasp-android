@@ -270,7 +270,11 @@ class Editor extends Panel {
     @Override
     public boolean insertAt(float x, float y, DragAround bit) {
 	return document.insertAt(x - horizontal_scroll,
-				 y - vertical_scroll, bit);
+				 y - vertical_scroll,
+				 (DragAround)
+				 translate(bit,
+					   -horizontal_scroll,
+					   -vertical_scroll));
     }
     
 }
