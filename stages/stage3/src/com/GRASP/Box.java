@@ -1,3 +1,4 @@
+
 package com.GRASP;
 
 import android.graphics.Canvas;
@@ -238,8 +239,7 @@ class Box extends Bit {
 	    accumulated_height += interline.height;
 
 	    if (y < accumulated_height) {
-		// ... chcemy dodac do interlinii
-		return false;
+		return interline.insert_line_with(target);
 	    }
 
 	    

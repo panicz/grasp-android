@@ -1,5 +1,7 @@
 package com.GRASP;
 
+import java.lang.Math;
+
 class Interline implements Highlightable {
     public float height;
     /*@Nullable*/ public Line following_line = null;
@@ -27,7 +29,8 @@ class Interline implements Highlightable {
     }
 
     public Interline(float h, Line line) {
-	height = h;
+	//GRASP.log("interline h="+h);
+	height = Math.max(0, h);
 	following_line = line;
     }
 
@@ -76,5 +79,13 @@ class Interline implements Highlightable {
 				 : following_line.deep_copy()));
     }
 
+    public boolean insert_line_with(DragAround dragged) {
+	Interline interline = new Interline(height,
+					    following_line);
+	following_line = new Line(new Space(dragged.x,
+					    dragged.target));
+	following_line.next_interline = interline;
+	return true;
+    }
     
 }
