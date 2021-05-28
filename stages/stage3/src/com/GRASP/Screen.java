@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.Iterator;
-import android.os.SystemClock;
+//import android.os.SystemClock;
 
 import android.view.inputmethod.InputMethodManager;
 

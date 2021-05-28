@@ -2,7 +2,7 @@
 package com.GRASP;
 
 import android.graphics.Canvas;
-import android.graphics.Path;
+//import android.graphics.Path;
 import java.lang.StringBuilder;
 import java.lang.Math;
 
@@ -12,9 +12,6 @@ class Box extends Bit {
 
     final static float parenWidth = 20;
     final static float parenBar = 20;
-
-    private float accumulated_height;
-    private float maximum_width;
 
     public static final float min_height =
 	Atom.text_size + 2*Atom.vertical_margin;
@@ -204,7 +201,6 @@ class Box extends Bit {
 		    if (nested != null) {
 			if (nested.target == bit) {
 			    nested.target=take.from(preceding_space);
-			    //preceding_space.remove_following_bit();
 			}
 			return (DragAround)
 			    nested.translate(accumulated_width,
@@ -257,10 +253,8 @@ class Box extends Bit {
 	    }
 	    
 	    float accumulated_width = parenWidth;
-
-	    Space last_space, PreviousSpace = null;
 	    
-	    for (last_space = line.first_space;
+	    for (Space last_space = line.first_space;
 		 last_space != null;
 		 last_space =
 		     last_space.following_bit.following_space) {

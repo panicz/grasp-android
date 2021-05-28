@@ -1,5 +1,5 @@
 package com.GRASP;
-import android.graphics.Canvas;
+//import android.graphics.Canvas;
 import android.graphics.RectF;
 
 abstract class Panel implements Widget {

@@ -14,12 +14,12 @@ import android.view.GestureDetector;
 import android.view.View.OnKeyListener;
 import android.view.KeyEvent;
 import android.graphics.Typeface;
-import android.graphics.Color;
+//import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.Window;
 import android.view.WindowManager;
 
-import java.lang.System;
+//import java.lang.System;
 //import java.util.Arrays;
 
 @TargetApi(5)
