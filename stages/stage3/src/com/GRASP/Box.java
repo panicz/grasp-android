@@ -6,7 +6,7 @@ import android.graphics.Canvas;
 import java.lang.StringBuilder;
 import java.lang.Math;
 
-class Box extends Bit {
+class Box implements Bit {
 
     public Interline first_interline = null;
 
@@ -15,9 +15,21 @@ class Box extends Bit {
 
     public static final float min_height =
 	Atom.text_size + 2*Atom.vertical_margin;
+
+    private Space _following_space = null;
     
     @Override
-    protected StringBuilder buildString(StringBuilder result) {
+    public Space following_space() {
+	return _following_space;
+    }
+
+    @Override
+    public void set_following_space(Space s) {
+	_following_space = s;
+    }
+    
+    @Override
+    public StringBuilder buildString(StringBuilder result) {
 	result.append('(');
 	Interline interline;
 	for (interline = first_interline;
@@ -33,7 +45,9 @@ class Box extends Bit {
 		 preceding_space != null
 		     && preceding_space.following_bit != null;
 		 preceding_space =
-		     preceding_space.following_bit.following_space) {
+		     preceding_space
+		     .following_bit
+		     .following_space()) {
 		preceding_space.following_bit.buildString(result);
 		result.append(' ');
 	    }
@@ -76,7 +90,9 @@ class Box extends Bit {
 	    for (Space preceding_space = line.first_space;
 		 preceding_space != null;
 		 preceding_space =
-		     preceding_space.following_bit.following_space) {
+		     preceding_space
+		     .following_bit
+		     .following_space()) {
 		/*
 		canvas.drawRect(accumulated_width,
 				accumulated_height,
@@ -176,7 +192,9 @@ class Box extends Bit {
 	    for (Space preceding_space = line.first_space;
 		 preceding_space != null;
 		 preceding_space =
-		     preceding_space.following_bit.following_space) {
+		     preceding_space
+		     .following_bit
+		     .following_space()) {
 
 		accumulated_width += preceding_space.width;
 
@@ -257,7 +275,7 @@ class Box extends Bit {
 	    for (Space last_space = line.first_space;
 		 last_space != null;
 		 last_space =
-		     last_space.following_bit.following_space) {
+		     last_space.following_bit.following_space()) {
 
 		if (x <= accumulated_width + last_space.width
 		    || last_space.following_bit == null
@@ -296,9 +314,9 @@ class Box extends Bit {
 		accumulated_width += w;
 		rx -= w;
 		
-		if (bit.following_space == null) {
-		    bit.following_space = new Space(rx);
-		    return bit.following_space
+		if (bit.following_space() == null) {
+		    bit.set_following_space(new Space(rx));
+		    return bit.following_space()
 			.insertAt(rx, ry,
 				  (DragAround) target
 				  .translate(-accumulated_width,
@@ -328,8 +346,8 @@ class Box extends Bit {
 	    copy.first_interline = first_interline.deep_copy();
 	}
 	
-	if (following_space != null) {
-	    copy.following_space = following_space.deep_copy();
+	if (_following_space != null) {
+	    copy.set_following_space(_following_space.deep_copy());
 	}
 
 	return copy;	

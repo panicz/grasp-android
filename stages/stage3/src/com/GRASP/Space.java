@@ -15,9 +15,9 @@ class Space implements Highlightable {
 	}
 	float element_height = following_bit.height();
 	float remaining_height =
-	    (following_bit.following_space == null
+	    (following_bit.following_space() == null
 	     ? 0
-	     : following_bit.following_space.maximum_height());
+	     : following_bit.following_space().maximum_height());
 	if (element_height > remaining_height) {
 	    return element_height;
 	}
@@ -29,9 +29,9 @@ class Space implements Highlightable {
 	    + ((following_bit == null)
 	       ? 0
 	       : (following_bit.width()
-		  + ((following_bit.following_space == null)
+		  + ((following_bit.following_space() == null)
 		     ? 0
-		     : following_bit.following_space.onward_width()
+		     : following_bit.following_space().onward_width()
 		     )));
     }
 
@@ -60,7 +60,7 @@ class Space implements Highlightable {
 	Space nextSpace = new Space(width-bit.x-bit.width(),
 				    following_bit);
 	following_bit = bit.target;
-	following_bit.following_space = nextSpace;
+	following_bit.set_following_space(nextSpace);
 	return true;
     }
     
@@ -70,8 +70,8 @@ class Space implements Highlightable {
 	if (following_bit != null) {
 	    width += following_bit.width();
 	    
-	    Space following_space = following_bit.following_space;
-	    following_bit.following_space = null;
+	    Space following_space = following_bit.following_space();
+	    following_bit.set_following_space(null);
 	    if (following_space != null) {
 		width += following_space.width;
 		following_bit = following_space.following_bit;

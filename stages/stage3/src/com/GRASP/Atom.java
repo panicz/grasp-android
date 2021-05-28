@@ -5,7 +5,7 @@ import android.graphics.Paint;
 //import android.graphics.Color;
 
 
-class Atom extends Bit {
+class Atom implements Bit {
     public static final float horizontal_margin = 8;
     public static final float vertical_margin = 20;
 
@@ -14,6 +14,18 @@ class Atom extends Bit {
     
     /*@NonNull*/ public String text;
 
+    private Space _following_space = null;
+    
+    @Override
+    public Space following_space() {
+	return _following_space;
+    }
+
+    @Override
+    public void set_following_space(Space s) {
+	_following_space = s;
+    }
+    
     @Override
     public void render(Canvas canvas) {
 	GRASP.paint.setTypeface(GRASP.symbols_font);
@@ -54,7 +66,7 @@ class Atom extends Bit {
     }
 
     @Override
-    protected StringBuilder buildString(StringBuilder result) {
+    public StringBuilder buildString(StringBuilder result) {
 	result.append(text);
 	return result;
     }
@@ -78,8 +90,8 @@ class Atom extends Bit {
     @Override
     public Bit deep_copy() {
 	Bit copy = new Atom(text);
-	if (following_space != null) {
-	    copy.following_space = following_space.deep_copy();
+	if (_following_space != null) {
+	    copy.set_following_space(_following_space.deep_copy());
 	}
 	return copy;
     }

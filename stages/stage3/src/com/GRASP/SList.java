@@ -56,7 +56,7 @@ class SList extends SExp {
 					    space);
 	    }
 	    else {
-		previous_bit.following_space = space;
+		previous_bit.set_following_space(space);
 	    }
 	    previous_bit = current_bit;
 	}

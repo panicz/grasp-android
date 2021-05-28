@@ -178,7 +178,7 @@ class Editor extends Panel {
 	@Override
 	public Bit from(Space space) {
 	    Bit copy = space.following_bit.shallow_copy();
-	    copy.following_space = null;
+	    copy.set_following_space(null);
 	    return copy.deep_copy();
 	}
     }

@@ -6,12 +6,25 @@ import android.graphics.Canvas;
 import java.lang.StringBuilder;
 
 
-class Document extends Bit {
+class Document implements Bit {
     public String path = null;
     public static List<Document> openedDocuments =
 	new ArrayList<Document>();
 
     private Box root;
+
+    private Space _following_space = null;
+    
+    @Override
+    public Space following_space() {
+	return _following_space;
+    }
+
+    @Override
+    public void set_following_space(Space s) {
+	_following_space = s;
+    }
+
     
     public Document(String text) {
 	openedDocuments.add(this);
@@ -49,7 +62,7 @@ class Document extends Bit {
     }
 
     @Override
-    protected StringBuilder buildString(StringBuilder sb) {
+    public StringBuilder buildString(StringBuilder sb) {
 	return root.buildString(sb);
     }
 

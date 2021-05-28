@@ -48,26 +48,27 @@ Line = Line :first-space Space
             :next-interline Interline;
 
 */
-abstract class Bit implements Widget {
-    public Space following_space = null;
+interface Bit extends Widget {
+    Space following_space();
+    void set_following_space(Space s);
 
-    public abstract void render(Canvas canvas);
+    void render(Canvas canvas);
 
-    public abstract float width();
-    public abstract float height();
+    float width();
+    float height();
 
-    protected abstract StringBuilder buildString(StringBuilder sb);
+    StringBuilder buildString(StringBuilder sb);
 
-    public abstract boolean insertAt(float x, float y,
-				     DragAround item);
+    boolean insertAt(float x, float y,
+		     DragAround item);
 
-    //public abstract Bit takeFrom(float x, float y);
+    //  Bit takeFrom(float x, float y);
 
-    public abstract DragAround dragAround(float x, float y,
-					  TakeBit take);
+    DragAround dragAround(float x, float y,
+			  TakeBit take);
     
-    public abstract Bit shallow_copy();
-    public abstract Bit deep_copy();
+    Bit shallow_copy();
+    Bit deep_copy();
     
 }
 
