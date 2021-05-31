@@ -201,7 +201,7 @@ class Screen extends View {
 	    float x0 = x[0];
 	    float y0 = y[0];
 	    cancelDrawingShape();
-	    drag[0] = panel.at(x0, y0).stretchFrom(0, x0, y0);
+	    drag[0] = panel/*.at(x0, y0)*/.stretchFrom(0, x0, y0);
 	}
 	
 	Drag d = panel.onPress(this, p, x[p], y[p]);

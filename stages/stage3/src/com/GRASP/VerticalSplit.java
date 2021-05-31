@@ -73,6 +73,31 @@ class VerticalSplit extends Split {
     }
 
     @Override
+    public Drag stretchFrom(int finger, float x, float y) {
+	
+	if (firstPanel.height() < y
+	    && y < firstPanel.height() + bar_width) {
+	    return translate(super
+			     .stretchFrom(finger,
+					  x, y-firstPanel.height()),
+			     0, firstPanel.height());
+	}
+	if (y <= firstPanel.height()) {
+	    return firstPanel.stretchFrom(finger, x, y);
+	}
+	if (y >= firstPanel.height() + bar_width) {
+	    return translate(secondPanel
+			     .stretchFrom(finger,
+					  x,
+					  y-firstPanel.height()
+					  -bar_width),
+			     0, firstPanel.height()+bar_width);
+	}
+	assert(false);
+	return null;
+    }
+    
+    @Override
     public Drag onPress(Screen screen,
 			int finger,
 			float x, float y) {

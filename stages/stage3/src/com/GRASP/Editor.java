@@ -139,6 +139,8 @@ class Editor extends Panel {
 
 	@Override
 	public Drag translate(float x, float y) {
+	    target.pin_x[finger] += x;
+	    target.pin_y[finger] += y;
 	    return this;
 	}
     }
@@ -150,6 +152,15 @@ class Editor extends Panel {
 
     @Override
     public void stretch() {
+	/*
+	 * to dziala tak: ruch powoduje zmiane wartosci stretch_
+	 * (w funkcji move), a pozniej jest wywolywana funkcja
+	 * 'stretch'.
+	 * w tej wlasnie funkcji powinnismy ustawiac wartosci
+	 * skali, przesuniecia i ewentualnie obrotu.
+	 *
+	 * pin reprezentuje 
+	 */
 	for (int i = 0; i < Screen.fingers; ++i) {
 	    if (stretching[i]) {
 		scrollBy(shift_x[i], shift_y[i]);

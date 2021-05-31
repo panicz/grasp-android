@@ -62,6 +62,30 @@ class HorizontalSplit extends Split {
 	return "HS("+firstPanel.toString()
 	    +", "+secondPanel.toString()+")";
     }
+
+    @Override
+    public Drag stretchFrom(int finger, float x, float y) {
+	if (firstPanel.width() < x
+	    && x < (firstPanel.width()+bar_width)) {
+	    return translate(super
+			     .stretchFrom(finger,
+					  x-firstPanel.width(), y),
+			     firstPanel.width(), 0);
+	}
+	if (x <= firstPanel.width()) {
+	    return firstPanel.stretchFrom(finger, x, y);
+	}
+	if (x >= (firstPanel.width()+bar_width)) {
+	    return translate(secondPanel
+			     .stretchFrom(finger,
+					  x-(firstPanel.width()
+					     +bar_width), y),
+			     (firstPanel.width()+bar_width), 0);
+	}
+	assert(false);
+	return null;
+    }
+
     
     @Override
     public Drag onPress(Screen screen,
