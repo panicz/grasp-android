@@ -1,5 +1,6 @@
 package com.GRASP;
 
+//import java.lang.Math;
 
 class S {
     public static int count(char c, String s) {
@@ -44,4 +45,8 @@ class S {
 	return s.length();
     }
 
+    public static float qr(float x) {
+	return x*x;
+    }
+    
 }

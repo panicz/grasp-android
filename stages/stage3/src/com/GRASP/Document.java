@@ -11,7 +11,7 @@ class Document implements Bit {
     public static List<Document> openedDocuments =
 	new ArrayList<Document>();
 
-    private Box root;
+    Box root;
 
     private Space _following_space = null;
     

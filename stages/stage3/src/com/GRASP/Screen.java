@@ -24,7 +24,7 @@ class Screen extends View {
     public float width;
     public float height;
 
-    public static final int fingers = 10;
+    public static final byte fingers = 10;
     
     boolean[] finger = new boolean[] {
 	false, false, false, false, false,
