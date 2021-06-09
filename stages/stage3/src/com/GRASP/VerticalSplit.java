@@ -73,7 +73,7 @@ class VerticalSplit extends Split {
     }
 
     @Override
-    public Drag stretchFrom(int finger, float x, float y) {
+    public Drag stretchFrom(byte finger, float x, float y) {
 	
 	if (firstPanel.height() < y
 	    && y < firstPanel.height() + bar_width) {
@@ -99,7 +99,7 @@ class VerticalSplit extends Split {
     
     @Override
     public Drag onPress(Screen screen,
-			int finger,
+			byte finger,
 			float x, float y) {
 	
 	if (firstPanel.height() < y
@@ -126,7 +126,7 @@ class VerticalSplit extends Split {
 
     @Override
     public void onClick(Screen screen,
-			int finger,
+			byte finger,
 			float x, float y) {
 	if (firstPanel.height() < y
 	    && y < firstPanel.height() + bar_width) {
@@ -149,7 +149,7 @@ class VerticalSplit extends Split {
 
     @Override
     public Drag onSecondPress(Screen screen,
-			      int finger,
+			      byte finger,
 			      float x, float y) {
 	if (firstPanel.height() < y
 	    && y < firstPanel.height() + bar_width) {
@@ -175,7 +175,7 @@ class VerticalSplit extends Split {
 
     @Override
     public void onDoubleClick(Screen screen,
-			      int finger,
+			      byte finger,
 			      float x, float y) {
 	if (firstPanel.height() < y
 	    && y < (firstPanel.height()+bar_width)) {
@@ -198,7 +198,7 @@ class VerticalSplit extends Split {
 
     @Override
     public Drag onHold(Screen screen,
-		       int finger,
+		       byte finger,
 		       float x, float y) {
 	if (firstPanel.height() < y
 	    && y < (firstPanel.height()+bar_width)) {

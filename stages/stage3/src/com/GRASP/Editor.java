@@ -11,10 +11,8 @@ class Editor extends Panel {
 
     Document document;
 
-    //Transform transform = new Grab();
-    
-    float horizontal_scroll = 0.0f;
-    float vertical_scroll = 0.0f;
+    Grab transform;
+
     float scale = 1.0f;
     float angle = 0.0f; // degrees
     
@@ -25,11 +23,10 @@ class Editor extends Panel {
     public boolean is_pinned = false;
     
     public Editor(float x, float y, float w, float h,
-		  Document doc, float hscroll, float vscroll) {
+		  Document doc, Grab grab) {
 	super(x, y, w, h);
 	document = doc;
-	horizontal_scroll = hscroll;
-	vertical_scroll = vscroll;
+	transform = grab;
 	id = instances++;
 	// powinnismy zwracac opcje dla dokumentu
 	// albo ktoregos jego elementu
@@ -44,9 +41,7 @@ class Editor extends Panel {
     @Override
     public Panel copy() {
 	return new Editor(left(), top(), width(), height(),
-			  document,
-			  horizontal_scroll,
-			  vertical_scroll);
+			  document, transform.copy());
     }
     
     @Override
@@ -77,8 +72,7 @@ class Editor extends Panel {
 
     @Override
     public void scrollBy(float x, float y) {
-	horizontal_scroll += x;
-	vertical_scroll += y;
+	transform.scrollBy(x, y);
     }
     
     @Override
@@ -86,79 +80,148 @@ class Editor extends Panel {
 	
 	canvas.save();
 
-	canvas.scale(scale, scale);
-	canvas.rotate(angle);
-
-	
-	canvas.translate(horizontal_scroll,
-			 vertical_scroll);
-	
+	transform.canvas(canvas);
 	
 	document.render(canvas);
 	canvas.restore();
+
+	float x0_0 = transform.x(5, 5);
+	float y0_0 = transform.y(5, 5);
+	float x100_0 = transform.x(100, 5);
+	float y100_0 = transform.y(100, 5);
+	float x0_200 = transform.x(5, 200);
+	float y0_200 = transform.y(5, 200);
+
+
+	canvas.drawLine(x0_0, y0_0, x100_0, y100_0, GRASP.paint);
+	canvas.drawLine(x0_0, y0_0, x0_200, y0_200, GRASP.paint);
+
+
+	canvas.drawLine(transform.unx(x0_0, y0_0),
+			transform.uny(x0_0, y0_0),
+			transform.unx(x100_0, y100_0),
+			transform.uny(x100_0, y100_0),
+			GRASP.paint);
+	
+	canvas.drawLine(transform.unx(x0_0, y0_0),
+			transform.uny(x0_0, y0_0),
+			transform.unx(x0_200, y0_200),
+			transform.uny(x0_200, y0_200), GRASP.paint);
+
     }
-
-
-    final float [] pin_x = new float[10];
-    final float [] pin_y = new float[10];
     
-    final float [] stretch_x = new float[10];
-    final float [] stretch_y = new float[10];
+    final float [] pending_x = new float[10];
+    final float [] pending_y = new float[10];
 
-    final float [] shift_x = new float[10];
-    final float [] shift_y = new float[10];
-
-    final byte [] pending_index = new byte[10];
-
+    final byte [] pending_index = new byte [] {
+	-1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1
+    };
     
-    boolean[] stretching = new boolean[] {
+    byte pending = 0;
+
+    boolean [] occupied_index = new boolean[] {
 	false, false, false, false, false,
 	false, false, false, false, false
     };
 
+    byte occupy_first_free_index(byte finger) {
+	for(byte i = 0; i < Screen.fingers; ++i) {
+	    if (!occupied_index[i]) {
+		occupied_index[i] = true;
+		pending_index[finger] = i;
+		++pending;
+		return i;
+	    }
+	}
+	assert(false);
+	return -1;
+    }
+
+    void release_index(byte finger) {
+	byte index = pending_index[finger];
+	assert(index >= 0);
+	assert(occupied_index[index]);
+	occupied_index[index] = false;
+	pending_index[finger] = -1;
+	if (--pending == 0) {
+	    return;
+	}
+	for (byte i = 0; i < Screen.fingers; ++i) {
+	    byte k = pending_index[i];
+	    if (k > index) {
+		occupied_index[k] = false;
+		occupied_index[k-1] = true;
+		pending_x[k-1] = pending_x[k];
+		pending_y[k-1] = pending_y[k];
+
+		pending_index[i] = (byte)(k-1);
+	    }
+	}
+    }
+
+    
     class Stretch implements Drag {
 
 	Editor target;
-	int finger;
-	
-	public Stretch(Editor target, int finger,
-		       float start_x, float start_y) {
+	byte finger;
 
+	float dx = 0;
+	float dy = 0;
+	
+	public Stretch(Editor target, byte finger,
+		       float start_x, float start_y) {
 	    Panel.stretches++;
 	    this.finger = finger;
 	    this.target = target;
-	    target.stretching[finger] = true;
-	    target.pin_x[finger] = start_x;
-	    target.pin_y[finger] = start_y;
-
-	    target.shift_x[finger] = 0;
-	    target.shift_y[finger] = 0;
+	    byte index = target.occupy_first_free_index(finger);
+	    target.pending_x[index] = start_x;
+	    target.pending_y[index] = start_y;
+	    transform.anchor(target.pending_x,
+			     target.pending_y,
+			     target.pending);
 	}
 
 	@Override
 	public void move(Screen screen, float x, float y,
-			 float dx, float dy) {
-	    target.stretch_x[finger] = x;
-	    target.stretch_y[finger] = y;
+			 float _dx, float _dy) {
+	    byte index = pending_index[finger];
+	    target.pending_x[index] = x + dx;
+	    target.pending_y[index] = y + dy;
 	}
 
 	@Override
 	public void drop(Screen screen, float x, float y,
 			 float vx, float vy) {
-	    target.stretching[finger] = false;
+	    target.release_index(finger);
 	    Panel.stretches--;
+	    transform.anchor(target.pending_x,
+			     target.pending_y,
+			     target.pending);
 	}
 
 	@Override
-	public Drag translate(float x, float y) {
-	    target.pin_x[finger] += x;
-	    target.pin_y[finger] += y;
+	public Drag outwards(Transform transform) {
+	    float x = transform.unx(dx, dy);
+	    float y = transform.uny(dx, dy);
+	    dx = x;
+	    dy = y;
+	    return this;
+	}
+
+	@Override
+	public Drag inwards(Transform transform) {
+	    float x = transform.x(dx, dy);
+	    float y = transform.y(dx, dy);
+	    dx = x;
+	    dy = y;
+
 	    return this;
 	}
     }
 
     @Override
-    public Drag stretchFrom(int finger, float x, float y) {
+    public Drag stretchFrom(byte finger, float x, float y) {
 	return new Stretch(this, finger, x, y);
     }
 
@@ -174,87 +237,12 @@ class Editor extends Panel {
 	 * pin reprezentuje stara pozycje palca, a  stretch
 	 * - nowa pozycje.
 	 */
-	byte pending = 0;
-	for (byte i = 0; i < Screen.fingers; ++i) {
-	    if (stretching[i]) {
-		pending_index[pending++] = i;
-	    }
-	}
 
 	if (pending == 0) {
 	    return;
 	}
 
-	if (pending == 1) {
-	    byte i = pending_index[0];
-	    scrollBy(shift_x[i]/scale, shift_y[i]/scale);
-	    shift_x[i] = stretch_x[i] - pin_x[i];
-	    shift_y[i] = stretch_y[i] - pin_y[i];
-		
-	    pin_x[i] = stretch_x[i];
-	    pin_y[i] = stretch_y[i];
-	    return;
-	}
-
-	if (pending > 2) {
-	    // docelowo moglibysmyzrobic tu obracanie
-	    pending = 2;
-	}
-
-
-	float px = pin_x[0]-pin_x[1];
-	float py = pin_y[0]-pin_y[1];
-
-	float d1 = (float) Math.sqrt(S.qr(px) + S.qr(py));
-
-	float sx = stretch_x[0]-stretch_x[1];
-	float sy = stretch_y[0]-stretch_y[1];
-	
-	float d2 = (float) Math.sqrt(S.qr(sx) + S.qr(sy));
-
-	float new_scale = scale*d2/d1;
-
-	float da = (float)(Math.atan2(sy,sx) - Math.atan2(py,px));
-	
-	float a0 = (float) Math.toRadians(angle);
-	float a1 = a0 + da;
-	
-	float sin_a0 = (float) Math.sin(a0);
-	float cos_a0 = (float) Math.cos(a0);
-
-	float sin_a1 = (float) Math.sin(a1);
-	float cos_a1 = (float) Math.cos(a1);
-
-	float dx = (cos_a0*pin_x[0] + sin_a0*pin_y[0])/scale
-	    - (cos_a1*stretch_x[0] + sin_a1*stretch_y[0])/new_scale;
-	float dy = (-sin_a0*pin_x[0] + cos_a0*pin_y[0])/scale
-	    - (-sin_a1*stretch_x[0] + cos_a1*stretch_y[0])/new_scale;
-	
-	scrollBy(-dx, -dy);
-	scale = new_scale;
-	angle = (float) Math.toDegrees(a1);
-
-	for (byte n = 0; n < pending; ++n) {
-	    byte i = pending_index[n];
-	    pin_x[i] = stretch_x[i];
-	    pin_y[i] = stretch_y[i];
-	}
-	
-    }
-
-    float docx(float scrx) {
-	return (scrx-horizontal_scroll)/scale;
-    }
-    float docy(float scry) {
-	return (scry-vertical_scroll)/scale;
-    }
-
-    float scrx(float docx) {
-	return docx/scale + horizontal_scroll;
-    }
-
-    float scry(float docy) {
-	return docy/scale * vertical_scroll;
+	transform.towards(pending_x, pending_y, pending);
     }
     
     class TakeOriginal implements TakeBit {
@@ -279,27 +267,23 @@ class Editor extends Panel {
     
     @Override
     public Drag onPress(Screen screen,
-			int finger,
+			byte finger,
 			float x, float y) {
 	if (GRASP.last_known_edit_instance.isOngoingDragAction()) {
 	    return new Stretch(this, finger, x, y);
 	}
 
-	DragAround drag = document.dragAround(docx(x),
-					docy(y),
-					takeOriginal);
+	DragAround drag = document.dragAround(transform.unx(x, y),
+					      transform.uny(x, y),
+					      takeOriginal);
 
 	if (drag != null) {
 	    if (drag.target == document.root) {
 		screen.overlay.removeLastOccurrence(drag);
 	    }
-	    else {
+	    else if (drag != null) {
 	    
-	    return drag;
-	    /*
-	    return translate(drag,
-			     horizontal_scroll*scale,
-			     vertical_scroll*scale);*/
+		return drag.outwards(transform);
 	    }
 	}
 
@@ -326,7 +310,7 @@ class Editor extends Panel {
 
     @Override    
     public void onClick(Screen screen,
-			int finger,
+			byte finger,
 			float x, float y) {
 	//GRASP.log(toString()+" click");
     }
@@ -334,16 +318,14 @@ class Editor extends Panel {
     
     @Override
     public Drag onSecondPress(Screen screen,
-			      int finger,
+			      byte finger,
 			      float x, float y) {
-	Drag drag = document.dragAround(docx(x),
-					docy(y),
+	Drag drag = document.dragAround(transform.unx(x, y),
+					transform.uny(x, y),
 					takeCopy);
 
 	if (drag != null) {
-	    return translate(drag,
-			     horizontal_scroll,
-			     vertical_scroll);
+	    return drag.outwards(transform);
 	}
 
 
@@ -352,28 +334,27 @@ class Editor extends Panel {
 
     @Override
     public void onDoubleClick(Screen screen,
-			      int finger,
+			      byte finger,
 			      float x, float y) {
 	//GRASP.log(toString()+" double click");
-
+	transform.reset();
     }
 
     @Override
     public Drag onHold(Screen screen,
-		       int finger,
+		       byte finger,
 		       float x, float y) {
 	//GRASP.log(toString()+" hold");
+	GRASP._log.clear();
 	return null;
     }
 
     @Override
     public boolean insertAt(float x, float y, DragAround bit) {
-	return document.insertAt(docx(x),
-				 docy(y),
+	return document.insertAt(transform.unx(x, y),
+				 transform.uny(x, y),
 				 (DragAround)
-				 translate(bit,
-					   -horizontal_scroll,
-					   -vertical_scroll));
+				 bit.inwards(transform));
     }
     
 }

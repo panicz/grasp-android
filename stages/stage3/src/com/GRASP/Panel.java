@@ -73,28 +73,28 @@ abstract class Panel implements Widget {
 	canBeSplittedHorizontallyBy(RectF line);
     
     public Drag onPress(Screen screen,
-			int finger,
+			byte finger,
 			float x, float y) {
 	return null;
     }
 
     public void onClick(Screen screen,
-			int finger,
+			byte finger,
 			float x, float y) {}
 
     public Drag onSecondPress(Screen screen,
-			      int finger,
+			      byte finger,
 			      float x, float y) {
 	return null;
     }
 
     public void onDoubleClick(Screen screen,
-			      int finger,
+			      byte finger,
 			      float x, float y) {
     }
 
     public Drag onHold(Screen screen,
-		       int finger,
+		       byte finger,
 		       float x, float y) {
 	return null;
     }
@@ -116,17 +116,20 @@ abstract class Panel implements Widget {
 	return this;
     }
 
-    public abstract Drag stretchFrom(int finger, float x, float y);
+    public abstract Drag stretchFrom(byte finger, float x, float y);
     
     public abstract void stretch();
 
     public abstract boolean insertAt(float x, float y,
 				     DragAround bit);
-
-    protected Drag translate(Drag drag, float x, float y) {
+    
+    protected static final Shift shift = new Shift();
+    
+    protected static Drag translate(Drag drag, float x, float y) {
 	if (drag == null) {
 	    return null;
 	}
-	return drag.translate(x, y);
+	shift.set(x, y);
+	return drag.outwards(shift);
     }
 };

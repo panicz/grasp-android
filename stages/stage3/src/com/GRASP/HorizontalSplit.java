@@ -64,7 +64,7 @@ class HorizontalSplit extends Split {
     }
 
     @Override
-    public Drag stretchFrom(int finger, float x, float y) {
+    public Drag stretchFrom(byte finger, float x, float y) {
 	if (firstPanel.width() < x
 	    && x < (firstPanel.width()+bar_width)) {
 	    return translate(super
@@ -89,7 +89,7 @@ class HorizontalSplit extends Split {
     
     @Override
     public Drag onPress(Screen screen,
-			int finger,
+			byte finger,
 			float x, float y) {
 	if (firstPanel.width() < x
 	    && x < (firstPanel.width()+bar_width)) {
@@ -114,7 +114,7 @@ class HorizontalSplit extends Split {
 
     @Override
     public void onClick(Screen screen,
-			int finger,
+			byte finger,
 			float x, float y) {
 	if (firstPanel.width() < x
 	    && x < (firstPanel.width()+bar_width)) {
@@ -136,13 +136,13 @@ class HorizontalSplit extends Split {
 
     @Override
     public Drag onSecondPress(Screen screen,
-			      int finger,
+			      byte finger,
 			      float x, float y) {
 	if (firstPanel.width() < x
 	    && x < (firstPanel.width()+bar_width)) {
 	    return translate(super
 			     .onSecondPress(screen, finger,
-				      x-firstPanel.width(), y),
+					    x-firstPanel.width(), y),
 			     firstPanel.width(), 0);
 	}
 	if (x <= firstPanel.width()) {
@@ -161,7 +161,7 @@ class HorizontalSplit extends Split {
 
     @Override
     public void onDoubleClick(Screen screen,
-			      int finger,
+			      byte finger,
 			      float x, float y) {
 	if (firstPanel.width() < x
 	    && x < (firstPanel.width()+bar_width)) {
@@ -184,7 +184,7 @@ class HorizontalSplit extends Split {
 
     @Override
     public Drag onHold(Screen screen,
-		       int finger,
+		       byte finger,
 		       float x, float y) {
 	if (firstPanel.width() < x
 	    && x < (firstPanel.width()+bar_width)) {

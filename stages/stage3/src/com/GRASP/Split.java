@@ -81,7 +81,7 @@ abstract class Split extends Panel implements Drag {
     }
 
     @Override
-    public Drag stretchFrom(int finger, float x, float y) {
+    public Drag stretchFrom(byte finger, float x, float y) {
 	return null;
     }
     
@@ -92,38 +92,43 @@ abstract class Split extends Panel implements Drag {
     }
 
     @Override
-    public Drag translate(float x, float y) {
+    public Drag inwards(Transform transform) {
 	return this;
     }
 
     @Override
+    public Drag outwards(Transform transform) {
+	return this;
+    }
+    
+    @Override
     public Drag onPress(Screen screen,
-			int finger,
+			byte finger,
 			float x, float y) {
 	return this;
     }
 
     @Override    
     public void onClick(Screen screen,
-			int finger,
+			byte finger,
 			float x, float y) {}
 
     @Override
     public Drag onSecondPress(Screen screen,
-			      int finger,
+			      byte finger,
 			      float x, float y) {
 	return null;
     }
 
     @Override
     public void onDoubleClick(Screen screen,
-			      int finger,
+			      byte finger,
 			      float x, float y) {
     }
 
     @Override
     public Drag onHold(Screen screen,
-		       int finger,
+		       byte finger,
 		       float x, float y) {
 	return null;
     }

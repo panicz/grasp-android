@@ -118,7 +118,7 @@ class Screen extends View {
 			    +"  (( ) ( ))\n"
 			    +"  ((cons h t)\n"
 			    +"   (cons (f h) (map f t)))))\n"),
-		   0, 0);
+		   new Grab());
     }
 
     Drag [] drag = new Drag[] {
@@ -127,7 +127,7 @@ class Screen extends View {
     };
 
     public boolean isOngoingDragAction() {
-	for (int i = 0; i < fingers; ++i) {
+	for (byte i = 0; i < fingers; ++i) {
 	    if (drag[i] != null) {
 		return true;
 	    }
@@ -180,7 +180,7 @@ class Screen extends View {
     public boolean onDown(MotionEvent event) {
 	
 	int i = event.getActionIndex();
-	int p = event.getPointerId(i);
+	byte p = (byte) event.getPointerId(i);
 	int n = event.getPointerCount();
 	
 	assert(!finger[p]);
@@ -201,7 +201,8 @@ class Screen extends View {
 	    float x0 = x[0];
 	    float y0 = y[0];
 	    cancelDrawingShape();
-	    drag[0] = panel/*.at(x0, y0)*/.stretchFrom(0, x0, y0);
+	    drag[0] = panel/*.at(x0, y0)*/.stretchFrom((byte)0,
+						       x0, y0);
 	}
 	
 	Drag d = panel.onPress(this, p, x[p], y[p]);
@@ -224,7 +225,7 @@ class Screen extends View {
     public boolean onMotion(MotionEvent event) {
 
 	int n = event.getPointerCount();
-	int max_finger = -1;
+	byte max_finger = -1;
 
 	if (double_pending
 	    && !double_generated
@@ -233,7 +234,7 @@ class Screen extends View {
 	    float dy = event.getY();
 	    if(Math.abs(dx-double_start_x) > 10
 	       && Math.abs(dy-double_start_y) > 10) {
-		Drag d = panel.onSecondPress(this, 0,
+		Drag d = panel.onSecondPress(this, (byte) 0,
 					     double_start_x,
 					     double_start_y);
 		double_generated = true;
@@ -242,7 +243,7 @@ class Screen extends View {
 	}
 	
 	for (int i = 0; i < n; ++i) {
-	    int p = event.getPointerId(i);
+	    byte p = (byte)event.getPointerId(i);
 	    float xp = event.getX(i);
 	    float yp = event.getY(i);
 	    assert(finger[p]);
@@ -280,7 +281,7 @@ class Screen extends View {
 
 	if (p == 0) {
 	    if (double_pending && !double_generated) {
-		panel.onDoubleClick(this, 0,
+		panel.onDoubleClick(this, (byte)0,
 				    double_start_x,
 				    double_start_y);
 		double_generated = true;
@@ -310,8 +311,7 @@ class Screen extends View {
     }
     
     public boolean onSingleTap(MotionEvent e) {
-	//GRASP.log("tap("+
-	panel.onClick(this, 0, e.getX(), e.getY());
+	panel.onClick(this, (byte)0, e.getX(), e.getY());
 	return true;
     }
 
@@ -325,8 +325,7 @@ class Screen extends View {
 	
 	cancelDrawingShape();
 
-	panel.onHold(this, 0, x, y);
-	//GRASP._log.clear();
+	panel.onHold(this, (byte)0, x, y);
 	return true;
     } 
     

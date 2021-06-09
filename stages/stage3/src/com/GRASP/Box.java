@@ -17,6 +17,8 @@ class Box implements Bit {
 	Atom.text_size + 2*Atom.vertical_margin;
 
     private Space _following_space = null;
+
+    static final Shift shift = new Shift();
     
     @Override
     public Space following_space() {
@@ -220,9 +222,10 @@ class Box implements Bit {
 			if (nested.target == bit) {
 			    nested.target=take.from(preceding_space);
 			}
+			shift.set(accumulated_width,
+				  accumulated_height);
 			return (DragAround)
-			    nested.translate(accumulated_width,
-					     accumulated_height);
+			    nested.outwards(shift);
 		    }
 		    return null;
 		}
@@ -280,12 +283,12 @@ class Box implements Bit {
 		if (x <= accumulated_width + last_space.width
 		    || last_space.following_bit == null
 		    ) {
+		    shift.set(accumulated_width, accumulated_height);
 		    return last_space
 			.insertAt(x - accumulated_width,
 				  y - accumulated_height,
 				  (DragAround) target
-				  .translate(-accumulated_width,
-					     -accumulated_height));
+				  .inwards(shift));
 		}
 
 		accumulated_width += last_space.width;
@@ -304,11 +307,11 @@ class Box implements Bit {
 		
 		if (0 <= rx && rx <= w
 		    && 0 <= ry && ry <= h) {
+		    shift.set(accumulated_width, accumulated_height);
 		    return bit
 			.insertAt(rx, ry,
 				  (DragAround) target
-				  .translate(-accumulated_width,
-					     -accumulated_height));
+				  .inwards(shift));
 		}
 
 		accumulated_width += w;
@@ -316,13 +319,12 @@ class Box implements Bit {
 		
 		if (bit.following_space() == null) {
 		    bit.set_following_space(new Space(rx));
+		    shift.set(accumulated_width, accumulated_height);
 		    return bit.following_space()
 			.insertAt(rx, ry,
 				  (DragAround) target
-				  .translate(-accumulated_width,
-					     -accumulated_height));
+				  .inwards(shift));
 		}
-		
 	    }
 	    if (accumulated_width > maximum_width) {
 		maximum_width = accumulated_width;

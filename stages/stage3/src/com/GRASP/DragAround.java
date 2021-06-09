@@ -35,9 +35,20 @@ class DragAround implements Widget, Drag {
     }
 
     @Override
-    public Drag translate(float x, float y) {
-	this.x += x;
-	this.y += y;
+    public Drag inwards(Transform transform) {
+	float x_ = transform.unx(x, y);
+	float y_ = transform.uny(x, y);
+	x = x_;
+	y = y_;
+	return this;
+    }
+
+    @Override
+    public Drag outwards(Transform transform) {
+	float x_ = transform.x(x, y);
+	float y_ = transform.y(x, y);
+	x = x_;
+	y = y_;
 	return this;
     }
     
