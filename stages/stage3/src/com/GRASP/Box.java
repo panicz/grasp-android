@@ -118,7 +118,7 @@ class Box implements Bit {
 		canvas.translate(accumulated_width,
 				 accumulated_height);
 
-		canvas.clipRect(0,0,w,h+100);
+		//canvas.clipRect(0,0,w,h+100);
 		bit.render(canvas);
 		canvas.restore();
 		
@@ -146,12 +146,11 @@ class Box implements Bit {
 	renderContents(canvas);
 	
 	Paren.Left.render(canvas, GRASP.paint, h);
-	canvas.save();
 	canvas.translate(w+parenWidth, 0);
 
 	Paren.Right.render(canvas, GRASP.paint, h);
-	
-	canvas.restore();
+
+	canvas.translate(-(w+parenWidth), 0);
 	GRASP.paint.setColor(previous_color);
     }
 

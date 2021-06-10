@@ -78,13 +78,12 @@ class Editor extends Panel {
     @Override
     public void render(Canvas canvas) {
 	
-	canvas.save();
-
+	//canvas.save();
 	transform.canvas(canvas);
-	
 	document.render(canvas);
-	canvas.restore();
-
+	transform.uncanvas(canvas);
+	//canvas.restore();
+	/*
 	float x0_0 = transform.x(5, 5);
 	float y0_0 = transform.y(5, 5);
 	float x100_0 = transform.x(100, 5);
@@ -107,7 +106,7 @@ class Editor extends Panel {
 			transform.uny(x0_0, y0_0),
 			transform.unx(x0_200, y0_200),
 			transform.uny(x0_200, y0_200), GRASP.paint);
-
+	*/
     }
     
     final float [] pending_x = new float[10];
