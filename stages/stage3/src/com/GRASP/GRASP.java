@@ -3,7 +3,7 @@ package com.GRASP;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Bundle;
-
+import android.os.Handler;
 //import android.graphics.Canvas;
 
 import android.view.MotionEvent;
@@ -22,6 +22,9 @@ import android.view.WindowManager;
 //import java.lang.System;
 //import java.util.Arrays;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 @TargetApi(5)
 public class GRASP
     extends Activity
@@ -39,15 +42,12 @@ public class GRASP
     public Screen edit;
     public static Screen last_known_edit_instance = null;
     public static Paint paint = null;
-
-
     
     public static void log(String s) {
 	_log.log(s);
 	last_known_edit_instance.invalidate();
     }
 
-    
     static String evt(MotionEvent e) {
 	return MotionEvent
 	    .actionToString(e.getActionMasked());

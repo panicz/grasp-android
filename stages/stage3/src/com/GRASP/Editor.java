@@ -13,6 +13,8 @@ class Editor extends Panel {
 
     Grab transform;
 
+    Animation animation = new Animation();
+    
     float scale = 1.0f;
     float angle = 0.0f; // degrees
     
@@ -78,35 +80,9 @@ class Editor extends Panel {
     @Override
     public void render(Canvas canvas) {
 	
-	//canvas.save();
 	transform.canvas(canvas);
 	document.render(canvas);
 	transform.uncanvas(canvas);
-	//canvas.restore();
-	/*
-	float x0_0 = transform.x(5, 5);
-	float y0_0 = transform.y(5, 5);
-	float x100_0 = transform.x(100, 5);
-	float y100_0 = transform.y(100, 5);
-	float x0_200 = transform.x(5, 200);
-	float y0_200 = transform.y(5, 200);
-
-
-	canvas.drawLine(x0_0, y0_0, x100_0, y100_0, GRASP.paint);
-	canvas.drawLine(x0_0, y0_0, x0_200, y0_200, GRASP.paint);
-
-
-	canvas.drawLine(transform.unx(x0_0, y0_0),
-			transform.uny(x0_0, y0_0),
-			transform.unx(x100_0, y100_0),
-			transform.uny(x100_0, y100_0),
-			GRASP.paint);
-	
-	canvas.drawLine(transform.unx(x0_0, y0_0),
-			transform.uny(x0_0, y0_0),
-			transform.unx(x0_200, y0_200),
-			transform.uny(x0_200, y0_200), GRASP.paint);
-	*/
     }
     
     final float [] pending_x = new float[10];
@@ -226,17 +202,6 @@ class Editor extends Panel {
 
     @Override
     public void stretch() {
-	/*
-	 * to dziala tak: ruch powoduje zmiane wartosci stretch_
-	 * (w funkcji move), a pozniej jest wywolywana funkcja
-	 * 'stretch'.
-	 * w tej wlasnie funkcji powinnismy ustawiac wartosci
-	 * skali, przesuniecia i ewentualnie obrotu.
-	 *
-	 * pin reprezentuje stara pozycje palca, a  stretch
-	 * - nowa pozycje.
-	 */
-
 	if (pending == 0) {
 	    return;
 	}
@@ -268,6 +233,10 @@ class Editor extends Panel {
     public Drag onPress(Screen screen,
 			byte finger,
 			float x, float y) {
+	if (animation.is_running()) {
+	    animation.stop();
+	}
+	
 	if (GRASP.last_known_edit_instance.isOngoingDragAction()) {
 	    return new Stretch(this, finger, x, y);
 	}
@@ -288,23 +257,6 @@ class Editor extends Panel {
 
 
 	return null;
-	
-	
-	//return null;	
-	/*
-	Location source = document
-	    .locationOfElementAtPosition
-	    (x + horizontal_scroll,
-	     y + vertical_scroll);
-	if (source == null) {
-	    return null;
-	}
-
-	Element target = document
-	    .takeElementFromLocation(source);
-
-	return new MoveAround(screen.add(target));
-	*/
     }
 
     @Override    
@@ -336,6 +288,22 @@ class Editor extends Panel {
 			      byte finger,
 			      float x, float y) {
 	//GRASP.log(toString()+" double click");
+	if(transform.getAngle() != 0) {
+	    animation.setTargetAngle(0, x, y);
+	    animation.start(1000);
+	    return;
+	}
+
+	float whole_document = document.height()/height();
+	    
+	if (transform.getScale() != whole_document) {
+	    animation.setTargetScale(whole_document);
+	    animation.start(1000);
+	    return;
+	}
+
+	animation.setTargetTransform(0.0f, 0.0f, 1.0f, 0.0f);
+	
 	transform.reset();
     }
 

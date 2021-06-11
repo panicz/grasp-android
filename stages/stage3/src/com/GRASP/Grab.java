@@ -15,6 +15,44 @@ class Grab implements Transform {
     private float sin = 0.0f;
     private float cos = 1.0f;
 
+    public float getAngle() {
+	return deg;
+    }
+
+    public void setAngle(float degrees) {
+	deg = degrees;
+	rad = (float) Math.toRadians(deg);
+	sin = (float) Math.sin(rad);
+	cos = (float) Math.cos(rad);
+    }
+
+    public float getScale() {
+	return scale;
+    }
+
+    public void setScale(float scale) {
+	assert(scale > 0);
+	this.scale = scale;
+	unscale = 1.0f/scale;
+    }
+
+    public float getLeft() {
+	return dx;
+    }
+
+    public void setLeft(float x) {
+	dx = x;
+    }
+
+    public float getTop() {
+	return dy;
+    }
+
+    public void setTop(float y) {
+	dy = y;
+    }
+
+       
     public void reset() {
 	dx = 0.0f;
 	dy = 0.0f;
