@@ -13,6 +13,7 @@ import java.util.ArrayDeque;
 import java.util.Iterator;
 //import android.os.SystemClock;
 
+
 import android.view.inputmethod.InputMethodManager;
 
 class Screen extends View {
@@ -20,6 +21,7 @@ class Screen extends View {
     public Panel panel;
 
     GRASP activity;
+    AnimationSystem animationSystem;
     
     public float width;
     public float height;
@@ -88,6 +90,8 @@ class Screen extends View {
 
 	activity = source;
 
+	animationSystem = new AnimationSystem(this);
+	
 	DisplayMetrics metrics =
 	    source
 	    .getResources()
@@ -97,7 +101,7 @@ class Screen extends View {
 	height = (float) metrics.heightPixels;
 
 	panel = new
-	    Editor(0, 0, width, height, new
+	    Editor(this, 0, 0, width, height, new
 		   Document("\n"
 			    +"(define (! n)\n"
 			    +" (if (= n 0)\n"

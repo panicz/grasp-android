@@ -13,7 +13,9 @@ class Editor extends Panel {
 
     Grab transform;
 
-    Animation animation = new Animation();
+    Animation animation;
+
+    Screen screen;
     
     float scale = 1.0f;
     float angle = 0.0f; // degrees
@@ -23,16 +25,18 @@ class Editor extends Panel {
     int id;
     
     public boolean is_pinned = false;
-    
-    public Editor(float x, float y, float w, float h,
+
+    public Editor(Screen owner,
+		  float x, float y, float w, float h,
 		  Document doc, Grab grab) {
 	super(x, y, w, h);
+	screen = owner;
 	document = doc;
 	transform = grab;
 	id = instances++;
+	animation = new Animation(this);
 	// powinnismy zwracac opcje dla dokumentu
 	// albo ktoregos jego elementu
-
     }
 
     @Override
@@ -42,7 +46,7 @@ class Editor extends Panel {
     
     @Override
     public Panel copy() {
-	return new Editor(left(), top(), width(), height(),
+	return new Editor(screen, left(), top(), width(), height(),
 			  document, transform.copy());
     }
     
@@ -287,11 +291,15 @@ class Editor extends Panel {
     public void onDoubleClick(Screen screen,
 			      byte finger,
 			      float x, float y) {
+	animation.setTargetAngle(0.0f, x, y);
+	animation.setTargetScale(1.0f);
+	animation.start(700);
 	//GRASP.log(toString()+" double click");
+	/*
 	if(transform.getAngle() != 0) {
 	    animation.setTargetAngle(0, x, y);
 	    animation.start(1000);
-	    return;
+	    //return;
 	}
 
 	float whole_document = document.height()/height();
@@ -299,12 +307,12 @@ class Editor extends Panel {
 	if (transform.getScale() != whole_document) {
 	    animation.setTargetScale(whole_document);
 	    animation.start(1000);
-	    return;
+	    //return;
 	}
-
-	animation.setTargetTransform(0.0f, 0.0f, 1.0f, 0.0f);
+	*/
+	//animation.setTargetTransform(0.0f, 0.0f, 1.0f, 0.0f);
 	
-	transform.reset();
+	//transform.reset();
     }
 
     @Override

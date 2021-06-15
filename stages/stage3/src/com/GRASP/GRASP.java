@@ -3,7 +3,6 @@ package com.GRASP;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
 //import android.graphics.Canvas;
 
 import android.view.MotionEvent;
@@ -21,9 +20,6 @@ import android.view.WindowManager;
 
 //import java.lang.System;
 //import java.util.Arrays;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 @TargetApi(5)
 public class GRASP
@@ -96,7 +92,6 @@ public class GRASP
 	    _log = new Logger(120);
 	}
 
-
 	edit = new Screen(this);
 
 	last_known_edit_instance = edit;
@@ -111,6 +106,13 @@ public class GRASP
         edit.requestFocus();
     }
 
+    
+    @Override
+    protected void onResume() {
+	super.onResume();
+	edit.animationSystem.prepare();
+    }
+    
     // ze wzgledu na ograniczenia techniczne, zdarzenia
     // tapniecia (w tym podwojnego) i przytrzymania
     // moga dzialac tylko dla pierwszego palca
