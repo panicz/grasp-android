@@ -283,8 +283,7 @@ class Editor extends Panel {
 	    return drag.outwards(transform);
 	}
 
-
-	return null;
+	return stretchFrom(finger, x, y);
     }
 
     @Override
@@ -325,18 +324,20 @@ class Editor extends Panel {
 	    return;
 	}
 
-	float whole_document = height()/document.height();
-	
-	if (Math.abs(whole_document - transform.getScale()) < 0.01) {
+	float height_ratio = height()/document.height();
 
-	    animation.setTargetScale(1.0f);
+	float width_ratio = width()/document.width();
+	
+	if (Math.abs(height_ratio - transform.getScale()) < 0.01) {
+
+	    animation.setTargetScale(width_ratio);
 	    animation.fixPoint(0, y);
 	    animation.start(700);
 	    return;
 	}
 
 
-	animation.setTargetScale(whole_document);
+	animation.setTargetScale(height_ratio);
 	animation.setScroll(0, 0);
 	animation.start(700);
 

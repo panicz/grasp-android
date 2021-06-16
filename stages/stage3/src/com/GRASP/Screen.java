@@ -167,6 +167,8 @@ class Screen extends View {
     boolean double_generated = false;
     
     public boolean onDoubleTap(MotionEvent event) {
+	cancelDrawingShape();
+	
 	int i = event.getActionIndex();
 	int p = event.getPointerId(i);
 	int n = event.getPointerCount();
@@ -238,6 +240,7 @@ class Screen extends View {
 	    float dy = event.getY();
 	    if(Math.abs(dx-double_start_x) > 10
 	       && Math.abs(dy-double_start_y) > 10) {
+		cancelDrawingShape();
 		Drag d = panel.onSecondPress(this, (byte) 0,
 					     double_start_x,
 					     double_start_y);
@@ -315,6 +318,7 @@ class Screen extends View {
     }
     
     public boolean onSingleTap(MotionEvent e) {
+	cancelDrawingShape();
 	panel.onClick(this, (byte)0, e.getX(), e.getY());
 	return true;
     }
