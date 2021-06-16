@@ -59,13 +59,13 @@ class AnimationSystem {
     }
 
     void start() {
-	GRASP.log("adding a new thread");
+	//GRASP.log("adding a new thread");
 	animate.schedule(nextFrame, 0, period_ms);
 	running = true;
     }
 
     void stop() {
-	GRASP.log("stopping the thread");
+	//GRASP.log("stopping the thread");
 	animate.cancel();
 	animate.purge();
 	running = false;

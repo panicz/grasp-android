@@ -291,9 +291,55 @@ class Editor extends Panel {
     public void onDoubleClick(Screen screen,
 			      byte finger,
 			      float x, float y) {
-	animation.setTargetAngle(0.0f, x, y);
-	animation.setTargetScale(1.0f);
+	// jak to powinno dzialac:
+	// 1. jezeli klikniemy na wyrazeniu, to chcemy
+	// je zmaksymalizowac, tzn dopasowac do szerokosci
+	// albo wysokosci edytora i wypozycjonowac mniej wiecej
+	// na srodku ekranu
+
+	// jezeli wyrazenie jest zmaksymalizowane, to
+	// podwojne klikniecie powinno ustawic taka skale,
+	// zeby widac bylo caly dokument
+
+	// tak samo powinno byc w przypadku klikniecia
+	// poza wyrazeniem - tzn powinnismy tak ustawic skale,
+	// zeby bylo widac caly dokument
+
+	if (Math.abs(transform.getAngle()) > 0.1) {
+	    animation.setTargetAngle(0.0f);
+	    animation.setTargetScale(transform.getScale());
+	    animation.fixPoint(x, y);
+	    animation.start(700);
+	    return;
+	}
+
+	animation.setTargetAngle(transform.getAngle());
+	
+	if (Math.abs(transform.getLeft()) > 0.1
+	    && Math.abs(transform.getTop()) > 0.1) {
+
+	    animation.setTargetScale(transform.getScale());
+
+	    animation.setScroll(0, 0);
+	    animation.start(700);
+	    return;
+	}
+
+	float whole_document = height()/document.height();
+	
+	if (Math.abs(whole_document - transform.getScale()) < 0.01) {
+
+	    animation.setTargetScale(1.0f);
+	    animation.fixPoint(0, y);
+	    animation.start(700);
+	    return;
+	}
+
+
+	animation.setTargetScale(whole_document);
+	animation.setScroll(0, 0);
 	animation.start(700);
+
 	//GRASP.log(toString()+" double click");
 	/*
 	if(transform.getAngle() != 0) {
