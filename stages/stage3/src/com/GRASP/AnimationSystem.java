@@ -45,6 +45,11 @@ class AnimationSystem {
 		public void run() {
 		    sync.post(new Runnable() {
 			    public void run() {
+				if (pending.isEmpty()) {
+				    return; // don't invalidate
+				    // the screen if nothing changed
+				}
+				
 				Iterator<Animation> anim =
 				    pending.keySet().iterator();
 				
