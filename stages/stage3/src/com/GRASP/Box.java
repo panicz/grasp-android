@@ -16,7 +16,7 @@ class Box implements Bit {
     public static final float min_height =
 	Atom.text_size + 2*Atom.vertical_margin;
 
-    private Space _following_space = null;
+    protected Space _following_space = null;
 
     static final Shift shift = new Shift();
     
@@ -63,14 +63,15 @@ class Box implements Bit {
     public String toString() {
 	return buildString(new StringBuilder()).toString();
     }
+
     
     public void renderContents(Canvas canvas) {
 	float accumulated_height = 0;
-	float maximum_width = 0;
 	
 	for (Interline interline = first_interline;
 	     interline != null;
-	     interline = interline.following_line.next_interline) {
+	     interline = interline.following_line
+		 .next_interline) {
 
 	    /*
 	    canvas.drawRect(20,accumulated_height,
@@ -123,9 +124,6 @@ class Box implements Bit {
 		canvas.restore();
 		
 		accumulated_width += w;
-	    }
-	    if (accumulated_width > maximum_width) {
-		maximum_width = accumulated_width;
 	    }
 	    
 	    accumulated_height += line_height;

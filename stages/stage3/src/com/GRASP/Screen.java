@@ -101,27 +101,28 @@ class Screen extends View {
 	height = (float) metrics.heightPixels;
 
 	panel = new
-	    Editor(this, 0, 0, width, height, new
-		   Document("\n"
-			    +"(define (! n)\n"
-			    +" (if (= n 0)\n"
-			    +"   1\n"
-			    +"  (* n (! (- n 1)))))\n\n\n"
-			    +"(e.g. (! 5) \u21d2 120)\n\n\n\n"
-			    +"(e.g.\n"
-			    +"  (= (! 5)\n"
-			    +"  (* 1 2 3 4 5)))\n\n\n\n"
-			    +"(define (! n)\n"
-			    +"  (let ((result 1))\n"
-			    +"  (while (is n > 1)\n"
-			    +"  (set! result (* n result))\n"
-			    +"  (set! n (- n 1))) \n"
-			    +"    result))\n\n\n\n"
-			    +"(define (map f l)\n"
-			    +"  (match l\n"
-			    +"  (( ) ( ))\n"
-			    +"  ((cons h t)\n"
-			    +"   (cons (f h) (map f t)))))\n"),
+	    Editor(this, 0, 0, width, height,
+		   Document
+		   .fromSource("\n"
+			       +"(define (! n)\n"
+			       +" (if (= n 0)\n"
+			       +"   1\n"
+			       +"  (* n (! (- n 1)))))\n\n\n"
+			       +"(e.g. (! 5) \u21d2 120)\n\n\n\n"
+			       +"(e.g.\n"
+			       +"  (= (! 5)\n"
+			       +"  (* 1 2 3 4 5)))\n\n\n\n"
+			       +"(define (! n)\n"
+			       +"  (let ((result 1))\n"
+			       +"  (while (is n > 1)\n"
+			       +"  (set! result (* n result))\n"
+			       +"  (set! n (- n 1))) \n"
+			       +"    result))\n\n\n\n"
+			       +"(define (map f l)\n"
+			       +"  (match l\n"
+			       +"  (( ) ( ))\n"
+			       +"  ((cons h t)\n"
+			       +"   (cons (f h) (map f t)))))\n"),
 		   new Grab());
     }
 

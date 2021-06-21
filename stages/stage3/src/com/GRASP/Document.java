@@ -6,28 +6,23 @@ import android.graphics.Canvas;
 import java.lang.StringBuilder;
 
 
-class Document implements Bit {
+class Document extends Box {
     public String path = null;
     public static List<Document> openedDocuments =
 	new ArrayList<Document>();
 
-    Box root;
-
-    private Space _following_space = null;
-    
-    @Override
-    public Space following_space() {
-	return _following_space;
-    }
-
-    @Override
-    public void set_following_space(Space s) {
-	_following_space = s;
-    }
-
-    
-    public Document(String text) {
+    public Document() {
 	openedDocuments.add(this);
+    }
+    
+    public static Document fromBox(Box prototype) {
+	Document document = new Document();
+	document.first_interline = prototype.first_interline;
+	document._following_space = prototype.following_space();
+	return document;
+    }
+
+    public static Document fromSource(String text) {
 	try {
 	    Reader input = new
 		StringReader(text);
@@ -36,56 +31,26 @@ class Document implements Bit {
 	    SExp sexpr = sexp.read_expressions();
 	    Bit content = sexpr.toBit();
 	    assert(content instanceof Box);
-	    root = (Box) content;
+	    return fromBox((Box) content);
 	} catch (IOException e) {
 	    GRASP.log(e.toString());
+	    return null;
 	}
-    }
-
-    public Document(Box box) {
-	root = box;
     }
 
     @Override
     public void render(Canvas canvas) {
-	root.renderContents(canvas);
-    }
-
-    @Override
-    public float width() {
-	return root.width();
-    }
-
-    @Override
-    public float height() {
-	return root.height();
-    }
-
-    @Override
-    public StringBuilder buildString(StringBuilder sb) {
-	return root.buildString(sb);
-    }
-
-    @Override
-    public boolean insertAt(float x, float y, DragAround item) {
-	return root.insertAt(x, y, item);
-    }
-
-    //public abstract Bit takeFrom(float x, float y);
-
-    @Override
-    public DragAround dragAround(float x, float y, TakeBit take) {
-	return root.dragAround(x, y, take);
+	renderContents(canvas);
     }
 
     @Override
     public Bit shallow_copy() {
-	return new Document(root);
+	return fromBox(this);
     }
 
     @Override
     public Bit deep_copy() {
-	return new Document((Box) root.deep_copy());
+	return fromBox((Box) deep_copy());
     }
 
     
