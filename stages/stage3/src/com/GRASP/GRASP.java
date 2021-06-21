@@ -32,6 +32,8 @@ public class GRASP
     public static Typeface symbols_font = null;
     public static Typeface strings_font = null;
     public static Typeface logs_font = null;
+    public static Typeface comments_font = null;
+    public static Typeface menu_font = null;
 
     GestureDetector gestureDetector;
     public static Logger _log = null;
@@ -77,6 +79,20 @@ public class GRASP
 		Typeface
 		.createFromAsset(getAssets(),
 				 "Oswald-Regular.ttf");
+	}
+
+	if (comments_font == null) {
+	    comments_font =
+		Typeface
+		.createFromAsset(getAssets(),
+				 "GloriaHallelujah.ttf");
+	}
+
+	if (menu_font == null) {
+	    menu_font =
+		Typeface
+		.createFromAsset(getAssets(),
+				 "Basic-Regular.otf");
 	}
 	
 	if (paint == null) {
