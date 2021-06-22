@@ -53,5 +53,25 @@ class Document extends Box {
 	return fromBox((Box) deep_copy());
     }
 
-    
+    @Override
+    protected DragAround dragAround() {
+	return null;
+    }
+
+    @Override
+    protected boolean insertLast(Interline last_interline,
+				 Line line,
+				 float x, float y,
+				 float accumulated_height,
+				 DragAround target) {
+	if (line != null) {
+	    if (line.next_interline == null) {
+		line.next_interline = new
+		    Interline(y - accumulated_height, null);
+	    }
+	    last_interline = line.next_interline;
+	}
+	return last_interline.insert_line_with(target);
+    }
+
 }

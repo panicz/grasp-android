@@ -250,13 +250,7 @@ class Editor extends Panel {
 					      takeOriginal);
 
 	if (drag != null) {
-	    if (drag.target == document) {
-		screen.overlay.removeLastOccurrence(drag);
-	    }
-	    else if (drag != null) {
-	    
-		return drag.outwards(transform);
-	    }
+	    return drag.outwards(transform);
 	}
 
 

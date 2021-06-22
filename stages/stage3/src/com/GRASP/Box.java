@@ -9,7 +9,7 @@ import java.lang.Math;
 class Box implements Bit {
 
     public Interline first_interline = null;
-
+    
     final static float parenWidth = 20;
     final static float parenBar = 20;
 
@@ -162,6 +162,10 @@ class Box implements Bit {
 			first_interline.onward_height());
     }
 
+    protected DragAround dragAround() {
+	return new DragAround(this, 0, 0);
+    }
+    
     @Override
     public DragAround dragAround(float x, float y,
 				 TakeBit take) {
@@ -169,7 +173,7 @@ class Box implements Bit {
 	float maximum_width = 0;
 
 	if (x < parenWidth) {
-	    return new DragAround(this, 0, 0);
+	    return dragAround();
 	}
 	
 	for (Interline interline = first_interline;
@@ -235,18 +239,27 @@ class Box implements Bit {
 	    accumulated_height += line_height;
 	}
 	if (maximum_width <= x && x < maximum_width + parenWidth) {
-	    return new DragAround(this, 0, 0);
+	    return dragAround();
 	}
 	return null;
     }
 
+    protected boolean insertLast(Interline last_interline,
+				 Line line,
+				 float x, float y,
+				 float accumulated_height,
+				 DragAround target) {
+	return false;
+    }
+    
     @Override
     public boolean insertAt(float x, float y, DragAround target) {
-       
-	float accumulated_height = 0;
-	float maximum_width = 0;
 	
-	for (Interline interline = first_interline;
+	float accumulated_height = 0;
+	Interline interline;
+	Line line = null;
+	
+	for (interline = first_interline;
 	     interline != null;
 	     interline = interline.following_line.next_interline) {
 	    
@@ -261,7 +274,7 @@ class Box implements Bit {
 		break;
 	    }
 	    
-	    Line line = interline.following_line;
+	    line = interline.following_line;
 
 	    float line_height = line.height();
 
@@ -299,6 +312,7 @@ class Box implements Bit {
 		float w = bit.width();
 		float h = bit.height();
 
+
 		float rx = x - accumulated_width;
 		float ry = y - accumulated_height;
 		
@@ -323,13 +337,12 @@ class Box implements Bit {
 				  .inwards(shift));
 		}
 	    }
-	    if (accumulated_width > maximum_width) {
-		maximum_width = accumulated_width;
-	    }
 	    
 	    accumulated_height += line_height;
 	}
-	return false;
+
+	return insertLast(interline, line, x, y,
+			  accumulated_height, target);
     }
 
 
