@@ -72,8 +72,7 @@ class Atom implements Bit {
     }
 
     @Override
-    public DragAround dragAround(float x, float y,
-				 TakeBit _) {
+    public Drag dragAround(float x, float y, TakeBit _) {
 	return new DragAround(this, 0, 0);
     }
 

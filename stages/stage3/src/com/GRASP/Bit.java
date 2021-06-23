@@ -64,8 +64,7 @@ interface Bit extends Widget {
 
     //  Bit takeFrom(float x, float y);
 
-    DragAround dragAround(float x, float y,
-			  TakeBit take);
+    Drag dragAround(float x, float y, TakeBit take);
     
     Bit shallow_copy();
     Bit deep_copy();

@@ -245,14 +245,17 @@ class Editor extends Panel {
 	    return new Stretch(this, finger, x, y);
 	}
 
-	DragAround drag = document.dragAround(transform.unx(x, y),
+	Drag drag = document.dragAround(transform.unx(x, y),
 					      transform.uny(x, y),
 					      takeOriginal);
 
 	if (drag != null) {
+	    if (drag instanceof DragAround) {
+		screen.overlay.push((DragAround)drag);
+	    }
 	    return drag.outwards(transform);
 	}
-
+	
 
 	return null;
     }
@@ -274,6 +277,10 @@ class Editor extends Panel {
 					takeCopy);
 
 	if (drag != null) {
+	    if (drag instanceof DragAround) {
+		screen.overlay.push((DragAround)drag);
+	    }
+
 	    return drag.outwards(transform);
 	}
 

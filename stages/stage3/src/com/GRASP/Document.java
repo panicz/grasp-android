@@ -11,6 +11,8 @@ class Document extends Box {
     public static List<Document> openedDocuments =
 	new ArrayList<Document>();
 
+    static final float min_space_between_bits = 100.0f;
+    
     public Document() {
 	openedDocuments.add(this);
     }
@@ -19,6 +21,7 @@ class Document extends Box {
 	Document document = new Document();
 	document.first_interline = prototype.first_interline;
 	document._following_space = prototype.following_space();
+	document.preserve_distance_between_elements();
 	return document;
     }
 
@@ -50,14 +53,18 @@ class Document extends Box {
 
     @Override
     public Bit deep_copy() {
-	return fromBox((Box) deep_copy());
+	return fromBox((Box) super.deep_copy());
     }
 
+    // used in Box's public dragAround method
     @Override
-    protected DragAround dragAround() {
+    protected Drag dragAround() {
+	// prevent the whole document from being dragged around
 	return null;
     }
 
+
+    // used in Box's insertAt method
     @Override
     protected boolean insertLast(Interline last_interline,
 				 Line line,
@@ -71,7 +78,52 @@ class Document extends Box {
 	    }
 	    last_interline = line.next_interline;
 	}
+	// make sure that the dragged box is added
+	// if it was dropped below the last expression
+	// in the document
 	return last_interline.insert_line_with(target);
     }
 
+    private void preserve_distance_between_elements() {
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line.next_interline) {
+
+	    if(interline.height < min_space_between_bits) {
+		interline.height = min_space_between_bits;
+	    }
+	    
+	    if(interline.following_line == null) {
+		break;
+	    }
+	    
+	    Line line = interline.following_line;
+
+	    for (Space preceding_space = line.first_space;
+		 preceding_space != null
+		     && preceding_space.following_bit != null;
+		 preceding_space =
+		     preceding_space
+		     .following_bit
+		     .following_space()) {
+		if (preceding_space.width < min_space_between_bits
+		    && preceding_space != line.first_space) {
+		    preceding_space.width = min_space_between_bits;
+		}
+	    }
+	}
+    }
+    
+    @Override
+    public boolean insertAt(float x, float y, DragAround target) {
+	boolean result = super.insertAt(x, y, target);
+	if (result) {
+	    preserve_distance_between_elements();
+	}
+	else {
+	    // powinnismy cofnac historie sprzed dragniecia
+	}
+	return result;
+    }
+    
 }

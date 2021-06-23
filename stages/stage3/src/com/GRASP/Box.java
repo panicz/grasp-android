@@ -33,8 +33,8 @@ class Box implements Bit {
     @Override
     public StringBuilder buildString(StringBuilder result) {
 	result.append('(');
-	Interline interline;
-	for (interline = first_interline;
+
+	for (Interline interline = first_interline;
 	     interline != null;
 	     interline = interline.following_line.next_interline) {
 	    if(interline.following_line == null) {
@@ -162,13 +162,13 @@ class Box implements Bit {
 			first_interline.onward_height());
     }
 
-    protected DragAround dragAround() {
+    // used in the public dragAround below, overrode by Document
+    protected Drag dragAround() {
 	return new DragAround(this, 0, 0);
     }
     
     @Override
-    public DragAround dragAround(float x, float y,
-				 TakeBit take) {
+    public Drag dragAround(float x, float y, TakeBit take) {
 	float accumulated_height = 0;
 	float maximum_width = 0;
 
@@ -217,16 +217,16 @@ class Box implements Bit {
 		
 		if (0 <= rx && rx <= w
 		    && 0 <= ry && ry <= h) {
-		    DragAround nested = bit.dragAround(rx, ry,
-						       take);
+		    Drag nested = bit.dragAround(rx, ry, take);
 		    if (nested != null) {
-			if (nested.target == bit) {
-			    nested.target=take.from(preceding_space);
+			if (nested instanceof DragAround
+			    && ((DragAround)nested).target == bit) {
+			    ((DragAround)nested).target =
+				take.from(preceding_space);
 			}
 			shift.set(accumulated_width,
 				  accumulated_height);
-			return (DragAround)
-			    nested.outwards(shift);
+			return nested.outwards(shift);
 		    }
 		    return null;
 		}
@@ -244,6 +244,7 @@ class Box implements Bit {
 	return null;
     }
 
+    // used from insertAt method, overrode by Document
     protected boolean insertLast(Interline last_interline,
 				 Line line,
 				 float x, float y,
@@ -312,7 +313,6 @@ class Box implements Bit {
 		float w = bit.width();
 		float h = bit.height();
 
-
 		float rx = x - accumulated_width;
 		float ry = y - accumulated_height;
 		
@@ -344,7 +344,6 @@ class Box implements Bit {
 	return insertLast(interline, line, x, y,
 			  accumulated_height, target);
     }
-
 
     public Bit shallow_copy() {
 	Box copy = new Box();
