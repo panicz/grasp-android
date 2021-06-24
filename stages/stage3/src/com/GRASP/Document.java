@@ -63,6 +63,15 @@ class Document extends Box {
 	return null;
     }
 
+    @Override
+    public  void trySetSize(float x, float y) {}
+
+    // used in Box's public dragAround method
+    @Override
+    protected Drag resize() {
+	// prevent the whole document from being resized
+	return null;
+    }
 
     // used in Box's insertAt method
     @Override
@@ -93,24 +102,38 @@ class Document extends Box {
 		interline.height = min_space_between_bits;
 	    }
 	    
-	    if(interline.following_line == null) {
-		break;
-	    }
-	    
-	    Line line = interline.following_line;
-
-	    for (Space preceding_space = line.first_space;
-		 preceding_space != null
-		     && preceding_space.following_bit != null;
-		 preceding_space =
-		     preceding_space
-		     .following_bit
-		     .following_space()) {
-		if (preceding_space.width < min_space_between_bits
-		    && preceding_space != line.first_space) {
-		    preceding_space.width = min_space_between_bits;
+	    do {
+		Line line = interline.following_line;
+		if (line == null) {
+		    return;
 		}
-	    }
+		
+		if (line.first_space == null
+		    || line.first_space.following_bit == null) {
+		    interline.remove_following_line();
+		    interline.height = min_space_between_bits;
+		    continue;
+		}
+		Space preceding_space = null;
+		for (preceding_space = line.first_space;
+		     preceding_space != null
+			 && preceding_space.following_bit != null;
+		     preceding_space =
+			 preceding_space
+			 .following_bit
+			 .following_space()) {
+		    if (preceding_space.width
+			< min_space_between_bits
+			&& preceding_space != line.first_space) {
+			preceding_space.width =
+			    min_space_between_bits;
+		    }
+		}
+		if(preceding_space != null) {
+		    preceding_space.width = 0;
+		}
+		break;
+	    } while(true);
 	}
     }
     
