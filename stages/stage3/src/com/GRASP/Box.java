@@ -46,8 +46,7 @@ class Box implements Bit {
 	    for (Space preceding_space = line.first_space;
 		 preceding_space != null
 		     && preceding_space.following_bit != null;
-		 preceding_space =
-		     preceding_space
+		 preceding_space = preceding_space
 		     .following_bit
 		     .following_space()) {
 		preceding_space.following_bit.buildString(result);
@@ -153,7 +152,8 @@ class Box implements Bit {
     }
 
     
-    @Override public float width() {
+    @Override
+    public float width() {
 	return 2*parenWidth+first_interline.maximum_width();
     }
     
@@ -166,6 +166,13 @@ class Box implements Bit {
     protected Drag dragAround() {
 	return new DragAround(this, 0, 0);
     }
+
+
+    // used in the public dragAround below, overrode by Document
+    protected Drag resize() {
+	return new Resize(this);
+    }
+
     
     @Override
     public Drag dragAround(float x, float y, TakeBit take) {
@@ -239,7 +246,8 @@ class Box implements Bit {
 	    accumulated_height += line_height;
 	}
 	if (maximum_width <= x && x < maximum_width + parenWidth) {
-	    return dragAround();
+	    return resize();
+	    //return dragAround();
 	}
 	return null;
     }
