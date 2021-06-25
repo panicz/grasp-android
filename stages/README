@@ -7,26 +7,24 @@ spanning from one side to another
 
 stage 2: the screen splits can be resized and discarded
 
-stage 3: files can be edited with touch (e.g. expressions
+stage 3: expressions can be edited with touch (e.g. they
 can be moved from one view to another);
 
-stage 4: lisp files can be imported and displayed in views.
-documents can be pinned. a pinned document doesn't let
-draw gestures, and intetprets the first finger as scroll.
-Widgets in a pinned document interpret actions in their own
-ways.
+stage 4: lisp files can be imported and exported
 
-stage 5: shapes can be drawn and associated with names.
+stage 5: shapes can be drawn and associated with names
 
-stage 6: expressions can be evaluated; certain kinds
-of expressions can be interpreted visually. an example:
-A* on graphs
+stage 6: undoing and history tracking
 
-stage 7: expressions can be pinned (context menu)  and maximized
-(double tap). a pinned expression interprets touch
-actions in its own way.
+stage 7: expressions can be evaluated
 
 stage 8: support for cursors within expressions and
 keyboard editing
 
-stage 9: undoing and history tracking
+stage 9: interaction extension mechanism: certain kinds
+of expressions can be interpreted visually. an example:
+A* on graphs
+
+stage 10: expressions can be pinned (context menu)  and maximized
+(double tap). a pinned expression interprets touch
+actions in its own way.
