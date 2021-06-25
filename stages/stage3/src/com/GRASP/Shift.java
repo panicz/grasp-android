@@ -2,8 +2,8 @@ package com.GRASP;
 import android.graphics.Canvas;
 
 class Shift implements Transform {
-    float dx = 0;
-    float dy = 0;
+    public float dx = 0;
+    public float dy = 0;
     
     Shift set(float x, float y) {
 	dx = x;

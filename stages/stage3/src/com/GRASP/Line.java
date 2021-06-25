@@ -12,6 +12,13 @@ class Line {
 	       ? 0 : next_interline.onward_height());
     }
 
+    public float minimum_height() {
+	return Math.max(Box.min_height,
+			((first_space == null)
+			 ? 0
+			 : first_space.minimum_height()));
+    }
+
     public float height() {
 	return Math.max(Box.min_height,
 			((first_space == null)
@@ -25,6 +32,12 @@ class Line {
 	    : first_space.onward_width();
     }
 
+    public float minimum_width() {
+	return (first_space == null)
+	    ? 0
+	    : first_space.minimum_width();
+    }
+    
     public Line(Space space) {
 	first_space = space;
     }

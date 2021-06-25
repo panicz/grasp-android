@@ -49,6 +49,9 @@ Line = Line :first-space Space
 
 */
 interface Bit extends Widget {
+    /* following_space should be a field, but Java interfaces
+       won't allow it, and we cannot make it an abstract class
+       for other reasons */
     Space following_space();
     void set_following_space(Space s);
 
@@ -57,6 +60,12 @@ interface Bit extends Widget {
     float width();
     float height();
 
+    float min_width();
+    float min_height();
+
+    float overwidth();
+    float overheight();
+    
     StringBuilder buildString(StringBuilder sb);
 
     boolean insertAt(float x, float y,
@@ -65,6 +74,8 @@ interface Bit extends Widget {
     //  Bit takeFrom(float x, float y);
 
     Drag dragAround(float x, float y, TakeBit take);
+
+    void trySetSize(float x, float y);
     
     Bit shallow_copy();
     Bit deep_copy();

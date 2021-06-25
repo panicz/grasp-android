@@ -156,12 +156,123 @@ class Box implements Bit {
     public float width() {
 	return 2*parenWidth+first_interline.maximum_width();
     }
-    
-    @Override public float height() {
+
+    @Override
+    public float min_width() {
+	return 2*parenWidth+first_interline.minimum_width();
+    }
+
+    @Override
+    public float height() {
 	return Math.max(min_height,
 			first_interline.onward_height());
     }
 
+    @Override
+    public float min_height() {
+	return first_interline.minimum_height();
+    }
+
+    @Override
+    public float overwidth() {
+	return width() - min_width();
+    }
+
+    @Override
+    public float overheight() {
+	return height() - min_height();	
+    }
+
+    @Override
+    public void trySetSize(float w, float h) {
+	// szerokosc. Jezeli bowiem wyjdzie na to,
+	// ze zmierzona szerokosc, mw, jest mniejsza
+	// od w, to przemiatamy te linie raz jeszcze,
+	// ale tym razem ustawiajac jako szerokosc
+	// kazdego elementu byla proporcjonalnie
+	// zmniejszona, tzn zeby proporcja
+	// mw/w byla taka, jak x.min_width()/x.width(),
+	// czyli zeby nowa szerokosc elementu
+	// wynosila (w/mw)*x.min_width() 
+
+	
+	Interline interline;
+	float h_total = 0;
+	float minh_total = 0;
+	Line line = null;
+	
+	for (interline = first_interline;
+	     interline != null;
+	     interline = line.next_interline) {
+	    
+	    h_total += interline.height;
+
+	    line = interline.following_line;
+	    
+	    if(line == null) {
+		break;
+	    }
+	    
+	    Space space;
+	    float w_total = 0;
+	    float minw_total = 0;
+	    Bit bit = null;
+	    float max_minh = 0;
+	    float max_h = 0;
+	    for (space = line.first_space;
+		 space != null;
+		 space = bit.following_space()) {
+
+		w_total += space.width;
+		minw_total += Math.min(Space.min_width,
+				       space.width);
+		
+		bit = space.following_bit;
+		
+		if (bit == null) {
+		    break;
+		}
+
+		w_total += bit.width();
+		minw_total += bit.min_width();
+		max_h = Math.max(max_h, bit.height());
+
+		max_minh = Math.max(max_minh,
+				    bit.min_height());
+	    }
+	    assert(space != null);
+	    if (bit != null) {
+		assert(bit.following_space() == null);
+		space = new Space(0, null);
+		space.width = 0;
+		bit.set_following_space(space);
+	    }
+	    w_total -= space.width;
+	    
+	    if (w_total < w) {
+		space.width = w - w_total;
+	    }
+	    else {
+		// zmniejszanie szerokosci
+	    }
+	    h_total += max_h;
+	    minh_total += max_minh;
+	}
+	if (line != null) {
+	    assert(line.next_interline == null);
+	    interline = new Interline(0, null);
+	    line.next_interline = interline;
+	}
+	h_total -= interline.height;
+	if (h_total < h) {
+	    interline.height = h - h_total;
+	}
+	else {
+	    // zmniejszanie wysokosci
+	}
+    }
+
+    
     // used in the public dragAround below, overrode by Document
     protected Drag dragAround() {
 	return new DragAround(this, 0, 0);

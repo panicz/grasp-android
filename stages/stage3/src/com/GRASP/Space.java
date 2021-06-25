@@ -8,6 +8,7 @@ class Space implements Highlightable {
     public Bit following_bit = null;
 
     static Paint paint = null;
+    public static final float min_width = 8.0f;
     
     public float maximum_height() {
 	if (following_bit == null) {
@@ -24,6 +25,21 @@ class Space implements Highlightable {
 	return remaining_height;
     }
 
+    public float minimum_height() {
+	if (following_bit == null) {
+	    return 0;
+	}
+	float element_height = following_bit.min_height();
+	float remaining_height =
+	    (following_bit.following_space() == null
+	     ? 0
+	     : following_bit.following_space().minimum_height());
+	if (element_height > remaining_height) {
+	    return element_height;
+	}
+	return remaining_height;
+    }
+    
     public float onward_width() {
 	return width
 	    + ((following_bit == null)
@@ -34,10 +50,21 @@ class Space implements Highlightable {
 		     : following_bit.following_space().onward_width()
 		     )));
     }
-
+    
+    public float minimum_width() {
+	return Math.min(min_width, width)
+	    + ((following_bit == null)
+	       ? 0
+	       : (following_bit.min_width()
+		  + ((following_bit.following_space() == null)
+		     ? 0
+		     : (following_bit.following_space()
+			.minimum_width())
+		     )));
+    }
     
     public Space(float w, Bit bit) {
-	width = Math.max(8, w);
+	width = Math.max(min_width, w);
 	following_bit = bit;
     }
 
@@ -55,7 +82,7 @@ class Space implements Highlightable {
     public boolean insertAt(float x, float y, DragAround bit) {
 	
 	if(bit.x < width || following_bit == null) {
- 	    width = Math.max(8, bit.x);
+ 	    width = Math.max(min_width, bit.x);
 	}
 	Space nextSpace = new Space(width-bit.x-bit.width(),
 				    following_bit);

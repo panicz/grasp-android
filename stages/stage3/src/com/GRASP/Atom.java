@@ -1,4 +1,4 @@
-
+    
 package com.GRASP;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -48,6 +48,27 @@ class Atom implements Bit {
     @Override public float height() {
 	return text_size + 2*vertical_margin;
     }
+
+    @Override
+    public float min_width() {
+	return width();
+    }
+    
+    @Override
+    public float min_height() {
+	return height();
+    }
+
+    @Override
+    public float overwidth() {
+	return 0;
+    }
+
+    @Override
+    public float overheight() {
+	return 0;
+    }
+
     
     public Atom(String value) {
 	text = value;
@@ -76,6 +97,11 @@ class Atom implements Bit {
 	return new DragAround(this, 0, 0);
     }
 
+    @Override
+    public  void trySetSize(float x, float y) {
+	// atoms aren't resizable
+    }
+    
     @Override
     public boolean insertAt(float x, float y, DragAround item) {
 	return false;

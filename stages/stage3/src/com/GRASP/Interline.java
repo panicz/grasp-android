@@ -12,6 +12,13 @@ class Interline implements Highlightable {
 	       ? 0
 	       : following_line.onward_height());
     }
+
+    public float minimum_height() {
+	return 
+	    ((following_line == null)
+	     ? 0
+	     : following_line.minimum_height());
+    }
     
     public float maximum_width() {
 	if (following_line == null) {
@@ -28,6 +35,22 @@ class Interline implements Highlightable {
 	return remaining_width;
     }
 
+    public float minimum_width() {
+	if (following_line == null) {
+	    return 0;
+	}
+	float line_width = following_line.minimum_width();
+	float remaining_width =
+	    (following_line.next_interline == null)
+	    ? 0
+	    : following_line.next_interline.maximum_width();
+	if (line_width > remaining_width) {
+	    return line_width;
+	}
+	return remaining_width;
+    }
+
+    
     public Interline(float h, Line line) {
 	//GRASP.log("interline h="+h);
 	height = Math.max(0, h);
