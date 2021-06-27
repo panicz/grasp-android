@@ -102,11 +102,15 @@ class Interline implements Highlightable {
 				 : following_line.deep_copy()));
     }
 
-    public boolean insert_line_with(DragAround dragged) {
-	Interline interline = new Interline(height,
-					    following_line);
+    public boolean insert_line_with(DragAround dragged,
+				    float x, float y) {
+	float h = dragged.height();
+	Interline interline = new
+	    Interline(Math.max(0, height - h),
+		      following_line);
 	following_line = new Line(new Space(dragged.x,
 					    dragged.target));
+	height = Math.max(0, height - h - interline.height); 
 	following_line.next_interline = interline;
 	return true;
     }

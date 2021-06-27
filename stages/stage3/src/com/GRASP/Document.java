@@ -90,7 +90,7 @@ class Document extends Box {
 	// make sure that the dragged box is added
 	// if it was dropped below the last expression
 	// in the document
-	return last_interline.insert_line_with(target);
+	return last_interline.insert_line_with(target, x, y);
     }
 
     private void preserve_distance_between_elements() {
