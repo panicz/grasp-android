@@ -158,8 +158,12 @@ class Grab implements Transform {
 	    return this;
 	}
 	if (n == 1) {
-	    dx += (xs[0] - pin_x[0])*unscale;
-	    dy += (ys[0] - pin_y[0])*unscale;
+	    dx -= (cos*(pin_x[0]-xs[0])
+		   + sin*(pin_y[0]-ys[0]))*unscale;
+	    dy -= (sin*(xs[0]-pin_x[0])
+		   + cos*(pin_y[0]-ys[0]))*unscale;	    
+	    //dx += (xs[0] - pin_x[0])*unscale;
+	    //dy += (ys[0] - pin_y[0])*unscale;
 	    return this.anchor(xs, ys, n);
 	}
 	
