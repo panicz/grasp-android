@@ -72,11 +72,11 @@ class Box implements Bit {
 	     interline = interline.following_line
 		 .next_interline) {
 
-	    
+	    /*	    
 	    canvas.drawRect(20,accumulated_height,
 			    40,accumulated_height+interline.height,
 			    GRASP.paint);
-	    
+	    */
 	    accumulated_height += interline.height;
 
 	    if(interline.following_line == null) {
@@ -95,14 +95,14 @@ class Box implements Bit {
 		     preceding_space
 		     .following_bit
 		     .following_space()) {
-		
+		/*
 		canvas.drawRect(accumulated_width,
 				accumulated_height,
 				accumulated_width
 				+preceding_space.width,
 				accumulated_height+20,
 				GRASP.paint);
-	       
+		*/
 		accumulated_width += preceding_space.width;
 		
 		Bit bit = preceding_space.following_bit;
@@ -207,7 +207,7 @@ class Box implements Bit {
 	    
 	    h_total += interline.height;
 
-	    line = interline.following_line;
+	    line = interline.remove_empty_lines();
 	    
 	    if(line == null) {
 		break;

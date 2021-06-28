@@ -60,4 +60,8 @@ class Line {
 	return copy;
     }
 
+    public boolean isEmpty() {
+	return first_space == null
+	    || first_space.following_bit == null;
+    }
 }

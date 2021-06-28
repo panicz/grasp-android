@@ -78,6 +78,15 @@ class Interline implements Highlightable {
 	return this;
     }
 
+
+    public Line remove_empty_lines() {
+	while (following_line != null
+	       && following_line.isEmpty()) {
+	    remove_following_line();
+	}
+	return following_line;
+    }
+
     private float highlighted = Float.NaN;
     
     @Override
