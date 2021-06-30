@@ -148,5 +148,72 @@ class Document extends Box {
 	}
 	return result;
     }
+
+
+    // we return the DragAround here because of laziness
+    // - it has all the fields we need, but we actually
+    // don't use any of its methods
+    public DragAround topLevelItemAt(float x, float y) {
+	float accumulated_height = 0;
+	Line line;
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = line.next_interline) {
+
+	    accumulated_height += interline.height;
+
+	    if (accumulated_height > y) {
+		break;
+	    }
+	   
+	    line = interline.following_line;
+	    
+	    if(line == null) {
+		break;
+	    }
+
+	    float accumulated_width = 0;
+	    float max_height = 0;
+	    Bit bit;
+	    for (Space preceding_space = line.first_space;
+		 preceding_space != null;
+		 preceding_space = bit.following_space()) {
+
+		accumulated_width += preceding_space.width;
+
+		if (accumulated_width > x) {
+		    break;
+		}
+		
+		bit = preceding_space.following_bit;
+		
+		if (bit == null) {
+		    break;
+		}
+
+		float w = bit.width();
+		float h = bit.height();
+
+		if (accumulated_height <= y
+		    && y <= accumulated_height + h
+		    && accumulated_width <= x
+		    && x <= accumulated_width + w) {
+		    return new DragAround(bit,
+					  accumulated_width,
+					  accumulated_height);
+		}
+
+		accumulated_width += w;
+		if (h > max_height) {
+		    max_height = h;
+		}
+	    }
+	    
+	    accumulated_height += max_height;
+	}
+	
+	return null;
+    }
+
     
 }

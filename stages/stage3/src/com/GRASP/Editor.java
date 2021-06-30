@@ -304,26 +304,51 @@ class Editor extends Panel {
 	// tak samo powinno byc w przypadku klikniecia
 	// poza wyrazeniem - tzn powinnismy tak ustawic skale,
 	// zeby bylo widac caly dokument
-
+	
 	if (Math.abs(transform.getAngle()) > 0.1) {
 	    animation.setTargetAngle(0.0f);
 	    animation.setTargetScale(transform.getScale());
 	    animation.fixPoint(x, y);
-	    animation.start(700);
+	    animation.start((int) Math.abs(720*transform.getAngle()
+					   /90));
 	    return;
 	}
 
 	animation.setTargetAngle(transform.getAngle());
+
+	float W = width();
+	float H = height();
 	
-	if (Math.abs(transform.getLeft()) > 0.1
-	    && Math.abs(transform.getTop()) > 0.1) {
+	float x_ = transform.unx(x, y);
+	float y_ = transform.uny(x, y);
+	
+	DragAround target = document.topLevelItemAt(x_, y_);
 
-	    animation.setTargetScale(transform.getScale());
+	if (target != null) {
+	    float w = 2*Document.min_space_between_bits
+		+ target.width();
+	    float h = 2*Document.min_space_between_bits
+		+ target.height();
+	    float scale = (float)
+		//Math.min(1.0,
+			 Math.min(H/h,
+				  W/w);
+	    float left = target.x
+		- Document.min_space_between_bits;
+	    
+	    float top = target.y - (H/scale-h)/2;
 
-	    animation.setScroll(0, 0);
-	    animation.start(700);
-	    return;
+	    if (Math.abs(left + transform.getLeft()) > 10
+		|| Math.abs(top + transform.getTop()) > 10
+		|| Math.abs(scale - transform.getScale()) > 0.01) {
+		//GRASP.log("focus on "+target.target);
+		animation.setTargetScale(scale);
+		animation.setScroll(-left, -top);
+		animation.start(700);
+		return;
+	    }
 	}
+	
 
 	float height_ratio = height()/document.height();
 
