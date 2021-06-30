@@ -129,6 +129,7 @@ abstract class Panel implements Widget {
 	if (drag == null) {
 	    return null;
 	}
+		
 	shift.set(x, y);
 	return drag.outwards(shift);
     }

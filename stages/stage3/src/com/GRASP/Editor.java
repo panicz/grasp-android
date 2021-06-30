@@ -246,8 +246,8 @@ class Editor extends Panel {
 	}
 
 	Drag drag = document.dragAround(transform.unx(x, y),
-					      transform.uny(x, y),
-					      takeOriginal);
+					transform.uny(x, y),
+					takeOriginal);
 
 	if (drag != null) {
 	    if (drag instanceof DragAround) {

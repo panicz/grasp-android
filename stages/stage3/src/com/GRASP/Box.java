@@ -280,8 +280,8 @@ class Box implements Bit {
 
 
     // used in the public dragAround below, overrode by Document
-    protected Drag resize() {
-	return new Resize(this);
+    protected Drag resize(float x, float y) {
+	return new Resize(this, x, y);
     }
 
     
@@ -357,7 +357,7 @@ class Box implements Bit {
 	    accumulated_height += line_height;
 	}
 	if (maximum_width <= x && x < maximum_width + parenWidth) {
-	    return resize();
+	    return resize(x, y);
 	    //return dragAround();
 	}
 	return null;

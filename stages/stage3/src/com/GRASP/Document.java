@@ -68,7 +68,7 @@ class Document extends Box {
 
     // used in Box's public dragAround method
     @Override
-    protected Drag resize() {
+    protected Drag resize(float x, float y) {
 	// prevent the whole document from being resized
 	return null;
     }
