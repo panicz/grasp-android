@@ -2,7 +2,7 @@ package com.GRASP;
 //import android.graphics.Canvas;
 import android.graphics.RectF;
 
-abstract class Panel implements Widget {
+abstract class Panel implements Tile {
     static final float near_edge = 60;
 
     static int stretches = 0;
@@ -56,7 +56,8 @@ abstract class Panel implements Widget {
 	_bottom = _top + _height;
     }    
     
-    public Panel(float x, float y, float w, float h) {	_left = x;
+    public Panel(float x, float y, float w, float h) {
+	_left = x;
 	_top = y;
 	_width = w;
 	_height = h;

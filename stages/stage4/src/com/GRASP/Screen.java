@@ -44,7 +44,7 @@ class Screen extends View {
 	      Float.NEGATIVE_INFINITY,
 	      Float.NEGATIVE_INFINITY);
 
-    public Deque<Widget> overlay = new ArrayDeque<Widget>();
+    public Deque<Tile> overlay = new ArrayDeque<Tile>();
     
     void startDrawingShape() {
 	shape = new Shape();
@@ -208,8 +208,7 @@ class Screen extends View {
 	    float x0 = x[0];
 	    float y0 = y[0];
 	    cancelDrawingShape();
-	    drag[0] = panel/*.at(x0, y0)*/.stretchFrom((byte)0,
-						       x0, y0);
+	    drag[0] = panel.stretchFrom((byte)0, x0, y0);
 	}
 	
 	Drag d = panel.onPress(this, p, x[p], y[p]);
@@ -334,7 +333,7 @@ class Screen extends View {
 	
 	cancelDrawingShape();
 
-	panel.onHold(this, (byte)0, x, y);
+	drag[0] = panel.onHold(this, (byte)0, x, y);
 	return true;
     } 
     
@@ -357,7 +356,7 @@ class Screen extends View {
 	
 	panel.render(canvas);
 
-	Iterator<Widget> it =  overlay.iterator();
+	Iterator<Tile> it =  overlay.iterator();
 
 	while(it.hasNext()) {
 	    it.next().render(canvas);

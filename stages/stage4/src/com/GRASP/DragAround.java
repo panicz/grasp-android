@@ -3,7 +3,7 @@ package com.GRASP;
 import android.graphics.Canvas;
 import java.lang.Math;
 
-class DragAround implements Widget, Drag {
+class DragAround implements Tile, Drag {
 
     public Bit target;
     public float x;

@@ -21,7 +21,7 @@ import android.graphics.Canvas;
  *
  */
 
-interface Widget {
+interface Tile {
     void render(Canvas canvas);
 
     float width();

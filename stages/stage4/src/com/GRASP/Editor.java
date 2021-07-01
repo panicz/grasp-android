@@ -35,8 +35,6 @@ class Editor extends Panel {
 	transform = grab;
 	id = instances++;
 	animation = new Animation(this);
-	// powinnismy zwracac opcje dla dokumentu
-	// albo ktoregos jego elementu
     }
 
     @Override
@@ -264,7 +262,8 @@ class Editor extends Panel {
     public void onClick(Screen screen,
 			byte finger,
 			float x, float y) {
-	//GRASP.log(toString()+" click");
+	// docelowo bedziemy chcieli umiescic kursor
+	// na danym wyrazeniu
     }
 
     
@@ -291,20 +290,6 @@ class Editor extends Panel {
     public void onDoubleClick(Screen screen,
 			      byte finger,
 			      float x, float y) {
-	// jak to powinno dzialac:
-	// 1. jezeli klikniemy na wyrazeniu, to chcemy
-	// je zmaksymalizowac, tzn dopasowac do szerokosci
-	// albo wysokosci edytora i wypozycjonowac mniej wiecej
-	// na srodku ekranu
-
-	// jezeli wyrazenie jest zmaksymalizowane, to
-	// podwojne klikniecie powinno ustawic taka skale,
-	// zeby widac bylo caly dokument
-
-	// tak samo powinno byc w przypadku klikniecia
-	// poza wyrazeniem - tzn powinnismy tak ustawic skale,
-	// zeby bylo widac caly dokument
-	
 	if (Math.abs(transform.getAngle()) > 0.1) {
 	    animation.setTargetAngle(0.0f);
 	    animation.setTargetScale(transform.getScale());
@@ -329,10 +314,7 @@ class Editor extends Panel {
 		+ target.width();
 	    float h = 2*Document.min_space_between_bits
 		+ target.height();
-	    float scale = (float)
-		//Math.min(1.0,
-			 Math.min(H/h,
-				  W/w);
+	    float scale = (float) Math.min(H/h, W/w);
 	    float left = target.x
 		- Document.min_space_between_bits;
 	    
@@ -366,26 +348,6 @@ class Editor extends Panel {
 	animation.setTargetScale(height_ratio);
 	animation.setScroll(0, 0);
 	animation.start(700);
-
-	//GRASP.log(toString()+" double click");
-	/*
-	if(transform.getAngle() != 0) {
-	    animation.setTargetAngle(0, x, y);
-	    animation.start(1000);
-	    //return;
-	}
-
-	float whole_document = document.height()/height();
-	    
-	if (transform.getScale() != whole_document) {
-	    animation.setTargetScale(whole_document);
-	    animation.start(1000);
-	    //return;
-	}
-	*/
-	//animation.setTargetTransform(0.0f, 0.0f, 1.0f, 0.0f);
-	
-	//transform.reset();
     }
 
     @Override
