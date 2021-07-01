@@ -2,7 +2,7 @@ package com.GRASP;
 //import android.graphics.Canvas;
 import android.graphics.RectF;
 
-abstract class Panel implements Tile {
+abstract class Panel implements Pad {
     static final float near_edge = 60;
 
     static int stretches = 0;
@@ -72,28 +72,33 @@ abstract class Panel implements Tile {
 
     public abstract boolean
 	canBeSplittedHorizontallyBy(RectF line);
-    
+
+    @Override
     public Drag onPress(Screen screen,
 			byte finger,
 			float x, float y) {
 	return null;
     }
 
+    @Override
     public void onClick(Screen screen,
 			byte finger,
 			float x, float y) {}
 
+    @Override
     public Drag onSecondPress(Screen screen,
 			      byte finger,
 			      float x, float y) {
 	return null;
     }
 
+    @Override
     public void onDoubleClick(Screen screen,
 			      byte finger,
 			      float x, float y) {
     }
 
+    @Override
     public Drag onHold(Screen screen,
 		       byte finger,
 		       float x, float y) {
