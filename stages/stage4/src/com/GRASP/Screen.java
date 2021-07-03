@@ -45,6 +45,8 @@ class Screen extends View {
 	      Float.NEGATIVE_INFINITY);
 
     public Deque<Tile> overlay = new ArrayDeque<Tile>();
+
+    public Deque<Pad> layers = new ArrayDeque<Pad>();
     
     void startDrawingShape() {
 	shape = new Shape();
@@ -203,15 +205,21 @@ class Screen extends View {
 	    // ignore it
 	    return false;
 	}
+
+	Pad top = layers.peekLast();
 	
-	if (p > 0 && finger[0] && isShapeBeingDrawn()) {
+	if (top == null && p > 0 && finger[0]
+	    && isShapeBeingDrawn()) {
 	    float x0 = x[0];
 	    float y0 = y[0];
 	    cancelDrawingShape();
 	    drag[0] = panel.stretchFrom((byte)0, x0, y0);
 	}
+
 	
-	Drag d = panel.onPress(this, p, x[p], y[p]);
+	Drag d = (top == null)
+	    ? panel.onPress(this, p, x[p], y[p])
+	    : top.onPress(this, p, x[p], y[p]);
 
 	if (d != null) {
 	    drag[p] = d;
@@ -220,6 +228,7 @@ class Screen extends View {
 	}
 		
 	if (n == 1 && p == 0
+	    && top == null
 	    && !isShapeBeingDrawn()) {
 	    startDrawingShape();
 	    return true;
@@ -241,9 +250,14 @@ class Screen extends View {
 	    if(Math.abs(dx-double_start_x) > 10
 	       && Math.abs(dy-double_start_y) > 10) {
 		cancelDrawingShape();
-		Drag d = panel.onSecondPress(this, (byte) 0,
-					     double_start_x,
-					     double_start_y);
+		Pad top = layers.peekLast();
+		Drag d = (top == null)
+		    ? panel.onSecondPress(this, (byte) 0,
+					  double_start_x,
+					  double_start_y)
+		    : top.onSecondPress(this, (byte) 0,
+					double_start_x,
+					double_start_y);
 		double_generated = true;
 		drag[0] = d;
 	    }
@@ -288,9 +302,18 @@ class Screen extends View {
 
 	if (p == 0) {
 	    if (double_pending && !double_generated) {
-		panel.onDoubleClick(this, (byte)0,
-				    double_start_x,
-				    double_start_y);
+		Pad top = layers.peekLast();
+
+		if (top == null) {
+		    panel.onDoubleClick(this, (byte)0,
+					double_start_x,
+					double_start_y);
+		}
+		else {
+		    top.onDoubleClick(this, (byte)0,
+					double_start_x,
+					double_start_y);
+		}
 		double_generated = true;
 		assert(drag[0] == null);
 	    }
@@ -319,7 +342,14 @@ class Screen extends View {
     
     public boolean onSingleTap(MotionEvent e) {
 	cancelDrawingShape();
-	panel.onClick(this, (byte)0, e.getX(), e.getY());
+	Pad top = layers.peekLast();
+
+	if (top == null) {
+	    panel.onClick(this, (byte)0, e.getX(), e.getY());
+	}
+	else {
+	    top.onClick(this, (byte)0, e.getX(), e.getY());
+	}
 	return true;
     }
 
@@ -333,7 +363,12 @@ class Screen extends View {
 	
 	cancelDrawingShape();
 
-	drag[0] = panel.onHold(this, (byte)0, x, y);
+	Pad top = layers.peekLast();
+
+
+	drag[0] = (top == null)
+	    ? panel.onHold(this, (byte)0, x, y)
+	    : top.onHold(this, (byte)0, x, y);
 	return true;
     } 
     
@@ -356,10 +391,16 @@ class Screen extends View {
 	
 	panel.render(canvas);
 
-	Iterator<Tile> it =  overlay.iterator();
+	Iterator<Pad> layer = layers.iterator();
 
-	while(it.hasNext()) {
-	    it.next().render(canvas);
+	while(layer.hasNext()) {
+	    layer.next().render(canvas);
+	}
+	
+	Iterator<Tile> tile =  overlay.iterator();
+
+	while(tile.hasNext()) {
+	    tile.next().render(canvas);
 	}
 	
 	for (Shape segment : segments) {
