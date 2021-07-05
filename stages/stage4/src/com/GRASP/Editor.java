@@ -13,7 +13,7 @@ class Editor extends Panel {
 
     Grab transform;
 
-    Animation animation;
+    Transition transition;
 
     Screen screen;
     
@@ -34,7 +34,7 @@ class Editor extends Panel {
 	document = doc;
 	transform = grab;
 	id = instances++;
-	animation = new Animation(this);
+	transition = new Transition(this);
     }
 
     @Override
@@ -235,8 +235,8 @@ class Editor extends Panel {
     public Drag onPress(Screen screen,
 			byte finger,
 			float x, float y) {
-	if (animation.is_running()) {
-	    animation.stop();
+	if (transition.is_running()) {
+	    transition.stop();
 	}
 	
 	if (GRASP.last_known_edit_instance.isOngoingDragAction()) {
@@ -291,15 +291,15 @@ class Editor extends Panel {
 			      byte finger,
 			      float x, float y) {
 	if (Math.abs(transform.getAngle()) > 0.1) {
-	    animation.setTargetAngle(0.0f);
-	    animation.setTargetScale(transform.getScale());
-	    animation.fixPoint(x, y);
-	    animation.start((int) Math.abs(720*transform.getAngle()
+	    transition.setTargetAngle(0.0f);
+	    transition.setTargetScale(transform.getScale());
+	    transition.fixPoint(x, y);
+	    transition.start((int) Math.abs(720*transform.getAngle()
 					   /90));
 	    return;
 	}
 
-	animation.setTargetAngle(transform.getAngle());
+	transition.setTargetAngle(transform.getAngle());
 
 	float W = width();
 	float H = height();
@@ -324,9 +324,9 @@ class Editor extends Panel {
 		|| Math.abs(top + transform.getTop()) > 10
 		|| Math.abs(scale - transform.getScale()) > 0.01) {
 		//GRASP.log("focus on "+target.target);
-		animation.setTargetScale(scale);
-		animation.setScroll(-left, -top);
-		animation.start(700);
+		transition.setTargetScale(scale);
+		transition.setScroll(-left, -top);
+		transition.start(700);
 		return;
 	    }
 	}
@@ -338,16 +338,16 @@ class Editor extends Panel {
 	
 	if (Math.abs(height_ratio - transform.getScale()) < 0.01) {
 
-	    animation.setTargetScale(width_ratio);
-	    animation.fixPoint(0, y);
-	    animation.start(700);
+	    transition.setTargetScale(width_ratio);
+	    transition.fixPoint(0, y);
+	    transition.start(700);
 	    return;
 	}
 
 
-	animation.setTargetScale(height_ratio);
-	animation.setScroll(0, 0);
-	animation.start(700);
+	transition.setTargetScale(height_ratio);
+	transition.setScroll(0, 0);
+	transition.start(700);
     }
 
     @Override
@@ -356,6 +356,7 @@ class Editor extends Panel {
 		       float x, float y) {
 	//GRASP.log(toString()+" hold");
 	GRASP._log.clear();
+	//screen.layers.add(new FileMenu(this, x, y));
 	return null;
     }
 
