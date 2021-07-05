@@ -26,6 +26,8 @@ interface Tile {
 
     float width();
     float height();
+
+    void trySetSize(float x, float y);
 }
 
 /*

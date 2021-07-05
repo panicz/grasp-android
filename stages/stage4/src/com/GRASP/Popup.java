@@ -4,24 +4,37 @@ import android.graphics.Canvas;
 
 class Popup implements Pad {
 
+    static final float margin_width = 4;
+    static final float bar_height = 4;
+    
     float left, top;
+    
     Pad content;
 
     @Override
     public void render(Canvas canvas) {
+	// render round rectangle
+	canvas.drawRoundRect(left, top,
+			     left+width(), top+height(), 25, 25,
+			     GRASP.paint);
+	canvas.translate(left+margin_width, top+bar_height);
 	content.render(canvas);
+	canvas.translate(-left-margin_width, -top-bar_height);
     }
 
     @Override
     public float width() {
-	// irrelevant
-	return GRASP.last_known_edit_instance.width;
+	return content.width() + 2*margin_width;
     }
 
     @Override
     public float height() {
-	// irrelevant
-	return GRASP.last_known_edit_instance.height;
+	return content.height() + 2*bar_height;
+    }
+
+    @Override
+    public void trySetSize(float x, float y) {
+	content.trySetSize(x - 2*margin_width, y - 2*bar_height);
     }
     
     @Override
@@ -38,7 +51,7 @@ class Popup implements Pad {
     public void onClick(Screen screen,
 			byte finger,
 			float x, float y) {
-	// przekazujemym
+	
     }
 
     @Override

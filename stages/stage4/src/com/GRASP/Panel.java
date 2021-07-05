@@ -55,6 +55,12 @@ abstract class Panel implements Pad {
 	_height = v;
 	_bottom = _top + _height;
     }    
+
+    @Override
+    public void trySetSize(float w, float h) {
+	setWidth(w);
+	setHeight(h);
+    }
     
     public Panel(float x, float y, float w, float h) {
 	_left = x;

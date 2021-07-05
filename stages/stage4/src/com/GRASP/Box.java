@@ -114,13 +114,17 @@ class Box implements Bit {
 		float w = bit.width();
 		float h = bit.height();
 
-		canvas.save();
+		//canvas.save();
 		canvas.translate(accumulated_width,
 				 accumulated_height);
 
 		//canvas.clipRect(0,0,w,h+100);
 		bit.render(canvas);
-		canvas.restore();
+
+		canvas.translate(-accumulated_width,
+				 -accumulated_height);
+
+		//canvas.restore();
 		
 		accumulated_width += w;
 	    }

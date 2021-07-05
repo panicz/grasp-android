@@ -74,8 +74,6 @@ interface Bit extends Tile {
     //  Bit takeFrom(float x, float y);
 
     Drag dragAround(float x, float y, TakeBit take);
-
-    void trySetSize(float x, float y);
     
     Bit shallow_copy();
     Bit deep_copy();

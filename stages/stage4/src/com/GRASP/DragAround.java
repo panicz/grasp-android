@@ -69,4 +69,8 @@ class DragAround implements Tile, Drag {
 	return target.height();
     }
 
+    @Override
+    public void trySetSize(float x, float y) {
+	target.trySetSize(x, y);
+    }
 }
