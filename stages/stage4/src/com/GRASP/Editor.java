@@ -356,7 +356,16 @@ class Editor extends Panel {
 		       float x, float y) {
 	//GRASP.log(toString()+" hold");
 	GRASP._log.clear();
-	//screen.layers.add(new FileMenu(this, x, y));
+	screen.layers
+	    .add(new
+		 Popup(new
+		       Below(new Button("New", 300, 80),
+			     new Button("Open", 300, 80),
+			     new Button("Switch to...", 300, 80),
+			     new Button("Save", 300, 80),
+			     new Button("Save as...", 300, 80),
+			     new Button("Close", 300, 80)
+			     ), x, y));
 	return null;
     }
 

@@ -364,7 +364,10 @@ class Screen extends View {
 	cancelDrawingShape();
 
 	Pad top = layers.peekLast();
-
+	
+	if (drag[0] != null) {
+	    drag[0].drop(this, x, y, 0, 0);
+	}
 
 	drag[0] = (top == null)
 	    ? panel.onHold(this, (byte)0, x, y)
