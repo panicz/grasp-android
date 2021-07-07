@@ -372,6 +372,22 @@ class Screen extends View {
 	drag[0] = (top == null)
 	    ? panel.onHold(this, (byte)0, x, y)
 	    : top.onHold(this, (byte)0, x, y);
+
+	if (drag[0] != null
+	    && drag[0] instanceof Popup) {
+	    Popup popup = (Popup) drag[0];
+	    float w = popup.width();
+	    float h = popup.height();
+	    popup.left = Math.max(0,
+				  Math.min(width-w,
+					   x - w/2));
+	    popup.top = Math.max(0,
+				 Math.min(height-h,
+					  y - h/2));
+	    
+	    layers.add(popup);
+	}
+	
 	return true;
     } 
     
@@ -391,13 +407,23 @@ class Screen extends View {
     protected void onDraw(Canvas canvas) {
 	canvas.drawRGB(255, 255, 255);
 	GRASP._log.draw(canvas, 0, 0);
+
+	Pad top = layer.peekLast();
+
+	if (top != null) {
+	    // blur filter mask
+	}
 	
 	panel.render(canvas);
 
 	Iterator<Pad> layer = layers.iterator();
-
+	
 	while(layer.hasNext()) {
-	    layer.next().render(canvas);
+	    Pad item = layer.next();
+	    if (item == top) {
+		//remove blur filter mask
+	    }
+	    item.render(canvas);
 	}
 	
 	Iterator<Tile> tile =  overlay.iterator();
