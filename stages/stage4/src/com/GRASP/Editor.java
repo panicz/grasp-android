@@ -356,6 +356,18 @@ class Editor extends Panel {
 		       float x, float y) {
 	//GRASP.log(toString()+" hold");
 	GRASP._log.clear();
+
+	DragAround item =
+	    document.topLevelItemAt(transform.unx(x, y),
+				    transform.uny(x, y));
+
+	if (item != null) {
+	    // ...
+	    // opcje dla tego czegos co zlapalismy
+	    GRASP.log(item.target.toString());
+	    return null;
+	}
+	
 	return
 	    new
 	    Popup(new
