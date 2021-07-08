@@ -3,6 +3,7 @@ package com.GRASP;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.graphics.BlurMaskFilter;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
@@ -47,6 +48,10 @@ class Screen extends View {
     public Deque<Tile> overlay = new ArrayDeque<Tile>();
 
     public Deque<Pad> layers = new ArrayDeque<Pad>();
+
+    BlurMaskFilter blur = new
+	BlurMaskFilter(5.0f,
+		       BlurMaskFilter.Blur.NORMAL);
     
     void startDrawingShape() {
 	shape = new Shape();
@@ -89,6 +94,10 @@ class Screen extends View {
     
     public Screen(GRASP source) {
 	super(source);
+
+
+	// blur doesn;t work with hw acceleration :/
+	setLayerType(View.LAYER_TYPE_SOFTWARE, GRASP.paint);
 
 	activity = source;
 
@@ -384,7 +393,8 @@ class Screen extends View {
 	    popup.top = Math.max(0,
 				 Math.min(height-h,
 					  y - h/2));
-	    
+
+	    //GRASP.log("popup left: "+(int)popup.left+", top: "+(int)popup.top);
 	    layers.add(popup);
 	}
 	
@@ -405,14 +415,19 @@ class Screen extends View {
     
     @Override
     protected void onDraw(Canvas canvas) {
+
+
 	canvas.drawRGB(255, 255, 255);
 	GRASP._log.draw(canvas, 0, 0);
 
-	Pad top = layer.peekLast();
+
+	Pad top = layers.peekLast();
 
 	if (top != null) {
+	    GRASP.paint.setMaskFilter(blur);
 	    // blur filter mask
 	}
+
 	
 	panel.render(canvas);
 
@@ -421,9 +436,16 @@ class Screen extends View {
 	while(layer.hasNext()) {
 	    Pad item = layer.next();
 	    if (item == top) {
+		GRASP.paint.setMaskFilter(null);
 		//remove blur filter mask
 	    }
+	    int a = GRASP.paint.getAlpha();
+	    GRASP.paint.setAlpha(64);
+	    canvas.drawRect(0, 0, width, height, GRASP.paint);
+	    GRASP.paint.setAlpha(a);
 	    item.render(canvas);
+
+
 	}
 	
 	Iterator<Tile> tile =  overlay.iterator();
