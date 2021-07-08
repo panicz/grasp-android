@@ -9,4 +9,12 @@ interface Pad extends Tile {
     void onDoubleClick(Screen screen, byte finger, float x, float y);
     Drag onHold(Screen screen, byte finger, float x, float y);
 
+    // these are only triggered when the parent decides so
+    // (currently only triggered from Popup and Below,
+    // and handled by Below and Button)
+    void onDragOver(Screen screen, byte finger, float x, float y);
+    void onDragOut(Screen screen, byte finger);
+    void onRelease(Screen screen, byte finger, float x, float y);
+
+    
 }

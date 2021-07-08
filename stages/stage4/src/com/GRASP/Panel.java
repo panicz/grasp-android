@@ -145,4 +145,17 @@ abstract class Panel implements Pad {
 	shift.set(x, y);
 	return drag.outwards(shift);
     }
+
+    @Override
+    public void onDragOver(Screen screen, byte finger,
+			   float x, float y) {}
+
+    @Override
+    public void onDragOut(Screen screen, byte finger) {}
+
+    @Override
+    public void onRelease(Screen screen, byte finger,
+			  float x, float y) {}
+
+    
 };

@@ -225,5 +225,15 @@ class Popup implements Pad, Drag {
 	return this;
     }
 
+    @Override
+    public void onDragOver(Screen screen, byte finger,
+			   float x, float y) {}
+
+    @Override
+    public void onDragOut(Screen screen, byte finger) {}
+
+    @Override
+    public void onRelease(Screen screen, byte finger,
+			  float x, float y) {}
     
 }

@@ -15,6 +15,12 @@ class Button implements Pad {
     public static final float horizontal_margin = 8;
     public static final float vertical_margin = 20;
 
+    public final int BGCOLOR = 0xccffffff;
+    public final int FGCOLOR = 0xcc000000;
+    
+    public int bgcolor = BGCOLOR;
+    public int fgcolor = FGCOLOR;
+
     
     public Button(String label, float w, float h) {
 
@@ -32,13 +38,13 @@ class Button implements Pad {
     
     @Override
     public void render(Canvas canvas) {
-	paint.setColor(0xeeffffff);
+	paint.setColor(bgcolor);
 	
 	canvas.drawRoundRect(1.0f, 1.0f,
 			     _width-2.0f, _height-2.0f,
 			     5.0f, 5.0f, paint);
 	
-	paint.setColor(0xee000000);
+	paint.setColor(fgcolor);
 	
 	canvas.drawText(caption, horizontal_margin,
 			(height()
@@ -68,9 +74,6 @@ class Button implements Pad {
     public Drag onPress(Screen screen,
 			byte finger,
 			float x, float y) {
-	// jezeli wcisnelismy na ramke u gory
-	// to przeciagamy wyrazenie,
-	// u dolu - byc moze zmieniamy jego rozmiar
 	return null;
     }
 
@@ -101,4 +104,28 @@ class Button implements Pad {
 		       float x, float y) {
 	return null;
     }
+
+    @Override
+    public void onDragOver(Screen screen, byte finger,
+			   float x, float y) {
+	//GRASP.log("over "+caption);
+	fgcolor = BGCOLOR;
+	bgcolor = FGCOLOR;
+    }
+
+    @Override
+    public void onDragOut(Screen screen, byte finger) {
+	//GRASP.log("out "+caption);
+
+	fgcolor = FGCOLOR;
+	bgcolor = BGCOLOR;
+    }
+
+    @Override
+    public void onRelease(Screen screen, byte finger,
+			  float x, float y) {
+
+    }
+
+    
 }
