@@ -1,4 +1,364 @@
+6805
 
+8.07.2021 plan kolejnych zmian:
+- nie ladujemy predefiniowanego dokumentu, tylko brudnopis
+- implementujemy popup switch
+- dajemy funkcjonalnosc tworzenia nowego dokumentu
+- zamykanie dokumentu
+- implementujemy przegladarke plikow
+  - umozliwiamy wczytywanie dokumentow
+  - umozliwiamy zapis dokumentow
+
+
+7.07.2021 implementacja onDragOver i onDragOut:
+- Popup powinien tak dzialac, ze jego metoda move
+sprawdza, czy poprzednio jego target byl hovered,
+i czy nadal jest hovered, i na tej podstawie
+odpowiednio wysylac zdarzenie
+
+
+
+6.07.2021 mamy juz pop-upa, tyle ze martwego. co nam pozostaje:
+- gorny i dolny pasek (przeciaganie i zmiana rozmiaru) V
+- wypozycjonowanie paska V
+- kolorowanie przy najezdzaniu (onDragOver i onDragOut) V
+- zaciemnianie tla (i rozmycie?) V
+- odtwarzanie animacji przy kliknieciu (75-100 ms) VX
+- wykonywanie akcji Buttona
+
+
+4.07.2021 zatem nasze nowe klasy to:
+
+- Button (implements Pad) V
+(zawiera animację wciśnięcia; powoduje wykonanie określonej
+akcji)
+
+- Below (implements Pad) V
+(agregowanie wielu elementow pod soba)
+
+- Popup (implements Pad) V
+(okienko; mozna przesuwac i probowac zmieniac rozmiar)
+
+
+3.07.2021 czas 'ukladania sobie w glowie'
+
+na razie zmienilismy nazwe Widget na Tile i wyodrebnilismy
+nowa abstrakcje Pad, krorej instancje stanowi Panel.
+
+Teraz chcielibysmy stworzyc FileMenu, będące instancją
+Popupa, przechowującego ButtonList. 
+
+Raczej: będziemy mieli pad o nazwie Below,
+agregujacy inne pady, i będziemy go uzywać
+do przechowania listy opcji dostępnych w menu.
+
+
+30.06.2021
+
+no dobra
+
+rozpoczyna sie ETAP 4!!! (czyli zapis/odczyt plikow)
+
+Co teraz?
+- przytrzymanie na dokumencie powinno spowodowac
+pojawienie sie menu kontekstowego
+
+
+New
+Open
+//Import
+//Symbol
+Switch to...
+Save
+Save as...
+Close
+
+- Wybor Open i Save as powinien otwierac przegladarke plikow
+
+i takie tam (ogarniemy).
+
+Natomiast jak to rozegrac technicznie?
+
+Teraz nagle mamy okna, ktore mozna przeciagac.
+Chcemy miec klase Window, ktora bedzie nam wyswietlac widget.
+(Czyli bedzie troche jak DragAround)
+
+
+
+28.06 do zrobienia:
+- usuwanie pustych linii v
+- poprawienie bledu zmiany rozmiaru w 'nieprzesunietych'
+splitach v
+
+23.06.2021
+w dodatku do zmiany rozmiaru pudelka powinnismy tez pamietac
+o maksymalizacji widoku na dwukliknietym wyrazeniu V
+oraz o zwijaniu pudelek X
+
+na poczatku jednak skupmy sie na jednej kwestii zwiazanej
+ze zmiana rozmiaru pudelek, mianowicie - ich powiekszaniu
+
+przy zmianie szerokosci, powinnismy zwiekszac szerokosc wszystkich
+linii, a konkretnie -- szerokosc ostatniej spacji w kazdej
+z tych linii
+
+z kolej przy zwiekszaniu wysokosci zwiększamy wysokość
+ostatniej interlinii
+
+
+22.06.2021
+- zapewnic minimalny odstep miedzy wyrazeniami w dokumencie V
+- zmiana wysokosci i szerokosci przy pomocy prawego nawiasu V
+
+co do zmiany rozmiaru:
+
+mozemy modulowac nastepujace parametry:
+
+- ilosc linii
+- szerokosc interlinii
+- szerokosc spacji miedzy wyrazeniami
+
+ponadto:
+- zmiana rozmiaru zewnetrznego pudelka moze wplywac
+na rozmiar i rozmieszczenie elementow w wewnetrznych
+pudelkach
+- powiekszanie wewnetrznego pudelka potencjalnie powoduje
+powiekszanie pudelek, w ktorych sie znajduje
+
+
+21.06.2021 cel na dzis:
+- sprawic, zeby Document dziedziczyl po Box, i zintegrowac to
+z parserem, wymuszajac minimalna odleglosc (pionowa lub
+pozioma) miedzy wyrazeniami
+
+
+20.06.2021 musimy wiedzieć nad czym pracujemy (w tygodniu 21-25.06)
+- poprawki w obsłudze dokumentu
+- przełączanie między dokumentami (wymaga mechanizmu menu)
+- otwieranie i zapisywanie dokumentów (wymaga listowania
+plików i poprawek w parserze)
+
+plan na poprawkę w obsłudze dokumentu:
+- wyabstrahowanie mechanizmu iteracji. aktualnie mechanizm
+ten służy albo do rysowania, albo do budowania stringa,
+albo do wyciagania wyrazenia, albo do wkladania
+wyrazenia.
+
+
+17.06.2021 zmiany w toplevelu (tzn. document vs box):
+- przy akceptowaniu wyrazen (przed pierwszym i za ostatnim
+wyrazeniem)
+- zapewnienie odstepow pomiedzy wyrazeniami
+- funkcja ktora pozwala otrzymac polozenie i rozmiar kliknietego
+wyrazenia (zeby moc na nim robic podwojne klikniecie)
+- zmiana rozmiaru wyrazenia przy przeciaganiu prawego nawiasa
+
+
+
+10.06.2021
+
+system animacji - jak powinien dzialac?
+
+z perspektywy aplikacji - mamy w edytorze handler
+podwojnego klikniecia.
+sprawdza, czy kat transformacji wynosi 0 - jesli nie,
+dodaje animacje, ktora sprowadzi kat do 0
+
+przy czym, jezeli w trakcie animacji uzytkownik dotknie
+edytora, animacja zostanie zatrzymana
+
+
+08.06.2021
+
+rzeczy do zrobienia 'na teraz'
+- poprawa błędu scrollowania na drugim ekranie v
+- poprawa błędu ze znikajacymi elementami v
+- (ewentualnie?) skalowanie przeciąganych elementów
+- podwójne kliknięcie:
+  - animacja normalizujaca widok:
+  1. cały dokumen v
+  2. kliknięte wyrażenie
+
+a co dalej:
+- więcej powietrza przy renderowaniu top-levelu v
+
+
+07.06.2021
+
+w jakich kontekstach pojawia sie 'translate':
+
+- metoda z interfejsu Drag
+- w klasie Panel jest metoda statyczna translate
+- klasa Split implementuje trywialnie te metode
+(jako czesc interfejsu Drag)
+- w klasach Horizontal/VerticalSplit metoda translate
+jest uzyta przy propagacji zdarzen
+- w klasie Box pojawia sie we Wlasciwych Kontekstach
+
+plan:
+- zmieniamy interfejs w Drag, zeby pobieral transform
+- zmieniamy uzycia w Box
+- zmieniamy propagatory
+
+03.06.2021
+
+wpadlem w 'krolicza nore' zoomowania dokumentu.
+na razie transformacja dziala, ale tylko wizualnie.
+Plan jest taki: dodajemy interfejs 'Transform'
+i zastepujemy metode translate obiektu 'Drag'.
+Interfejs 'Drag' bedzie implementowany przez klasy
+Translate (tylko dodawanie/odejmowanie) i Grab
+
+28.05.2021 
+
+zastanowmy sie, jak by to moglo dzialac.
+pierwsza uwaga: bedziemy potrzebowac listy dwukierunkowej
+z wyrazeniami, ktore sa umieszczane bezposrednio
+pod soba.
+
+edytor musi miec wskaznik na pierwsze widoczne wyrazenie,
+zeby nie musiec za kazdym razem przeskakiwac niewidocznych
+wyrazen
+
+klopot jednak polega na tym, ze jezeli mamy dwa edytory,
+ktore wyswietlaja ten sam dokument, to jezeli zmodyfikujemy
+w jakims edytorze pierwsze widoczne wyrazenie z innego edytora,
+mozemy dostac niespojny stan
+
+(z kolei przy samym scrollowaniu jest o tyle spoko, ze
+podczas scrolowania w gore sprawdzamy tylko, czy poprzedni
+element stal sie widoczny, a przy scrollowaniu w dol
+- czy pierwszy element nadal jest widoczny)
+
+rozwiazanie byloby takie, ze kazde wyrazenie mialoby liste
+edytorow, ktore maja je jako pierwsze wyrazenie, i w momencie,
+gdy byloby wyciagane albo usuwane, wszystkie edytory bylyby
+o tym powiadamiane
+
+Jest to do zrobienia. Wyglada jednak na to, ze w tym celu
+niezbedne bedzie przekonwertowanie klasy Bit do interfejsu.
+
+Przekonwertowane, ale teraz nie bardzo wiem co to mialo dac :D
+
+Nie ma powodu dla ktorego Document mialby dziedziczyc po klasie
+Bit czy tez ja implementowac.
+
+Raczej zamiast tego bedziemy po prostu mieli dwukierunkowa
+liste naprzemienna.
+
+
+
+27.05.2021 zmiany w klasie Document:
+- elementy przechowujemy w liście dwukierunkowej
+- wyswietlamy tylko te wyrazena, ktore sa aktualnie
+widoczne na ekranie
+- klasy Editor i Document mogą byc ze soba 'intymnie splecione'
+- klasa Document sluzy przede wszystkim do interakcji
+w kontekscie otwierania i zapisywania plikow.
+Document nie musi miec tych wszystkicg funkcji renderujacych
+- moga one byc obsluzobe po stronie edytora
+
+
+25.05.2021 dalsze kroki:
+- zmiana insertAt v
+- kopiowanie z drugiego klikniecia v
+- zrzut na interlinie v
+
+- Document wyswietla elementy pod soba x (+ uniemozliwienie draga
+calego dokumentu v)
+
+- podswietlanie obszaru dla dropa? -> na razie nie robimy
+
+- ograniczenie scrollowania do pionowego
+- normalizacja wciec
+- zoomowanie v
+- undo i historia edycji (+zrzucanie elementów na atomy)
+- otwieranie/zapisywanie dokumentow, przegladarka plikow?
+(czy to nie wymaga mechanizmu rozszerzen?)
+- obsluga stringow, dotted taili i komentarzy
+- dodawanie gestow
+- gesty dla 'box' i 'underline'
+- edycja z klawiatury
+
+- abstrakt na Scheme Workshops (do 26.06)
+
+- interpreter Scheme'u
+- mechanizm rozszerzen
+- edytor grafow
+- wizualna ewaluacja
+
+- Scheme workshops (27.08)
+
+- zapamietywanie ukladow ekranow
+dla orientacji pionowej i poziomej
+
+
+Kopiowanie z drugiego klikniecia:
+dragAround powinno dostac dodatkowe argumenty:
+- w jaki sposob pobieramy element
+(w przypadku pojedynczego klikniecia
+
+- co zrobic gdy nie uda sie odlozyc elementu
+
+
+23.05.2021 jaki powinien być następny krok?
+z pobieżnej analizy wynika, że insertAt pojawia się
+w kodzie 17 razy. jeden z pomysłów na refaktor
+to żeby zmienić ostatni argument z Bit na DragAround.
+
+równolegle jest jednak jeszcze inny pomysł, żeby
+raczej mieć funkcję, która zwraca nam "lokację"
+danego wyrażenia, oraz inne funkcje, które na tej
+lokacji operują
+
+(tak czy siusiak, warto dodać logowanie tego, co się
+aktualnie dzieje)
+
+a jak by mogły takie lokacje wyglądać?
+- ciągi liczb postaci lclclc...  gdzie l to numer
+linii, a c - numer kolumny, przy czym indeksy parzyste
+(od 0) to interlinie i spacje, a indeksy nieparzyste
+to linie i 'bity'.
+
+
+no, nie bujajmy na razie w obłokach. mamy do rozwiązania
+następujące kazusy:
+- jak sie dropuje za ostatni bit w danej linii, to
+miejsce zrzutu jest strasznie mocno przesunięte w prawo
+- jak się kliknie i momentalnie puści, to element
+przesuwa się w prawo
+- zrzut na interlinię powoduje zniknięcie elementu
+- zrzut na atom powoduje zniknięcienelement
+
+
+
+
+22.05.2021 drop dziala, o ile nie zrzucamy czegos na interlinie,
+za ostatnie wyrazenie albo na jakies miejsce nielegalne (np. atom).
+trzeba to poprawic, przy czym ten ostatni przypadek wymaga
+powrotu na oryginalna pozycje, a wiec zalazka implementacji
+mechanizmu historii
+
+poza tym:
+- klikniecie nie powinno powodowac przemieszczenia
+- ale juz ma tym etapie potrzebujemy mechanizmu, ktory
+by nam jakos normalizowal wciecia
+- no i fajnie byloby miec podswietlanie spacji/interlinii
+
+
+
+
+20.05.2021 chyba drag dziala juz w miare ok, teraz pora na dropa
+
+19.05.2021 drag jako tako działa, ale trzeba przemyśleć
+nieco rzeczy w związku z błędami, jakie się pojawiły:
+- wydaje się, ze scrollowanie psuje drag&dropa
+- pudełka się zmniejszają gdy się z nich coś wyciągnie
+- no i trzeba zaimplementować dropa
+
+18.05.2021 mamy juz potrzebne zdarzenia, a teraz chcemy ich
+uzyc do implementacji pożądanych zachowań. Zaczniemy od
+implementacji onSecondPress na boxach
 
 16.05.2021 kolejny krok: trzeba okreslic warunki, w ktorych
 wymyślone poprzednio rodzaje zdarzeń będą generowane.
@@ -75,11 +435,11 @@ ktore wyciagaja element spod wspolrzednej (x, y)
 
 12.05.2021 trzeba rozkminic interakcje:
 
-- chwytanie za nawiasy i atomy powinno powodowac wyciaganie
+- chwytanie za atomy i lewe nawiasy powinno powodowac wyciaganie
 odpowiedniego wyrazenia (a upuszczenie - umieszczenie wyrazenia
 w jakims miejscu)
 
-- rozciąganie przeciagniętego wyrażenia powoduje
+- rozciąganie prawego nawiasu wyrażenia powoduje
 zmianę rozmiaru (na ile to możliwe)
 
 - podwojne klikniecie i rozpoczecie przeciagania (nawias
