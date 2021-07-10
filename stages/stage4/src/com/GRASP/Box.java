@@ -158,23 +158,33 @@ class Box implements Bit {
     
     @Override
     public float width() {
-	return 2*parenWidth+first_interline.maximum_width();
+	return 2*parenWidth
+	    + (first_interline == null
+	       ? 0
+	       : first_interline.maximum_width());
     }
 
     @Override
     public float min_width() {
-	return 2*parenWidth+first_interline.minimum_width();
+	return 2*parenWidth
+	    + (first_interline == null
+	       ? 0
+	       : first_interline.minimum_width());
     }
 
     @Override
     public float height() {
 	return Math.max(min_height,
-			first_interline.onward_height());
+			first_interline == null
+			? 0
+			: first_interline.onward_height());
     }
 
     @Override
     public float min_height() {
-	return first_interline.minimum_height();
+	return (first_interline == null)
+	    ? 0
+	    : first_interline.minimum_height();
     }
 
     @Override
