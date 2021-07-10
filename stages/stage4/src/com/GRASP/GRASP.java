@@ -38,7 +38,7 @@ public class GRASP
     GestureDetector gestureDetector;
     public static Logger _log = null;
     public Screen edit;
-    public static Screen last_known_edit_instance = null;
+    private static Screen last_known_edit_instance = null;
     public static Paint paint = null;
     
     public static void log(String s) {
@@ -108,13 +108,14 @@ public class GRASP
 	    _log = new Logger(120);
 	}
 
+
 	edit = new Screen(this);
 
 	last_known_edit_instance = edit;
 	
         setContentView(edit);
 	
-	gestureDetector = new GestureDetector(this,this);
+	gestureDetector = new GestureDetector(this, this);
         gestureDetector.setOnDoubleTapListener(this);
 
         edit.setOnKeyListener(this);

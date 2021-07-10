@@ -2,6 +2,7 @@ package com.GRASP;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 //import android.graphics.Path;
+import java.util.List;
 
 
 import java.lang.Math;
@@ -196,7 +197,7 @@ class Editor extends Panel {
 	    return this;
 	}
     }
-
+    
     @Override
     public Drag stretchFrom(byte finger, float x, float y) {
 	return new Stretch(this, finger, x, y);
@@ -239,7 +240,7 @@ class Editor extends Panel {
 	    transition.stop();
 	}
 	
-	if (GRASP.last_known_edit_instance.isOngoingDragAction()) {
+	if (screen.isOngoingDragAction()) {
 	    return new Stretch(this, finger, x, y);
 	}
 
@@ -265,7 +266,6 @@ class Editor extends Panel {
 	// docelowo bedziemy chcieli umiescic kursor
 	// na danym wyrazeniu
     }
-
     
     @Override
     public Drag onSecondPress(Screen screen,
@@ -349,7 +349,36 @@ class Editor extends Panel {
 	transition.setScroll(0, 0);
 	transition.start(700);
     }
+    
+    class ShowOpenedDocuments implements Action {
+	Editor target;
+	
+	public ShowOpenedDocuments(Editor editor) {
+	    target = editor;
+	}
 
+	@Override
+	public void perform(float x, float y) {
+	    target.screen.layers.removeLast();
+	    List<Document> opened = target.document.openedDocuments;
+	    Button [] documents = new Button[opened.size()];
+
+	    for (int i = 0; i < opened.size(); ++i) {
+		Document doc = opened.get(i);
+		documents[i] =
+		    new Button(doc.path);
+	    }
+
+	    Popup popup = new Popup(new Below(documents));
+	    popup.centerAround(x, y,
+			       target.screen.width,
+			       target.screen.height);
+
+	    target.screen.layers
+		.addLast(popup);
+	}
+    }
+    
     @Override
     public Drag onHold(Screen screen,
 		       byte finger,
@@ -371,12 +400,13 @@ class Editor extends Panel {
 	return
 	    new
 	    Popup(new
-		  Below(new Button("New", 300, 80),
-			new Button("Open", 300, 80),
-			new Button("Switch to...", 300, 80),
-			new Button("Save", 300, 80),
-			new Button("Save as...", 300, 80),
-			new Button("Close", 300, 80)
+		  Below(new Button("New"),
+			new Button("Open"),
+			new Button("Switch to...",
+				   new ShowOpenedDocuments(this)),
+			new Button("Save"),
+			new Button("Save as..."),
+			new Button("Close")
 			));
     }
 

@@ -235,5 +235,13 @@ class Popup implements Pad, Drag {
     @Override
     public void onRelease(Screen screen, byte finger,
 			  float x, float y) {}
+
+    public void centerAround(float x, float y,
+			     float width, float height) {
+	float w = this.width();
+	float h = this.height();
+	left =  Math.max(0, Math.min(width-w, x - w/2));
+	top = Math.max(0, Math.min(height-h, y - h/2));
+    }
     
 }
