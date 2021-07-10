@@ -21,9 +21,11 @@ class Button implements Pad {
     public int bgcolor = BGCOLOR;
     public int fgcolor = FGCOLOR;
 
+    static Noop noop = new Noop();
+    Action action;
     
-    public Button(String label, float w, float h) {
-
+    public Button(String label, float w, float h,
+		  Action whenClicked) {
 	if (paint == null) {
 	    paint = new Paint();
 	    paint.setStrokeWidth(4);
@@ -34,7 +36,21 @@ class Button implements Pad {
 	
 	caption = label;
 	trySetSize(w, h);
+	action = whenClicked;
     }
+
+    public Button(String label, float w, float h) {
+	this(label, w, h, noop);
+    }
+
+    public Button(String label, Action whenClicked) {
+	this(label, 0, 0, whenClicked);
+    }
+
+    public Button(String label) {
+	this(label, 0, 0, noop);
+    }
+
     
     @Override
     public void render(Canvas canvas) {
@@ -53,6 +69,16 @@ class Button implements Pad {
 			paint);
     }
 
+    void invert_colors() {
+	fgcolor = BGCOLOR;
+	bgcolor = FGCOLOR;
+    }
+
+    void normal_colors() {
+	bgcolor = BGCOLOR;
+	fgcolor = FGCOLOR;
+    }
+    
     @Override
     public float width() {
 	return _width;
@@ -66,22 +92,24 @@ class Button implements Pad {
     @Override
     public void trySetSize(float x, float y) {
 	_width = Math.max(x, paint.measureText(caption)
-			  + 2*horizontal_margin);
+			  + 3*horizontal_margin);
 	_height = Math.max(y, text_size+2*vertical_margin);
     }
+
     
     @Override
     public Drag onPress(Screen screen,
 			byte finger,
 			float x, float y) {
+	invert_colors();
 	return null;
     }
-
+    
     @Override
     public void onClick(Screen screen,
 			byte finger,
 			float x, float y) {
-	
+	action.perform(x, y);
     }
 
     @Override
@@ -109,22 +137,19 @@ class Button implements Pad {
     public void onDragOver(Screen screen, byte finger,
 			   float x, float y) {
 	//GRASP.log("over "+caption);
-	fgcolor = BGCOLOR;
-	bgcolor = FGCOLOR;
+	invert_colors();
     }
 
     @Override
     public void onDragOut(Screen screen, byte finger) {
 	//GRASP.log("out "+caption);
-
-	fgcolor = FGCOLOR;
-	bgcolor = BGCOLOR;
+	normal_colors();
     }
 
     @Override
     public void onRelease(Screen screen, byte finger,
 			  float x, float y) {
-
+	action.perform(x, y);
     }
 
     

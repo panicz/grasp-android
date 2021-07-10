@@ -10,6 +10,11 @@ class Below implements Pad, Drag {
 
     public Below(Pad ... items) {
 	contents = items;
+	float w = width();
+	
+	for (int i = 0; i < contents.length; ++i) {
+	    contents[i].trySetSize(w, contents[i].height());
+	}
     }
     
     protected static Drag translate(Drag drag, float x, float y) {
@@ -55,6 +60,7 @@ class Below implements Pad, Drag {
 
     @Override
     public void trySetSize(float x, float y) {
+
     }
 
 
