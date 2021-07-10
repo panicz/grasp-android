@@ -14,6 +14,16 @@ stage 4: lisp files can be imported and exported
 
 stage 5: shapes can be drawn and associated with names
 
+  box -> list
+
+  underscore -> atom
+
+  vertical bar -> comment / dotted tail
+
+  Q - magnifying glass
+
+  straight line between two editors - start targets end
+
 stage 6: undoing and history tracking
 
 stage 7: expressions can be evaluated
