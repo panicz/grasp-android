@@ -4,10 +4,8 @@ import java.lang.Math;
 
 abstract class Animation {
     protected long progress_ms, duration_ms;
-
-    AnimationSystem animationSystem;
     
-    public final boolean is_running() {
+    public boolean is_running(AnimationSystem animationSystem) {
 	return animationSystem
 	    .pending
 	    .containsKey(this);
@@ -26,22 +24,23 @@ abstract class Animation {
 	    (start + (end-start)*Math.sin(progress*Math.PI/2.0)); 
     }
 
-    public void start(int duration_ms) {
+    public void start(int duration_ms,
+		      AnimationSystem animationSystem) {
 	assert(duration_ms > 0);
 	progress_ms = 0;
 	animationSystem.add(this);
 	this.duration_ms = duration_ms;
     }
 
-    public void stop() {
+    public void stop(AnimationSystem animationSystem) {
 	animationSystem.remove(this);
     }
 
     protected abstract void advance(float progress);
     
-    public final void step() {
+    public final void step(AnimationSystem animationSystem) {
 	if (progress_ms > duration_ms) {
-	    stop();
+	    stop(animationSystem);
 	    return;
 	}
 	progress_ms += AnimationSystem.period_ms;

@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Bundle;
 //import android.graphics.Canvas;
+import android.util.DisplayMetrics;
+
 
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +31,12 @@ public class GRASP
 	       OnKeyListener
 	    //   implements OnTouchListener
 {
+    enum ScreenOrientation {
+	Horizontal, Vertical
+    }
+
+    ScreenOrientation screenOrientation;
+    
     public static Typeface symbols_font = null;
     public static Typeface strings_font = null;
     public static Typeface logs_font = null;
@@ -37,13 +45,15 @@ public class GRASP
 
     GestureDetector gestureDetector;
     public static Logger _log = null;
-    public Screen edit;
-    private static Screen last_known_edit_instance = null;
+    public Screen screen;
+    private static Screen last_known_screen_instance = null;
     public static Paint paint = null;
+
+    private Panel other_panel;
     
     public static void log(String s) {
 	_log.log(s);
-	last_known_edit_instance.invalidate();
+	last_known_screen_instance.invalidate();
     }
 
     static String evt(MotionEvent e) {
@@ -108,26 +118,80 @@ public class GRASP
 	    _log = new Logger(120);
 	}
 
-
-	edit = new Screen(this);
-
-	last_known_edit_instance = edit;
-	
-        setContentView(edit);
-	
 	gestureDetector = new GestureDetector(this, this);
         gestureDetector.setOnDoubleTapListener(this);
 
-        edit.setOnKeyListener(this);
-        edit.setFocusableInTouchMode(true);
-        edit.requestFocus();
+
+	DisplayMetrics metrics =
+	    getResources()
+	    .getDisplayMetrics();
+
+	if (metrics.widthPixels < metrics.heightPixels) {
+	    screenOrientation = ScreenOrientation.Vertical;
+	}
+	else {
+	    screenOrientation = ScreenOrientation.Horizontal;
+	}
+
+	//savedState
+	Panel content = null;
+
+	if (savedState != null) {
+	    Panel horizontalPanel = savedState
+		.getParcelable("horizontal_panel");
+	    Panel verticalPanel = savedState
+		.getParcelable("vertical_panel");
+	    
+	    if (screenOrientation == ScreenOrientation.Horizontal
+		&& horizontalPanel != null) {
+		content = horizontalPanel;
+		other_panel = verticalPanel;
+	    }
+	    else if (screenOrientation == ScreenOrientation.Vertical
+		     && verticalPanel != null) {
+		content = verticalPanel;
+		other_panel = horizontalPanel;
+	    }
+	    else if (horizontalPanel != null
+		     && verticalPanel == null) {
+		content = horizontalPanel;
+	    }
+	    else if (verticalPanel != null
+		     && horizontalPanel == null) {
+		content = verticalPanel;
+	    }
+	}
+
+	if (content == null) {
+	    content = new Editor(0, 0,
+				 metrics.widthPixels,
+				 metrics.heightPixels,
+				 Scratch.instance(),
+				 new Grab());
+	}
+	
+	screen = new Screen(this, content);
+        setContentView(screen);
+	
+        screen.setOnKeyListener(this);
+        screen.setFocusableInTouchMode(true);
+        screen.requestFocus();
+
+	last_known_screen_instance = screen;
+	log(screenOrientation.toString());
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle state) {
+	
+
     }
 
     
     @Override
     protected void onResume() {
 	super.onResume();
-	edit.animationSystem.prepare();
+	screen.animationSystem.prepare();
     }
     
     // ze wzgledu na ograniczenia techniczne, zdarzenia
@@ -136,14 +200,14 @@ public class GRASP
 
     boolean invalidating(boolean result) {
 	if (result) {
-	    edit.invalidate();
+	    screen.invalidate();
 	}
 	return result;
     }
      
     @Override
     public boolean onDown(MotionEvent event) {
-	return invalidating(edit.onDown(event));
+	return invalidating(screen.onDown(event));
     }
 
     
@@ -151,13 +215,13 @@ public class GRASP
     public boolean onFling(MotionEvent _,
 			   MotionEvent event,
 			   float vx, float vy) {
-	return invalidating(edit.onUp(event, vx, vy));
+	return invalidating(screen.onUp(event, vx, vy));
     }
 
     @Override
     public void onLongPress(MotionEvent event) {
-	if(edit.onLongPress(event)) {
-	    edit.invalidate();
+	if(screen.onLongPress(event)) {
+	    screen.invalidate();
 	}
     } 
 
@@ -179,7 +243,7 @@ public class GRASP
 
     @Override
     public boolean onDoubleTap(MotionEvent e) {
-        return invalidating(edit.onDoubleTap(e));
+        return invalidating(screen.onDoubleTap(e));
     }
 
     @Override
@@ -189,7 +253,7 @@ public class GRASP
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-	return invalidating(edit.onSingleTap(e));
+	return invalidating(screen.onSingleTap(e));
     }
 
     @Override
@@ -201,19 +265,19 @@ public class GRASP
 	switch(action) {
 	case MotionEvent.ACTION_DOWN:	    
 	case MotionEvent.ACTION_POINTER_DOWN:
-	    return invalidating(edit.onDown(event));
+	    return invalidating(screen.onDown(event));
 
 	case MotionEvent.ACTION_UP:
-	    return invalidating(edit.onUp(event, 0, 0));
+	    return invalidating(screen.onUp(event, 0, 0));
 
 	case MotionEvent.ACTION_POINTER_UP:	    
-	    return invalidating(edit.onUp(event, 0, 0));
+	    return invalidating(screen.onUp(event, 0, 0));
 
 	case MotionEvent.ACTION_OUTSIDE:
-	    return invalidating(edit.onUp(event, 0, 0));
+	    return invalidating(screen.onUp(event, 0, 0));
 
 	case MotionEvent.ACTION_MOVE:
-	    return invalidating(edit.onMotion(event));
+	    return invalidating(screen.onMotion(event));
 
 	case MotionEvent.ACTION_CANCEL: 
 	default: 

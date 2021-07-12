@@ -1,8 +1,11 @@
 package com.GRASP;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-class VerticalSplit extends Split {
+
+final class VerticalSplit extends Split {
 
     public VerticalSplit(float x, float y, float w, float h,
 			 Panel top,
@@ -328,5 +331,16 @@ class VerticalSplit extends Split {
 	return false;
     }
 
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+	out.writeByte(PANEL_TYPE_VERTICAL_SPLIT);
+
+    }
+
+    public static VerticalSplit fromParcel(Parcel in) {
+	// the PANEL_TYPE_VERTICAL_SPLIT parcel tag has
+	// already been read by Panel's Parcelable.Creator
+	return null;
+    }
     
 }

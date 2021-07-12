@@ -3,20 +3,19 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 //import android.graphics.Path;
 import java.util.List;
-
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.lang.Math;
 
 
-class Editor extends Panel {
+final class Editor extends Panel {
 
     Document document;
 
     Grab transform;
 
     Transition transition;
-
-    Screen screen;
     
     float scale = 1.0f;
     float angle = 0.0f; // degrees
@@ -27,11 +26,9 @@ class Editor extends Panel {
     
     public boolean is_pinned = false;
 
-    public Editor(Screen owner,
-		  float x, float y, float w, float h,
+    public Editor(float x, float y, float w, float h,
 		  Document doc, Grab grab) {
 	super(x, y, w, h);
-	screen = owner;
 	document = doc;
 	transform = grab;
 	id = instances++;
@@ -45,7 +42,7 @@ class Editor extends Panel {
     
     @Override
     public Panel copy() {
-	return new Editor(screen, left(), top(), width(), height(),
+	return new Editor(left(), top(), width(), height(),
 			  document, transform.copy());
     }
     
@@ -236,8 +233,8 @@ class Editor extends Panel {
     public Drag onPress(Screen screen,
 			byte finger,
 			float x, float y) {
-	if (transition.is_running()) {
-	    transition.stop();
+	if (transition.is_running(screen.animationSystem)) {
+	    transition.stop(screen.animationSystem);
 	}
 	
 	if (screen.isOngoingDragAction()) {
@@ -254,7 +251,6 @@ class Editor extends Panel {
 	    }
 	    return drag.outwards(transform);
 	}
-	
 
 	return null;
     }
@@ -295,7 +291,8 @@ class Editor extends Panel {
 	    transition.setTargetScale(transform.getScale());
 	    transition.fixPoint(x, y);
 	    transition.start((int) Math.abs(720*transform.getAngle()
-					   /90));
+					    /90),
+			     screen.animationSystem);
 	    return;
 	}
 
@@ -326,7 +323,7 @@ class Editor extends Panel {
 		//GRASP.log("focus on "+target.target);
 		transition.setTargetScale(scale);
 		transition.setScroll(-left, -top);
-		transition.start(700);
+		transition.start(700, screen.animationSystem);
 		return;
 	    }
 	}
@@ -340,27 +337,27 @@ class Editor extends Panel {
 
 	    transition.setTargetScale(width_ratio);
 	    transition.fixPoint(x, y);
-	    transition.start(700);
+	    transition.start(700, screen.animationSystem);
 	    return;
 	}
 
 
 	transition.setTargetScale(height_ratio);
 	transition.setScroll(0, 0);
-	transition.start(700);
+	transition.start(700, screen.animationSystem);
     }
     
     class ShowOpenedDocuments implements Action {
-	Editor target;
+	Screen target;
 	
-	public ShowOpenedDocuments(Editor editor) {
-	    target = editor;
+	public ShowOpenedDocuments(Screen screen) {
+	    target = screen;
 	}
 
 	@Override
-	public void perform(float x, float y) {
-	    target.screen.layers.removeLast();
-	    List<Document> opened = target.document.openedDocuments;
+	public void perform(byte finger, float x, float y) {
+	    target.layers.removeLast();
+	    List<Document> opened = Document.openedDocuments;
 	    Button [] documents = new Button[opened.size()];
 
 	    for (int i = 0; i < opened.size(); ++i) {
@@ -371,11 +368,10 @@ class Editor extends Panel {
 
 	    Popup popup = new Popup(new Below(documents));
 	    popup.centerAround(x, y,
-			       target.screen.width,
-			       target.screen.height);
+			       target.width,
+			       target.height);
 
-	    target.screen.layers
-		.addLast(popup);
+	    target.layers.addLast(popup);
 	}
     }
     
@@ -403,7 +399,7 @@ class Editor extends Panel {
 		  Below(new Button("New"),
 			new Button("Open"),
 			new Button("Switch to...",
-				   new ShowOpenedDocuments(this)),
+				   new ShowOpenedDocuments(screen)),
 			new Button("Save"),
 			new Button("Save as..."),
 			new Button("Close")
@@ -417,5 +413,16 @@ class Editor extends Panel {
 				 (DragAround)
 				 bit.inwards(transform));
     }
-    
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+	out.writeByte(PANEL_TYPE_EDITOR);
+
+    }
+
+    public static Editor fromParcel(Parcel in) {
+	// the PANEL_TYPE_EDITOR parcel tag has already been
+	// read by Panel's Parcelable.Creator
+	return null;
+    }
 }

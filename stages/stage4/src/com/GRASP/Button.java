@@ -109,7 +109,7 @@ class Button implements Pad {
     public void onClick(Screen screen,
 			byte finger,
 			float x, float y) {
-	action.perform(x, y);
+	action.perform(finger, x, y);
     }
 
     @Override
@@ -149,7 +149,7 @@ class Button implements Pad {
     @Override
     public void onRelease(Screen screen, byte finger,
 			  float x, float y) {
-	action.perform(x, y);
+	action.perform(finger, x, y);
     }
 
     

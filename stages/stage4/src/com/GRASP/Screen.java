@@ -92,9 +92,8 @@ class Screen extends View {
 	shape = null;
     }
     
-    public Screen(GRASP source) {
+    public Screen(GRASP source, Panel content) {
 	super(source);
-
 
 	// blur doesn;t work with hw acceleration :/
 	setLayerType(View.LAYER_TYPE_SOFTWARE, GRASP.paint);
@@ -111,10 +110,7 @@ class Screen extends View {
 	width = (float) metrics.widthPixels;
 	height = (float) metrics.heightPixels;
 
-	panel = new
-	    Editor(this, 0, 0, width, height,
-		   new Scratch(),
-		   new Grab());
+	panel = content;
     }
 
     Drag [] drag = new Drag[] {

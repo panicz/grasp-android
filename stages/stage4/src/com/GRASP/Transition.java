@@ -17,7 +17,6 @@ public class Transition extends Animation {
     
     public Transition(Editor target) {
 	editor = target;
-	animationSystem = editor.screen.animationSystem;
     }
 
     @Override

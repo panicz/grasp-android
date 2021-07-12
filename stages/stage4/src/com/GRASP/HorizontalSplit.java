@@ -1,8 +1,11 @@
 package com.GRASP;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-class HorizontalSplit extends Split {
+
+final class HorizontalSplit extends Split {
 
     public HorizontalSplit(float x, float y, float w, float h,
 			   Panel left_panel,
@@ -316,4 +319,18 @@ class HorizontalSplit extends Split {
 	}
 	return false;
     }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+	out.writeByte(PANEL_TYPE_HORIZONTAL_SPLIT);
+
+    }
+
+    public static HorizontalSplit fromParcel(Parcel in) {
+	// the PANEL_TYPE_HORIZONTAL_SPLIT parcel tag has
+	// already been read by Panel's Parcelable.Creator
+	return null;
+    }
+
+    
 }

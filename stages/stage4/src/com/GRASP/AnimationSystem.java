@@ -40,6 +40,7 @@ class AnimationSystem {
     }
     
     void prepare() {
+	final AnimationSystem that = this;
 	animate = new Timer();
 	nextFrame = new TimerTask() {
 		public void run() {
@@ -54,7 +55,8 @@ class AnimationSystem {
 				    pending.keySet().iterator();
 				
 				while (anim.hasNext()) {
-				    anim.next().step();
+				    anim.next()
+					.step(that);
 				}
 				screen.invalidate();
 			    }

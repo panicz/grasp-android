@@ -1,8 +1,11 @@
 package com.GRASP;
 //import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-abstract class Panel implements Pad {
+
+abstract class Panel implements Pad, Parcelable {
     static final float near_edge = 60;
 
     static int stretches = 0;
@@ -157,5 +160,40 @@ abstract class Panel implements Pad {
     public void onRelease(Screen screen, byte finger,
 			  float x, float y) {}
 
+    static final byte PANEL_TYPE_EDITOR = 0;
+    static final byte PANEL_TYPE_HORIZONTAL_SPLIT = 1;
+    static final byte PANEL_TYPE_VERTICAL_SPLIT = 2;
+    
+    @Override
+    public int describeContents() {
+	// CONTENTS_FILE_DESCRIPTOR?
+	return 0;
+    }
+
+    @Override
+    public abstract void writeToParcel(Parcel out, int flags);
+
+    public static final Parcelable.Creator<Panel> CREATOR =
+	new Parcelable.Creator<Panel>() {
+	    public Panel createFromParcel(Parcel in) {
+		
+		byte parcelTag = in.readByte();
+		switch (parcelTag) {
+		default:
+		case PANEL_TYPE_EDITOR:
+		    return Editor.fromParcel(in);
+		case PANEL_TYPE_HORIZONTAL_SPLIT:
+		    return HorizontalSplit.fromParcel(in);
+		case PANEL_TYPE_VERTICAL_SPLIT:
+		    return VerticalSplit.fromParcel(in);
+		}
+	    }
+
+	    public Panel[] newArray(int size) {
+		return new Panel[size];
+	    }
+	};
+
+    
     
 };
