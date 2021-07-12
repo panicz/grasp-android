@@ -356,14 +356,15 @@ final class Editor extends Panel {
 
 	@Override
 	public void perform(byte finger, float x, float y) {
+	    x = target.x[finger];
+	    y = target.y[finger];
 	    target.layers.removeLast();
 	    List<Document> opened = Document.openedDocuments;
 	    Button [] documents = new Button[opened.size()];
-
+	    
 	    for (int i = 0; i < opened.size(); ++i) {
 		Document doc = opened.get(i);
-		documents[i] =
-		    new Button(doc.path);
+		documents[i] = new Button(doc.path);
 	    }
 
 	    Popup popup = new Popup(new Below(documents));
