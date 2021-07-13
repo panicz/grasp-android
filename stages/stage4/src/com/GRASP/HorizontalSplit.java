@@ -321,15 +321,26 @@ final class HorizontalSplit extends Split {
     }
 
     @Override
-    public void writeToParcel(Parcel out, int flags) {
-	out.writeByte(PANEL_TYPE_HORIZONTAL_SPLIT);
-
+    public void writeDataToParcel(Parcel out, int flags) {
+	out.writeFloat(_left);
+	out.writeFloat(_top);
+	out.writeFloat(_width);
+	out.writeFloat(_height);
+	out.writeParcelable(firstPanel, flags);
+	out.writeParcelable(secondPanel, flags);
     }
-
+    
     public static HorizontalSplit fromParcel(Parcel in) {
-	// the PANEL_TYPE_HORIZONTAL_SPLIT parcel tag has
-	// already been read by Panel's Parcelable.Creator
-	return null;
+	float x = in.readFloat();
+	float y = in.readFloat();
+	float w = in.readFloat();
+	float h = in.readFloat();
+	Panel left_panel = in.readParcelable(Panel.class
+					     .getClassLoader());
+	Panel right_panel = in.readParcelable(Panel.class
+					     .getClassLoader());
+	return new HorizontalSplit(x, y, w, h,
+				   left_panel, right_panel);
     }
 
     

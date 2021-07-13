@@ -20,10 +20,6 @@ final class Editor extends Panel {
     float scale = 1.0f;
     float angle = 0.0f; // degrees
     
-    static int instances = 0;
-
-    int id;
-    
     public boolean is_pinned = false;
 
     public Editor(float x, float y, float w, float h,
@@ -31,13 +27,7 @@ final class Editor extends Panel {
 	super(x, y, w, h);
 	document = doc;
 	transform = grab;
-	id = instances++;
 	transition = new Transition(this);
-    }
-
-    @Override
-    public String toString() {
-	return String.valueOf(id);
     }
     
     @Override
@@ -416,14 +406,31 @@ final class Editor extends Panel {
     }
 
     @Override
-    public void writeToParcel(Parcel out, int flags) {
-	out.writeByte(PANEL_TYPE_EDITOR);
-
+    public void writeDataToParcel(Parcel out, int flags) {
+	out.writeFloat(_left);
+	out.writeFloat(_top);
+	out.writeFloat(_width);
+	out.writeFloat(_height);
+	out.writeString(document.path);
+	out.writeFloat(transform.getLeft());
+	out.writeFloat(transform.getTop());
+	out.writeFloat(transform.getScale());
+	out.writeFloat(transform.getAngle());
     }
 
     public static Editor fromParcel(Parcel in) {
-	// the PANEL_TYPE_EDITOR parcel tag has already been
-	// read by Panel's Parcelable.Creator
-	return null;
+	float x = in.readFloat();
+	float y = in.readFloat();
+	float w = in.readFloat();
+	float h = in.readFloat();
+	String path = in.readString();
+	float left = in.readFloat();
+	float top = in.readFloat();
+	float scale = in.readFloat();
+	float angle = in.readFloat();
+	return new Editor(x, y, w, h,
+			  Document.fromPath(path),
+			  new Grab(left, top, scale, angle));
+
     }
 }

@@ -152,13 +152,11 @@ public class GRASP
 		content = verticalPanel;
 		other_panel = horizontalPanel;
 	    }
-	    else if (horizontalPanel != null
-		     && verticalPanel == null) {
-		content = horizontalPanel;
+	    else if (horizontalPanel != null) {
+		other_panel = horizontalPanel;
 	    }
-	    else if (verticalPanel != null
-		     && horizontalPanel == null) {
-		content = verticalPanel;
+	    else if (verticalPanel != null) {
+		other_panel = verticalPanel;
 	    }
 	}
 
@@ -183,10 +181,17 @@ public class GRASP
 
     @Override
     public void onSaveInstanceState(Bundle state) {
-	
-
+	state.putParcelable("horizontal_panel",
+			    (screenOrientation
+			     == ScreenOrientation.Horizontal)
+			    ? screen.panel
+			    : other_panel);
+	state.putParcelable("vertical_panel",
+			    (screenOrientation
+			     == ScreenOrientation.Vertical)
+			    ? screen.panel
+			    : other_panel);
     }
-
     
     @Override
     protected void onResume() {

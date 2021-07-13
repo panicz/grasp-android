@@ -170,9 +170,26 @@ abstract class Panel implements Pad, Parcelable {
 	return 0;
     }
 
+    abstract void writeDataToParcel(Parcel out, int flags);
+    
     @Override
-    public abstract void writeToParcel(Parcel out, int flags);
-
+    public void writeToParcel(Parcel out, int flags) {
+	if (this instanceof Editor) {
+	    out.writeByte(PANEL_TYPE_EDITOR);
+	}
+	else if (this instanceof HorizontalSplit) {
+	    out.writeByte(PANEL_TYPE_HORIZONTAL_SPLIT);
+	}
+	else if (this instanceof VerticalSplit) {
+ 	    out.writeByte(PANEL_TYPE_VERTICAL_SPLIT);
+	}
+	else {
+	    assert(false);
+	}
+	
+	writeDataToParcel(out, flags);
+    }
+    
     public static final Parcelable.Creator<Panel> CREATOR =
 	new Parcelable.Creator<Panel>() {
 	    public Panel createFromParcel(Parcel in) {

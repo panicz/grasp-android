@@ -132,6 +132,4 @@ abstract class Split extends Panel implements Drag {
 		       float x, float y) {
 	return null;
     }
-
-    
 }

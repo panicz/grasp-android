@@ -1,16 +1,29 @@
 package com.GRASP;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.io.*;
 import android.graphics.Canvas;
 import java.lang.StringBuilder;
-
 
 class Document extends Box {
     public String path = null;
     public static List<Document> openedDocuments =
 	new ArrayList<Document>();
 
+    public static Document fromPath(String path) {
+	Iterator<Document> it = openedDocuments.iterator();
+	
+	while(it.hasNext()) {
+	    Document doc = it.next();
+	    if (doc.path.equals(path)) {
+		return doc;
+	    }
+	}
+	GRASP.log("Unable to open document "+path);
+	return Scratch.instance();
+    }
+    
     static final float min_space_between_bits = 100.0f;
     
     public Document() {
