@@ -3,8 +3,10 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 //import android.graphics.Path;
 import java.util.List;
+import java.util.WeakHashMap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.util.Iterator;
 
 import java.lang.Math;
 
@@ -336,36 +338,138 @@ final class Editor extends Panel {
 	transition.setScroll(0, 0);
 	transition.start(700, screen.animationSystem);
     }
+
+    WeakHashMap<Document, Grab> documentTransform =
+	new WeakHashMap<Document, Grab>();
+
+    WeakHashMap<Document, Document> previousDocument =
+	new WeakHashMap<Document, Document>();
+    
+    void switchToDocument(Document target) {
+	Grab grab = documentTransform.get(target);
+	if (grab == null) {
+	    grab = new Grab();
+	}
+	documentTransform.put(document, transform);
+	document = target;
+	transform = grab;
+    }
+    
+    class SwitchToDocument implements Action {
+	Screen screen;
+	Editor editor;
+	Document document;
+	
+	public SwitchToDocument(Screen screen,
+				Editor editor,
+				Document document) {
+	    this.screen = screen;
+	    this.editor = editor;
+	    this.document = document;
+	}
+	
+	@Override
+	public void perform(byte finger, float x, float y) {
+	    screen.layers.clear();
+	    editor.previousDocument.put(document, editor.document);
+	    editor.switchToDocument(document);
+	}
+	
+    }
     
     class ShowOpenedDocuments implements Action {
-	Screen target;
-	
-	public ShowOpenedDocuments(Screen screen) {
-	    target = screen;
+	Screen screen;
+	Editor editor;
+	public ShowOpenedDocuments(Screen screen, Editor editor) {
+ 	    this.screen = screen;
+	    this.editor = editor;
 	}
 
 	@Override
 	public void perform(byte finger, float x, float y) {
-	    x = target.x[finger];
-	    y = target.y[finger];
-	    target.layers.removeLast();
+	    x = screen.x[finger];
+	    y = screen.y[finger];
+	    //screen.layers.removeLast();
 	    List<Document> opened = Document.openedDocuments;
 	    Button [] documents = new Button[opened.size()];
 	    
 	    for (int i = 0; i < opened.size(); ++i) {
 		Document doc = opened.get(i);
-		documents[i] = new Button(doc.path);
+		documents[i] =
+		    new Button(doc.path,
+			       new SwitchToDocument(screen,
+						    editor,
+						    doc));
 	    }
 
 	    Popup popup = new Popup(new Below(documents));
 	    popup.centerAround(x, y,
-			       target.width,
-			       target.height);
+			       screen.width,
+			       screen.height);
 
-	    target.layers.addLast(popup);
+	    screen.layers.addLast(popup);
 	}
     }
+
+    class CreateNewDocument implements Action {
+	Screen screen;
+	Editor editor;
+	public CreateNewDocument(Screen screen, Editor editor) {
+	    this.screen = screen;
+	    this.editor = editor;
+	}
+	
+	@Override
+	public void perform(byte finger, float x, float y) {
+	    screen.layers.clear();
+	    editor.switchToDocument(Document.createNew());
+	}	
+    }
+
+    @Override
+    public boolean closeDocument(Document document) {
+	if (this.document != document) {
+	    return true;
+	}
+
+	Document replacement = previousDocument.get(document);
+	if (replacement == null
+	    || replacement == document) {
+	    Iterator<Document> it = Document
+		.openedDocuments.iterator();
+
+	    while(it.hasNext()) {
+		replacement = it.next();
+
+		if (replacement != document) {
+		    switchToDocument(replacement);
+		    return true;
+		}
+	    }
+	    return false;
+	}
+
+	switchToDocument(replacement);
+	return true;
+    }
     
+    class CloseDocument implements Action {
+	Screen screen;
+	Document document;
+	
+	public CloseDocument(Screen screen,
+			     Document document) {
+	    this.screen = screen;
+	    this.document = document;
+	}
+	
+	@Override
+	public void perform(byte finger, float x, float y) {
+	    screen.layers.clear();
+	    screen.closeDocument(document);
+	}	
+    }
+
     @Override
     public Drag onHold(Screen screen,
 		       byte finger,
@@ -387,13 +491,17 @@ final class Editor extends Panel {
 	return
 	    new
 	    Popup(new
-		  Below(new Button("New"),
+		  Below(new Button("New", new
+				   CreateNewDocument(screen, this)),
 			new Button("Open"),
-			new Button("Switch to...",
-				   new ShowOpenedDocuments(screen)),
+			new Button("Switch to...", new
+				   ShowOpenedDocuments(screen,
+						       this)),
 			new Button("Save"),
 			new Button("Save as..."),
-			new Button("Close")
+			new Button("Close", new
+				   CloseDocument(screen,
+						 document))
 			));
     }
 

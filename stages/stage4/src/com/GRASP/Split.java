@@ -16,6 +16,12 @@ abstract class Split extends Panel implements Drag {
     }
 
     @Override
+    public boolean closeDocument(Document document) {
+	return firstPanel.closeDocument(document)
+	    && secondPanel.closeDocument(document);
+    }
+    
+    @Override
     public boolean canBeSplittedVerticallyBy(RectF line) {
 	return firstPanel.canBeSplittedVerticallyBy(line)
 	    || secondPanel.canBeSplittedVerticallyBy(line);

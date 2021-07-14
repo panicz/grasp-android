@@ -48,8 +48,6 @@ public class GRASP
     public Screen screen;
     private static Screen last_known_screen_instance = null;
     public static Paint paint = null;
-
-    private Panel other_panel;
     
     public static void log(String s) {
 	_log.log(s);
@@ -135,7 +133,8 @@ public class GRASP
 
 	//savedState
 	Panel content = null;
-
+	Panel other_panel = null;
+	
 	if (savedState != null) {
 	    Panel horizontalPanel = savedState
 		.getParcelable("horizontal_panel");
@@ -169,6 +168,7 @@ public class GRASP
 	}
 	
 	screen = new Screen(this, content);
+	screen.other_panel = other_panel;
         setContentView(screen);
 	
         screen.setOnKeyListener(this);
@@ -176,7 +176,11 @@ public class GRASP
         screen.requestFocus();
 
 	last_known_screen_instance = screen;
+	
 	log(screenOrientation.toString());
+	log(getFilesDir().toString());
+
+	
     }
 
     @Override
@@ -185,12 +189,12 @@ public class GRASP
 			    (screenOrientation
 			     == ScreenOrientation.Horizontal)
 			    ? screen.panel
-			    : other_panel);
+			    : screen.other_panel);
 	state.putParcelable("vertical_panel",
 			    (screenOrientation
 			     == ScreenOrientation.Vertical)
 			    ? screen.panel
-			    : other_panel);
+			    : screen.other_panel);
     }
     
     @Override

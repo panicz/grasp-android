@@ -20,6 +20,7 @@ import android.view.inputmethod.InputMethodManager;
 class Screen extends View {
 
     public Panel panel;
+    public Panel other_panel;
 
     GRASP activity;
     AnimationSystem animationSystem;
@@ -393,6 +394,8 @@ class Screen extends View {
 
 	if (top != null) {
 	    GRASP.paint.setMaskFilter(blur);
+	    Button.paint.setMaskFilter(blur);
+
 	    // blur filter mask
 	}
 
@@ -405,6 +408,7 @@ class Screen extends View {
 	    Pad item = layer.next();
 	    if (item == top) {
 		GRASP.paint.setMaskFilter(null);
+		Button.paint.setMaskFilter(null);
 		//remove blur filter mask
 	    }
 	    int a = GRASP.paint.getAlpha();
@@ -412,8 +416,6 @@ class Screen extends View {
 	    canvas.drawRect(0, 0, width, height, GRASP.paint);
 	    GRASP.paint.setAlpha(a);
 	    item.render(canvas);
-
-
 	}
 	
 	Iterator<Tile> tile =  overlay.iterator();
@@ -436,4 +438,13 @@ class Screen extends View {
 				     float vy) {
 	panel = panel.finishResizing(s, vx, vy);
     }
+
+    void closeDocument(Document document) {
+	if (panel.closeDocument(document)
+	    && (other_panel == null
+		|| other_panel.closeDocument(document))) {
+	    Document.close(document);
+	}
+    }
+
 }

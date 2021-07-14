@@ -74,6 +74,8 @@ abstract class Panel implements Pad, Parcelable {
 	_bottom = y+h;
     }
 
+    public abstract boolean closeDocument(Document document);
+    
     public abstract Panel copy();
     
     public abstract boolean

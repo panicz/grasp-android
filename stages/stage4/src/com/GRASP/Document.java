@@ -54,6 +54,18 @@ class Document extends Box {
 	}
     }
 
+    public static Document createNew() {
+	return null;
+    }
+
+    public static void close(Document x) {
+	if (x == Scratch.instance()) {
+	    return;
+	}
+	openedDocuments.remove(x);
+    }
+
+    
     @Override
     public void render(Canvas canvas) {
 	renderContents(canvas);
