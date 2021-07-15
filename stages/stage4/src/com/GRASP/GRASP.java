@@ -6,7 +6,7 @@ import android.os.Bundle;
 //import android.graphics.Canvas;
 import android.util.DisplayMetrics;
 
-
+import android.content.res.Configuration;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.GestureDetector;
@@ -187,6 +187,34 @@ public class GRASP
 	
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+	super.onConfigurationChanged(newConfig);
+
+	DisplayMetrics metrics =
+	    getResources()
+	    .getDisplayMetrics();
+
+	ScreenOrientation newOrientation =
+	    (metrics.widthPixels < metrics.heightPixels)
+	    ? ScreenOrientation.Vertical
+	    : ScreenOrientation.Horizontal;
+
+	if (newOrientation != screenOrientation) {
+	    Panel content = screen.other_panel;
+	    if (content == null) {
+		content = new Editor(0, 0,
+				     metrics.widthPixels,
+				     metrics.heightPixels,
+				     Scratch.instance(),
+				     new Grab());
+	    }
+	    screen.other_panel = screen.panel;
+	    screen.panel = content;
+	    screenOrientation = newOrientation;
+	}
+    }
+    
     @Override
     public void onSaveInstanceState(Bundle state) {
 	state.putParcelable("horizontal_panel",
