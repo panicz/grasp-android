@@ -48,6 +48,8 @@ public class GRASP
     public Screen screen;
     private static Screen last_known_screen_instance = null;
     public static Paint paint = null;
+
+    public static GRASP instance;
     
     public static void log(String s) {
 	_log.log(s);
@@ -68,6 +70,8 @@ public class GRASP
 			     WindowManager.LayoutParams
 			     .FLAG_FULLSCREEN);
 
+	instance = this;
+	
 	if (symbols_font == null) {
 	    symbols_font =
 		Typeface

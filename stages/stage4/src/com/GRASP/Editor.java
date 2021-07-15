@@ -75,6 +75,12 @@ final class Editor extends Panel {
 	transform.canvas(canvas);
 	document.render(canvas);
 	transform.uncanvas(canvas);
+
+	GRASP.paint.setTypeface(GRASP.logs_font);
+	GRASP.paint.setTextSize(16);
+	canvas.drawText(document.path, 0, height()-2,
+			GRASP.paint);
+
     }
     
     final float [] pending_x = new float[10];
@@ -396,7 +402,9 @@ final class Editor extends Panel {
 	    for (int i = 0; i < opened.size(); ++i) {
 		Document doc = opened.get(i);
 		documents[i] =
-		    new Button(doc.path,
+		    new Button(doc.file == null
+			       ? doc.path
+			       : doc.file.getName(),
 			       new SwitchToDocument(screen,
 						    editor,
 						    doc));

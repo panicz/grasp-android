@@ -6,8 +6,15 @@ import java.io.*;
 import android.graphics.Canvas;
 import java.lang.StringBuilder;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Calendar;
+
+
 class Document extends Box {
     public String path = null;
+    public File file = null;
     public static List<Document> openedDocuments =
 	new ArrayList<Document>();
 
@@ -29,6 +36,16 @@ class Document extends Box {
     public Document() {
 	openedDocuments.add(this);
     }
+
+    public Document(File file, String path) {
+	this();
+	this.file = file;
+	this.path = path;
+
+	first_interline = new Interline(0, null);
+	_following_space = new Space(0, null);
+
+    }
     
     public static Document fromBox(Box prototype) {
 	Document document = new Document();
@@ -40,8 +57,7 @@ class Document extends Box {
 
     public static Document fromSource(String text) {
 	try {
-	    Reader input = new
-		StringReader(text);
+	    Reader input = new StringReader(text);
 	    SExpReader sexp =
 		new SExpReader(new PeekingReader(input, 4));
 	    SExp sexpr = sexp.read_expressions();
@@ -54,12 +70,31 @@ class Document extends Box {
 	}
     }
 
+    static DateFormat date = new SimpleDateFormat("yyyyMMddHHmmss");
+    
     public static Document createNew() {
-	return null;
+	Date now = Calendar.getInstance().getTime();
+	
+	String file_base = GRASP.instance.getFilesDir()
+	    + File.separator + date.format(now);
+
+	String path = file_base + ".grasp";
+       
+	File file = new File(path);
+
+	for (int i = 0; file.exists(); ++i) {
+	    path = file_base + "-" + i + ".grasp";
+	    GRASP.log("retrying with "+path);
+	    file = new File(path);
+	}
+
+	GRASP.log("created "+path);
+	
+	return new Document(file, path);
     }
 
     public static void close(Document x) {
-	if (x == Scratch.instance()) {
+	if (x.file == null) {
 	    return;
 	}
 	openedDocuments.remove(x);
