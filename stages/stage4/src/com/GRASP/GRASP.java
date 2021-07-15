@@ -181,10 +181,6 @@ public class GRASP
 
 	last_known_screen_instance = screen;
 	
-	log(screenOrientation.toString());
-	log(getFilesDir().toString());
-
-	
     }
 
     @Override

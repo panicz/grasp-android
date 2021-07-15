@@ -109,7 +109,7 @@ class Button implements Pad {
     public void onClick(Screen screen,
 			byte finger,
 			float x, float y) {
-	GRASP.log("performing "+caption+" (click)");
+	//normal_colors();
 	action.perform(finger, x, y);
     }
 
@@ -150,9 +150,7 @@ class Button implements Pad {
     @Override
     public void onRelease(Screen screen, byte finger,
 			  float x, float y) {
-	GRASP.log("performing "+caption+" (release)");
-
-	action.perform(finger, x, y);
+	normal_colors();
     }
 
     
