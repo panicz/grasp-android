@@ -212,6 +212,8 @@ public class GRASP
 	    screen.other_panel = screen.panel;
 	    screen.panel = content;
 	    screenOrientation = newOrientation;
+	    screen.width = metrics.widthPixels;
+	    screen.height = metrics.heightPixels;
 	}
     }
     

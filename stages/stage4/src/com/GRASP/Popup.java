@@ -100,6 +100,7 @@ class Popup implements Pad, Drag {
     public Drag onPress(Screen screen,
 			byte finger,
 			float x, float y) {
+	GRASP.log("popup pressed "+this);
 	float w = content.width();
 	float h = content.height();
 
