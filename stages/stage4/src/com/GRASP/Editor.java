@@ -7,9 +7,11 @@ import java.util.WeakHashMap;
 import android.os.Parcel;
 import android.os.Parcelable;
 import java.util.Iterator;
+import android.os.Environment;
+
+import android.net.Uri;
 
 import java.lang.Math;
-
 
 final class Editor extends Panel {
 
@@ -134,64 +136,6 @@ final class Editor extends Panel {
     }
 
     
-    class Stretch implements Drag {
-
-	Editor target;
-	byte finger;
-
-	float dx = 0;
-	float dy = 0;
-	
-	public Stretch(Editor target, byte finger,
-		       float start_x, float start_y) {
-	    Panel.stretches++;
-	    this.finger = finger;
-	    this.target = target;
-	    byte index = target.occupy_first_free_index(finger);
-	    target.pending_x[index] = start_x;
-	    target.pending_y[index] = start_y;
-	    transform.anchor(target.pending_x,
-			     target.pending_y,
-			     target.pending);
-	}
-
-	@Override
-	public void move(Screen screen, float x, float y,
-			 float _dx, float _dy) {
-	    byte index = pending_index[finger];
-	    target.pending_x[index] = x + dx;
-	    target.pending_y[index] = y + dy;
-	}
-
-	@Override
-	public void drop(Screen screen, float x, float y,
-			 float vx, float vy) {
-	    target.release_index(finger);
-	    Panel.stretches--;
-	    transform.anchor(target.pending_x,
-			     target.pending_y,
-			     target.pending);
-	}
-
-	@Override
-	public Drag outwards(Transform transform) {
-	    float x = transform.unx(dx, dy);
-	    float y = transform.uny(dx, dy);
-	    dx = x;
-	    dy = y;
-	    return this;
-	}
-
-	@Override
-	public Drag inwards(Transform transform) {
-	    float x = transform.x(dx, dy);
-	    float y = transform.y(dx, dy);
-	    dx = x;
-	    dy = y;
-
-	    return this;
-	}
-    }
     
     @Override
     public Drag stretchFrom(byte finger, float x, float y) {
@@ -350,6 +294,7 @@ final class Editor extends Panel {
 
     WeakHashMap<Document, Document> previousDocument =
 	new WeakHashMap<Document, Document>();
+
     
     void switchToDocument(Document target) {
 	Grab grab = documentTransform.get(target);
@@ -361,79 +306,6 @@ final class Editor extends Panel {
 	transform = grab;
     }
     
-    class SwitchToDocument implements Action {
-	Screen screen;
-	Editor editor;
-	Document document;
-	
-	public SwitchToDocument(Screen screen,
-				Editor editor,
-				Document document) {
-	    this.screen = screen;
-	    this.editor = editor;
-	    this.document = document;
-	}
-	
-	@Override
-	public void perform(byte finger, float x, float y) {
-	    screen.layers.clear();
-	    editor.previousDocument.put(document, editor.document);
-	    editor.switchToDocument(document);
-	}
-	
-    }
-    
-    class ShowOpenedDocuments implements Action {
-	Screen screen;
-	Editor editor;
-	public ShowOpenedDocuments(Screen screen, Editor editor) {
- 	    this.screen = screen;
-	    this.editor = editor;
-	}
-
-	@Override
-	public void perform(byte finger, float x, float y) {
-	    x = screen.x[finger];
-	    y = screen.y[finger];
-	    //screen.layers.removeLast();
-	    List<Document> opened = Document.openedDocuments;
-	    Button [] documents = new Button[opened.size()];
-	    
-	    for (int i = 0; i < opened.size(); ++i) {
-		Document doc = opened.get(i);
-		documents[i] =
-		    new Button(doc.file == null
-			       ? doc.path
-			       : doc.file.getName(),
-			       new SwitchToDocument(screen,
-						    editor,
-						    doc));
-	    }
-
-	    Popup popup = new Popup(new Below(documents));
-	    popup.centerAround(x, y,
-			       screen.width,
-			       screen.height);
-
-	    screen.layers.addLast(popup);
-	}
-    }
-
-    class CreateNewDocument implements Action {
-	Screen screen;
-	Editor editor;
-	public CreateNewDocument(Screen screen, Editor editor) {
-	    this.screen = screen;
-	    this.editor = editor;
-	}
-	
-	@Override
-	public void perform(byte finger, float x, float y) {
-	    screen.layers.clear();
-	    editor.switchToDocument(Document.createNew());
-	}	
-    }
-
     @Override
     public boolean closeDocument(Document document) {
 	if (this.document != document) {
@@ -461,23 +333,6 @@ final class Editor extends Panel {
 	return true;
     }
     
-    class CloseDocument implements Action {
-	Screen screen;
-	Document document;
-	
-	public CloseDocument(Screen screen,
-			     Document document) {
-	    this.screen = screen;
-	    this.document = document;
-	}
-	
-	@Override
-	public void perform(byte finger, float x, float y) {
-	    screen.layers.clear();
-	    screen.closeDocument(document);
-	}	
-    }
-
     @Override
     public Drag onHold(Screen screen,
 		       byte finger,
@@ -501,7 +356,11 @@ final class Editor extends Panel {
 	    Popup(new
 		  Below(new Button("New", new
 				   CreateNewDocument(screen, this)),
-			new Button("Open"),
+			new
+			Button("Open...", new
+			       OpenFileBrowser(screen, this,
+					       Environment
+					       .getExternalStorageDirectory())),
 			new Button("Switch to...", new
 				   ShowOpenedDocuments(screen,
 						       this)),

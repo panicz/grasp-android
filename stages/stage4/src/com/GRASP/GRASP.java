@@ -19,6 +19,8 @@ import android.graphics.Typeface;
 import android.graphics.Paint;
 import android.view.Window;
 import android.view.WindowManager;
+import android.content.pm.PackageManager;
+
 
 //import java.lang.System;
 //import java.util.Arrays;
@@ -180,7 +182,6 @@ public class GRASP
         screen.requestFocus();
 
 	last_known_screen_instance = screen;
-	
     }
 
     @Override
@@ -225,6 +226,23 @@ public class GRASP
 			     == ScreenOrientation.Vertical)
 			    ? screen.panel
 			    : screen.other_panel);
+    }
+
+    Procedure permissionGranted = DoNothing.instance;
+    
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions,
+                                           int[] grantResults)
+    {
+	super.onRequestPermissionsResult(requestCode,
+                                         permissions,
+                                         grantResults);
+        if (grantResults.length > 0
+            && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+	    permissionGranted.perform();
+	    permissionGranted = DoNothing.instance; 
+	}
     }
     
     @Override
