@@ -5,6 +5,7 @@ import android.os.Environment;
 import java.io.File;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import java.lang.Math;
 
 class OpenFileBrowser implements Action, Procedure {
     Screen screen;
@@ -28,7 +29,12 @@ class OpenFileBrowser implements Action, Procedure {
 	    buttons[i] = new Button(files[i]);
 	}
 
-	Popup popup = new Popup(new Below(buttons));
+	Pad list = new Below(buttons);
+	Popup popup = new Popup(new Scroll(list,
+					   list.width(),
+					   Math.min(list.height(),
+						    screen.height
+						    - 200)));
 	/*
 	popup.centerAround(x, y,
 			   screen.width,

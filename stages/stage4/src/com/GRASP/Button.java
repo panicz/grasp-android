@@ -110,6 +110,7 @@ class Button implements Pad {
 			byte finger,
 			float x, float y) {
 	//normal_colors();
+	invert_colors();
 	action.perform(finger, x, y);
     }
 
