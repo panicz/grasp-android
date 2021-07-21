@@ -51,6 +51,13 @@ class Button implements Pad {
 	this(label, 0, 0, noop);
     }
 
+    protected void renderCaption(Canvas canvas) {
+	canvas.drawText(caption, horizontal_margin,
+			(height()
+			 + text_size
+			 - vertical_margin)/2,
+			paint);
+    }
     
     @Override
     public void render(Canvas canvas) {
@@ -61,12 +68,8 @@ class Button implements Pad {
 			     5.0f, 5.0f, paint);
 	
 	paint.setColor(fgcolor);
-	
-	canvas.drawText(caption, horizontal_margin,
-			(height()
-			 + text_size
-			 - vertical_margin)/2,
-			paint);
+
+	renderCaption(canvas);
     }
 
     void invert_colors() {
@@ -77,6 +80,16 @@ class Button implements Pad {
     void normal_colors() {
 	bgcolor = BGCOLOR;
 	fgcolor = FGCOLOR;
+    }
+
+    boolean inverted_colors() {
+	if (bgcolor == FGCOLOR) {
+	    assert(fgcolor == BGCOLOR);
+	    return true;
+	}
+	assert(fgcolor == FGCOLOR);
+	assert(bgcolor == BGCOLOR);
+	return true;
     }
     
     @Override

@@ -26,7 +26,7 @@ class OpenFileBrowser implements Action, Procedure {
 	Button [] buttons = new Button[files.length];
 
 	for (int i = 0; i < files.length; ++i) {
-	    buttons[i] = new Button(files[i]);
+	    buttons[i] = new FileButton(dir, files[i]);
 	}
 
 	Pad list = new Below(buttons);

@@ -17,10 +17,15 @@ import android.view.KeyEvent;
 import android.graphics.Typeface;
 //import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Bitmap;
+
 import android.view.Window;
 import android.view.WindowManager;
 import android.content.pm.PackageManager;
 
+import com.caverock.androidsvg.SVG;
+import com.caverock.androidsvg.PreserveAspectRatio;
+import java.lang.Exception;
 
 //import java.lang.System;
 //import java.util.Arrays;
@@ -45,6 +50,10 @@ public class GRASP
     public static Typeface comments_font = null;
     public static Typeface menu_font = null;
 
+    public static SVG empty_file_icon = null;
+    public static SVG file_icon = null;
+    public static SVG directory_icon = null;
+    
     GestureDetector gestureDetector;
     public static Logger _log = null;
     public Screen screen;
@@ -108,6 +117,53 @@ public class GRASP
 		.createFromAsset(getAssets(),
 				 "Basic-Regular.otf");
 	}
+
+	if (_log == null) {
+	    _log = new Logger(120);
+	}
+
+	PreserveAspectRatio preserve = PreserveAspectRatio.START;
+	
+	if (empty_file_icon == null) {
+	    try {
+		empty_file_icon = SVG
+		    .getFromAsset(getAssets(),
+				  "empty_file.svg");
+		empty_file_icon
+		    .setDocumentPreserveAspectRatio(preserve);
+		empty_file_icon.setDocumentHeight(64);
+	    }
+	    catch(Exception e) {
+		log(e.toString());
+	    }
+	}
+	
+	if (file_icon == null) {
+	    try {
+		file_icon = SVG
+		    .getFromAsset(getAssets(),
+				  "file.svg");
+		file_icon.setDocumentPreserveAspectRatio(preserve);
+		file_icon.setDocumentHeight(64);
+	    }
+	    catch(Exception e) {
+		log(e.toString());
+	    }
+	}
+
+	if (directory_icon == null) {
+	    try {
+		directory_icon = SVG
+		    .getFromAsset(getAssets(),
+				  "directory.svg");
+		directory_icon
+		    .setDocumentPreserveAspectRatio(preserve);
+		directory_icon.setDocumentHeight(64);
+	    }
+	    catch(Exception e) {
+		log(e.toString());
+	    }
+	}
 	
 	if (paint == null) {
 	    paint = new Paint();
@@ -116,10 +172,6 @@ public class GRASP
 	    paint.setColor(0xff555555);
 	    paint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
-	}
-
-	if (_log == null) {
-	    _log = new Logger(120);
 	}
 
 	gestureDetector = new GestureDetector(this, this);
