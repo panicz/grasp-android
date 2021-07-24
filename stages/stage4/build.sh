@@ -22,11 +22,6 @@ _CLEANUP_() {
        	rm -rf bin
        	rm -rf gen
        	rm -rf obj
-	if [ -d "$HOME/storage/downloads" ];
-	then
-	    mkdir -p "$HOME/storage/downloads/GRASP"
-	    cp "$PKGNAME.apk" "$HOME/storage/downloads/GRASP/"
-	fi
 	printf "\\n\\n%s\\n\\n" "Share https://wiki.termux.com/wiki/Development everwhere🌎🌍🌏🌐!"
 }
 
@@ -56,12 +51,12 @@ printf "%s\\n\\n" "aapt: done"
 
 
 printf "%s\\n" "ecj: begun..."
-for JAVAFILE in $(find . -type f -name "*.java")
+for JAVAFILE in $(find ./src/ -type f -name "*.java")
 do
        	JAVAFILES="$JAVAFILES $JAVAFILE"
 done
 
-for JARFILE in $(find . -type f -name "*.jar")
+for JARFILE in $(find ./lib/ -type f -name "*.jar")
 do
     CLASSFILES="$CLASSFILES -classpath $JARFILE"
     JARFILES="$JARFILES $JARFILE"
@@ -98,6 +93,13 @@ printf "%s\\n" "DONE"
 printf "%s" "Verifying $PKGNAME.apk: "
 apksigner verify --verbose "$PKGNAME.apk" || { cd ..; _UNTP_; }
 printf "%s\\n" "DONE"
+
+if [ -d "$HOME/storage/downloads" ];
+then
+    echo "Copying $PKGNAME.apk to $HOME/storage/downloads/GRASP/"
+    mkdir -p "$HOME/storage/downloads/GRASP"
+    cp "$PKGNAME.apk" "$HOME/storage/downloads/GRASP/"
+fi
 
 cd ..
 
