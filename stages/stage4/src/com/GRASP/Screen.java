@@ -361,10 +361,7 @@ class Screen extends View {
 
 	if (drag[0] != null
 	    && drag[0] instanceof Popup) {
-	    Popup popup = (Popup) drag[0];
-	    popup.centerAround(x, y, width, height);
-	    //GRASP.log("popup left: "+(int)popup.left+", top: "+(int)popup.top);
-	    layers.add(popup);
+	    layers.add((Popup) drag[0]);
 	}
 	
 	return true;

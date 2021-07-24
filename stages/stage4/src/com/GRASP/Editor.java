@@ -352,24 +352,27 @@ final class Editor extends Panel {
 	}
 	
 	return
-	    new
-	    Popup(new
-		  Below(new Button("New", new
-				   CreateNewDocument(screen, this)),
-			new
-			Button("Open...", new
-			       OpenFileBrowser(screen, this,
-					       Environment
-					       .getExternalStorageDirectory())),
-			new Button("Switch to...", new
-				   ShowOpenedDocuments(screen,
-						       this)),
-			new Button("Save"),
-			new Button("Save as..."),
-			new Button("Close", new
-				   CloseDocument(screen,
-						 document))
-			));
+	    (new
+	     Popup(new
+		   Below(new Button("New", new
+				    CreateNewDocument(screen, this)),
+			 new
+			 Button("Open...", new
+				OpenFileBrowser(screen, this,
+						Environment
+						.getExternalStorageDirectory())),
+			 new Button("Switch to...", new
+				    ShowOpenedDocuments(screen,
+							this)),
+			 new Button("Save"),
+			 new Button("Save as..."),
+			 new Button("Close", new
+				    CloseDocument(screen,
+						  document))
+			 ))).centerAround(screen.x[finger],
+					  screen.y[finger],
+					  screen.width,
+					  screen.height);
     }
 
     @Override

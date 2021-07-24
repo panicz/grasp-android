@@ -263,6 +263,7 @@ public class GRASP
 	    screenOrientation = newOrientation;
 	    screen.width = metrics.widthPixels;
 	    screen.height = metrics.heightPixels;
+	    screen.layers.clear();
 	}
     }
     
@@ -290,10 +291,11 @@ public class GRASP
 	super.onRequestPermissionsResult(requestCode,
                                          permissions,
                                          grantResults);
-        if (grantResults.length > 0
-            && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-	    permissionGranted.perform();
-	    permissionGranted = DoNothing.instance; 
+        if (grantResults.length > 0) {
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+		permissionGranted.perform();
+		permissionGranted = DoNothing.instance;
+	    }
 	}
     }
     

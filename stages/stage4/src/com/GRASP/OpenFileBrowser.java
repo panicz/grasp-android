@@ -11,11 +11,12 @@ class OpenFileBrowser implements Action, Procedure {
     Screen screen;
     Editor editor;
     File dir;
-
+    float x, y;
+    
     public OpenFileBrowser(Screen screen,
 			   Editor editor,
 			   File dir) {
-	this.screen = screen;
+ 	this.screen = screen;
 	this.editor = editor;
 	this.dir = dir;
     }
@@ -26,7 +27,7 @@ class OpenFileBrowser implements Action, Procedure {
 	Button [] buttons = new Button[files.length];
 
 	for (int i = 0; i < files.length; ++i) {
-	    buttons[i] = new FileButton(dir, files[i]);
+	    buttons[i] = new FileButton(dir, files[i], this);
 	}
 
 	Pad list = new Below(buttons);
@@ -34,7 +35,8 @@ class OpenFileBrowser implements Action, Procedure {
 					   list.width(),
 					   Math.min(list.height(),
 						    screen.height
-						    - 200)));
+						    - 200)))
+	    .centerAround(x, y, screen.width, screen.height);
 	/*
 	popup.centerAround(x, y,
 			   screen.width,
@@ -46,8 +48,9 @@ class OpenFileBrowser implements Action, Procedure {
     @Override // Action
     public void perform(byte finger, float x, float y) {
 	//screen.layers.clear();
-	GRASP.log(GRASP.instance.getFilesDir().toString());
 	assert(dir.isDirectory());
+	this.x = screen.x[finger];
+	this.y = screen.y[finger];
 
 	String read_fs = Manifest.permission.READ_EXTERNAL_STORAGE;
 	
