@@ -29,9 +29,20 @@ class Below implements Pad, Drag {
     @Override
     public void render(Canvas canvas) {
 	canvas.save();
+	boolean something_was_dislayed = false;
 	for (int i = 0; i < contents.length; ++i) {
+	    float w = contents[i].width();
 	    float h = contents[i].height();
-	    contents[i].render(canvas);
+	    if (canvas.quickReject(0.0f, 0.0f, w, h,
+				   Canvas.EdgeType.BW)) {
+		if (something_was_dislayed) {
+		    break;
+		}
+	    }
+	    else {
+		contents[i].render(canvas);
+		something_was_dislayed = true;
+	    }
 	    canvas.translate(0, h);
 	}
 	canvas.restore();
