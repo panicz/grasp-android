@@ -21,8 +21,7 @@ class Document extends Box {
 	Iterator<Document> it = openedDocuments.iterator();
 	
 	while(it.hasNext()) {
-	    Document doc = it.next();
-	    if (doc.file.getPath().equals(file.getPath())) {
+	    Document doc = it.next();	    if (doc.file.getPath().equals(file.getPath())) {
 		return doc;
 	    }
 	}
@@ -34,7 +33,9 @@ class Document extends Box {
 	    SExp sexpr = sexp.read_expressions();
 	    Bit content = sexpr.toBit();
 	    assert(content instanceof Box);
-	    return fromBox((Box) content);	    
+	    Document result = fromBox((Box) content);
+	    result.file = file;
+	    return result;
 	} catch (IOException e) {
 	    GRASP.log(e.toString());
 	    return null;
