@@ -1,9 +1,10 @@
 package com.GRASP;
+import java.io.File;
 
 class Scratch extends Document {
     private Scratch() {
 	super();
-	path = "<scratch>";
+	file = new File(GRASP.instance.getFilesDir(), "SCRATCH");
     }
 
     private static Scratch _instance = null;

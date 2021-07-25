@@ -44,9 +44,7 @@ class ShowOpenedDocuments implements Action {
 	for (int i = 0; i < opened.size(); ++i) {
 	    Document doc = opened.get(i);
 	    documents[i] =
-		new Button(doc.file == null
-			   ? doc.path
-			   : doc.file.getName(),
+		new Button(doc.file.getName(),
 			   new SwitchToDocument(screen,
 						editor,
 						doc));

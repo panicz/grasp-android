@@ -8,7 +8,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import java.util.Iterator;
 import android.os.Environment;
-
+import java.io.File;
 import android.net.Uri;
 
 import java.lang.Math;
@@ -80,7 +80,7 @@ final class Editor extends Panel {
 
 	GRASP.paint.setTypeface(GRASP.logs_font);
 	GRASP.paint.setTextSize(16);
-	canvas.drawText(document.path, 0, height()-2,
+	canvas.drawText(document.file.getPath(), 0, height()-2,
 			GRASP.paint);
 
     }
@@ -389,7 +389,7 @@ final class Editor extends Panel {
 	out.writeFloat(_top);
 	out.writeFloat(_width);
 	out.writeFloat(_height);
-	out.writeString(document.path);
+	out.writeString(document.file.getPath());
 	out.writeFloat(transform.getLeft());
 	out.writeFloat(transform.getTop());
 	out.writeFloat(transform.getScale());
@@ -407,7 +407,7 @@ final class Editor extends Panel {
 	float scale = in.readFloat();
 	float angle = in.readFloat();
 	return new Editor(x, y, w, h,
-			  Document.fromPath(path),
+			  Document.fromFile(new File(path)),
 			  new Grab(left, top, scale, angle));
 
     }

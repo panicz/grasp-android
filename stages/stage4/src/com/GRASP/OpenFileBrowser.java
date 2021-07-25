@@ -23,11 +23,14 @@ class OpenFileBrowser implements Action, Procedure {
 
     @Override //Procedure
     public void perform() {
-	String [] files = dir.list();
-	Button [] buttons = new Button[files.length];
 
-	for (int i = 0; i < files.length; ++i) {
-	    buttons[i] = new FileButton(dir, files[i], this);
+	String [] files = dir.list();
+	Button [] buttons = new Button[files.length+1];
+
+	buttons[0] = new FileButton(dir.getParentFile(), "..", this);
+	
+	for (int i = 1; i < buttons.length; ++i) {
+	    buttons[i] = new FileButton(dir, files[i-1], this);
 	}
 
 	Pad list = new Below(buttons);

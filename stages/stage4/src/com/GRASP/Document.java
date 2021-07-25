@@ -13,22 +13,32 @@ import java.util.Calendar;
 
 
 class Document extends Box {
-    public String path = null;
     public File file = null;
     public static List<Document> openedDocuments =
 	new ArrayList<Document>();
 
-    public static Document fromPath(String path) {
+    public static Document fromFile(File file) {
 	Iterator<Document> it = openedDocuments.iterator();
 	
 	while(it.hasNext()) {
 	    Document doc = it.next();
-	    if (doc.path.equals(path)) {
+	    if (doc.file.getPath().equals(file.getPath())) {
 		return doc;
 	    }
 	}
-	GRASP.log("Unable to open document "+path);
-	return Scratch.instance();
+	try {
+	    Reader input = new FileReader(file);
+	    SExpReader sexp =
+		new SExpReader(new PeekingReader(input, 4));
+	    	    
+	    SExp sexpr = sexp.read_expressions();
+	    Bit content = sexpr.toBit();
+	    assert(content instanceof Box);
+	    return fromBox((Box) content);	    
+	} catch (IOException e) {
+	    GRASP.log(e.toString());
+	    return null;
+	}
     }
     
     static final float min_space_between_bits = 100.0f;
@@ -37,10 +47,9 @@ class Document extends Box {
 	openedDocuments.add(this);
     }
 
-    public Document(File file, String path) {
+    public Document(File file) {
 	this();
 	this.file = file;
-	this.path = path;
 
 	first_interline = new Interline(0, null);
 	_following_space = new Space(0, null);
@@ -55,22 +64,7 @@ class Document extends Box {
 	return document;
     }
 
-    public static Document fromSource(String text) {
-	try {
-	    Reader input = new StringReader(text);
-	    SExpReader sexp =
-		new SExpReader(new PeekingReader(input, 4));
-	    SExp sexpr = sexp.read_expressions();
-	    Bit content = sexpr.toBit();
-	    assert(content instanceof Box);
-	    return fromBox((Box) content);
-	} catch (IOException e) {
-	    GRASP.log(e.toString());
-	    return null;
-	}
-    }
-
-    static DateFormat date = new SimpleDateFormat("yyyyMMddHHmmss");
+    static DateFormat date = new SimpleDateFormat("yyyy-MM-dd@HH:mm:ss");
     
     public static Document createNew() {
 	Date now = Calendar.getInstance().getTime();
@@ -90,7 +84,7 @@ class Document extends Box {
 
 	GRASP.log("created "+path);
 	
-	return new Document(file, path);
+	return new Document(file);
     }
 
     public static void close(Document x) {

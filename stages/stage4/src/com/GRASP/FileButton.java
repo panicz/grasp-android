@@ -23,7 +23,12 @@ class FileButton extends Button implements Action {
 			      GRASP.directory_icon
 			      .getDocumentAspectRatio() * 64));*/
 	_width += 64 + 8;
-	file = new File(dir, filename);
+	if (filename.equals("..")) {
+	    file = dir;
+	}
+	else {
+	    file = new File(dir, filename);
+	}
 	action = this;
     }
 
@@ -50,7 +55,16 @@ class FileButton extends Button implements Action {
 	    browser.perform(finger, x, y);
 	}
 	else {
-	    // wczytujemy plik!!!
+	    Document document = Document.fromFile(file);
+	    if (document != null) {
+		browser.screen.layers.clear();
+		browser.editor.previousDocument
+		    .put(document, browser.editor.document);
+		browser.editor.switchToDocument(document);
+	    }
+	    else {
+		GRASP.log("failed to open "+file.toString());
+	    }
 	}
     }
 
