@@ -99,6 +99,7 @@ then
     echo "Copying $PKGNAME.apk to $HOME/storage/downloads/GRASP/"
     mkdir -p "$HOME/storage/downloads/GRASP"
     cp "$PKGNAME.apk" "$HOME/storage/downloads/GRASP/"
+    cp "../assets/example.grasp" "$HOME/storage/downloads/GRASP/"
 fi
 
 cd ..
