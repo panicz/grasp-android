@@ -1,0 +1,8 @@
+* GRASP: The GRAphical Scheme Programming
+
+This is the repository of the GRASP project, which
+is intended to be an extensible editor of s-expressions
+optimized for interacting via touch screen.
+
+The work is still in progress, and it has been divided
+into stages. See the `stages` directory for more details.
