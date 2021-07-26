@@ -350,7 +350,7 @@ final class Editor extends Panel {
 	    GRASP.log(item.target.toString());
 	    return null;
 	}
-	
+
 	return
 	    (new
 	     Popup(new

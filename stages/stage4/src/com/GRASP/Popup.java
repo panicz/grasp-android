@@ -209,19 +209,11 @@ class Popup implements Pad, Drag {
 
     @Override
     public Drag outwards(Transform transform) {
-	float x = transform.x(left, top);
-	float y = transform.y(left, top);
-	left = x;
-	top = y;
 	return this;
     }
 
     @Override
     public Drag inwards(Transform transform) {
-	float x = transform.unx(left, top);
-	float y = transform.uny(left, top);
-	left = x;
-	top = y;
 	return this;
     }
 

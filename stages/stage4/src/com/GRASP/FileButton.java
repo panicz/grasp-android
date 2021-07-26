@@ -31,7 +31,16 @@ class FileButton extends Button implements Action {
 	}
 	action = this;
     }
+    
+    public FileButton(File file, OpenFileBrowser parent) {
+	super(file.getName());
+	browser = parent;
+	_width += 64 + 8;
+	this.file = file;
+	action = this;
+    }
 
+    
     @Override
     public void renderCaption(Canvas canvas) {
 	canvas.translate(8, 16);
