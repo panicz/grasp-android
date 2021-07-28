@@ -365,7 +365,9 @@ final class Editor extends Panel {
 				    ShowOpenedDocuments(screen,
 							this)),
 			 new Button("Save"),
-			 new Button("Save as..."),
+			 new Button("Save as...", new
+				    SaveFileBrowser(screen, this,
+						    document.file.getParentFile())),
 			 new Button("Close", new
 				    CloseDocument(screen,
 						  document))

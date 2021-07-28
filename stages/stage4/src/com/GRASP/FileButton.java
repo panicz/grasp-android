@@ -39,7 +39,6 @@ class FileButton extends Button implements Action {
 	this.file = file;
 	action = this;
     }
-
     
     @Override
     public void renderCaption(Canvas canvas) {

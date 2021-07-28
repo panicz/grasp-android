@@ -17,5 +17,5 @@ class DirectoriesFirst implements Comparator<File> {
 	return a.compareTo(b);
     }
 
-    public static Comparator<File> instance = new DirectoriesFirst();
+    public static Comparator<File> comparator = new DirectoriesFirst();
 }

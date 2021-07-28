@@ -25,7 +25,7 @@ class OpenFileBrowser implements Action, Procedure {
     }
     
     @Override //Procedure
-    public void perform() {
+    public void execute() {
 
 	String [] filenames = dir.list();
 	File [] files = new File[filenames.length];
@@ -33,7 +33,7 @@ class OpenFileBrowser implements Action, Procedure {
 	    files[i] = new File(dir, filenames[i]);
 	}
 
-	Arrays.sort(files, DirectoriesFirst.instance);
+	Arrays.sort(files, DirectoriesFirst.comparator);
 	
 	Button [] buttons = new Button[files.length+1];
 
@@ -62,7 +62,7 @@ class OpenFileBrowser implements Action, Procedure {
     @Override // Action
     public void perform(byte finger, float x, float y) {
 	//screen.layers.clear();
-	assert(dir.isDirectory());
+ 	assert(dir.isDirectory());
 	this.finger = finger;
 
 	String read_fs = Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -75,7 +75,7 @@ class OpenFileBrowser implements Action, Procedure {
 		}, 1);
 	}
 	else {
-	    /*Procedure.*/perform();
+	    /*Procedure.*/execute();
 	}
     }
 }

@@ -293,7 +293,7 @@ public class GRASP
                                          grantResults);
         if (grantResults.length > 0) {
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-		permissionGranted.perform();
+		permissionGranted.execute();
 		permissionGranted = DoNothing.instance;
 	    }
 	}

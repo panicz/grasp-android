@@ -21,7 +21,8 @@ class Document extends Box {
 	Iterator<Document> it = openedDocuments.iterator();
 	
 	while(it.hasNext()) {
-	    Document doc = it.next();	    if (doc.file.getPath().equals(file.getPath())) {
+	    Document doc = it.next();
+	    if (doc.file.getPath().equals(file.getPath())) {
 		return doc;
 	    }
 	}
