@@ -378,6 +378,19 @@ final class Editor extends Panel {
     }
 
     @Override
+    public boolean onKeyUp(Screen screen, int keycode,
+			   char unicode, int meta) {
+	return false;
+    }
+
+    @Override
+    public boolean onKeyDown(Screen screen, int keycode,
+			     char unicode, int meta) {
+	return false;
+    }
+
+    
+    @Override
     public boolean insertAt(float x, float y, DragAround bit) {
 	return document.insertAt(transform.unx(x, y),
 				 transform.uny(x, y),

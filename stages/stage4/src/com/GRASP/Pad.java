@@ -9,6 +9,12 @@ interface Pad extends Tile {
     void onDoubleClick(Screen screen, byte finger, float x, float y);
     Drag onHold(Screen screen, byte finger, float x, float y);
 
+    boolean onKeyUp(Screen screen, int keycode,
+		    char unicode, int meta);
+
+    boolean onKeyDown(Screen screen, int keycode,
+		      char unicode, int meta);
+
     // these are only triggered when the parent decides so
     // (currently only triggered from Popup and Below,
     // and handled by Below and Button)

@@ -101,6 +101,19 @@ class TextInput implements Pad {
 	return null;
     }
 
+    @Override
+    public boolean onKeyUp(Screen screen, int keycode,
+			   char unicode, int meta) {
+	return false;
+    }
+
+    @Override
+    public boolean onKeyDown(Screen screen, int keycode,
+			     char unicode, int meta) {
+	return false;
+    }
+
+    
     // these are only triggered when the parent decides so
     // (currently only triggered from Popup and Below,
     // and handled by Below and Button)

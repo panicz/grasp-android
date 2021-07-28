@@ -7,12 +7,15 @@ abstract class Split extends Panel implements Drag {
     
     public Panel firstPanel;
     public Panel secondPanel;
+    public Panel keyboardFocus;
 
     public Split(float x, float y, float w, float h,
-		 Panel first, Panel second) {
+		 Panel first, Panel second, Panel focus) {
 	super(x, y, w, h);
 	firstPanel = first;
 	secondPanel = second;
+	assert(focus == first || focus == second);
+	keyboardFocus = focus;
     }
 
     @Override
@@ -137,5 +140,17 @@ abstract class Split extends Panel implements Drag {
 		       byte finger,
 		       float x, float y) {
 	return null;
+    }
+
+    @Override
+    public boolean onKeyUp(Screen screen, int keycode,
+			   char unicode, int meta) {
+	return keyboardFocus.onKeyUp(screen, keycode, unicode, meta);
+    }
+
+    @Override
+    public boolean onKeyDown(Screen screen, int keycode,
+			     char unicode, int meta) {
+	return keyboardFocus.onKeyDown(screen, keycode, unicode, meta);
     }
 }

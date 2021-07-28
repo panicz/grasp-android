@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 class Below implements Pad, Drag {
     Pad [] contents;
     Pad hovered = null;
+    int focus = 0;
     
     static final Shift shift = new Shift();
 
@@ -178,6 +179,24 @@ class Below implements Pad, Drag {
 			 0, total_height);
     }
 
+    @Override
+    public boolean onKeyUp(Screen screen, int keycode,
+			   char unicode, int meta) {
+	if (0 <= focus && focus < contents.length) {
+	    return contents[focus].onKeyUp(screen, keycode, unicode, meta);
+	}
+	return false;
+    }
+
+    @Override
+    public boolean onKeyDown(Screen screen, int keycode,
+			     char unicode, int meta) {
+	if (0 <= focus && focus < contents.length) {
+	    return contents[focus].onKeyDown(screen, keycode, unicode, meta);
+	}
+	return false;
+    }
+    
     float dx = 0;
     float dy = 0;
     @Override

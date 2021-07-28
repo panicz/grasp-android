@@ -195,6 +195,18 @@ class Popup implements Pad, Drag {
     }
 
     @Override
+    public boolean onKeyUp(Screen screen, int keycode,
+			   char unicode, int meta) {
+	return content.onKeyUp(screen, keycode, unicode, meta);
+    }
+
+    @Override
+    public boolean onKeyDown(Screen screen, int keycode,
+			     char unicode, int meta) {
+	return content.onKeyDown(screen, keycode, unicode, meta);
+    }
+    
+    @Override
     public void move(Screen screen, float x, float y,
 		     float dx, float dy) {
 

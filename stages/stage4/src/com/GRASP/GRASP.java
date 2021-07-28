@@ -401,12 +401,39 @@ public class GRASP
 
     
     @Override
-    public boolean onKey(View view,
-			 int keyCode,
-			 KeyEvent event) {
-	
-	log("onKey("+view+", "+keyCode+", "+event+")");
-	return true;
+    public boolean onKey(View view, int keyCode, KeyEvent event) {
+	switch (event.getAction()) {
+	case KeyEvent.ACTION_DOWN: {
+	    int meta = event.getMetaState();
+	    return screen.onKeyDown(event.getKeyCode(),
+				    (char)event.getUnicodeChar(meta),
+				    meta);
+	}
+	case KeyEvent.ACTION_UP: {
+	    int meta = event.getMetaState();
+	    return screen.onKeyUp(event.getKeyCode(),
+				  (char)event.getUnicodeChar(meta),
+				  meta);
+	}
+	case KeyEvent.ACTION_MULTIPLE: {
+	    String chars = event.getCharacters();
+	    boolean result = false;
+	    if (chars != null) {
+		int keycode = event.getKeyCode();
+		int meta = event.getMetaState();
+		for (int i = 0; i < chars.length(); ++i) {
+		    result |= screen.onKeyDown(keycode,
+					       chars.charAt(i),
+					       meta);
+		}
+	    }
+	    return result;
+	}
+
+	default:
+	    log("onKey("+view+", "+keyCode+", "+event+")");
+	    return false;
+	}
     }
 
     

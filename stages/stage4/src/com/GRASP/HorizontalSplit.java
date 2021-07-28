@@ -10,14 +10,14 @@ final class HorizontalSplit extends Split {
     public HorizontalSplit(float x, float y, float w, float h,
 			   Panel left_panel,
 			   Panel right_panel) {
-	super(x, y, w, h, left_panel, right_panel);
+	super(x, y, w, h, left_panel, right_panel, left_panel);
     }
     
     public HorizontalSplit(Panel panel,
 			   RectF rect) {
 	super(panel.left(), panel.top(),
 	      panel.width(), panel.height(),
-	      panel, panel.copy());
+	      panel, panel.copy(), panel);
 	float center = (rect.left + rect.right)/2.0f;
 	
 	firstPanel.setWidth(center - left() - bar_width/2.0f);
@@ -125,10 +125,12 @@ final class HorizontalSplit extends Split {
 	    return;
 	}
 	if (x <= firstPanel.width()) {
+	    keyboardFocus = firstPanel;
 	    firstPanel.onClick(screen, finger, x, y);
 	    return;
 	}
 	if (x >= (firstPanel.width()+bar_width)) {
+	    keyboardFocus = secondPanel;
 	    secondPanel.onClick(screen, finger,
 				x-(firstPanel.width()+bar_width), y);
 	    return;

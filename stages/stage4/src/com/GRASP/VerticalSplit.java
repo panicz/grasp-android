@@ -10,14 +10,14 @@ final class VerticalSplit extends Split {
     public VerticalSplit(float x, float y, float w, float h,
 			 Panel top,
 			 Panel bottom) {
-	super(x, y, w, h, top, bottom);
+	super(x, y, w, h, top, bottom, top);
     }
 
     public VerticalSplit(Panel panel,
 			 RectF rect) {
 	super(panel.left(), panel.top(),
 	      panel.width(), panel.height(),
-	      panel, panel.copy());
+	      panel, panel.copy(), panel);
 	float center = (rect.top + rect.bottom)/2.0f;
 	firstPanel.setHeight(center - top() - bar_width/2.0f);
 
@@ -138,10 +138,12 @@ final class VerticalSplit extends Split {
 	    return;
 	}
 	if (y <= firstPanel.height()) {
+	    keyboardFocus = firstPanel;
 	    firstPanel.onClick(screen, finger, x, y);
 	    return;
 	}
 	if (y >= firstPanel.height() + bar_width) {
+	    keyboardFocus = secondPanel;
 	    secondPanel.onClick(screen, finger,
 				x, y-firstPanel.height()-bar_width);
 	    return;

@@ -167,5 +167,16 @@ class Button implements Pad {
 	normal_colors();
     }
 
+    @Override
+    public boolean onKeyUp(Screen screen, int keycode,
+			   char unicode, int meta) {
+	return false;
+    }
+
+    @Override
+    public boolean onKeyDown(Screen screen, int keycode,
+			     char unicode, int meta) {
+	return false;
+    }
     
 }

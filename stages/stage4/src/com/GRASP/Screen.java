@@ -382,10 +382,8 @@ class Screen extends View {
     @Override
     protected void onDraw(Canvas canvas) {
 
-
 	canvas.drawRGB(255, 255, 255);
 	GRASP._log.draw(canvas, 0, 0);
-
 
 	Pad top = layers.peekLast();
 
@@ -444,4 +442,25 @@ class Screen extends View {
 	}
     }
 
+    boolean onKeyDown(int keycode, char unicode, int meta) {
+	if (layers.isEmpty()) {
+	    return panel.onKeyDown(this, keycode, unicode, meta);
+	}
+	else {
+	    return layers.peekLast().onKeyDown(this, keycode,
+					       unicode, meta);
+	}
+    }
+
+    boolean onKeyUp(int keycode, char unicode, int meta) {
+	if (layers.isEmpty()) {
+	    return panel.onKeyUp(this, keycode, unicode, meta);
+	}
+	else {
+	    return layers.peekLast().onKeyUp(this, keycode,
+					     unicode, meta);
+	}
+    }
+
+    
 }
