@@ -405,15 +405,19 @@ public class GRASP
 	switch (event.getAction()) {
 	case KeyEvent.ACTION_DOWN: {
 	    int meta = event.getMetaState();
-	    return screen.onKeyDown(event.getKeyCode(),
-				    (char)event.getUnicodeChar(meta),
-				    meta);
+	    return invalidating(screen
+				.onKeyDown(event.getKeyCode(),
+					   (char)event
+					   .getUnicodeChar(meta),
+					   meta));
 	}
 	case KeyEvent.ACTION_UP: {
 	    int meta = event.getMetaState();
-	    return screen.onKeyUp(event.getKeyCode(),
-				  (char)event.getUnicodeChar(meta),
-				  meta);
+	    return invalidating(screen
+				.onKeyUp(event.getKeyCode(),
+					 (char)event
+					 .getUnicodeChar(meta),
+					 meta));
 	}
 	case KeyEvent.ACTION_MULTIPLE: {
 	    String chars = event.getCharacters();
@@ -427,7 +431,7 @@ public class GRASP
 					       meta);
 		}
 	    }
-	    return result;
+	    return invalidating(result);
 	}
 
 	default:

@@ -5,6 +5,8 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import java.lang.StringBuilder;
 import java.lang.Math;
+import android.view.KeyEvent;
+
 
 class TextInput implements Pad {
     StringBuilder contents;
@@ -15,7 +17,10 @@ class TextInput implements Pad {
     float min_width;
     static Paint paint = null;
 
-    public TextInput(float min_width, String initial_text, float font_size, Typeface font) {
+    public TextInput(float min_width,
+		     String initial_text,
+		     float font_size,
+		     Typeface font) {
 	this.min_width = min_width;
 	contents = new StringBuilder(initial_text);
 	this.font_size = font_size;
@@ -53,7 +58,8 @@ class TextInput implements Pad {
 	canvas.drawRect(prefix_width, 0,
 			prefix_width+selection_width, font_size,
 			GRASP.paint);
-	canvas.drawText(selection, prefix_width, font_size, paint);
+	canvas.drawText(selection, prefix_width,
+			font_size, paint);
 	canvas.drawText(after_selection,
 			prefix_width+selection_width,
 			font_size, GRASP.paint);
@@ -63,7 +69,8 @@ class TextInput implements Pad {
     public float width() {
 	paint.setTypeface(font);
 	paint.setTextSize(font_size);
-	return Math.max(min_width, paint.measureText(contents.toString()));
+	return Math.max(min_width,
+			paint.measureText(contents.toString()));
     }
     
     @Override
@@ -77,27 +84,37 @@ class TextInput implements Pad {
     }
 
     @Override
-    public Drag onPress(Screen screen, byte finger, float x, float y) {
+    public Drag onPress(Screen screen, byte finger,
+			float x, float y) {
 	return null;
     }
 
     @Override
-    public void onClick(Screen screen, byte finger, float x, float y) {
-
+    public void onClick(Screen screen, byte finger,
+			float x, float y) {
+	paint.setTypeface(font);
+	paint.setTextSize(font_size);
+	cursor_position = selection_start =
+	    paint.breakText(contents.toString(), true,
+			    x, null);
+	screen.showKeyboard();
     }
 
     @Override
-    public Drag onSecondPress(Screen screen, byte finger, float x, float y) {
+    public Drag onSecondPress(Screen screen, byte finger,
+			      float x, float y) {
 	return null;
     }
 
     @Override
-    public void onDoubleClick(Screen screen, byte finger, float x, float y) {
+    public void onDoubleClick(Screen screen, byte finger,
+			      float x, float y) {
 
     }
 
     @Override
-    public Drag onHold(Screen screen, byte finger, float x, float y) {
+    public Drag onHold(Screen screen, byte finger,
+		       float x, float y) {
 	return null;
     }
 
@@ -107,12 +124,80 @@ class TextInput implements Pad {
 	return false;
     }
 
+    boolean delete_selection() {
+	if (cursor_position == selection_start) {
+	    return false;
+	}
+	int left = Math.min(cursor_position,
+			    selection_start);
+	int right = Math.max(cursor_position,
+			     selection_start);
+	contents.delete(left, right);
+	cursor_position = selection_start = left;
+	return true;
+    }
+	
     @Override
     public boolean onKeyDown(Screen screen, int keycode,
 			     char unicode, int meta) {
-	return false;
+	if (unicode == 0) {
+	    switch (keycode) {
+	    case KeyEvent.KEYCODE_DPAD_LEFT:
+		if ((meta & KeyEvent.META_SHIFT_MASK) != 0) {
+		    if (selection_start > 0) {
+			--selection_start;
+		    }
+		}
+		else if (cursor_position == selection_start) {
+		    cursor_position = selection_start
+			= Math.max(0,
+				   Math.min(cursor_position,
+					    selection_start) - 1);
+		}
+		else {
+		    selection_start = cursor_position;
+		}
+		break;
+	    case KeyEvent.KEYCODE_DPAD_RIGHT:
+		if ((meta & KeyEvent.META_SHIFT_MASK) != 0) {
+		    if (selection_start < contents.length()) {
+			++selection_start;
+		    }
+		}
+		else if (cursor_position == selection_start) {
+		    cursor_position = selection_start
+			= Math.min(contents.length(),
+				   Math.max(cursor_position,
+					    selection_start) + 1);
+		}
+		else {
+		    selection_start = cursor_position;
+		}
+		break;
+	    case KeyEvent.KEYCODE_DEL:
+		if (!delete_selection()
+		    && cursor_position > 0) {
+		    selection_start = --cursor_position;
+		    contents.deleteCharAt(cursor_position);
+		}
+		break;
+	    case KeyEvent.KEYCODE_FORWARD_DEL:
+		if (!delete_selection()
+		    && cursor_position < contents.length()) {
+		    contents.deleteCharAt(cursor_position);
+		}
+		break;
+	    default:
+		return false;
+	    }
+	}
+	else {
+	    delete_selection();
+	    contents.insert(cursor_position, unicode);
+	    selection_start = ++cursor_position;
+	}
+	return true;
     }
-
     
     // these are only triggered when the parent decides so
     // (currently only triggered from Popup and Below,
