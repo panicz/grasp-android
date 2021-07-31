@@ -26,46 +26,56 @@ class Below implements Pad, Drag {
 	shift.set(x, y);
 	return drag.outwards(shift);
     }
+
+    protected void translate(Canvas canvas, float w, float h) {
+	canvas.translate(0, h);
+    }
     
     @Override
     public void render(Canvas canvas) {
 	canvas.save();
-	boolean something_was_dislayed = false;
+	boolean something_was_displayed = false;
 	for (int i = 0; i < contents.length; ++i) {
 	    float w = contents[i].width();
 	    float h = contents[i].height();
 	    if (canvas.quickReject(0.0f, 0.0f, w, h,
 				   Canvas.EdgeType.BW)) {
-		if (something_was_dislayed) {
+		if (something_was_displayed) {
 		    break;
 		}
 	    }
 	    else {
 		contents[i].render(canvas);
-		something_was_dislayed = true;
+		something_was_displayed = true;
 	    }
-	    canvas.translate(0, h);
+	    translate(canvas, w, h);
 	}
 	canvas.restore();
     }
 
+    protected float horizontal(float accum, float value) {
+	return value > accum ? value : accum;
+    }
+    
     @Override
     public float width() {
 	float max_width = 0;
 	for (int i = 0; i < contents.length; ++i) {
 	    float w = contents[i].width();
-	    if (w > max_width) {
-		max_width = w;
-	    }
+	    max_width = horizontal(max_width, w);
 	}
 	return max_width;
     }
 
+    protected float vertical(float accum, float value) {
+	return accum + value;
+    }
+    
     @Override
     public float height() {
 	float total_height = 0;
 	for (int i = 0; i < contents.length; ++i) {
-	    total_height += contents[i].height();
+	    total_height = vertical(total_height, contents[i].height());
 	}
 	return total_height;
     }
@@ -75,26 +85,36 @@ class Below implements Pad, Drag {
 
     }
 
+    protected float advance_height(float h) {
+	return h;
+    }
 
-    float total_height;
+    protected float advance_width(float w) {
+	return 0;
+    }
+
+    float preceding_height = 0;
+    float preceding_width = 0; //use by Beside
     Pad itemAt(float x, float y) {
 	if (x < 0) {
 	    return null;
 	}
 	
-	total_height = 0;
+	preceding_height = 0;
 	for (int i = 0; i < contents.length; ++i) {
+	    float w = contents[i].width();
 	    float h = contents[i].height();
-	    if (total_height <= y && y < total_height + h) {
-		if (x < contents[i].width()) {
-		    return contents[i];
-		}
-		else {
-		    return null;
-		}
+	    if (preceding_height <= y && y < preceding_height + h
+		&& preceding_width <= x && x < preceding_width + w) {
+		return contents[i];
 	    }
 	    
-	    total_height += h;
+	    preceding_height += advance_height(h);
+	    preceding_width += advance_width(h);
+
+	    if (preceding_width > x || preceding_height > y) {
+		return null;
+	    }
 	}
 	return null;
     }
@@ -111,12 +131,15 @@ class Below implements Pad, Drag {
 	}
 
 	Drag drag = target.onPress(screen, finger,
-				   x, y-total_height);
+				   x-preceding_width,
+				   y-preceding_height);
 	if (drag == null) {
 	    return this;
 	}
 
-	return translate(drag, 0, total_height);
+	return translate(drag,
+			 preceding_width,
+			 preceding_height);
     }
 
     @Override
@@ -128,7 +151,8 @@ class Below implements Pad, Drag {
 	if (target != null) {
 	    target.onClick(screen,
 			   finger,
-			   x, y-total_height);
+			   x-preceding_width,
+			   y-preceding_height);
 	}
     }
 
@@ -144,8 +168,9 @@ class Below implements Pad, Drag {
 
 	return translate(target.onSecondPress(screen,
 					      finger,
-					      x, y-total_height),
-			 0, total_height);
+					      x-preceding_width,
+					      y-preceding_height),
+			 preceding_width, preceding_height);
     }
 
     @Override
@@ -158,7 +183,8 @@ class Below implements Pad, Drag {
 	if (target != null) {
 	    target.onDoubleClick(screen,
 				 finger,
-				 x, y-total_height);
+				 x-preceding_width,
+				 y-preceding_height);
 	}
 
     }
@@ -175,8 +201,9 @@ class Below implements Pad, Drag {
 
 	return translate(target.onHold(screen,
 				       finger,
-				       x, y-total_height),
-			 0, total_height);
+				       x-preceding_width,
+				       y-preceding_height),
+			 preceding_width, preceding_height);
     }
 
     @Override
@@ -281,7 +308,4 @@ class Below implements Pad, Drag {
 
 	dx = dy = 0;
     }
-    
-
-    
 }
