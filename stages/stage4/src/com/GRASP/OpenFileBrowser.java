@@ -10,11 +10,11 @@ import java.lang.Math;
 import java.util.Arrays;
 
 
-class OpenFileBrowser implements Action, Procedure {
+class OpenFileBrowser implements Action, Procedure, FileBrowser {
     Screen screen;
     Editor editor;
     File dir;
-    byte finger;
+    float x0, y0;
     
     public OpenFileBrowser(Screen screen,
 			   Editor editor,
@@ -49,8 +49,7 @@ class OpenFileBrowser implements Action, Procedure {
 					   Math.min(list.height(),
 						    screen.height
 						    - 200)))
-	    .centerAround(screen.x[finger], screen.y[finger],
-			  screen.width, screen.height);
+	    .centerAround(x0, y0, screen.width, screen.height);
 	/*
 	popup.centerAround(x, y,
 			   screen.width,
@@ -63,7 +62,8 @@ class OpenFileBrowser implements Action, Procedure {
     public void perform(byte finger, float x, float y) {
 	//screen.layers.clear();
  	assert(dir.isDirectory());
-	this.finger = finger;
+	x0 = screen.x[finger];
+	y0 = screen.y[finger];
 
 	String read_fs = Manifest.permission.READ_EXTERNAL_STORAGE;
 	
@@ -78,4 +78,28 @@ class OpenFileBrowser implements Action, Procedure {
 	    /*Procedure.*/execute();
 	}
     }
+
+    @Override
+    public void fileAction(File file, byte finger, float x, float y) {
+	Document document = Document.fromFile(file);
+	if (document != null) {
+	    screen.layers.clear();
+	    editor.previousDocument
+		.put(document, editor.document);
+	    editor.switchToDocument(document);
+	}
+	else {
+	    GRASP.log("failed to open "+file.toString());
+	}
+    }
+
+
+    @Override
+    public void directoryAction(File file, byte finger, float x, float y) {
+	dir = file;
+	screen.layers.removeLast();
+	perform(finger, x, y);
+
+    }
+
 }

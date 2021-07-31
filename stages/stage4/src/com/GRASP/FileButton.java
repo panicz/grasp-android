@@ -7,12 +7,12 @@ import java.lang.Math;
 import java.io.File;
 
 class FileButton extends Button implements Action {
-    OpenFileBrowser browser;
+    FileBrowser browser;
     File file;
     static final float icon_width = 64;
     
     public FileButton(File dir, String filename,
-		      OpenFileBrowser parent) {
+		      FileBrowser parent) {
 	super(filename);
 	browser = parent;
 	/*
@@ -32,7 +32,7 @@ class FileButton extends Button implements Action {
 	action = this;
     }
     
-    public FileButton(File file, OpenFileBrowser parent) {
+    public FileButton(File file, FileBrowser parent) {
 	super(file.getName());
 	browser = parent;
 	_width += 64 + 8;
@@ -57,22 +57,10 @@ class FileButton extends Button implements Action {
     @Override
     public void perform(byte finger, float x, float y) {
 	if (file.isDirectory()) {
-	    GRASP.log("opening "+file);
-	    browser.dir = file;
-	    browser.screen.layers.removeLast();
-	    browser.perform(finger, x, y);
+	    browser.directoryAction(file, finger, x, y);
 	}
 	else {
-	    Document document = Document.fromFile(file);
-	    if (document != null) {
-		browser.screen.layers.clear();
-		browser.editor.previousDocument
-		    .put(document, browser.editor.document);
-		browser.editor.switchToDocument(document);
-	    }
-	    else {
-		GRASP.log("failed to open "+file.toString());
-	    }
+	    browser.fileAction(file, finger, x, y);
 	}
     }
 
