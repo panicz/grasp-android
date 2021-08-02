@@ -351,6 +351,7 @@ final class Editor extends Panel {
 	    return null;
 	}
 
+	
 	return
 	    (new
 	     Popup(new

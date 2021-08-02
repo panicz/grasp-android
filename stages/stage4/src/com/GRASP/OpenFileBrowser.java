@@ -10,7 +10,7 @@ import java.lang.Math;
 import java.util.Arrays;
 
 
-class OpenFileBrowser implements Action, Procedure, FileBrowser {
+class OpenFileBrowser implements Action, PermissionGrantedHandler, FileBrowser {
     Screen screen;
     Editor editor;
     File dir;
@@ -24,8 +24,10 @@ class OpenFileBrowser implements Action, Procedure, FileBrowser {
 	this.dir = dir;
     }
     
-    @Override //Procedure
-    public void execute() {
+    @Override
+    public void onPermissionGranted(int requestCode,
+				    String[] permissions,
+				    int[] grantResults) {
 
 	String [] filenames = dir.list();
 	File [] files = new File[filenames.length];
@@ -72,10 +74,11 @@ class OpenFileBrowser implements Action, Procedure, FileBrowser {
 	    GRASP.instance.permissionGranted = this;
 	    GRASP.instance.requestPermissions(new String [] {
 		    read_fs
-		}, 1);
+		}, ExternalReadFromOpenFileBrowser);
 	}
 	else {
-	    /*Procedure.*/execute();
+	    onPermissionGranted(ExternalReadFromOpenFileBrowserAlreadyGranted,
+				null, null);
 	}
     }
 
@@ -99,7 +102,6 @@ class OpenFileBrowser implements Action, Procedure, FileBrowser {
 	dir = file;
 	screen.layers.removeLast();
 	perform(finger, x, y);
-
     }
 
 }

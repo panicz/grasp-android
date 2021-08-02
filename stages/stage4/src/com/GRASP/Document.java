@@ -271,5 +271,16 @@ class Document extends Box {
 	return null;
     }
 
-    
+    @Override
+    public StringBuilder buildString(StringBuilder result) {
+	result = super.buildString(result);
+	int left = result.indexOf("(");
+	int right = result.lastIndexOf(")");
+	if (left >= 0 && right > left) {
+	    result.deleteCharAt(right);
+	    result.deleteCharAt(left);
+	}
+	return result;
+    }
+
 }

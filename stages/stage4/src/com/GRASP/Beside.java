@@ -8,6 +8,11 @@ class Beside extends Below {
     }
 
     @Override
+    Pad itemAt(float x, float y) {
+	return super.itemAt(x, y);
+    }
+	
+    @Override
     protected float horizontal(float accum, float value) {
 	return super.vertical(accum, value);
     }
@@ -24,13 +29,16 @@ class Beside extends Below {
 
     @Override
     protected float advance_height(float h) {
-	return super.advance_width(h);
+	return 0;
     }
 
     @Override
     protected float advance_width(float w) {
-	return super.advance_height(w);
+	return w;
     }
 
+    @Override
+    public void trySetSize(float x, float y) {
+    }
     
 }

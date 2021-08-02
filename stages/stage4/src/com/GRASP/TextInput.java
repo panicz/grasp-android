@@ -15,8 +15,9 @@ class TextInput implements Pad {
     float font_size;
     Typeface font;
     float min_width;
+    float margin;
     static Paint paint = null;
-
+    
     public TextInput(float min_width,
 		     String initial_text,
 		     float font_size,
@@ -24,6 +25,7 @@ class TextInput implements Pad {
 	this.min_width = min_width;
 	contents = new StringBuilder(initial_text);
 	this.font_size = font_size;
+	margin= .12f*font_size;
 	this.font = font;
 	cursor_position = selection_start = initial_text.length();
 	if (paint == null) {
@@ -34,7 +36,18 @@ class TextInput implements Pad {
     }
 
     public TextInput(float min_width) {
-	this(min_width, "", 76, GRASP.strings_font);
+	this(min_width, "", 72, GRASP.strings_font);
+    }
+
+    public String getText() {
+	return contents.toString();
+    }
+
+    public TextInput setText(String text) {
+	int n = contents.length();
+	contents.replace(0, n, text);
+	cursor_position = selection_start = n;
+	return this;
     }
     
     @Override
@@ -49,20 +62,20 @@ class TextInput implements Pad {
 	
 	canvas.drawRect(0, 0, width(), height(), paint);
 	
-	canvas.drawText(before_selection, 0.0f, font_size,
+	canvas.drawText(before_selection, 0.0f, font_size+margin,
 			GRASP.paint);
 	float prefix_width = GRASP.paint
 	    .measureText(before_selection);
 	float selection_width = Math.max(2.0f, GRASP.paint
 					 .measureText(selection));
-	canvas.drawRect(prefix_width, 0,
-			prefix_width+selection_width, font_size,
+	canvas.drawRect(prefix_width, margin,
+			prefix_width+selection_width, font_size+margin,
 			GRASP.paint);
 	canvas.drawText(selection, prefix_width,
-			font_size, paint);
+			font_size+margin, paint);
 	canvas.drawText(after_selection,
 			prefix_width+selection_width,
-			font_size, GRASP.paint);
+			font_size+margin, GRASP.paint);
     }
 
     @Override
@@ -75,7 +88,7 @@ class TextInput implements Pad {
     
     @Override
     public float height() {
-	return font_size;
+	return font_size + 2*margin;
     }
 
     @Override
@@ -136,7 +149,7 @@ class TextInput implements Pad {
 	cursor_position = selection_start = left;
 	return true;
     }
-	
+
     @Override
     public boolean onKeyDown(Screen screen, int keycode,
 			     char unicode, int meta) {
@@ -151,7 +164,7 @@ class TextInput implements Pad {
 		else if (cursor_position == selection_start) {
 		    cursor_position = selection_start
 			= Math.max(0,
-				   Math.min(cursor_position,
+				   Math.max(cursor_position,
 					    selection_start) - 1);
 		}
 		else {
@@ -167,7 +180,7 @@ class TextInput implements Pad {
 		else if (cursor_position == selection_start) {
 		    cursor_position = selection_start
 			= Math.min(contents.length(),
-				   Math.max(cursor_position,
+				   Math.min(cursor_position,
 					    selection_start) + 1);
 		}
 		else {

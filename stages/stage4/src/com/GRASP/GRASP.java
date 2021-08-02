@@ -281,7 +281,7 @@ public class GRASP
 			    : screen.other_panel);
     }
 
-    Procedure permissionGranted = DoNothing.instance;
+    PermissionGrantedHandler permissionGranted = NoActionOnPermissionGranted.instance;
     
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -293,8 +293,10 @@ public class GRASP
                                          grantResults);
         if (grantResults.length > 0) {
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-		permissionGranted.execute();
-		permissionGranted = DoNothing.instance;
+		permissionGranted.onPermissionGranted(requestCode,
+						      permissions,
+						      grantResults);
+		permissionGranted = NoActionOnPermissionGranted.instance;
 	    }
 	}
     }

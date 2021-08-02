@@ -11,11 +11,8 @@ class Below implements Pad, Drag {
 
     public Below(Pad ... items) {
 	contents = items;
-	float w = width();
-	
-	for (int i = 0; i < contents.length; ++i) {
-	    contents[i].trySetSize(w, contents[i].height());
-	}
+
+	trySetSize(width(), height());
     }
     
     protected static Drag translate(Drag drag, float x, float y) {
@@ -83,6 +80,13 @@ class Below implements Pad, Drag {
     @Override
     public void trySetSize(float x, float y) {
 
+	if (y != height()) {
+	    GRASP.log("height changing policy not implemented for Below");
+	}
+	
+	for (int i = 0; i < contents.length; ++i) {
+	    contents[i].trySetSize(x, contents[i].height());
+	}
     }
 
     protected float advance_height(float h) {
@@ -96,10 +100,11 @@ class Below implements Pad, Drag {
     float preceding_height = 0;
     float preceding_width = 0; //use by Beside
     Pad itemAt(float x, float y) {
-	if (x < 0) {
+	if (x < 0 || y < 0) {
 	    return null;
 	}
-	
+
+	preceding_width = 0;
 	preceding_height = 0;
 	for (int i = 0; i < contents.length; ++i) {
 	    float w = contents[i].width();
@@ -110,7 +115,7 @@ class Below implements Pad, Drag {
 	    }
 	    
 	    preceding_height += advance_height(h);
-	    preceding_width += advance_width(h);
+	    preceding_width += advance_width(w);
 
 	    if (preceding_width > x || preceding_height > y) {
 		return null;
@@ -125,7 +130,7 @@ class Below implements Pad, Drag {
 			float x, float y) {
 
 	Pad target = itemAt(x, y);
-
+	
 	if (target == null) {
 	    return this;
 	}

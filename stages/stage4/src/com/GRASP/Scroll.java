@@ -17,6 +17,10 @@ class Scroll implements Pad, Drag {
 	_width = w;
 	_height = h;
     }
+
+    public Scroll(Pad target) {
+	this(target, target.width(), target.height());
+    }
     
     @Override
     public void render(Canvas canvas) {

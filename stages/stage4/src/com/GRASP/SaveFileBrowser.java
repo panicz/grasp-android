@@ -3,6 +3,9 @@ package com.GRASP;
 import android.Manifest;
 import android.os.Environment;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import java.lang.Math;
@@ -10,10 +13,12 @@ import java.lang.Math;
 import java.util.Arrays;
 
 
-class SaveFileBrowser implements Action, Procedure, FileBrowser {
+class SaveFileBrowser implements Action, PermissionGrantedHandler, FileBrowser {
     Screen screen;
     Editor editor;
     File dir;
+    File file = null;
+    TextInput filename;
     float x0, y0;
     
     public SaveFileBrowser(Screen screen,
@@ -23,9 +28,21 @@ class SaveFileBrowser implements Action, Procedure, FileBrowser {
 	this.editor = editor;
 	this.dir = dir;
     }
+
+    class SaveFileAction implements Action {
+	SaveFileBrowser parent;
+	
+	public SaveFileAction(SaveFileBrowser parent) {
+	    this.parent = parent;
+	}
+	
+	@Override // Action
+	public void perform(byte finger, float x, float y) {
+	    parent.saveFile(new File(parent.dir, parent.filename.getText()));
+	}
+    }
     
-    @Override
-    public void execute() {
+    void showBrowserWindow() {
 	String [] filenames = dir.list();
 
 	File [] files = new File[filenames.length];
@@ -49,23 +66,75 @@ class SaveFileBrowser implements Action, Procedure, FileBrowser {
 	
 	float text_width = Math.max(420, filelist.width() - save.width());
 	
-	TextInput filename = new
-	    TextInput(text_width, "filename", 72, GRASP.strings_font);
+	filename = new
+	    TextInput(text_width, "filename", 76, GRASP.strings_font);
 
-	Scroll textfield = new Scroll(filename, filename.width(), filename.height());
+	save.action = new SaveFileAction(this);
+	
+	Scroll textfield = new Scroll(filename);
 
 	Beside header = new Beside(textfield, save);
+
+	filelist.trySetSize(header.width(), filelist.height());
 	
 	Popup popup = new
 	    Popup(new
 		  Below(header,
-			new Scroll(new Below(buttons),
+			new Scroll(filelist,
 				   header.width(),
 				   Math.min(header.height() + filelist.height(),
 					    screen.height - 200))))
 	    .centerAround(x0, y0, screen.width, screen.height);
 
 	screen.layers.addLast(popup);
+    }
+
+
+    void saveFile(File file) {
+	this.file = file;
+	String write_fs = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+	
+	if (GRASP.instance.checkSelfPermission(write_fs)
+	    == PackageManager.PERMISSION_DENIED) {
+	    GRASP.instance.permissionGranted = this;
+	    GRASP.instance.requestPermissions(new String [] {
+		    write_fs
+		}, ExternalWriteFromSaveFileBrowser);
+	}
+	else {
+	    onPermissionGranted(ExternalWriteFromSaveFileBrowserAlreadyGranted,
+				null, null);
+	}
+    }
+
+    void saveFile() {
+	BufferedWriter writer = null;
+	try {
+	    writer = new BufferedWriter(new FileWriter(file));
+	    writer.append(editor.document.buildString(new StringBuilder()));
+	    writer.close();
+	} catch(IOException but) {
+	    GRASP.log(but.toString());
+	}
+    }
+    
+    @Override
+    public void onPermissionGranted(int requestCode,
+				    String[] permissions,
+				    int[] grantResults) {
+	switch(requestCode) {
+	case ExternalReadFromSaveFileBrowser:
+	case ExternalReadFromSaveFileBrowserAlreadyGranted:
+	    showBrowserWindow();
+	    break;
+	case ExternalWriteFromSaveFileBrowser:
+	case ExternalWriteFromSaveFileBrowserAlreadyGranted:
+	    saveFile();
+	    break;
+	default:
+	    GRASP.log("unsupported request code: "+requestCode);
+	    break;
+	}
     }
 
     @Override // Action
@@ -82,21 +151,24 @@ class SaveFileBrowser implements Action, Procedure, FileBrowser {
 	    GRASP.instance.permissionGranted = this;
 	    GRASP.instance.requestPermissions(new String [] {
 		    read_fs
-		}, 1);
+		}, ExternalReadFromSaveFileBrowser);
 	}
 	else {
-	    /*Procedure.*/execute();
+	    onPermissionGranted(ExternalReadFromSaveFileBrowserAlreadyGranted,
+				null, null);
 	}
     }
 
     @Override
     public void fileAction(File file, byte finger, float x, float y) {
-
+	filename.setText(file.getName());
     }
 
     @Override
     public void directoryAction(File file, byte finger, float x, float y) {
-
+	dir = file;
+	screen.layers.removeLast();
+	perform(finger, x, y);
     }
 
 }
