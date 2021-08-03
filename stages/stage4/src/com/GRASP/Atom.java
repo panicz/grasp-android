@@ -87,9 +87,14 @@ class Atom implements Bit {
     }
 
     @Override
-    public StringBuilder buildString(StringBuilder result) {
+    public int buildString(StringBuilder result, int indent) {
+	return buildString(result) + indent;
+    }
+    
+    @Override
+    public int buildString(StringBuilder result) {
 	result.append(text);
-	return result;
+	return text.length();
     }
 
     @Override

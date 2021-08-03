@@ -111,8 +111,11 @@ class SaveFileBrowser implements Action, PermissionGrantedHandler, FileBrowser {
 	BufferedWriter writer = null;
 	try {
 	    writer = new BufferedWriter(new FileWriter(file));
-	    writer.append(editor.document.buildString(new StringBuilder()));
+	    StringBuilder sb = new StringBuilder();
+	    editor.document.buildString(sb);
+	    writer.append(sb);
 	    writer.close();
+	    screen.layers.clear();
 	} catch(IOException but) {
 	    GRASP.log(but.toString());
 	}

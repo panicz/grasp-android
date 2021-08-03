@@ -272,13 +272,16 @@ class Document extends Box {
     }
 
     @Override
-    public StringBuilder buildString(StringBuilder result) {
-	result = super.buildString(result);
-	int left = result.indexOf("(");
-	int right = result.lastIndexOf(")");
+    public int buildString(StringBuilder sb, int indent) {
+	int result = super.buildString(sb, indent);
+	int left = sb.indexOf("(");
+	int right = sb.lastIndexOf(")");
 	if (left >= 0 && right > left) {
-	    result.deleteCharAt(right);
-	    result.deleteCharAt(left);
+	    sb.deleteCharAt(right);
+	    sb.deleteCharAt(left);
+	}
+	while(last_char(sb) == ' ') {
+	    delete_last_char(sb);
 	}
 	return result;
     }

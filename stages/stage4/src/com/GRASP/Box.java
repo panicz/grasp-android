@@ -31,12 +31,17 @@ class Box implements Bit {
     }
     
     @Override
-    public StringBuilder buildString(StringBuilder result) {
+    public int buildString(StringBuilder result) {
+	return buildString(result, 0);
+    }
+    
+    public StringBuilder old_buildString(StringBuilder result) {
 	result.append('(');
 
 	for (Interline interline = first_interline;
 	     interline != null;
 	     interline = interline.following_line.next_interline) {
+	    
 	    if(interline.following_line == null) {
 		break;
 	    }
@@ -58,11 +63,92 @@ class Box implements Bit {
 	return result;
     }
 
-    @Override
-    public String toString() {
-	return buildString(new StringBuilder()).toString();
+    static void repeat(char c, int times, StringBuilder result) {
+	for (int i = 0; i < times; ++i) {
+	    result.append(c);
+	}
+    }
+    
+    static boolean is_separator(char c) {
+	return c == '(' || c == ')' || c == ' ';
     }
 
+    static char last_char(StringBuilder sb) {
+	return sb.charAt(sb.length()-1);
+    }
+
+    static void delete_last_char(StringBuilder sb) {
+	sb.deleteCharAt(sb.length() - 1);
+    }
+				 
+    
+    public int buildString(StringBuilder result, int indent) {
+	int longest_line_length = indent;
+
+	// kwestia jest taka, ze zawsze po znaku nowej linii
+	// chcemy wyswietlic odpowiednia ilosc spacji wcinajacych
+
+	// tylko pytanie, kiedy wyswietlamy znaki nowej linii?
+	// - jezeli interlinia ma odpowiednia wysokosc
+	// - 
+	
+	result.append('(');
+
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line.next_interline) {
+
+	    repeat('\n', (int) (interline.height / Atom.text_size), result);
+	    
+	    if (interline.following_line == null) {
+		break;
+	    }
+
+	    if (interline != first_interline) {
+		result.append('\n');
+		repeat(' ', indent, result);
+	    }
+	    
+	    Line line = interline.following_line;
+	    int line_indent = indent;
+	    
+	    for (Space preceding_space = line.first_space;
+		 preceding_space != null;
+		 preceding_space = preceding_space
+		     .following_bit
+		     .following_space()) {
+		int spaces = (int) Math.floor(preceding_space.width / (4*Space.min_width));
+		if (spaces <= 0 && !is_separator(last_char(result))) {
+		    spaces = 1;
+		}
+		repeat(' ', spaces, result);
+		line_indent += spaces;
+		if (preceding_space.following_bit == null) {
+		    break;
+		}
+		line_indent = preceding_space.following_bit.buildString(result,
+									line_indent);	
+	    }
+	    if (line_indent > longest_line_length) {
+		longest_line_length = line_indent;
+	    }
+	}
+
+	if (last_char(result) == '\n') {
+	    repeat(' ', longest_line_length - 1, result);
+	}
+	
+	result.append(')');
+	
+	return longest_line_length;
+    }
+
+    @Override
+    public String toString() {
+	StringBuilder sb = new StringBuilder();
+	buildString(sb);
+	return sb.toString();
+    }
     
     public void renderContents(Canvas canvas) {
 	float accumulated_height = 0;

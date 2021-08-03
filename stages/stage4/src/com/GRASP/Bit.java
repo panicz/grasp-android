@@ -66,7 +66,8 @@ interface Bit extends Tile {
     float overwidth();
     float overheight();
     
-    StringBuilder buildString(StringBuilder sb);
+    int buildString(StringBuilder sb, int indent);
+    int buildString(StringBuilder sb);
 
     boolean insertAt(float x, float y,
 		     DragAround item);
