@@ -281,7 +281,8 @@ public class GRASP
 			    : screen.other_panel);
     }
 
-    PermissionGrantedHandler permissionGranted = NoActionOnPermissionGranted.instance;
+    PermissionGrantedHandler permissionGranted =
+	NoActionOnPermissionGranted.instance;
     
     @Override
     public void onRequestPermissionsResult(int requestCode,

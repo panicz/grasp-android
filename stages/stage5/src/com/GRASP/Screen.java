@@ -38,59 +38,40 @@ class Screen extends View {
     float[] x = new float[10];
     float[] y = new float[10];
 
-    public List<Shape> segments = new ArrayList<Shape>();
-    public Shape shape = null;
-    public RectF shape_area = new
-	RectF(Float.POSITIVE_INFINITY,
-	      Float.POSITIVE_INFINITY,
-	      Float.NEGATIVE_INFINITY,
-	      Float.NEGATIVE_INFINITY);
+    public Shape shape = new Shape();
+    public Stroke stroke = null;
 
     public Deque<Tile> overlay = new ArrayDeque<Tile>();
 
     public Deque<Pad> layers = new ArrayDeque<Pad>();
 
+    public List<Gesture> known_gestures = new ArrayList<Gesture>();
+    
     BlurMaskFilter blur = new
 	BlurMaskFilter(5.0f,
 		       BlurMaskFilter.Blur.NORMAL);
     
     void startDrawingShape() {
-	shape = new Shape();
+	stroke = new Stroke();
     }
 
     void cancelDrawingShape() {
-	shape = null;
-	segments.clear();
-	shape_area.left = Float.POSITIVE_INFINITY;
-	shape_area.top = Float.POSITIVE_INFINITY;
-	shape_area.right = Float.NEGATIVE_INFINITY;
-	shape_area.bottom = Float.NEGATIVE_INFINITY;
+	shape.clear();
+	stroke = null;
     }
 
     boolean isShapeBeingDrawn() {
-	return shape != null;
+	return stroke != null;
     }
 
-    void finalizeShapeSegment() {
-	if (shape != null
-	    && (shape.rect.width() > 4
-		|| shape.rect.height() > 4)) {
-	    segments.add(shape);
-	    if (shape.rect.left < shape_area.left) {
-		shape_area.left = shape.rect.left;
-	    }
-	    if (shape.rect.right > shape_area.right) {
-		shape_area.right = shape.rect.right;
-	    }
-	    if (shape.rect.top < shape_area.top) {
-		shape_area.top = shape.rect.top;
-	    }
-	    if (shape.rect.bottom > shape_area.bottom) {
-		shape_area.bottom = shape.rect.bottom;
-	    }
+    void finalizeStroke() {
+	if (stroke != null
+	    && (stroke.rect.width() > 4
+		|| stroke.rect.height() > 4)) {
+	    shape.add(stroke);
 	}
 	
-	shape = null;
+	stroke = null;
     }
     
     public Screen(GRASP source, Panel content) {
@@ -101,8 +82,7 @@ class Screen extends View {
 
 	activity = source;
 
-	animationSystem = new AnimationSystem(this);
-	
+	animationSystem = new AnimationSystem(this);	
 	DisplayMetrics metrics =
 	    source
 	    .getResources()
@@ -112,6 +92,9 @@ class Screen extends View {
 	height = (float) metrics.heightPixels;
 
 	panel = content;
+
+	known_gestures.add(HorizontalLineAcrossTheScreen.instance);
+	known_gestures.add(VerticalLineAcrossTheScreen.instance);
     }
 
     Drag [] drag = new Drag[] {
@@ -125,28 +108,6 @@ class Screen extends View {
 		return true;
 	    }
 	}
-	return false;
-    }
-    
-    boolean splittedView(RectF rect) {
-	/**
-	 * a horizontal line makes a VerticalSplit,
-	 * while a vertical line makes a HorizontalSplit
-	 */
-	if (shape.isHorizontalLine()
-	    && panel.canBeSplittedVerticallyBy(rect)) {
-	    panel = panel.splitVerticallyBy(rect);
-	    cancelDrawingShape();
-	    return true;
-	}
-	
-	if(shape.isVerticalLine()
-	   && panel.canBeSplittedHorizontallyBy(rect)) {
-	    panel = panel.splitHorizontallyBy(rect);
-	    cancelDrawingShape();
-	    return true;
-	}
-
 	return false;
     }
 
@@ -268,7 +229,7 @@ class Screen extends View {
 	if (max_finger == 0
 	    && n == 1
 	    && isShapeBeingDrawn()) {
-	    shape.add(x[0], y[0]);
+	    stroke.add(x[0], y[0]);
 	    //GRASP._log.update("("+x[0]+", "+y[0]+")");
 	}
 
@@ -313,13 +274,20 @@ class Screen extends View {
 	}
 	
 	if (isShapeBeingDrawn() && p == 0) {
+	    	    
+	    finalizeStroke();
 	    
-	    if (segments.isEmpty()
-		&& splittedView(shape.rect)) {	       
-		return true;
+	    Iterator<Gesture> it = known_gestures.iterator();
+
+	    while(it.hasNext()) {
+		Gesture gesture = it.next();
+		GRASP.log("testing "+gesture.name);
+		if (gesture.recognize(shape, this)) {
+		    cancelDrawingShape();
+		    return gesture.perform(shape, this);
+		}
 	    }
 	    
-	    finalizeShapeSegment();
 	    //suggestShapeActions(x[p], y[p]);
 	}
 	
@@ -418,13 +386,11 @@ class Screen extends View {
 	while(tile.hasNext()) {
 	    tile.next().render(canvas);
 	}
+
+	shape.draw(canvas);
 	
-	for (Shape segment : segments) {
-	    segment.draw(canvas);
-	}
-	
-	if (shape != null) {
-	    shape.draw(canvas);
+	if (stroke != null) {
+	    stroke.draw(canvas);
 	}
     }
 
