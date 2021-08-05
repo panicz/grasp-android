@@ -64,14 +64,20 @@ class Screen extends View {
 	return stroke != null;
     }
 
-    void finalizeStroke() {
+    boolean finalizeStroke() {
+	boolean result = false;
 	if (stroke != null
 	    && (stroke.rect.width() > 4
 		|| stroke.rect.height() > 4)) {
 	    shape.add(stroke);
+	    result = true;
+	}
+	else {
+	    GRASP.log("ignoring too small a stroke");
 	}
 	
 	stroke = null;
+	return result;
     }
     
     public Screen(GRASP source, Panel content) {
@@ -273,18 +279,17 @@ class Screen extends View {
 	    return true;
 	}
 	
-	if (isShapeBeingDrawn() && p == 0) {
-	    	    
-	    finalizeStroke();
+	if (isShapeBeingDrawn() && p == 0
+	    && finalizeStroke()) {
 	    
 	    Iterator<Gesture> it = known_gestures.iterator();
 
 	    while(it.hasNext()) {
 		Gesture gesture = it.next();
-		GRASP.log("testing "+gesture.name);
-		if (gesture.recognize(shape, this)) {
+		if (gesture.recognizes(shape, this)) {
+		    gesture.perform(shape, this);
 		    cancelDrawingShape();
-		    return gesture.perform(shape, this);
+		    return true;
 		}
 	    }
 	    
@@ -309,6 +314,7 @@ class Screen extends View {
 
     public boolean onLongPress(MotionEvent event) {
 	if (double_pending) {
+	    GRASP.log("double pending");
 	    return false;
 	}
 
@@ -409,7 +415,7 @@ class Screen extends View {
     }
 
     boolean onKeyDown(int keycode, char unicode, int meta) {
-	if (layers.isEmpty()) {
+	if(layers.isEmpty()) {
 	    return panel.onKeyDown(this, keycode, unicode, meta);
 	}
 	else {

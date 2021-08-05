@@ -6,16 +6,15 @@ class HorizontalLineAcrossTheScreen extends Gesture {
     }
 
     @Override
-    public boolean recognize(Shape shape, Screen screen) {
+    public boolean recognizes(Shape shape, Screen screen) {
 	return shape.strokes.size() == 1
-	    && shape.getWidth() < 120
+	    && shape.getHeight() < 120
 	    && screen.panel.canBeSplittedVerticallyBy(shape.area);
     }
 
     @Override
-    public boolean perform(Shape shape, Screen screen) {
+    public void perform(Shape shape, Screen screen) {
 	screen.panel = screen.panel.splitVerticallyBy(shape.area);
-	return true;
     }
 
     public static Gesture instance = new HorizontalLineAcrossTheScreen();

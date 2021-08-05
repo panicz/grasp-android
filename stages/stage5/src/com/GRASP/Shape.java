@@ -32,6 +32,8 @@ class Shape {
     }
 
     public void add(Stroke stroke) {
+	strokes.add(stroke);
+	    
 	if (stroke.rect.left < area.left) {
 	    area.left = stroke.rect.left;
 	}
@@ -47,11 +49,11 @@ class Shape {
     }
 
     public float getWidth() {
-	return area.right - area.left;
+	return area.width();
     }
 
     public float getHeight() {
-	return area.bottom - area.top;
+	return area.height();
     }
 
     public void draw(Canvas canvas) {
@@ -59,6 +61,5 @@ class Shape {
 	    stroke.draw(canvas);
 	}
     }
-    
 }
 

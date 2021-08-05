@@ -154,9 +154,7 @@ class Stroke {
 
     public float deriv(Point p1,
 		       Point p2,
-		       Point p3)
-    {
-	    
+		       Point p3) {
 	Vector v1 = new Vector(p1, p2);
 	Vector v2 = new Vector(p2, p3);
 	Vector n1 = v1.normalized();
