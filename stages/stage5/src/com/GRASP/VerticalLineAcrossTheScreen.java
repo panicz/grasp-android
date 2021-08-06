@@ -20,6 +20,3 @@ class VerticalLineAcrossTheScreen extends Gesture {
     public static Gesture instance = new VerticalLineAcrossTheScreen();
 
 }
-
-
-    

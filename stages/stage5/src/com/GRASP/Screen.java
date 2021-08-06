@@ -7,6 +7,7 @@ import android.graphics.BlurMaskFilter;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -71,11 +72,7 @@ class Screen extends View {
 		|| stroke.rect.height() > 4)) {
 	    shape.add(stroke);
 	    result = true;
-	}
-	else {
-	    GRASP.log("ignoring too small a stroke");
-	}
-	
+	}	
 	stroke = null;
 	return result;
     }
@@ -287,6 +284,8 @@ class Screen extends View {
 	    while(it.hasNext()) {
 		Gesture gesture = it.next();
 		if (gesture.recognizes(shape, this)) {
+		    Toast.makeText(activity.getApplicationContext(),
+				   gesture.name, Toast.LENGTH_SHORT).show();
 		    gesture.perform(shape, this);
 		    cancelDrawingShape();
 		    return true;

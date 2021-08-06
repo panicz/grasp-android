@@ -19,6 +19,3 @@ class HorizontalLineAcrossTheScreen extends Gesture {
 
     public static Gesture instance = new HorizontalLineAcrossTheScreen();
 }
-
-
-    
