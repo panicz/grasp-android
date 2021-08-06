@@ -5,6 +5,8 @@ import android.graphics.RectF;
 //import java.io.Serializable;
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.List;
+
 //import java.util.Comparator;
 //import java.util.Collections;
 
@@ -174,5 +176,85 @@ class Stroke {
 	Point p2 = points.get(l-2).point;
 	Point p3 = points.get(l-3).point;
 	return deriv(p1, p2, p3);
+    }
+
+    // adapted from
+    // https://rosettacode.org/wiki/Ramer-Douglas-Peucker_line_simplification#Java
+    static float perpendicularDistance(Point pt, Point lineStart, Point lineEnd) {
+        float dx = lineEnd.x - lineStart.x;
+        float dy = lineEnd.y - lineStart.y;
+ 
+        // Normalize
+        float mag = (float) Math.hypot(dx, dy);
+        if (mag > 0.0f) {
+            dx /= mag;
+            dy /= mag;
+        }
+        float pvx = pt.x - lineStart.x;
+        float pvy = pt.y - lineStart.y;
+ 
+        // Get dot product (project pv onto normalized direction)
+        float pvdot = dx * pvx + dy * pvy;
+ 
+        // Scale line direction vector and subtract it from pv
+        float ax = pvx - pvdot * dx;
+        float ay = pvy - pvdot * dy;
+ 
+        return (float) Math.hypot(ax, ay);
+    }
+ 
+    static List<Point> RDP(List<Point> input, float epsilon) {
+	// Ramer-Douglas-Peucker
+	if (input.size() <= 2) {
+	    return input;
+	}
+
+	List<Point> out = new ArrayList<Point>();
+	
+	float dmax = 0.0f;
+        int index = 0;
+        int end = input.size() - 1;
+        for (int i = 1; i < end; ++i) {
+            float d = perpendicularDistance(input.get(i),
+					    input.get(0),
+					    input.get(end));
+            if (d > dmax) {
+                index = i;
+                dmax = d;
+            }
+        }
+ 
+        // If max distance is greater than epsilon, recursively simplify
+        if (dmax > epsilon) {
+            List<Point> firstLine = input.subList(0, index + 1);
+            List<Point> lastLine = input.subList(index, input.size());
+
+            List<Point> recResults1 = RDP(firstLine, epsilon);
+            List<Point> recResults2 = RDP(lastLine, epsilon);
+ 
+            // build the result list
+            out.addAll(recResults1.subList(0, recResults1.size() - 1));
+            out.addAll(recResults2);
+
+        } else {
+            out.clear();
+            out.add(input.get(0));
+            out.add(input.get(input.size() - 1));
+        }
+
+	return out;
+    }
+    
+    public Stroke simplify(float epsilon) {
+	Stroke result = new Stroke();
+	List<Point> input = new ArrayList<Point>();
+	for (DerivPoint dp : points) {
+	    input.add(dp.point);
+	}
+	List<Point> simplified = RDP(input, epsilon);
+	for (Point p : simplified) {
+	    result.add(p);
+	}
+	return result;
     }
 }

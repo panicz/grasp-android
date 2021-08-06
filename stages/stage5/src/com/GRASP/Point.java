@@ -31,7 +31,7 @@ class Point {
     public float distanceTo(float px, float py) {
 	float dx = px - x;
 	float dy = py - y;
-	return (float) Math.sqrt(dx*dx+dy*dy);
+	return (float) Math.hypot(dx,dy);
     }
 
     public boolean near(Point p) {
