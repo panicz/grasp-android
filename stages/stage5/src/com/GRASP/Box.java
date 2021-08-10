@@ -35,7 +35,8 @@ class Box implements Bit {
 	return buildString(result, 0);
     }
     
-    static void repeat(char c, int times, StringBuilder result) {
+    static void repeat(char c, int times,
+		       StringBuilder result) {
 	for (int i = 0; i < times; ++i) {
 	    result.append(c);
 	}
@@ -53,7 +54,8 @@ class Box implements Bit {
 	sb.deleteCharAt(sb.length() - 1);
     }				 
     
-    public int buildString(StringBuilder result, int indent) {
+    public int buildString(StringBuilder result,
+			   int indent) {
 	int longest_line_length = indent;
 
 	// kwestia jest taka, ze zawsze po znaku nowej linii
@@ -92,19 +94,22 @@ class Box implements Bit {
 		     .following_bit
 		     .following_space()) {
 		int spaces =
-		    (int) Math.floor(preceding_space.width
-				     / (4*Space.min_width));
+		    (int) Math
+		    .floor(preceding_space.width
+			   / (4*Space.min_width));
 		if (spaces <= 0
 		    && !is_separator(last_char(result))) {
 		    spaces = 1;
 		}
 		repeat(' ', spaces, result);
 		line_indent += spaces;
-		if (preceding_space.following_bit == null) {
+		if (preceding_space
+		    .following_bit == null) {
 		    break;
 		}
-		line_indent = preceding_space.following_bit.buildString(result,
-									line_indent);	
+		line_indent =
+		    preceding_space.following_bit
+		    .buildString(result, line_indent);	
 	    }
 	    if (line_indent > longest_line_length) {
 		longest_line_length = line_indent;
@@ -166,7 +171,8 @@ class Box implements Bit {
 				accumulated_height+20,
 				GRASP.paint);
 		*/
-		accumulated_width += preceding_space.width;
+		accumulated_width +=
+		    preceding_space.width;
 		
 		Bit bit = preceding_space.following_bit;
 	       
@@ -237,10 +243,11 @@ class Box implements Bit {
 
     @Override
     public float height() {
-	return Math.max(min_height,
-			first_interline == null
-			? 0
-			: first_interline.onward_height());
+	return
+	    Math.max(min_height,
+		     first_interline == null
+		     ? 0
+		     : first_interline.onward_height());
     }
 
     @Override
@@ -292,7 +299,11 @@ class Box implements Bit {
 	    
 	    h_total += interline.height;
 
-	    line = interline.remove_empty_lines();
+	    if (interline == first_interline) {
+		line = interline.following_line;
+	    } else {
+		line = interline.remove_empty_lines();
+	    }
 	    
 	    if(line == null) {
 		break;
@@ -585,23 +596,26 @@ class Box implements Bit {
 	return copy;	
     }
 
-    void createBox(float left, float top,
-		      float right, float bottom) {
-	// 1. znajdz najglebsze pudelko, do ktorego
-	// naleza (left, top) i (right, bottom)
-	// 2. stworz nowe pudelko, i umiesc w nim
-	// wszystkie elementy z najglebszego pudelka,
-	// ktore sa calkowicie zawarte
-
-	float accumulated_height = 0;
+    void createBoxWithElementsFrom(float left,
+				   float top,
+				   float right,
+				   float bottom) {
+	assert(bottom > top);
+	assert(right > left);
 	
+	float accumulated_height = 0;
+
 	for (Interline interline = first_interline;
 	     interline != null;
 	     interline = interline.following_line
 		 .next_interline) {
 
 	    accumulated_height += interline.height;
-
+	    
+	    if (accumulated_height > bottom) {
+		break;
+	    }
+	    
 	    if(interline.following_line == null) {
 		break;
 	    }
@@ -622,7 +636,11 @@ class Box implements Bit {
 		    += preceding_space.width;
 		
 		Bit bit = preceding_space.following_bit;
-	       
+
+		if (accumulated_width > right) {
+		    break;
+		}
+		
 		if (bit == null) {
 		    break;
 		}
@@ -630,14 +648,99 @@ class Box implements Bit {
 		float w = bit.width();
 		float h = bit.height();
 
-		///
+		if(accumulated_width >= left
+		   && right <= accumulated_width + w
+		   && accumulated_height >= top
+		   && bottom <= accumulated_height + h) {
+		    // zabieramy sobie bit stad
+		    // i go wkladamy do nowego
+		    // puelka
+		}
 		
-		accumulated_width += w;
+		accumulated_width += w;	
+	    }   
+	    accumulated_height += line_height;
+	}
+	// a na koniec umieszczamy nowe pudelko
+	// w odpowiednim miejscu
+	
+    }
+
+    
+    void createBox(float left, float top,
+		   float right, float bottom) {
+	// 1. znajdz najglebsze pudelko, do ktorego
+	// naleza (left, top) i (right, bottom)
+	// 2. stworz nowe pudelko, i umiesc w nim
+	// wszystkie elementy z najglebszego pudelka,
+	// ktore sa calkowicie zawarte
+	assert(bottom > top);
+	assert(right > left);
+	
+	float accumulated_height = 0;
+
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line
+		 .next_interline) {
+
+	    accumulated_height += interline.height;
+	    
+	    if (accumulated_height > bottom) {
+		break;
 	    }
 	    
+	    if(interline.following_line == null) {
+		break;
+	    }
+	    
+	    Line line = interline.following_line;
+
+	    float line_height = line.height();
+	    
+	    float accumulated_width = parenWidth;
+	    
+	    for (Space preceding_space = line.first_space;
+		 preceding_space != null;
+		 preceding_space =
+		     preceding_space
+		     .following_bit
+		     .following_space()) {
+		accumulated_width
+		    += preceding_space.width;
+		
+		Bit bit = preceding_space.following_bit;
+
+		if (accumulated_width > right) {
+		    break;
+		}
+		
+		if (bit == null) {
+		    break;
+		}
+		
+		float w = bit.width();
+		float h = bit.height();
+
+		if (bit instanceof Box
+		    && accumulated_width <= left
+		    && right <= accumulated_width + w
+		    && accumulated_height <= top
+		    && bottom <= accumulated_height + h) {
+		    Box x = (Box) bit;
+		    x.createBox(left-accumulated_width,
+				top-accumulated_height,
+				right-accumulated_width,
+				top-accumulated_height);
+		    return;
+		}
+		accumulated_width += w;	
+	    }   
 	    accumulated_height += line_height;
 	}
 
+	createBoxWithElementsFrom(left, top,
+				  right, bottom);
     }
     
 }

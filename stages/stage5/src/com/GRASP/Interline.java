@@ -65,10 +65,12 @@ class Interline implements Highlightable {
 
 	if (following_line != null) {
 	    height += following_line.height();
-	    Interline next_interline = following_line.next_interline;
+	    Interline next_interline =
+		following_line.next_interline;
 	    if (next_interline != null) {
 		height += next_interline.height;
-		following_line = next_interline.following_line;
+		following_line =
+		    next_interline.following_line;
 	    }
 	    else {
 		following_line = null;
@@ -105,10 +107,11 @@ class Interline implements Highlightable {
     }
 
     public Interline deep_copy() {
-	return new Interline(height,
-			     ((following_line == null)
-				 ? null
-				 : following_line.deep_copy()));
+	return new
+	    Interline(height,
+		      ((following_line == null)
+		       ? null
+		       : following_line.deep_copy()));
     }
 
     public boolean insert_line_with(DragAround dragged,
@@ -117,9 +120,11 @@ class Interline implements Highlightable {
 	Interline interline = new
 	    Interline(Math.max(0, height - h),
 		      following_line);
-	following_line = new Line(new Space(dragged.x,
-					    dragged.target));
-	height = Math.max(0, height - h - interline.height); 
+	following_line = new
+	    Line(new Space(dragged.x,
+			   dragged.target));
+	height =
+	    Math.max(0, height - h - interline.height); 
 	following_line.next_interline = interline;
 	return true;
     }

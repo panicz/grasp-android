@@ -70,6 +70,12 @@ class SList extends SExp {
 	else {
 	    current_line.next_interline = last_interline;
 	}
+
+	if (box.first_interline.following_line == null) {
+	    box.first_interline.following_line =
+		new Line(new Space(Space.min_width));
+	}
+
 	
 	return box;
     }

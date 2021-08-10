@@ -14,6 +14,18 @@ class DragAround implements Tile, Drag {
 	assert(target.following_space() == null);
 	x = dx;
 	y = dy;
+	if (widget instanceof Box) {
+	    Box b = (Box) widget;
+	    Line line = b.first_interline != null
+		? b.first_interline.following_line
+		: null;
+	    Space space = line != null
+		? line.first_space
+		: null;
+	    GRASP.log("dragging "+b.first_interline
+		      +" "+line+" "+space);
+	}
+	
     }
     
     @Override
@@ -28,7 +40,8 @@ class DragAround implements Tile, Drag {
     public void drop(Screen screen, float x, float y,
 		     float vx, float vy) {
 	screen.overlay.removeLastOccurrence(this);
-	if (Math.sqrt(vx*vx + vy*vy) < Split.closing_threshold) {
+	if (Math.sqrt(vx*vx + vy*vy)
+	    < Split.closing_threshold) {
 	    screen.panel.insertAt(x, y, this);
 	}
     }
