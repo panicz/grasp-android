@@ -14,7 +14,6 @@ class Point {
 	z = depth;
     }
 
-
     public Point(float left, float top) {
 	x = left;
 	y = top;
@@ -22,10 +21,14 @@ class Point {
 	     - start_ns)*0.000000001f;
     }
 
+    public Point() {
+	x = y = z = Float.NaN;
+    }
+    
     public float distanceTo(Point p) {
 	float dx = p.x - x;
 	float dy = p.y - y;
-	return (float) Math.sqrt(dx*dx+dy*dy);
+	return (float) Math.hypot(dx, dy);
     }
 
     public float distanceTo(float px, float py) {
@@ -53,9 +56,18 @@ class Point {
 	y = p.y;
 	return this;
     }
+
+    public Point transform(Transform t) {
+	set(t.x(x, y), t.y(x, y));
+	return this;
+    }
+    
+    public Point untransform(Transform t) {
+	set(t.unx(x, y), t.uny(x, y));
+	return this;
+    }
     
     public String toString() {
 	return "("+(int)x+", "+(int)y+")";
     }
-
 }

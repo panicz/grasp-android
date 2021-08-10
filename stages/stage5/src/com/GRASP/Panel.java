@@ -133,6 +133,10 @@ abstract class Panel implements Pad, Parcelable {
 	return this;
     }
 
+    public Panel at(Point p) {
+	return at(p.x, p.y);
+    }
+    
     public abstract Drag stretchFrom(byte finger, float x, float y);
     
     public abstract void stretch();

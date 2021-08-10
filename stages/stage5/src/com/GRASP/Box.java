@@ -35,34 +35,6 @@ class Box implements Bit {
 	return buildString(result, 0);
     }
     
-    public StringBuilder old_buildString(StringBuilder result) {
-	result.append('(');
-
-	for (Interline interline = first_interline;
-	     interline != null;
-	     interline = interline.following_line.next_interline) {
-	    
-	    if(interline.following_line == null) {
-		break;
-	    }
-	    
-	    Line line = interline.following_line;
-
-	    for (Space preceding_space = line.first_space;
-		 preceding_space != null
-		     && preceding_space.following_bit != null;
-		 preceding_space = preceding_space
-		     .following_bit
-		     .following_space()) {
-		preceding_space.following_bit.buildString(result);
-		result.append(' ');
-	    }
-	}
-	result.deleteCharAt(result.length() - 1);
-	result.append(')');
-	return result;
-    }
-
     static void repeat(char c, int times, StringBuilder result) {
 	for (int i = 0; i < times; ++i) {
 	    result.append(c);
@@ -79,8 +51,7 @@ class Box implements Bit {
 
     static void delete_last_char(StringBuilder sb) {
 	sb.deleteCharAt(sb.length() - 1);
-    }
-				 
+    }				 
     
     public int buildString(StringBuilder result, int indent) {
 	int longest_line_length = indent;
@@ -96,9 +67,12 @@ class Box implements Bit {
 
 	for (Interline interline = first_interline;
 	     interline != null;
-	     interline = interline.following_line.next_interline) {
+	     interline = interline.following_line
+		 .next_interline) {
 
-	    repeat('\n', (int) (interline.height / Atom.text_size), result);
+	    repeat('\n', (int) (interline.height
+				/ Atom.text_size),
+		   result);
 	    
 	    if (interline.following_line == null) {
 		break;
@@ -117,8 +91,11 @@ class Box implements Bit {
 		 preceding_space = preceding_space
 		     .following_bit
 		     .following_space()) {
-		int spaces = (int) Math.floor(preceding_space.width / (4*Space.min_width));
-		if (spaces <= 0 && !is_separator(last_char(result))) {
+		int spaces =
+		    (int) Math.floor(preceding_space.width
+				     / (4*Space.min_width));
+		if (spaces <= 0
+		    && !is_separator(last_char(result))) {
 		    spaces = 1;
 		}
 		repeat(' ', spaces, result);
@@ -300,6 +277,14 @@ class Box implements Bit {
 	float h_total = 0;
 	float minh_total = 0;
 	Line line = null;
+
+	if (first_interline == null) {
+	    float ih = Math.max(0, (h-min_height));
+	    first_interline =
+		new Interline(ih,
+			      new Line(new Space(w)));
+	}
+	
 	
 	for (interline = first_interline;
 	     interline != null;
@@ -386,7 +371,8 @@ class Box implements Bit {
 
     
     @Override
-    public Drag dragAround(float x, float y, TakeBit take) {
+    public Drag dragAround(float x, float y,
+			   TakeBit take) {
 	float accumulated_height = 0;
 	float maximum_width = 0;
 
@@ -396,7 +382,8 @@ class Box implements Bit {
 	
 	for (Interline interline = first_interline;
 	     interline != null;
-	     interline = interline.following_line.next_interline) {
+	     interline = interline.following_line
+		 .next_interline) {
 
 	    accumulated_height += interline.height;
 
@@ -417,7 +404,8 @@ class Box implements Bit {
 		     .following_bit
 		     .following_space()) {
 
-		accumulated_width += preceding_space.width;
+		accumulated_width
+		    += preceding_space.width;
 
 		Bit bit = preceding_space.following_bit;
 
@@ -435,12 +423,15 @@ class Box implements Bit {
 		
 		if (0 <= rx && rx <= w
 		    && 0 <= ry && ry <= h) {
-		    Drag nested = bit.dragAround(rx, ry, take);
+		    Drag nested =
+			bit.dragAround(rx, ry, take);
 		    if (nested != null) {
 			if (nested instanceof DragAround
-			    && ((DragAround)nested).target == bit) {
+			    && ((DragAround)nested).target
+			    == bit) {
 			    ((DragAround)nested).target =
-				take.from(preceding_space);
+				take
+				.from(preceding_space);
 			}
 			shift.set(accumulated_width,
 				  accumulated_height);
@@ -456,7 +447,8 @@ class Box implements Bit {
 	    }
 	    accumulated_height += line_height;
 	}
-	if (maximum_width <= x && x < maximum_width + parenWidth) {
+	if (maximum_width <= x
+	    && x < maximum_width + parenWidth) {
 	    return resize(x, y);
 	    //return dragAround();
 	}
@@ -473,7 +465,8 @@ class Box implements Bit {
     }
     
     @Override
-    public boolean insertAt(float x, float y, DragAround target) {
+    public boolean insertAt(float x, float y,
+			    DragAround target) {
 	
 	float accumulated_height = 0;
 	Interline interline;
@@ -481,7 +474,8 @@ class Box implements Bit {
 	
 	for (interline = first_interline;
 	     interline != null;
-	     interline = interline.following_line.next_interline) {
+	     interline = interline.following_line
+		 .next_interline) {
 	    
 	    accumulated_height += interline.height;
 
@@ -508,13 +502,15 @@ class Box implements Bit {
 	    
 	    for (Space last_space = line.first_space;
 		 last_space != null;
-		 last_space =
-		     last_space.following_bit.following_space()) {
+		 last_space = last_space.following_bit
+		     .following_space()) {
 
-		if (x <= accumulated_width + last_space.width
+		if (x <= (accumulated_width
+			  + last_space.width)
 		    || last_space.following_bit == null
 		    ) {
-		    shift.set(accumulated_width, accumulated_height);
+		    shift.set(accumulated_width,
+			      accumulated_height);
 		    return last_space
 			.insertAt(x - accumulated_width,
 				  y - accumulated_height,
@@ -538,7 +534,8 @@ class Box implements Bit {
 		
 		if (0 <= rx && rx <= w
 		    && 0 <= ry && ry <= h) {
-		    shift.set(accumulated_width, accumulated_height);
+		    shift.set(accumulated_width,
+			      accumulated_height);
 		    return bit
 			.insertAt(rx, ry,
 				  (DragAround) target
@@ -549,8 +546,10 @@ class Box implements Bit {
 		rx -= w;
 		
 		if (bit.following_space() == null) {
-		    bit.set_following_space(new Space(rx));
-		    shift.set(accumulated_width, accumulated_height);
+		    bit.set_following_space(new
+					    Space(rx));
+		    shift.set(accumulated_width,
+			      accumulated_height);
 		    return bit.following_space()
 			.insertAt(rx, ry,
 				  (DragAround) target
@@ -574,14 +573,71 @@ class Box implements Bit {
     public Bit deep_copy() {
 	Box copy = new Box();
 	if(first_interline != null) {
-	    copy.first_interline = first_interline.deep_copy();
+	    copy.first_interline =
+		first_interline.deep_copy();
 	}
 	
 	if (_following_space != null) {
-	    copy.set_following_space(_following_space.deep_copy());
+	    copy.set_following_space(_following_space
+				     .deep_copy());
 	}
 
 	return copy;	
     }
 
+    void createBox(float left, float top,
+		      float right, float bottom) {
+	// 1. znajdz najglebsze pudelko, do ktorego
+	// naleza (left, top) i (right, bottom)
+	// 2. stworz nowe pudelko, i umiesc w nim
+	// wszystkie elementy z najglebszego pudelka,
+	// ktore sa calkowicie zawarte
+
+	float accumulated_height = 0;
+	
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line
+		 .next_interline) {
+
+	    accumulated_height += interline.height;
+
+	    if(interline.following_line == null) {
+		break;
+	    }
+	    
+	    Line line = interline.following_line;
+
+	    float line_height = line.height();
+	    
+	    float accumulated_width = parenWidth;
+	    
+	    for (Space preceding_space = line.first_space;
+		 preceding_space != null;
+		 preceding_space =
+		     preceding_space
+		     .following_bit
+		     .following_space()) {
+		accumulated_width
+		    += preceding_space.width;
+		
+		Bit bit = preceding_space.following_bit;
+	       
+		if (bit == null) {
+		    break;
+		}
+		
+		float w = bit.width();
+		float h = bit.height();
+
+		///
+		
+		accumulated_width += w;
+	    }
+	    
+	    accumulated_height += line_height;
+	}
+
+    }
+    
 }

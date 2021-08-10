@@ -46,7 +46,8 @@ class Screen extends View {
 
     public Deque<Pad> layers = new ArrayDeque<Pad>();
 
-    public List<Gesture> known_gestures = new ArrayList<Gesture>();
+    public List<Gesture> known_gestures =
+	new ArrayList<Gesture>();
     
     BlurMaskFilter blur = new
 	BlurMaskFilter(5.0f,
@@ -96,8 +97,11 @@ class Screen extends View {
 
 	panel = content;
 
-	known_gestures.add(HorizontalLineAcrossTheScreen.instance);
-	known_gestures.add(VerticalLineAcrossTheScreen.instance);
+	known_gestures.add(HorizontalLineAcrossTheScreen
+			   .instance);
+	known_gestures.add(VerticalLineAcrossTheScreen
+			   .instance);
+	known_gestures.add(new BoxGesture(30.0f));
     }
 
     Drag [] drag = new Drag[] {

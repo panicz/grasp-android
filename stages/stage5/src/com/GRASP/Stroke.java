@@ -41,10 +41,11 @@ class Stroke {
 
     Paint paint = new Paint();
     
-    public RectF rect = new RectF(Float.POSITIVE_INFINITY,
-				  Float.POSITIVE_INFINITY,
-				  Float.NEGATIVE_INFINITY,
-				  Float.NEGATIVE_INFINITY);
+    public RectF rect =
+	new RectF(Float.POSITIVE_INFINITY,
+		  Float.POSITIVE_INFINITY,
+		  Float.NEGATIVE_INFINITY,
+		  Float.NEGATIVE_INFINITY);
 
     public Stroke() {
 	paint.setColor(Color.LTGRAY);
@@ -92,13 +93,14 @@ class Stroke {
 	rect.top = 0;
 	return this;
     }
-    
-    public void add(Point p) {
-	add(p.x, p.y);
+
+    public void add(float x, float y) {
+	add(new Point(x, y));
     }
     
-    public void add(float x, float y) {
-	Point p1 = new Point(x, y);
+    public void add(Point p1) {
+	float x = p1.x;
+	float y = p1.y;
 	int l = points.size();
 
 	if (l < 2) {
