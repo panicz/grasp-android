@@ -14,6 +14,7 @@ class DragAround implements Tile, Drag {
 	assert(target.following_space() == null);
 	x = dx;
 	y = dy;
+	/*
 	if (widget instanceof Box) {
 	    Box b = (Box) widget;
 	    Line line = b.first_interline != null
@@ -25,6 +26,7 @@ class DragAround implements Tile, Drag {
 	    GRASP.log("dragging "+b.first_interline
 		      +" "+line+" "+space);
 	}
+	*/
 	
     }
     

@@ -18,9 +18,14 @@ class Box implements Bit {
 
     protected Space _following_space = null;
 
-    public Box() {}
+    public Box() {
+	first_interline =
+	    new Interline(0,
+			  new Line(new Space()));
+    }
 
     public Box(float w, float h) {
+	this();
 	trySetSize(w, h);
     }
     
@@ -145,10 +150,10 @@ class Box implements Bit {
 	     interline != null;
 	     interline = interline.following_line
 		 .next_interline) {
-
-	    /*	    
+	    /*
 	    canvas.drawRect(20,accumulated_height,
-			    40,accumulated_height+interline.height,
+			    40,accumulated_height
+			    +interline.height,
 			    GRASP.paint);
 	    */
 	    accumulated_height += interline.height;
@@ -290,14 +295,6 @@ class Box implements Bit {
 	float h_total = 0;
 	float minh_total = 0;
 	Line line = null;
-
-	if (first_interline == null) {
-	    float ih = Math.max(0, (h-min_height));
-	    first_interline =
-		new Interline(ih,
-			      new Line(new Space(w)));
-	}
-	
 	
 	for (interline = first_interline;
 	     interline != null;
@@ -373,19 +370,16 @@ class Box implements Bit {
 	    // zmniejszanie wysokosci
 	}
     }
-
     
     // used in the public dragAround below, overrode by Document
     protected Drag dragAround() {
 	return new DragAround(this, 0, 0);
     }
 
-
     // used in the public dragAround below, overrode by Document
     protected Drag resize(float x, float y) {
 	return new Resize(this, x, y);
     }
-
     
     @Override
     public Drag dragAround(float x, float y,
@@ -612,7 +606,9 @@ class Box implements Bit {
 	assert(bottom > top);
 	assert(right > left);
 
-	Box box = new Box(right-left, bottom-top);
+	float bw = right-left-40;
+	float bh = bottom-top-100;
+	Box box = new Box(bw, bh);
 	
 	float accumulated_height = 0;
 
@@ -638,19 +634,16 @@ class Box implements Bit {
 	    float accumulated_width = parenWidth;
 	    
 	    for (Space preceding_space = line.first_space;
-		 preceding_space != null;
-		 preceding_space =
-		     preceding_space
-		     .following_bit
-		     .following_space()) {
+		 preceding_space != null; ) {
 		accumulated_width
 		    += preceding_space.width;
-		
-		Bit bit = preceding_space.following_bit;
 
 		if (accumulated_width > right) {
 		    break;
 		}
+		
+		Bit bit = preceding_space.following_bit;
+
 		
 		if (bit == null) {
 		    break;
@@ -659,10 +652,10 @@ class Box implements Bit {
 		float w = bit.width();
 		float h = bit.height();
 
-		if(accumulated_width >= left
-		   && right <= accumulated_width + w
-		   && accumulated_height >= top
-		   && bottom <= accumulated_height + h) {
+		if(left <= accumulated_width
+		   && accumulated_width + w <= right
+		   && top <= accumulated_height
+		   && accumulated_height + h <= bottom) {
 		    // zabieramy sobie bit stad
 		    // i go wkladamy do nowego
 		    // puelka
@@ -676,8 +669,15 @@ class Box implements Bit {
 		    box.insertAt(accumulated_width-left,
 				 accumulated_height-top,
 				 throwAround);
+		    box.trySetSize(bw, bh);
 		}
-		
+		else {
+		    preceding_space =
+			preceding_space
+			.following_bit
+			.following_space();
+		}
+
 		accumulated_width += w;	
 	    }   
 	    accumulated_height += line_height;
@@ -688,6 +688,7 @@ class Box implements Bit {
 	throwAround.x = left;
 	throwAround.y = top;
 	insertAt(left, top, throwAround);
+	box.trySetSize(bw, bh);
     }
 
     

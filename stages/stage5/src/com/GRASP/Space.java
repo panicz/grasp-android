@@ -72,6 +72,11 @@ class Space implements Highlightable {
 	this(w, (Bit) null);
     }
 
+    public Space() {
+	this(min_width, (Bit) null);
+    }
+
+    
     public Space deep_copy() {
 	return new Space(width, ((following_bit == null)
 				 ? null

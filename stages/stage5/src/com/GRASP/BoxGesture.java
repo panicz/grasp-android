@@ -112,12 +112,23 @@ class BoxGesture extends Gesture {
 	}
 
 	a.set(p1);
+	a.x -= editor.left();
+	a.y -= editor.top();
 	a.untransform(editor.transform);
+
 	b.set(p2);
+	b.x -= editor.left();
+	b.y -= editor.top();
 	b.untransform(editor.transform);
+	
 	c.set(p3);
+	c.x -= editor.left();
+	c.y -= editor.top();
 	c.untransform(editor.transform);
+	
 	d.set(p4);
+	d.x -= editor.left();
+	d.y -= editor.top();
 	d.untransform(editor.transform);
 	
 	top = min(a.y, b.y, c.y, d.y);

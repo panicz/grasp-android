@@ -31,6 +31,10 @@ class Resize implements Drag {
     @Override
     public void drop(Screen screen, float x, float y,
 		     float vx, float vy) {
+	if (Math.sqrt(vx*vx + vy*vy)
+	    >= Split.closing_threshold) {
+	    // pull the rug
+	}
     }
     
     @Override
