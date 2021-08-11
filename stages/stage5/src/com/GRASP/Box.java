@@ -18,6 +18,12 @@ class Box implements Bit {
 
     protected Space _following_space = null;
 
+    public Box() {}
+
+    public Box(float w, float h) {
+	trySetSize(w, h);
+    }
+    
     static final Shift shift = new Shift();
     
     @Override
@@ -596,12 +602,17 @@ class Box implements Bit {
 	return copy;	
     }
 
+    static DragAround throwAround =
+	new DragAround(null, 0, 0);
+    
     void createBoxWithElementsFrom(float left,
 				   float top,
 				   float right,
 				   float bottom) {
 	assert(bottom > top);
 	assert(right > left);
+
+	Box box = new Box(right-left, bottom-top);
 	
 	float accumulated_height = 0;
 
@@ -655,6 +666,16 @@ class Box implements Bit {
 		    // zabieramy sobie bit stad
 		    // i go wkladamy do nowego
 		    // puelka
+		    throwAround.target =
+			preceding_space
+			.remove_following_bit();
+		    throwAround.x =
+			accumulated_width-left;
+		    throwAround.y =
+			accumulated_height-top;
+		    box.insertAt(accumulated_width-left,
+				 accumulated_height-top,
+				 throwAround);
 		}
 		
 		accumulated_width += w;	
@@ -663,7 +684,10 @@ class Box implements Bit {
 	}
 	// a na koniec umieszczamy nowe pudelko
 	// w odpowiednim miejscu
-	
+	throwAround.target = box;
+	throwAround.x = left;
+	throwAround.y = top;
+	insertAt(left, top, throwAround);
     }
 
     
