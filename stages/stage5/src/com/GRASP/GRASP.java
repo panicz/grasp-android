@@ -183,10 +183,12 @@ public class GRASP
 	    .getDisplayMetrics();
 
 	if (metrics.widthPixels < metrics.heightPixels) {
-	    screenOrientation = ScreenOrientation.Vertical;
+	    screenOrientation =
+		ScreenOrientation.Vertical;
 	}
 	else {
-	    screenOrientation = ScreenOrientation.Horizontal;
+	    screenOrientation =
+		ScreenOrientation.Horizontal;
 	}
 
 	//savedState
@@ -199,12 +201,14 @@ public class GRASP
 	    Panel verticalPanel = savedState
 		.getParcelable("vertical_panel");
 	    
-	    if (screenOrientation == ScreenOrientation.Horizontal
+	    if (screenOrientation == (ScreenOrientation
+				      .Horizontal)
 		&& horizontalPanel != null) {
 		content = horizontalPanel;
 		other_panel = verticalPanel;
 	    }
-	    else if (screenOrientation == ScreenOrientation.Vertical
+	    else if (screenOrientation==(ScreenOrientation
+					 .Vertical)
 		     && verticalPanel != null) {
 		content = verticalPanel;
 		other_panel = horizontalPanel;
@@ -237,7 +241,8 @@ public class GRASP
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(Configuration
+				       newConfig) {
 	super.onConfigurationChanged(newConfig);
 
 	DisplayMetrics metrics =
@@ -264,6 +269,7 @@ public class GRASP
 	    screen.width = metrics.widthPixels;
 	    screen.height = metrics.heightPixels;
 	    screen.layers.clear();
+	    screen.invalidate();
 	}
     }
     

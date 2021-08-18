@@ -36,7 +36,7 @@ final class Editor extends Panel {
     
     @Override
     public Panel copy() {
-	return new Editor(left(), top(), width(), height(),
+	return new Editor(left(),top(),width(),height(),
 			  document, transform.copy());
     }
     
@@ -138,7 +138,8 @@ final class Editor extends Panel {
     
     
     @Override
-    public Drag stretchFrom(byte finger, float x, float y) {
+    public Drag stretchFrom(byte finger,
+			    float x, float y) {
 	return new Stretch(this, finger, x, y);
     }
 
@@ -153,8 +154,8 @@ final class Editor extends Panel {
     
     class TakeOriginal implements TakeBit {
 	@Override
-	public Bit from(Space space) {
-	    return space.remove_following_bit();	    
+	public Bit from(Space space, Line line) {
+	    return space.remove_following_bit(line);
 	}
     }
 
@@ -162,7 +163,7 @@ final class Editor extends Panel {
 
     class TakeCopy implements TakeBit {
 	@Override
-	public Bit from(Space space) {
+	public Bit from(Space space, Line line) {
 	    Bit copy = space.following_bit.shallow_copy();
 	    copy.set_following_space(null);
 	    return copy.deep_copy();
@@ -175,7 +176,8 @@ final class Editor extends Panel {
     public Drag onPress(Screen screen,
 			byte finger,
 			float x, float y) {
-	if (transition.is_running(screen.animationSystem)) {
+	if (transition.is_running(screen
+				  .animationSystem)) {
 	    transition.stop(screen.animationSystem);
 	}
 	
@@ -183,9 +185,10 @@ final class Editor extends Panel {
 	    return new Stretch(this, finger, x, y);
 	}
 
-	Drag drag = document.dragAround(transform.unx(x, y),
-					transform.uny(x, y),
-					takeOriginal);
+	Drag drag =
+	    document.dragAround(transform.unx(x, y),
+				transform.uny(x, y),
+				takeOriginal);
 
 	if (drag != null) {
 	    if (drag instanceof DragAround) {
@@ -209,8 +212,9 @@ final class Editor extends Panel {
     public Drag onSecondPress(Screen screen,
 			      byte finger,
 			      float x, float y) {
-	Drag drag = document.dragAround(transform.unx(x, y),
-					transform.uny(x, y),
+	Drag drag =
+	    document.dragAround(transform.unx(x, y),
+				transform.uny(x, y),
 					takeCopy);
 
 	if (drag != null) {
@@ -230,9 +234,11 @@ final class Editor extends Panel {
 			      float x, float y) {
 	if (Math.abs(transform.getAngle()) > 0.1) {
 	    transition.setTargetAngle(0.0f);
-	    transition.setTargetScale(transform.getScale());
+	    transition.setTargetScale(transform
+				      .getScale());
 	    transition.fixPoint(x, y);
-	    transition.start((int) Math.abs(720*transform.getAngle()
+	    transition.start((int) Math.abs(720*transform
+					    .getAngle()
 					    /90),
 			     screen.animationSystem);
 	    return;
@@ -246,7 +252,8 @@ final class Editor extends Panel {
 	float x_ = transform.unx(x, y);
 	float y_ = transform.uny(x, y);
 	
-	DragAround target = document.topLevelItemAt(x_, y_);
+	DragAround target =
+	    document.topLevelItemAt(x_, y_);
 
 	if (target != null) {
 	    float w = 2*Document.min_space_between_bits
@@ -261,11 +268,14 @@ final class Editor extends Panel {
 
 	    if (Math.abs(left + transform.getLeft()) > 10
 		|| Math.abs(top + transform.getTop()) > 10
-		|| Math.abs(scale - transform.getScale()) > 0.01) {
+		|| Math.abs(scale
+			    -transform
+			    .getScale()) > 0.01) {
 		//GRASP.log("focus on "+target.target);
 		transition.setTargetScale(scale);
 		transition.setScroll(-left, -top);
-		transition.start(700, screen.animationSystem);
+		transition.start(700,
+				 screen.animationSystem);
 		return;
 	    }
 	}
@@ -275,7 +285,8 @@ final class Editor extends Panel {
 
 	float width_ratio = width()/document.width();
 	
-	if (Math.abs(height_ratio - transform.getScale()) < 0.01) {
+	if (Math.abs(height_ratio
+		     - transform.getScale()) < 0.01) {
 
 	    transition.setTargetScale(width_ratio);
 	    transition.fixPoint(x, y);
@@ -312,7 +323,8 @@ final class Editor extends Panel {
 	    return true;
 	}
 
-	Document replacement = previousDocument.get(document);
+	Document replacement =
+	    previousDocument.get(document);
 	if (replacement == null
 	    || replacement == document) {
 	    Iterator<Document> it = Document
@@ -347,35 +359,50 @@ final class Editor extends Panel {
 	if (item != null) {
 	    // ...
 	    // opcje dla tego czegos co zlapalismy
-	    GRASP.log(item.target.toString());
+	    // GRASP.log(item.target.toString());
 	    return null;
 	}
+	Button create = new
+	    Button("New", new
+		   CreateNewDocument(screen,
+				     this));
+	
+	Button open = new
+	    Button("Open...", new
+		   OpenFileBrowser(screen,
+				   this,
+				   Environment
+				   .getExternalStorageDirectory()));
+	Button switchto = new
+	    Button("Switch to...", new
+		   ShowOpenedDocuments(screen,
+				       this));
 
+	Button saveas = new
+	    Button("Save as...", new
+		   SaveFileBrowser(screen, this,
+				   document.file
+				   .getParentFile()));
+
+	Button close = new
+	    Button("Close", new
+		   CloseDocument(screen,
+				 document));
 	
 	return
 	    (new
 	     Popup(new
-		   Below(new Button("New", new
-				    CreateNewDocument(screen, this)),
-			 new
-			 Button("Open...", new
-				OpenFileBrowser(screen, this,
-						Environment
-						.getExternalStorageDirectory())),
-			 new Button("Switch to...", new
-				    ShowOpenedDocuments(screen,
-							this)),
-			 new Button("Save"),
-			 new Button("Save as...", new
-				    SaveFileBrowser(screen, this,
-						    document.file.getParentFile())),
-			 new Button("Close", new
-				    CloseDocument(screen,
-						  document))
-			 ))).centerAround(screen.x[finger],
-					  screen.y[finger],
-					  screen.width,
-					  screen.height);
+		   Below(create,
+			 open,
+			 switchto,
+			 //new Button("Save"),
+			 saveas,
+			 close
+			 )))
+	    .centerAround(screen.x[finger],
+			  screen.y[finger],
+			  screen.width,
+			  screen.height);
     }
 
     @Override
@@ -392,7 +419,8 @@ final class Editor extends Panel {
 
     
     @Override
-    public boolean insertAt(float x, float y, DragAround bit) {
+    public boolean insertAt(float x, float y,
+			    DragAround bit) {
 	return document.insertAt(transform.unx(x, y),
 				 transform.uny(x, y),
 				 (DragAround)
@@ -423,8 +451,10 @@ final class Editor extends Panel {
 	float scale = in.readFloat();
 	float angle = in.readFloat();
 	return new Editor(x, y, w, h,
-			  Document.fromFile(new File(path)),
-			  new Grab(left, top, scale, angle));
+			  Document.fromFile(new
+					    File(path)),
+			  new Grab(left, top,
+				   scale, angle));
 
     }
 }

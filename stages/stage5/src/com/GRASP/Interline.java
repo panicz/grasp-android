@@ -28,7 +28,8 @@ class Interline implements Highlightable {
 	float remaining_width =
 	    (following_line.next_interline == null)
 	    ? 0
-	    : following_line.next_interline.maximum_width();
+	    : following_line.next_interline
+	    .maximum_width();
 	if (line_width > remaining_width) {
 	    return line_width;
 	}
@@ -43,7 +44,8 @@ class Interline implements Highlightable {
 	float remaining_width =
 	    (following_line.next_interline == null)
 	    ? 0
-	    : following_line.next_interline.maximum_width();
+	    : following_line.next_interline
+	    .maximum_width();
 	if (line_width > remaining_width) {
 	    return line_width;
 	}
@@ -75,7 +77,6 @@ class Interline implements Highlightable {
 	    else {
 		following_line = null;
 	    }
-
 	}
 	return this;
     }
@@ -114,11 +115,11 @@ class Interline implements Highlightable {
 		       : following_line.deep_copy()));
     }
 
-    public boolean insert_line_with(DragAround dragged,
-				    float x, float y) {
+    public Line insert_line_with(DragAround dragged,
+				 float x, float y) {
 	float h = dragged.height();
 	Interline interline = new
-	    Interline(Math.max(0, height - h),
+	    Interline(Math.max(0, height - h - dragged.y),
 		      following_line);
 	following_line = new
 	    Line(new Space(dragged.x,
@@ -126,7 +127,7 @@ class Interline implements Highlightable {
 	height =
 	    Math.max(0, height - h - interline.height); 
 	following_line.next_interline = interline;
-	return true;
+	return following_line;
     }
     
 }

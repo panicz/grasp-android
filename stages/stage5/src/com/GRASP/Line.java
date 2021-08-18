@@ -49,7 +49,6 @@ class Line {
 	return next_interline.following_line;
     }
 
-
     public Line deep_copy() {
 	Line copy = new Line(first_space == null
 			     ? null

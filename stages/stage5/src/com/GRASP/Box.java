@@ -69,13 +69,6 @@ class Box implements Bit {
 			   int indent) {
 	int longest_line_length = indent;
 
-	// kwestia jest taka, ze zawsze po znaku nowej linii
-	// chcemy wyswietlic odpowiednia ilosc spacji wcinajacych
-
-	// tylko pytanie, kiedy wyswietlamy znaki nowej linii?
-	// - jezeli interlinia ma odpowiednia wysokosc
-	// - 
-	
 	result.append('(');
 
 	for (Interline interline = first_interline;
@@ -280,17 +273,6 @@ class Box implements Bit {
 
     @Override
     public void trySetSize(float w, float h) {
-	// szerokosc. Jezeli bowiem wyjdzie na to,
-	// ze zmierzona szerokosc, mw, jest mniejsza
-	// od w, to przemiatamy te linie raz jeszcze,
-	// ale tym razem ustawiajac jako szerokosc
-	// kazdego elementu byla proporcjonalnie
-	// zmniejszona, tzn zeby proporcja
-	// mw/w byla taka, jak x.min_width()/x.width(),
-	// czyli zeby nowa szerokosc elementu
-	// wynosila (w/mw)*x.min_width() 
-
-	
 	Interline interline;
 	float h_total = 0;
 	float minh_total = 0;
@@ -313,11 +295,11 @@ class Box implements Bit {
 	    }
 	    
 	    Space space;
-	    float w_total = 0;
+	    float w_total = 40;
 	    float minw_total = 0;
 	    Bit bit = null;
 	    float max_minh = 0;
-	    float max_h = 0;
+	    float max_h = min_height;
 	    for (space = line.first_space;
 		 space != null;
 		 space = bit.following_space()) {
@@ -357,26 +339,27 @@ class Box implements Bit {
 	    h_total += max_h;
 	    minh_total += max_minh;
 	}
+
+	
 	if (line != null) {
 	    assert(line.next_interline == null);
-	    interline = new Interline(0, null);
-	    line.next_interline = interline;
+	    interline = line.next_interline =
+		new Interline(0);
 	}
-	h_total -= interline.height;
-	if (h_total < h) {
-	    interline.height = h - h_total;
-	}
-	else {
-	    // zmniejszanie wysokosci
-	}
+
+	interline.height =
+	    Math.max(0,
+		     interline.height + (h - h_total));
     }
     
-    // used in the public dragAround below, overrode by Document
+    // used in the public dragAround below,
+    // overrode by Document
     protected Drag dragAround() {
 	return new DragAround(this, 0, 0);
     }
 
-    // used in the public dragAround below, overrode by Document
+    // used in the public dragAround below,
+    // overrode by Document
     protected Drag resize(float x, float y) {
 	return new Resize(this, x, y);
     }
@@ -491,17 +474,17 @@ class Box implements Bit {
 	    accumulated_height += interline.height;
 
 	    if (y < accumulated_height) {
-		return interline
-		    .insert_line_with(target, x, y);
+		return (interline
+			.insert_line_with(target, x, y)
+			!= null);
 	    }
 
-	    
-	    if(interline.following_line == null) {
+	    line = interline.following_line;
+
+	    if(line == null) {
 		break;
 	    }
 	    
-	    line = interline.following_line;
-
 	    float line_height = line.height();
 
 	    if (y >= accumulated_height + line_height) {
@@ -522,11 +505,28 @@ class Box implements Bit {
 		    ) {
 		    shift.set(accumulated_width,
 			      accumulated_height);
-		    return last_space
+		    boolean result = last_space
 			.insertAt(x - accumulated_width,
 				  y - accumulated_height,
 				  (DragAround) target
 				  .inwards(shift));
+		    float new_height = line.height();
+		    float increase =
+			new_height - line_height;
+		    assert(increase >= 0);
+
+		    if (line.next_interline != null) {
+			line.next_interline
+			    .remove_empty_lines();
+
+			line.next_interline.height
+			    -= Math.min(increase,
+					line
+					.next_interline
+					.height);
+		    }
+		    
+		    return result;
 		}
 
 		accumulated_width += last_space.width;
@@ -561,10 +561,27 @@ class Box implements Bit {
 					    Space(rx));
 		    shift.set(accumulated_width,
 			      accumulated_height);
-		    return bit.following_space()
+		    boolean result = bit.following_space()
 			.insertAt(rx, ry,
 				  (DragAround) target
 				  .inwards(shift));
+		    float new_height = line.height();
+		    float increase =
+			new_height - line_height;
+		    assert(increase >= 0);
+	
+		    if (line.next_interline != null) {
+			line.next_interline
+			    .remove_empty_lines();
+
+			line.next_interline.height
+			    -= Math.min(increase,
+					line
+					.next_interline
+					.height);
+		    }
+		    
+		    return result;
 		}
 	    }
 	    
@@ -606,8 +623,8 @@ class Box implements Bit {
 	assert(bottom > top);
 	assert(right > left);
 
-	float bw = right-left-40;
-	float bh = bottom-top-100;
+	float bw = right-left;
+	float bh = bottom-top;
 	Box box = new Box(bw, bh);
 	
 	float accumulated_height = 0;
@@ -632,9 +649,17 @@ class Box implements Bit {
 	    float line_height = line.height();
 	    
 	    float accumulated_width = parenWidth;
+
+	    int items_to_move = 0;
+	    Space initial_space = null;
+	    float position = 0;
 	    
 	    for (Space preceding_space = line.first_space;
-		 preceding_space != null; ) {
+		 preceding_space != null;
+		 preceding_space =
+			preceding_space
+			.following_bit
+			.following_space()) {
 		accumulated_width
 		    += preceding_space.width;
 
@@ -643,7 +668,6 @@ class Box implements Bit {
 		}
 		
 		Bit bit = preceding_space.following_bit;
-
 		
 		if (bit == null) {
 		    break;
@@ -656,30 +680,38 @@ class Box implements Bit {
 		   && accumulated_width + w <= right
 		   && top <= accumulated_height
 		   && accumulated_height + h <= bottom) {
-		    // zabieramy sobie bit stad
-		    // i go wkladamy do nowego
-		    // puelka
-		    throwAround.target =
-			preceding_space
-			.remove_following_bit();
-		    throwAround.x =
-			accumulated_width-left;
-		    throwAround.y =
-			accumulated_height-top;
-		    box.insertAt(accumulated_width-left,
-				 accumulated_height-top,
-				 throwAround);
-		    box.trySetSize(bw, bh);
-		}
-		else {
-		    preceding_space =
-			preceding_space
-			.following_bit
-			.following_space();
+		    if (initial_space == null) {
+			initial_space = preceding_space;
+			position = accumulated_width
+			    - left
+			    - preceding_space.width;
+		    }
+		    ++items_to_move;
 		}
 
 		accumulated_width += w;	
-	    }   
+	    }
+
+	    //GRASP.log("items to move: "+items_to_move);
+	    
+	    for (int i = 0; i < items_to_move; ++i) {
+		// zabieramy sobie bit stad
+		// i go wkladamy do nowego
+		// puelka
+		throwAround.x =
+		    position + initial_space.width;
+		
+		throwAround.target =
+		    initial_space
+		    .remove_following_bit(line);
+		    
+		throwAround.y =
+		    accumulated_height;
+		box.insertAt(throwAround.x,
+			     accumulated_height-top,
+			     throwAround);
+	    }
+	    
 	    accumulated_height += line_height;
 	}
 	// a na koniec umieszczamy nowe pudelko
@@ -688,7 +720,7 @@ class Box implements Bit {
 	throwAround.x = left;
 	throwAround.y = top;
 	insertAt(left, top, throwAround);
-	box.trySetSize(bw, bh);
+
     }
 
     
@@ -756,7 +788,8 @@ class Box implements Bit {
 		    x.createBox(left-accumulated_width,
 				top-accumulated_height,
 				right-accumulated_width,
-				top-accumulated_height);
+				bottom
+				-accumulated_height);
 		    return;
 		}
 		accumulated_width += w;	
