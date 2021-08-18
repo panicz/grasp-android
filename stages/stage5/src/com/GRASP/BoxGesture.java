@@ -29,8 +29,8 @@ class BoxGesture extends Gesture {
 	    .simplify(epsilon);
 	
 	if (simplified.points.size() != 5) {
-	    GRASP.log("simplified.points.size() = "
-		      +simplified.points.size());
+	    /*GRASP.log("simplified.points.size() = "
+	      +simplified.points.size());*/
 	    return false;
 	}
 	Point p1 = simplified.points.get(0).point;
@@ -89,8 +89,21 @@ class BoxGesture extends Gesture {
 	if (!(near(l1, rotation, margin)
 	      || near(l2, rotation, margin)
 	      || near(l3, rotation, margin)
-	      || near(l4, rotation, margin))) {
-	    //*
+	      || near(l4, rotation, margin))
+	    && !(near(l1, angle(rotation+90), margin)
+		 || near(l2, angle(rotation+90), margin)
+		 || near(l3, angle(rotation+90), margin)
+		 || near(l4, angle(rotation+90), margin))
+	    && !(near(l1, angle(rotation-90), margin)
+		 || near(l2, angle(rotation-90), margin)
+		 || near(l3, angle(rotation-90), margin)
+		 || near(l4, angle(rotation-90), margin))
+	    && !(near(l1, angle(rotation+180), margin)
+		 || near(l2, angle(rotation+180), margin)
+		 || near(l3, angle(rotation+180), margin)
+		 || near(l4, angle(rotation+180), margin))
+	    ) {
+	    /*
 	    GRASP.log("l1 = "+l1+", "
 		      +"l2 = "+l2+", "
 		      +"l3 = "+l3+", "
@@ -104,7 +117,7 @@ class BoxGesture extends Gesture {
 	     || (near(angle(l2 - l1), -90.0f, margin)
 		 && near(angle(l3 - l2), -90.0f, margin)
 		 && near(angle(l4-l3),-90.0f,margin)))) {
-	    //*
+	    /*
 	    GRASP.log("l2-l1 = "+angle(l2-l1)+", "
 		      +"l3-l2 = "+angle(l3-l2)+", "
 		      +"l4-l3 = "+angle(l4-l3));//*/
