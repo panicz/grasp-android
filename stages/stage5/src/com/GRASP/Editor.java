@@ -79,8 +79,9 @@ final class Editor extends Panel {
 	transform.uncanvas(canvas);
 
 	GRASP.paint.setTypeface(GRASP.logs_font);
-	GRASP.paint.setTextSize(16);
-	canvas.drawText(document.file.getPath(), 0, height()-2,
+	GRASP.paint.setTextSize(32);
+	canvas.drawText(document.file.getPath(),
+			0, height()-2,
 			GRASP.paint);
 
     }
@@ -204,6 +205,25 @@ final class Editor extends Panel {
     public void onClick(Screen screen,
 			byte finger,
 			float x, float y) {
+	
+	Bit target = document
+	    .itemAt(transform.unx(x, y),
+		    transform.uny(x, y));
+	if (target == document) {
+	    return;
+	}
+
+	if (target instanceof Atom) {
+	    screen.layers
+		.add(new
+		     Popup(new
+			   AtomEditor((Atom) target))
+		     .centerAround(screen.x[finger],
+				   screen.y[finger],
+				   screen.width,
+				   screen.height));
+	}
+	
 	// docelowo bedziemy chcieli umiescic kursor
 	// na danym wyrazeniu
     }

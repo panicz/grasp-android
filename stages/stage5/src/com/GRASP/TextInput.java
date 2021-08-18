@@ -27,7 +27,8 @@ class TextInput implements Pad {
 	this.font_size = font_size;
 	margin= .12f*font_size;
 	this.font = font;
-	cursor_position = selection_start = initial_text.length();
+	cursor_position = selection_start =
+	    initial_text.length();
 	if (paint == null) {
 	    paint = new Paint();
 	    paint.setColor(0xffffffff);
@@ -52,24 +53,34 @@ class TextInput implements Pad {
     
     @Override
     public void render(Canvas canvas) {
-	int left = Math.min(cursor_position, selection_start);
-	int right = Math.max(cursor_position, selection_start);
-	String before_selection = contents.substring(0, left);
-	String selection = contents.substring(left, right);
-	String after_selection = contents.substring(right);
+	int left =
+	    Math.min(cursor_position,
+		     selection_start);
+	int right =
+	    Math.max(cursor_position,
+		     selection_start);
+	String before_selection =
+	    contents.substring(0, left);
+	String selection =
+	    contents.substring(left, right);
+	String after_selection =
+	    contents.substring(right);
 	GRASP.paint.setTypeface(font);
 	GRASP.paint.setTextSize(font_size);
 	
 	canvas.drawRect(0, 0, width(), height(), paint);
 	
-	canvas.drawText(before_selection, 0.0f, font_size+margin,
+	canvas.drawText(before_selection, 0.0f,
+			font_size+margin,
 			GRASP.paint);
 	float prefix_width = GRASP.paint
 	    .measureText(before_selection);
-	float selection_width = Math.max(2.0f, GRASP.paint
-					 .measureText(selection));
+	float selection_width =
+	    Math.max(2.0f, GRASP.paint
+		     .measureText(selection));
 	canvas.drawRect(prefix_width, margin,
-			prefix_width+selection_width, font_size+margin,
+			prefix_width+selection_width,
+			font_size+margin,
 			GRASP.paint);
 	canvas.drawText(selection, prefix_width,
 			font_size+margin, paint);
@@ -83,7 +94,8 @@ class TextInput implements Pad {
 	paint.setTypeface(font);
 	paint.setTextSize(font_size);
 	return Math.max(min_width,
-			paint.measureText(contents.toString()));
+			paint.measureText(contents
+					  .toString()));
     }
     
     @Override
@@ -93,7 +105,7 @@ class TextInput implements Pad {
 
     @Override
     public void trySetSize(float x, float y) {
-	
+	min_width = y;
     }
 
     @Override
@@ -156,32 +168,39 @@ class TextInput implements Pad {
 	if (unicode == 0) {
 	    switch (keycode) {
 	    case KeyEvent.KEYCODE_DPAD_LEFT:
-		if ((meta & KeyEvent.META_SHIFT_MASK) != 0) {
+		if ((meta & KeyEvent.META_SHIFT_MASK)
+		    != 0) {
 		    if (selection_start > 0) {
 			--selection_start;
 		    }
 		}
-		else if (cursor_position == selection_start) {
-		    cursor_position = selection_start
-			= Math.max(0,
-				   Math.max(cursor_position,
-					    selection_start) - 1);
+		else if (cursor_position
+			 == selection_start) {
+		    cursor_position = selection_start =
+			Math.max(0,
+				 Math.max(cursor_position,
+					  selection_start)
+				 - 1);
 		}
 		else {
 		    selection_start = cursor_position;
 		}
 		break;
 	    case KeyEvent.KEYCODE_DPAD_RIGHT:
-		if ((meta & KeyEvent.META_SHIFT_MASK) != 0) {
-		    if (selection_start < contents.length()) {
+		if ((meta & KeyEvent.META_SHIFT_MASK)
+		    != 0) {
+		    if (selection_start < (contents
+					   .length())) {
 			++selection_start;
 		    }
 		}
-		else if (cursor_position == selection_start) {
-		    cursor_position = selection_start
-			= Math.min(contents.length(),
-				   Math.min(cursor_position,
-					    selection_start) + 1);
+		else if (cursor_position
+			 == selection_start) {
+		    cursor_position = selection_start =
+			Math.min(contents.length(),
+				 Math.min(cursor_position,
+					  selection_start)
+				 + 1);
 		}
 		else {
 		    selection_start = cursor_position;
@@ -191,13 +210,16 @@ class TextInput implements Pad {
 		if (!delete_selection()
 		    && cursor_position > 0) {
 		    selection_start = --cursor_position;
-		    contents.deleteCharAt(cursor_position);
+		    contents
+			.deleteCharAt(cursor_position);
 		}
 		break;
 	    case KeyEvent.KEYCODE_FORWARD_DEL:
 		if (!delete_selection()
-		    && cursor_position < contents.length()) {
-		    contents.deleteCharAt(cursor_position);
+		    && cursor_position < (contents
+					  .length())) {
+		    contents
+			.deleteCharAt(cursor_position);
 		}
 		break;
 	    default:
@@ -216,7 +238,8 @@ class TextInput implements Pad {
     // (currently only triggered from Popup and Below,
     // and handled by Below and Button)
     @Override
-    public void onDragOver(Screen screen, byte finger, float x, float y) {
+    public void onDragOver(Screen screen, byte finger,
+			   float x, float y) {
     }
 
     @Override
@@ -224,7 +247,8 @@ class TextInput implements Pad {
     }
 
     @Override
-    public void onRelease(Screen screen, byte finger, float x, float y) {
+    public void onRelease(Screen screen, byte finger,
+			  float x, float y) {
     }
 
 }
