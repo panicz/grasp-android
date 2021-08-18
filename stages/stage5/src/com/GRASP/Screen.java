@@ -283,13 +283,18 @@ class Screen extends View {
 	if (isShapeBeingDrawn() && p == 0
 	    && finalizeStroke()) {
 	    
-	    Iterator<Gesture> it = known_gestures.iterator();
+	    Iterator<Gesture> it =
+		known_gestures.iterator();
 
 	    while(it.hasNext()) {
 		Gesture gesture = it.next();
 		if (gesture.recognizes(shape, this)) {
-		    Toast.makeText(activity.getApplicationContext(),
-				   gesture.name, Toast.LENGTH_SHORT).show();
+		    Toast
+			.makeText(activity.
+				  getApplicationContext(),
+				  gesture.name,
+				  Toast.LENGTH_SHORT)
+			.show();
 		    gesture.perform(shape, this);
 		    cancelDrawingShape();
 		    return true;
@@ -307,7 +312,8 @@ class Screen extends View {
 	Pad top = layers.peekLast();
 
 	if (top == null) {
-	    panel.onClick(this, (byte)0, e.getX(), e.getY());
+	    panel.onClick(this, (byte)0,
+			  e.getX(), e.getY());
 	}
 	else {
 	    top.onClick(this, (byte)0, e.getX(), e.getY());
@@ -317,7 +323,7 @@ class Screen extends View {
 
     public boolean onLongPress(MotionEvent event) {
 	if (double_pending) {
-	    GRASP.log("double pending");
+	    //GRASP.log("double pending");
 	    return false;
 	}
 
@@ -326,12 +332,13 @@ class Screen extends View {
 	
 	cancelDrawingShape();
 
-	Pad top = layers.peekLast();
-	
 	if (drag[0] != null) {
-	    drag[0].drop(this, x, y, 0, 0);
+	    //drag[0].drop(this, x, y, 0, 0);
+	    return false;
 	}
 
+	Pad top = layers.peekLast();
+	
 	drag[0] = (top == null)
 	    ? panel.onHold(this, (byte)0, x, y)
 	    : top.onHold(this, (byte)0, x, y);

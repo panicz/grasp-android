@@ -42,7 +42,8 @@ class Atom implements Bit {
     }
     
     @Override public float width() {
-	return paint.measureText(text) + 2*horizontal_margin;
+	return paint.measureText(text)
+	    + 2*horizontal_margin;
     }
     
     @Override public float height() {
@@ -87,7 +88,8 @@ class Atom implements Bit {
     }
 
     @Override
-    public int buildString(StringBuilder result, int indent) {
+    public int buildString(StringBuilder result,
+			   int indent) {
 	return buildString(result) + indent;
     }
     
@@ -106,9 +108,19 @@ class Atom implements Bit {
     public  void trySetSize(float x, float y) {
 	// atoms aren't resizable
     }
+
+    @Override
+    public Bit itemAt(float x, float y) {
+	assert(0 <= x);
+	assert(x <= width());
+	assert(0 <= y);
+	assert(y <= height());
+	return this;
+    }
     
     @Override
-    public boolean insertAt(float x, float y, DragAround item) {
+    public boolean insertAt(float x, float y,
+			    DragAround item) {
 	return false;
     }
 
@@ -121,7 +133,8 @@ class Atom implements Bit {
     public Bit deep_copy() {
 	Bit copy = new Atom(text);
 	if (_following_space != null) {
-	    copy.set_following_space(_following_space.deep_copy());
+	    copy.set_following_space(_following_space
+				     .deep_copy());
 	}
 	return copy;
     }

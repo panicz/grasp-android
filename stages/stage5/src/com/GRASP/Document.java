@@ -18,18 +18,21 @@ class Document extends Box {
 	new ArrayList<Document>();
 
     public static Document fromFile(File file) {
-	Iterator<Document> it = openedDocuments.iterator();
+	Iterator<Document> it =
+	    openedDocuments.iterator();
 	
 	while(it.hasNext()) {
 	    Document doc = it.next();
-	    if (doc.file.getPath().equals(file.getPath())) {
+	    if (doc.file.getPath()
+		.equals(file.getPath())) {
 		return doc;
 	    }
 	}
 	try {
 	    Reader input = new FileReader(file);
 	    SExpReader sexp =
-		new SExpReader(new PeekingReader(input, 4));
+		new SExpReader(new
+			       PeekingReader(input, 4));
 	    	    
 	    SExp sexpr = sexp.read_expressions();
 	    Bit content = sexpr.toBit();
@@ -60,13 +63,16 @@ class Document extends Box {
     
     public static Document fromBox(Box prototype) {
 	Document document = new Document();
-	document.first_interline = prototype.first_interline;
-	document._following_space = prototype.following_space();
+	document.first_interline =
+	    prototype.first_interline;
+	document._following_space =
+	    prototype.following_space();
 	document.preserve_distance_between_elements();
 	return document;
     }
 
-    static DateFormat date = new SimpleDateFormat("yyyy-MM-dd@HH:mm:ss");
+    static DateFormat date =
+	new SimpleDateFormat("yyyy-MM-dd@HH:mm:ss");
     
     public static Document createNew() {
 	Date now = Calendar.getInstance().getTime();
@@ -139,22 +145,25 @@ class Document extends Box {
 	if (line != null) {
 	    if (line.next_interline == null) {
 		line.next_interline = new
-		    Interline(y - accumulated_height, null);
+		    Interline(y - accumulated_height);
 	    }
 	    last_interline = line.next_interline;
 	}
 	// make sure that the dragged box is added
 	// if it was dropped below the last expression
 	// in the document
-	return last_interline.insert_line_with(target, x, y);
+	return (last_interline
+		.insert_line_with(target, x, y)
+		!= null);
     }
 
     private void preserve_distance_between_elements() {
 	for (Interline interline = first_interline;
 	     interline != null;
-	     interline = interline.following_line.next_interline) {
+	     interline = interline
+		 .following_line.next_interline) {
 
-	    if(interline.height < min_space_between_bits) {
+	    if(interline.height < min_space_between_bits){
 		interline.height = min_space_between_bits;
 	    }
 	    
@@ -165,22 +174,26 @@ class Document extends Box {
 		}
 		
 		if (line.first_space == null
-		    || line.first_space.following_bit == null) {
+		    || (line.first_space
+			.following_bit == null)) {
 		    interline.remove_following_line();
-		    interline.height = min_space_between_bits;
+		    interline.height =
+			min_space_between_bits;
 		    continue;
 		}
 		Space preceding_space = null;
 		for (preceding_space = line.first_space;
 		     preceding_space != null
-			 && preceding_space.following_bit != null;
+			 && (preceding_space
+			     .following_bit != null);
 		     preceding_space =
 			 preceding_space
 			 .following_bit
 			 .following_space()) {
 		    if (preceding_space.width
 			< min_space_between_bits
-			&& preceding_space != line.first_space) {
+			&& (preceding_space
+			    != line.first_space)) {
 			preceding_space.width =
 			    min_space_between_bits;
 		    }
@@ -194,7 +207,8 @@ class Document extends Box {
     }
     
     @Override
-    public boolean insertAt(float x, float y, DragAround target) {
+    public boolean insertAt(float x, float y,
+			    DragAround target) {
 	boolean result = super.insertAt(x, y, target);
 	if (result) {
 	    preserve_distance_between_elements();
@@ -233,9 +247,11 @@ class Document extends Box {
 	    Bit bit;
 	    for (Space preceding_space = line.first_space;
 		 preceding_space != null;
-		 preceding_space = bit.following_space()) {
+		 preceding_space =
+		     bit.following_space()) {
 
-		accumulated_width += preceding_space.width;
+		accumulated_width
+		    += preceding_space.width;
 
 		if (accumulated_width > x) {
 		    break;
@@ -254,9 +270,10 @@ class Document extends Box {
 		    && y <= accumulated_height + h
 		    && accumulated_width <= x
 		    && x <= accumulated_width + w) {
-		    return new DragAround(bit,
-					  accumulated_width,
-					  accumulated_height);
+		    return new
+			DragAround(bit,
+				   accumulated_width,
+				   accumulated_height);
 		}
 
 		accumulated_width += w;

@@ -9,6 +9,10 @@ class Resize implements Drag {
     float x0, y0;
     float w0, h0;
 
+    Box parent;
+    Space preceding_space;
+    Line line;
+    float xp, yp;
     
     Grab grab = new Grab();
     
@@ -23,17 +27,84 @@ class Resize implements Drag {
     @Override
     public void move(Screen screen, float x, float y,
 		     float dx, float dy) {
-	float dw = grab.unx(x, y)-grab.unx(x0, y0);
-	float dh  = grab.uny(x, y)-grab.uny(x0, y0);
-	target.trySetSize(w0+dw, h0+dh);
+	if (target != null) {
+	    float dw = grab.unx(x, y)-grab.unx(x0, y0);
+	    float dh  = grab.uny(x, y)-grab.uny(x0, y0);
+	    /*
+	      GRASP.log("("+(int)w0+", "+(int)h0+") -> ("
+	      +(int)(w0+dw)+", "+(int)(h0+dh)+")"
+	      +"/@("+(int)dw+", "+(int)dh+")");
+	    */
+	    target.trySetSize(w0+dw, h0+dh);
+	}
     }
 
+    static DragAround throwAround =
+	new DragAround(null, 0, 0);
+    
+    void pull_the_rug() {
+	preceding_space.remove_following_bit(line);
+	Box rug = (Box) target;
+	target = null;
+	float accumulated_height = 0;
+	Interline interline;
+	Line line = null;
+	
+	for (interline = rug.first_interline;
+	     interline != null;
+	     interline = interline.following_line
+		 .next_interline) {
+	    
+	    accumulated_height += interline.height;
+
+	    line = interline.following_line;
+
+	    if(line == null) {
+		break;
+	    }
+
+	    if (line.first_space == null) {
+		break;
+	    }
+	    
+	    float line_height = line.height();
+
+	    while (line.first_space
+		   .following_bit != null) {
+		throwAround.x = xp + Box.parenWidth
+		    + line.first_space.width;
+		
+		throwAround.y = yp + accumulated_height;
+		
+		Bit bit = line.first_space
+		    .remove_following_bit(line);
+	       
+		if (bit == null) {
+		    break;
+		}
+
+		throwAround.target = bit;
+		
+		parent.insertAt(throwAround.x,
+				throwAround.y,
+				throwAround);
+		
+	    }
+	    accumulated_height += line_height;
+	}
+
+    }
+
+    
     @Override
     public void drop(Screen screen, float x, float y,
 		     float vx, float vy) {
 	if (Math.sqrt(vx*vx + vy*vy)
 	    >= Split.closing_threshold) {
-	    // pull the rug
+	    target.trySetSize(w0, h0);
+	    if(target instanceof Box) {
+		pull_the_rug();
+	    }
 	}
     }
     

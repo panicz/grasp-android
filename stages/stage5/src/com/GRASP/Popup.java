@@ -6,7 +6,8 @@ class Popup implements Pad, Drag {
 
     static final Shift shift = new Shift();
     
-    protected static Drag translate(Drag drag, float x, float y) {
+    protected static Drag translate(Drag drag,
+				    float x, float y) {
 	if (drag == null) {
 	    return null;
 	}
@@ -29,18 +30,21 @@ class Popup implements Pad, Drag {
 	}
 	
 	@Override
-	public void move(Screen screen, float x, float y,
+	public void move(Screen screen,
+			 float x, float y,
 			 float dx, float dy) {
 	    target.left += dx;
 	    target.top += dy;
 	}
 
 	@Override
-	public void drop(Screen screen, float x, float y,
+	public void drop(Screen screen,
+			 float x, float y,
 			 float vx, float vy) {
 	    if (Math.sqrt(vx*vx + vy*vy)
 		>= Split.closing_threshold) {
-		screen.layers.removeLastOccurrence(target);
+		screen.layers
+		    .removeLastOccurrence(target);
 	    }
 	}
 
@@ -71,14 +75,19 @@ class Popup implements Pad, Drag {
     
     @Override
     public void render(Canvas canvas) {
-	GRASP.paint.setColor(GRASP.paint.getColor()-0x77000000);
+	GRASP.paint.setColor(GRASP.paint.getColor()
+			     -0x77000000);
 	canvas.drawRoundRect(left, top,
-			     left+width(), top+height(), 25, 25,
+			     left+width(), top+height(),
+			     25, 25,
 			     GRASP.paint);
-	canvas.translate(left+margin_width, top+bar_height);
+	canvas.translate(left+margin_width,
+			 top+bar_height);
 	content.render(canvas);
-	canvas.translate(-left-margin_width, -top-bar_height);
-	GRASP.paint.setColor(GRASP.paint.getColor()+0x77000000);
+	canvas.translate(-left-margin_width,
+			 -top-bar_height);
+	GRASP.paint.setColor(GRASP.paint.getColor()
+			     +0x77000000);
     }
 
     @Override
@@ -93,7 +102,8 @@ class Popup implements Pad, Drag {
 
     @Override
     public void trySetSize(float x, float y) {
-	content.trySetSize(x - 2*margin_width, y - 2*bar_height);
+	content.trySetSize(x - 2*margin_width,
+			   y - 2*bar_height);
     }
     
     @Override
@@ -112,15 +122,18 @@ class Popup implements Pad, Drag {
 	    && x < left+margin_width+w
 	    && top+bar_height < y
 	    && y < top+bar_height+h) {
-	    return translate(content.onPress(screen,finger,
-					     x-left-margin_width,
-					     y-top-bar_height),
-			     left+margin_width,
-			     top+bar_height);
+	    return
+		translate(content
+			  .onPress(screen,finger,
+				   x-left-margin_width,
+				   y-top-bar_height),
+			  left+margin_width,
+			  top+bar_height);
 	}
 
 	if (left < x && x < left + w
-	    && top+bar_height+h < y && y < top+2*bar_height+h) {
+	    && top+bar_height+h < y
+	    && y < top+2*bar_height+h) {
 	    return moveAround;
 	}
 
@@ -153,12 +166,15 @@ class Popup implements Pad, Drag {
 	    && x < left+margin_width+content.width()
 	    && top+bar_height < y
 	    && y < top+bar_height+content.height()) {
-	    return translate(content
-			     .onSecondPress(screen,finger,
-					    x-left-margin_width,
-					    y-top-bar_height),
-			     left+margin_width,
-			     top+bar_height);
+	    return
+		translate(content
+			  .onSecondPress(screen,finger,
+					 x-left
+					 -margin_width,
+					 y-top
+					 -bar_height),
+			  left+margin_width,
+			  top+bar_height);
 	}
 	return null;
     }
@@ -185,11 +201,13 @@ class Popup implements Pad, Drag {
 	    && x < left+margin_width+content.width()
 	    && top+bar_height < y
 	    && y < top+bar_height+content.height()) {
-	    return translate(content.onHold(screen,finger,
-					    x-left-margin_width,
-					    y-top-bar_height),
-			     left+margin_width,
-			     top+bar_height);
+	    return
+		translate(content
+			  .onHold(screen,finger,
+				  x-left-margin_width,
+				  y-top-bar_height),
+			  left+margin_width,
+			  top+bar_height);
 	}	
 	return null;
     }
@@ -197,13 +215,15 @@ class Popup implements Pad, Drag {
     @Override
     public boolean onKeyUp(Screen screen, int keycode,
 			   char unicode, int meta) {
-	return content.onKeyUp(screen, keycode, unicode, meta);
+	return content.onKeyUp(screen, keycode,
+			       unicode, meta);
     }
 
     @Override
     public boolean onKeyDown(Screen screen, int keycode,
 			     char unicode, int meta) {
-	return content.onKeyDown(screen, keycode, unicode, meta);
+	return content.onKeyDown(screen, keycode,
+				 unicode, meta);
     }
     
     @Override

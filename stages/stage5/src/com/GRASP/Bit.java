@@ -72,6 +72,7 @@ interface Bit extends Tile {
     boolean insertAt(float x, float y,
 		     DragAround item);
 
+    Bit itemAt(float x, float y);
     //  Bit takeFrom(float x, float y);
 
     Drag dragAround(float x, float y, TakeBit take);

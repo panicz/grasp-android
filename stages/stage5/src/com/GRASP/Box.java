@@ -143,7 +143,7 @@ class Box implements Bit {
 	     interline != null;
 	     interline = interline.following_line
 		 .next_interline) {
-	    /*
+	    /*	    
 	    canvas.drawRect(20,accumulated_height,
 			    40,accumulated_height
 			    +interline.height,
@@ -425,7 +425,19 @@ class Box implements Bit {
 			    == bit) {
 			    ((DragAround)nested).target =
 				take
-				.from(preceding_space);
+				.from(preceding_space,
+				      line);
+			}
+			else if(nested instanceof Resize
+				&& ((Resize)nested).parent
+				== null) {
+			    Resize r = (Resize)nested;
+			    r.parent = this;
+			    r.xp = accumulated_width;
+			    r.yp = accumulated_height;
+			    r.preceding_space =
+				preceding_space;
+			    r.line = line;
 			}
 			shift.set(accumulated_width,
 				  accumulated_height);
@@ -456,6 +468,85 @@ class Box implements Bit {
 				 float accumulated_height,
 				 DragAround target) {
 	return false;
+    }
+
+
+    @Override
+    public Bit itemAt(float x, float y) {
+	
+	float accumulated_height = 0;
+	Interline interline;
+	Line line = null;
+	
+	for (interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line
+		 .next_interline) {
+	    
+	    accumulated_height += interline.height;
+
+	    if (y < accumulated_height) {
+		return this;
+	    }
+
+	    line = interline.following_line;
+
+	    if(line == null) {
+		break;
+	    }
+	    
+	    float line_height = line.height();
+
+	    if (y >= accumulated_height + line_height) {
+		accumulated_height += line_height;
+		continue;
+	    }
+	    
+	    float accumulated_width = parenWidth;
+	    
+	    for (Space last_space = line.first_space;
+		 last_space != null;
+		 last_space = last_space.following_bit
+		     .following_space()) {
+
+		if (x <= (accumulated_width
+			  + last_space.width)
+		    || last_space.following_bit == null
+		    ) {
+		    return this;
+		}
+
+		accumulated_width += last_space.width;
+	       
+		Bit bit = last_space.following_bit;
+	       
+		if (bit == null) {
+		    break;
+		}
+		
+		float w = bit.width();
+		float h = bit.height();
+
+		float rx = x - accumulated_width;
+		float ry = y - accumulated_height;
+		
+		if (0 <= rx && rx <= w
+		    && 0 <= ry && ry <= h) {
+		    return bit.itemAt(rx, ry);
+		}
+
+		accumulated_width += w;
+		rx -= w;
+		
+		if (bit.following_space() == null) {
+		    return this;
+		}
+	    }
+	    
+	    accumulated_height += line_height;
+	}
+
+	return this;
     }
     
     @Override
@@ -733,9 +824,9 @@ class Box implements Bit {
 	// ktore sa calkowicie zawarte
 	assert(bottom > top);
 	assert(right > left);
-	
-	float accumulated_height = 0;
 
+	float accumulated_height = 0;
+ 
 	for (Interline interline = first_interline;
 	     interline != null;
 	     interline = interline.following_line
