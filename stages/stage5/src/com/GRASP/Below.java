@@ -15,7 +15,8 @@ class Below implements Pad, Drag {
 	trySetSize(width(), height());
     }
     
-    protected static Drag translate(Drag drag, float x, float y) {
+    protected static Drag translate(Drag drag,
+				    float x, float y) {
 	if (drag == null) {
 	    return null;
 	}
@@ -24,7 +25,8 @@ class Below implements Pad, Drag {
 	return drag.outwards(shift);
     }
 
-    protected void translate(Canvas canvas, float w, float h) {
+    protected void translate(Canvas canvas,
+			     float w, float h) {
 	canvas.translate(0, h);
     }
     
@@ -85,7 +87,8 @@ class Below implements Pad, Drag {
 	}
 	
 	for (int i = 0; i < contents.length; ++i) {
-	    contents[i].trySetSize(x, contents[i].height());
+	    contents[i]
+		.trySetSize(x, contents[i].height());
 	}
     }
 
@@ -109,15 +112,18 @@ class Below implements Pad, Drag {
 	for (int i = 0; i < contents.length; ++i) {
 	    float w = contents[i].width();
 	    float h = contents[i].height();
-	    if (preceding_height <= y && y < preceding_height + h
-		&& preceding_width <= x && x < preceding_width + w) {
+	    if (preceding_height <= y
+		&& y < preceding_height + h
+		&& preceding_width <= x
+		&& x < preceding_width + w) {
 		return contents[i];
 	    }
 	    
 	    preceding_height += advance_height(h);
 	    preceding_width += advance_width(w);
 
-	    if (preceding_width > x || preceding_height > y) {
+	    if (preceding_width > x
+		|| preceding_height > y) {
 		return null;
 	    }
 	}
@@ -171,11 +177,13 @@ class Below implements Pad, Drag {
 	    return null;
 	}
 
-	return translate(target.onSecondPress(screen,
-					      finger,
-					      x-preceding_width,
-					      y-preceding_height),
-			 preceding_width, preceding_height);
+	return
+	    translate(target
+		      .onSecondPress(screen,
+				     finger,
+				     x-preceding_width,
+				     y-preceding_height),
+		      preceding_width, preceding_height);
     }
 
     @Override
@@ -204,18 +212,21 @@ class Below implements Pad, Drag {
 	    return this;
 	}
 
-	return translate(target.onHold(screen,
-				       finger,
-				       x-preceding_width,
-				       y-preceding_height),
-			 preceding_width, preceding_height);
+	return
+	    translate(target
+		      .onHold(screen,
+			      finger,
+			      x-preceding_width,
+			      y-preceding_height),
+		      preceding_width, preceding_height);
     }
 
     @Override
     public boolean onKeyUp(Screen screen, int keycode,
 			   char unicode, int meta) {
 	if (0 <= focus && focus < contents.length) {
-	    return contents[focus].onKeyUp(screen, keycode, unicode, meta);
+	    return contents[focus]
+		.onKeyUp(screen, keycode, unicode, meta);
 	}
 	return false;
     }
@@ -224,7 +235,9 @@ class Below implements Pad, Drag {
     public boolean onKeyDown(Screen screen, int keycode,
 			     char unicode, int meta) {
 	if (0 <= focus && focus < contents.length) {
-	    return contents[focus].onKeyDown(screen, keycode, unicode, meta);
+	    return contents[focus]
+		.onKeyDown(screen, keycode,
+			   unicode, meta);
 	}
 	return false;
     }
@@ -282,6 +295,13 @@ class Below implements Pad, Drag {
 	hovered = null;	
     }
 
+    @Override
+    public void onRemove(Screen screen) {
+	for (int i = 0; i < contents.length; ++i) {
+	    contents[i].onRemove(screen);
+	}
+    }
+    
     @Override
     public void move(Screen screen, float x, float y,
 		     float _dx, float _dy) {

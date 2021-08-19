@@ -444,5 +444,8 @@ class Screen extends View {
 	}
     }
 
-    
+    public void removeLayerWith(Pad target) {
+	target.onRemove(this);
+	layers.removeLastOccurrence(target);
+    }
 }

@@ -251,4 +251,7 @@ class TextInput implements Pad {
 			  float x, float y) {
     }
 
+    @Override
+    public void onRemove(Screen screen) {}
+
 }

@@ -206,18 +206,13 @@ final class Editor extends Panel {
 			byte finger,
 			float x, float y) {
 	
-	Bit target = document
-	    .itemAt(transform.unx(x, y),
-		    transform.uny(x, y));
-	if (target == document) {
-	    return;
-	}
-
-	if (target instanceof Atom) {
+	AtomEditor ed = document
+	    .editItemAt(transform.unx(x, y),
+			transform.uny(x, y));
+	if (ed != null) {
 	    screen.layers
 		.add(new
-		     Popup(new
-			   AtomEditor((Atom) target))
+		     Popup(ed)
 		     .centerAround(screen.x[finger],
 				   screen.y[finger],
 				   screen.width,

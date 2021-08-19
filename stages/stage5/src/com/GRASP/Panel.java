@@ -166,6 +166,9 @@ abstract class Panel implements Pad, Parcelable {
     public void onRelease(Screen screen, byte finger,
 			  float x, float y) {}
 
+    @Override
+    public void onRemove(Screen screen) {}
+    
     static final byte PANEL_TYPE_EDITOR = 0;
     static final byte PANEL_TYPE_HORIZONTAL_SPLIT = 1;
     static final byte PANEL_TYPE_VERTICAL_SPLIT = 2;

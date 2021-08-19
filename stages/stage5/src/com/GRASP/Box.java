@@ -548,6 +548,97 @@ class Box implements Bit {
 
 	return this;
     }
+
+    public AtomEditor editItemAt(float x, float y) {
+	
+	float accumulated_height = 0;
+	Interline interline;
+	Line line = null;
+	
+	for (interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line
+		 .next_interline) {
+	    
+	    accumulated_height += interline.height;
+
+	    if (y < accumulated_height) {
+		return null;
+	    }
+
+	    line = interline.following_line;
+
+	    if(line == null) {
+		break;
+	    }
+	    
+	    float line_height = line.height();
+
+	    if (y >= accumulated_height + line_height) {
+		accumulated_height += line_height;
+		continue;
+	    }
+	    
+	    float accumulated_width = parenWidth;
+	    
+	    for (Space last_space = line.first_space;
+		 last_space != null;
+		 last_space = last_space.following_bit
+		     .following_space()) {
+
+		if (x <= (accumulated_width
+			  + last_space.width)
+		    || last_space.following_bit == null
+		    ) {
+		    return null;
+		}
+
+		accumulated_width += last_space.width;
+	       
+		Bit bit = last_space.following_bit;
+	       
+		if (bit == null) {
+		    break;
+		}
+		
+		float w = bit.width();
+		float h = bit.height();
+
+		float rx = x - accumulated_width;
+		float ry = y - accumulated_height;
+		
+		if (0 <= rx && rx <= w
+		    && 0 <= ry && ry <= h) {
+		    if (bit instanceof Box) {
+			Box box = (Box) bit;
+			return box.editItemAt(rx, ry);
+		    }
+		    else if (bit instanceof Atom) {
+			return new
+			    AtomEditor(last_space,
+				       line);
+		    }
+		    else {
+			GRASP.log("unsupported bit "+
+				  this);
+			return null;
+		    }
+		}
+
+		accumulated_width += w;
+		rx -= w;
+		
+		if (bit.following_space() == null) {
+		    return null;
+		}
+	    }
+	    
+	    accumulated_height += line_height;
+	}
+
+	return null;
+    }
+
     
     @Override
     public boolean insertAt(float x, float y,

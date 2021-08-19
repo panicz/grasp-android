@@ -3,11 +3,16 @@ package com.GRASP;
 import android.view.KeyEvent;
 
 class AtomEditor extends TextInput {
-    Atom target;
-    public AtomEditor(Atom atom) {
-	super(300, atom.text, Atom.text_size,
+    Space ps;
+    Line line;
+    public AtomEditor(Space ps, Line ln) {
+	super(300,
+	      ((Atom) ps
+	       .following_bit).text,
+	      Atom.text_size,
 	      GRASP.symbols_font);
-	target = atom;
+	this.ps = ps;
+	line = ln;
     }
 
     @Override
@@ -24,9 +29,18 @@ class AtomEditor extends TextInput {
        if (unicode != 0
 	   || keycode == KeyEvent.KEYCODE_DEL
 	   || keycode == KeyEvent.KEYCODE_FORWARD_DEL) {
-	   target.text = getText();
+	   ((Atom)ps.following_bit).text = getText();
 	   return true;
        }
        return result;
     }
+
+    @Override
+    public void onRemove(Screen screen) {
+	/// usuwamy puste atomy
+	if (getText().length() == 0) {
+	    ps.remove_following_bit(line);
+	}
+    }
+
 }

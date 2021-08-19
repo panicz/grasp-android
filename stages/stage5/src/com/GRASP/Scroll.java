@@ -107,13 +107,15 @@ class Scroll implements Pad, Drag {
     @Override
     public boolean onKeyUp(Screen screen, int keycode,
 			   char unicode, int meta) {
-	return target.onKeyUp(screen, keycode, unicode, meta);
+	return target.onKeyUp(screen, keycode,
+			      unicode, meta);
     }
 
     @Override
     public boolean onKeyDown(Screen screen, int keycode,
 			     char unicode, int meta) {
-	return target.onKeyDown(screen, keycode, unicode, meta);
+	return target.onKeyDown(screen, keycode,
+				unicode, meta);
     }
 
 
@@ -138,6 +140,11 @@ class Scroll implements Pad, Drag {
 			 y + vscroll);
     }
 
+    @Override
+    public void onRemove(Screen screen) {
+	target.onRemove(screen);
+    }
+    
     @Override
     public Drag outwards(Transform transform) {
 	return this;

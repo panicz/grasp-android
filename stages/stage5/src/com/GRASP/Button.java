@@ -178,5 +178,8 @@ class Button implements Pad {
 			     char unicode, int meta) {
 	return false;
     }
-    
+
+    @Override
+    public void onRemove(Screen screen) {}
+
 }

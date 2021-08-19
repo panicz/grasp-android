@@ -43,8 +43,7 @@ class Popup implements Pad, Drag {
 			 float vx, float vy) {
 	    if (Math.sqrt(vx*vx + vy*vy)
 		>= Split.closing_threshold) {
-		screen.layers
-		    .removeLastOccurrence(target);
+		screen.removeLayerWith(target);
 	    }
 	}
 
@@ -154,7 +153,7 @@ class Popup implements Pad, Drag {
 			    y-top-bar_height);
 	}
 	else {
-	    screen.layers.removeLastOccurrence(this);
+	    screen.removeLayerWith(this);
 	}
     }
 
@@ -224,6 +223,11 @@ class Popup implements Pad, Drag {
 			     char unicode, int meta) {
 	return content.onKeyDown(screen, keycode,
 				 unicode, meta);
+    }
+
+    @Override
+    public void onRemove(Screen screen) {
+	content.onRemove(screen);
     }
     
     @Override
