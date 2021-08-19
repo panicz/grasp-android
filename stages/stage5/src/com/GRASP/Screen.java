@@ -102,6 +102,7 @@ class Screen extends View {
 	known_gestures.add(VerticalLineAcrossTheScreen
 			   .instance);
 	known_gestures.add(new BoxGesture(30.0f));
+	known_gestures.add(new UnderscoreGesture(30.0f));
     }
 
     Drag [] drag = new Drag[] {
