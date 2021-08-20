@@ -373,8 +373,13 @@ class Screen extends View {
 	Pad top = layers.peekLast();
 
 	if (top != null) {
+
 	    GRASP.paint.setMaskFilter(blur);
-	    Button.paint.setMaskFilter(blur);
+
+
+	    if (Button.paint != null) {
+		Button.paint.setMaskFilter(blur);
+	    }
 
 	    // blur filter mask
 	}
@@ -388,7 +393,10 @@ class Screen extends View {
 	    Pad item = layer.next();
 	    if (item == top) {
 		GRASP.paint.setMaskFilter(null);
-		Button.paint.setMaskFilter(null);
+	
+		if (Button.paint != null) {
+		    Button.paint.setMaskFilter(null);
+		}
 		//remove blur filter mask
 	    }
 	    int a = GRASP.paint.getAlpha();
