@@ -72,9 +72,33 @@ class UnderscoreGesture extends Gesture {
 	return true;
     }
 
+    static Ref<Line> line = new Ref<Line>(null);
+    static DragAround throwAround =
+	new DragAround(null, 0, 0);
+
+    
     @Override
     public void perform(Shape shape, Screen screen) {
-	// add a new empty atom
+	// 1. dodajemy nowy atom do edytora
+	throwAround.target = new Atom("");
+	throwAround.x = left;
+	throwAround.y = top;
+	Space space =
+	    editor.insertAt(left, top,
+			    throwAround,
+			    line);
+
+	if (space == null) {
+	    return;
+	}
+	screen.layers
+	    .add(new
+		 Popup(new AtomEditor(space, line.ref))
+		 .centerAround(left,
+			       top,
+			       screen.width,
+			       screen.height));
+	line.ref = null;
     }
 
     
