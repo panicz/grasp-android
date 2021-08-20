@@ -119,9 +119,10 @@ class Atom implements Bit {
     }
     
     @Override
-    public boolean insertAt(float x, float y,
-			    DragAround item) {
-	return false;
+    public Space insertAt(float x, float y,
+			  DragAround item,
+			  Ref<Line> ln) {
+	return null;
     }
 
     @Override

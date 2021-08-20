@@ -306,9 +306,11 @@ final class HorizontalSplit extends Split {
     }
 
     @Override
-    public boolean insertAt(float x, float y, DragAround bit) {
+    public Space insertAt(float x, float y,
+			  DragAround bit,
+			  Ref<Line> ln) {
 	if (x <= firstPanel.width()) {
-	    return firstPanel.insertAt(x, y, bit);
+	    return firstPanel.insertAt(x, y, bit, ln);
 	}
 	else if (x >= firstPanel.width() + bar_width) {
 	    return secondPanel.insertAt(x - (firstPanel.width()
@@ -317,9 +319,10 @@ final class HorizontalSplit extends Split {
 					translate(bit,
 						  -(firstPanel.
 						    width()
-						    + bar_width),0));
+						    + bar_width),0),
+					ln);
 	}
-	return false;
+	return null;
     }
 
     @Override

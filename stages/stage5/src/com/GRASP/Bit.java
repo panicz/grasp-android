@@ -69,8 +69,9 @@ interface Bit extends Tile {
     int buildString(StringBuilder sb, int indent);
     int buildString(StringBuilder sb);
 
-    boolean insertAt(float x, float y,
-		     DragAround item);
+    Space insertAt(float x, float y,
+		   DragAround item,
+		   Ref<Line> ln);
 
     Bit itemAt(float x, float y);
     //  Bit takeFrom(float x, float y);

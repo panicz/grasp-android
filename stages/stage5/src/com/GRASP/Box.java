@@ -462,12 +462,13 @@ class Box implements Bit {
     }
 
     // used from insertAt method, overrode by Document
-    protected boolean insertLast(Interline last_interline,
-				 Line line,
-				 float x, float y,
-				 float accumulated_height,
-				 DragAround target) {
-	return false;
+    protected Space insertLast(Interline last_interline,
+			       Line line,
+			       float x, float y,
+			       float accumulated_height,
+			       DragAround target,
+			       Ref<Line> ln) {
+	return null;
     }
 
 
@@ -641,8 +642,9 @@ class Box implements Bit {
 
     
     @Override
-    public boolean insertAt(float x, float y,
-			    DragAround target) {
+    public Space insertAt(float x, float y,
+			  DragAround target,
+			  Ref<Line> ln) {
 	
 	float accumulated_height = 0;
 	Interline interline;
@@ -656,9 +658,14 @@ class Box implements Bit {
 	    accumulated_height += interline.height;
 
 	    if (y < accumulated_height) {
-		return (interline
-			.insert_line_with(target, x, y)
-			!= null);
+		Line added = interline
+		    .insert_line_with(target, x, y);
+		if (added == null) {
+		    return null;
+		}
+
+		
+		return added.first_space;
 	    }
 
 	    line = interline.following_line;
@@ -692,6 +699,10 @@ class Box implements Bit {
 				  y - accumulated_height,
 				  (DragAround) target
 				  .inwards(shift));
+		    if(ln != null) {
+			ln.ref = line;
+		    }
+		    
 		    float new_height = line.height();
 		    float increase =
 			new_height - line_height;
@@ -708,7 +719,7 @@ class Box implements Bit {
 					.height);
 		    }
 		    
-		    return result;
+		    return result ? last_space : null;
 		}
 
 		accumulated_width += last_space.width;
@@ -732,7 +743,8 @@ class Box implements Bit {
 		    return bit
 			.insertAt(rx, ry,
 				  (DragAround) target
-				  .inwards(shift));
+				  .inwards(shift),
+				  ln);
 		}
 
 		accumulated_width += w;
@@ -747,6 +759,10 @@ class Box implements Bit {
 			.insertAt(rx, ry,
 				  (DragAround) target
 				  .inwards(shift));
+		    if(ln != null) {
+			ln.ref = line;
+		    }
+
 		    float new_height = line.height();
 		    float increase =
 			new_height - line_height;
@@ -763,7 +779,9 @@ class Box implements Bit {
 					.height);
 		    }
 		    
-		    return result;
+		    return result
+			? bit.following_space()
+			: null;
 		}
 	    }
 	    
@@ -771,7 +789,8 @@ class Box implements Bit {
 	}
 
 	return insertLast(interline, line, x, y,
-			  accumulated_height, target);
+			  accumulated_height,
+			  target, ln);
     }
 
     public Bit shallow_copy() {
@@ -891,7 +910,8 @@ class Box implements Bit {
 		    accumulated_height;
 		box.insertAt(throwAround.x,
 			     accumulated_height-top,
-			     throwAround);
+			     throwAround,
+			     null);
 	    }
 	    
 	    accumulated_height += line_height;
@@ -901,7 +921,7 @@ class Box implements Bit {
 	throwAround.target = box;
 	throwAround.x = left;
 	throwAround.y = top;
-	insertAt(left, top, throwAround);
+	insertAt(left, top, throwAround, null);
 
     }
 

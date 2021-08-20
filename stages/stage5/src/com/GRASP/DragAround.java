@@ -44,7 +44,7 @@ class DragAround implements Tile, Drag {
 	screen.overlay.removeLastOccurrence(this);
 	if (Math.sqrt(vx*vx + vy*vy)
 	    < Split.closing_threshold) {
-	    screen.panel.insertAt(x, y, this);
+	    screen.panel.insertAt(x, y, this, null);
 	}
     }
 

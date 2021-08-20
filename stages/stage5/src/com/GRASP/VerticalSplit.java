@@ -316,21 +316,26 @@ final class VerticalSplit extends Split {
     }
 
     @Override
-    public boolean insertAt(float x, float y, DragAround bit) {
+    public Space insertAt(float x, float y,
+			  DragAround bit,
+			  Ref<Line> ln) {
 	if (y <= firstPanel.height()) {
-	    return firstPanel.insertAt(x, y, bit);
+	    return firstPanel
+		.insertAt(x, y, bit, ln);
 	}
 	else if (y >= firstPanel.height() + bar_width) {
-	    return secondPanel.insertAt(x,
-					y - (firstPanel.height()
-					     + bar_width),
-					(DragAround)
-					translate(bit, 0,
-						  -(firstPanel
-						    .height()
-						    + bar_width)));
+	    return secondPanel
+		.insertAt(x,
+			  y - (firstPanel.height()
+			       + bar_width),
+			  (DragAround)
+			  translate(bit, 0,
+				    -(firstPanel
+				      .height()
+				      + bar_width)),
+			  ln);
 	}
-	return false;
+	return null;
     }
 
     @Override

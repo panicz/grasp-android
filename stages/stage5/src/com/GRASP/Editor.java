@@ -434,12 +434,14 @@ final class Editor extends Panel {
 
     
     @Override
-    public boolean insertAt(float x, float y,
-			    DragAround bit) {
+    public Space insertAt(float x, float y,
+			    DragAround bit,
+			    Ref<Line> ln) {
 	return document.insertAt(transform.unx(x, y),
 				 transform.uny(x, y),
 				 (DragAround)
-				 bit.inwards(transform));
+				 bit.inwards(transform),
+				 ln);
     }
 
     @Override

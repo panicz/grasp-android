@@ -137,11 +137,12 @@ class Document extends Box {
 
     // used in Box's insertAt method
     @Override
-    protected boolean insertLast(Interline last_interline,
-				 Line line,
-				 float x, float y,
-				 float accumulated_height,
-				 DragAround target) {
+    protected Space insertLast(Interline last_interline,
+			       Line line,
+			       float x, float y,
+			       float accumulated_height,
+			       DragAround target,
+			       Ref<Line> ln) {
 	if (line != null) {
 	    if (line.next_interline == null) {
 		line.next_interline = new
@@ -152,9 +153,18 @@ class Document extends Box {
 	// make sure that the dragged box is added
 	// if it was dropped below the last expression
 	// in the document
-	return (last_interline
-		.insert_line_with(target, x, y)
-		!= null);
+	Line added = last_interline
+	    .insert_line_with(target, x, y);
+
+	if (added == null) {
+	    return null;
+	}
+
+	if(ln != null) {
+	    ln.ref = added;
+	}
+	
+	return added.first_space;
     }
 
     private void preserve_distance_between_elements() {
@@ -207,10 +217,11 @@ class Document extends Box {
     }
     
     @Override
-    public boolean insertAt(float x, float y,
-			    DragAround target) {
-	boolean result = super.insertAt(x, y, target);
-	if (result) {
+    public Space insertAt(float x, float y,
+			  DragAround target,
+			  Ref<Line> ln) {
+	Space result = super.insertAt(x, y, target, ln);
+	if (result != null) {
 	    preserve_distance_between_elements();
 	}
 	else {

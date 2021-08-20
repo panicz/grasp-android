@@ -87,7 +87,8 @@ class Resize implements Drag {
 		
 		parent.insertAt(throwAround.x,
 				throwAround.y,
-				throwAround);
+				throwAround,
+				null);
 		
 	    }
 	    accumulated_height += line_height;
