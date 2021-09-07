@@ -1,0 +1,23 @@
+(define (! n)
+ (if (= n 0)
+   1
+  (* n (! (- n 1)))))
+  
+(e.g. (! 5) \u21d2 120)
+
+(e.g.
+  (= (! 5)
+  (* 1 2 3 4 5)))
+
+(define (! n)
+  (let ((result 1))
+  (while (is n > 1)
+  (set! result (* n result))
+  (set! n (- n 1))) 
+    result))
+
+(define (map f l)
+  (match l
+  (( ) ( ))
+  ((cons h t)
+   (cons (f h) (map f t)))))
