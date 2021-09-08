@@ -252,6 +252,8 @@ class TextInput implements Pad {
     }
 
     @Override
-    public void onRemove(Screen screen) {}
+    public void onRemove(Screen screen) {
+	screen.hideKeyboard();
+    }
 
 }

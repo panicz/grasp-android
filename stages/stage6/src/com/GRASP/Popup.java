@@ -228,6 +228,7 @@ class Popup implements Pad, Drag {
     @Override
     public void onRemove(Screen screen) {
 	content.onRemove(screen);
+	screen.hideKeyboard();
     }
     
     @Override

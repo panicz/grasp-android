@@ -364,6 +364,12 @@ class Screen extends View {
 			      .SHOW_IMPLICIT);
 	}
     }
+
+    public void hideKeyboard() {
+	InputMethodManager imm = (InputMethodManager)
+	    activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+	imm.hideSoftInputFromWindow(getWindowToken(), 0);
+    }
     
     @Override
     protected void onDraw(Canvas canvas) {

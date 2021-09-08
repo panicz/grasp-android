@@ -167,7 +167,7 @@ class Document extends Box {
 	return added.first_space;
     }
 
-    private void preserve_distance_between_elements() {
+    public void preserve_distance_between_elements() {
 	for (Interline interline = first_interline;
 	     interline != null;
 	     interline = interline

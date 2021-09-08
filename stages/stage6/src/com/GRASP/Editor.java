@@ -26,6 +26,8 @@ final class Editor extends Panel {
     
     public boolean is_pinned = false;
 
+    Editor evaluation_target = this;
+    
     public Editor(float x, float y, float w, float h,
 		  Document doc, Grab grab) {
 	super(x, y, w, h);
@@ -217,6 +219,7 @@ final class Editor extends Panel {
 				   screen.y[finger],
 				   screen.width,
 				   screen.height));
+	    screen.showKeyboard();
 	}
 	
 	// docelowo bedziemy chcieli umiescic kursor

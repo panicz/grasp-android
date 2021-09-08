@@ -98,6 +98,7 @@ class UnderscoreGesture extends Gesture {
 			       top,
 			       screen.width,
 			       screen.height));
+	screen.showKeyboard();
 	line.ref = null;
     }
 

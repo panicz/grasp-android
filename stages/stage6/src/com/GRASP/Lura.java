@@ -2,13 +2,13 @@ package com.GRASP;
 
 import gnu.expr.Language;
 import kawa.standard.Scheme;
-//import gnu.mapping.Environment;
+import gnu.mapping.Environment;
 import gnu.mapping.InPort;
-
+import gnu.mapping.Values;
+import gnu.lists.Pair;
+import gnu.lists.LList;
 
 class Lura {
-    // extracted from Kawa Shell module
-
     
     public static Language scheme = Scheme.instance;
 
@@ -20,28 +20,90 @@ class Lura {
 	Environment.setCurrent(scheme.getEnvironment());
     }
 
-    static Object eval(Bit expr, Editor editor) {
+    static DragAround insert = new
+	DragAround(null, 16, 0);
+    
+    static Bit addBit(Object object, Bit paradigm, Space preceding) {
+	if (object == null) {
+	    return null;
+	}
+	if (object instanceof Values) {
+	    Values v = (Values) object;
+	    if (v.isEmpty()) {
+		return null;
+	    }
+	    else {
+		Object a [] = v.getValues();
+		Bit first = null;
+		for (int i = a.length-1; i >= 0; --i) {
+		    first = addBit(a[i], paradigm, preceding);
+		}
+		return first;
+	    }
+	}
+
+	Bit result;
+	if (object instanceof Pair) {
+	    Box box = new Box();
+	    
+	    if (false && paradigm instanceof Box) {
+		
+	    }
+	    else {
+		Space tip = box.first_interline
+		    .following_line.first_space;
+		while (object instanceof Pair) {
+		    tip = addBit(((Pair)object).getCar(), null, tip)
+			.following_space();
+		    object = ((Pair)object).getCdr();
+		}
+		if (object != LList.Empty) {
+		    GRASP.log("need to convert dotted tail");
+		}
+	    }
+	    result = box;
+	}
+	else {
+	    // domyslnie zwracamy atoma
+	    result = new Atom(object.toString());
+	}
+	insert.target = result;
+	preceding.insertAt(0, 0, insert);
+	insert.target = null;
+	return result;
+    }
+    
+    static Bit eval(Bit expr, Editor editor) {
 	if (instance != null) {
 	    return instance.evalBit(expr, editor);
 	}
 	return null;
     }
     
-    Object evalBit(Bit expr, Editor editor) {
+    Bit evalBit(Bit expr, Editor editor) {
 	StringBuilder sb = new StringBuilder();
 	expr.buildString(sb);
 	CharSequenceReader in = new CharSequenceReader(sb);
 	InPort inp = new InPort(in);
 	Environment env = Environment.getCurrent();
+	Object result = null;
 	try {
-	    Object result = Scheme.eval(inp, env);
-	    GRASP.log(result.getClass().toString()+": "+result.toString());
+	    result = Scheme.eval(inp, env);
+	    Space preceding_space = editor.evaluation_target == editor
+		? expr.following_space()
+		: expr.following_space();
+	    if (preceding_space == null) {
+		preceding_space = new Space();
+		expr.set_following_space(preceding_space);
+	    }
+	    
+	    addBit(result, expr, preceding_space);
+	    editor.document.preserve_distance_between_elements();
+	    //GRASP.log(result.getClass().toString()+": "+result.toString());
 	}
 	catch(Throwable e) {
 	    GRASP.log(e.toString());
-
-	//
-	
+	}
 	return null;
     }
 }

@@ -75,7 +75,7 @@ class EvalGesture extends Gesture {
 
     @Override
     public void perform(Shape shape, Screen screen) {
-	GRASP.log(target.target.toString());
+	//GRASP.log(target.target.toString());
 	Lura.eval(target.target, editor);
     }    
 
