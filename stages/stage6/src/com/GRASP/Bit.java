@@ -48,15 +48,16 @@ Line = Line :first-space Space
             :next-interline Interline;
 
 */
-interface Bit extends Tile {
+interface Bit extends Tile, Location {
     /* following_space should be a field, but Java interfaces
        won't allow it, and we cannot make it an abstract class
        for other reasons */
     Space following_space();
     void set_following_space(Space s);
 
-    void render(Canvas canvas);
-
+    void render(Canvas canvas, int level,
+		Editor editor);
+    
     float width();
     float height();
 

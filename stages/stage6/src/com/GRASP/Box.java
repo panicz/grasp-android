@@ -140,7 +140,8 @@ class Box implements Bit {
 	return sb.toString();
     }
     
-    public void renderContents(Canvas canvas) {
+    public void renderContents(Canvas canvas, int level,
+			       Editor editor) {
 	float accumulated_height = 0;
 	
 	for (Interline interline = first_interline;
@@ -191,19 +192,26 @@ class Box implements Bit {
 		float w = bit.width();
 		float h = bit.height();
 
-		//canvas.save();
-		canvas.translate(accumulated_width,
-				 accumulated_height);
-
-		//canvas.clipRect(0,0,w,h+100);
-		bit.render(canvas);
-
-		canvas.translate(-accumulated_width,
-				 -accumulated_height);
-
-		//canvas.restore();
+		if (!canvas.quickReject(accumulated_width,
+					accumulated_height,
+					accumulated_width+w,
+					accumulated_height+h,
+					Canvas.EdgeType.BW)) {
 		
-		accumulated_width += w;
+		    //canvas.save();
+		    canvas.translate(accumulated_width,
+				     accumulated_height);
+
+		    //canvas.clipRect(0,0,w,h+100);
+		    bit.render(canvas, level+1, editor);
+
+		    canvas.translate(-accumulated_width,
+				     -accumulated_height);
+
+		    //canvas.restore();
+		
+		    accumulated_width += w;
+		}
 	    }
 	    
 	    accumulated_height += line_height;
@@ -211,9 +219,14 @@ class Box implements Bit {
 
     }
 
-    
     @Override
     public void render(Canvas canvas) {
+	render(canvas, 0, null);
+    }
+    
+    @Override
+    public void render(Canvas canvas, int level,
+		       Editor editor) {
 
 	float w = first_interline.maximum_width();
 	float h = height();
@@ -221,7 +234,7 @@ class Box implements Bit {
 	int previous_color = GRASP.paint.getColor();
 	GRASP.paint.setColor(previous_color + 0x111111);
 	
-	renderContents(canvas);
+	renderContents(canvas, level, editor);
 	
 	Paren.Left.render(canvas, GRASP.paint, h);
 	canvas.translate(w+parenWidth, 0);

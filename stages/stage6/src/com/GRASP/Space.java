@@ -3,7 +3,7 @@ import android.graphics.Paint;
 import java.lang.Math;
 
 
-class Space implements Highlightable {
+class Space implements Location {
     public float width;
     public Bit following_bit = null;
 
@@ -141,25 +141,5 @@ class Space implements Highlightable {
 
 	return removed;
     }
-
-    private float highlighted = Float.NaN;
-    
-    @Override
-    public boolean is_highlighted() {
-	return !Float.isNaN(highlighted);
-    }
-
-    @Override
-    public void highlight(float x, float y) {
-	highlighted = x;
-    }
-
-    @Override
-    public void unhighlight() {
-	highlighted = Float.NaN;
-    }
-
-
-
     
 }

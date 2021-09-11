@@ -104,8 +104,9 @@ class Document extends Box {
 
     
     @Override
-    public void render(Canvas canvas) {
-	renderContents(canvas);
+    public void render(Canvas canvas, int level,
+		       Editor editor) {
+	renderContents(canvas, level, editor);
     }
 
     @Override

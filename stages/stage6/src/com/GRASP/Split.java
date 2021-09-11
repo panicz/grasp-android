@@ -71,6 +71,12 @@ abstract class Split extends Panel implements Drag {
     public abstract void resizeBy(float dx, float dy);
 
     @Override
+    public void onDelete() {
+	firstPanel.onDelete();
+	secondPanel.onDelete();
+    }
+    
+    @Override
     public void move(Screen screen,
 		     float x, float y,
 		     float dx, float dy) {

@@ -234,6 +234,7 @@ final class VerticalSplit extends Split {
 		|| secondPanel.height() <= bar_width) {
 		firstPanel.setHeight(height());
 		firstPanel.setTop(top());
+		secondPanel.onDelete();
 		return firstPanel;
 	    }
 	
@@ -241,6 +242,7 @@ final class VerticalSplit extends Split {
 		|| firstPanel.height() <= bar_width) {
 		secondPanel.setHeight(height());
 		secondPanel.setTop(top());
+		firstPanel.onDelete();
 		return secondPanel;
 	    }
 	}

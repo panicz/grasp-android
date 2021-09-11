@@ -2,7 +2,7 @@ package com.GRASP;
 
 import java.lang.Math;
 
-class Interline implements Highlightable {
+class Interline {
     public float height;
     /*@Nullable*/ public Line following_line = null;
     
@@ -88,23 +88,6 @@ class Interline implements Highlightable {
 	    remove_following_line();
 	}
 	return following_line;
-    }
-
-    private float highlighted = Float.NaN;
-    
-    @Override
-    public boolean is_highlighted() {
-	return !Float.isNaN(highlighted);
-    }
-
-    @Override
-    public void highlight(float x, float y) {
-	highlighted = x;
-    }
-
-    @Override
-    public void unhighlight() {
-	highlighted = Float.NaN;
     }
 
     public Interline deep_copy() {

@@ -129,6 +129,8 @@ abstract class Panel implements Pad, Parcelable {
 	return this;
     }
 
+    public abstract void onDelete();
+    
     public Panel at(float x, float y) {
 	return this;
     }

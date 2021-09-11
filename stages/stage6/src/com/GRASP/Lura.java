@@ -24,7 +24,7 @@ class Lura {
 	DragAround(null, 16, 0);
     
     static Bit addBit(Object object, Bit paradigm, Space preceding) {
-	if (object == null) {
+	if (object == null || object instanceof java.lang.Package) {
 	    return null;
 	}
 	if (object instanceof Values) {
@@ -46,25 +46,24 @@ class Lura {
 	if (object instanceof Pair) {
 	    Box box = new Box();
 	    
-	    if (false && paradigm instanceof Box) {
-		
+	    Space tip = box.first_interline
+		.following_line.first_space;
+	    while (object instanceof Pair) {
+		tip = addBit(((Pair)object).getCar(), null, tip)
+		    .following_space();
+		object = ((Pair)object).getCdr();
 	    }
-	    else {
-		Space tip = box.first_interline
-		    .following_line.first_space;
-		while (object instanceof Pair) {
-		    tip = addBit(((Pair)object).getCar(), null, tip)
-			.following_space();
-		    object = ((Pair)object).getCdr();
-		}
-		if (object != LList.Empty) {
-		    GRASP.log("need to convert dotted tail");
-		}
+	    if (object != LList.Empty) {
+		GRASP.log("need to convert dotted tail");
 	    }
 	    result = box;
 	}
+	else if (object == LList.Empty) {
+	    result = new Box();
+	}
 	else {
 	    // domyslnie zwracamy atoma
+	    GRASP.log(object.getClass().toString());
 	    result = new Atom(object.toString());
 	}
 	insert.target = result;

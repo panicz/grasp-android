@@ -221,6 +221,7 @@ final class HorizontalSplit extends Split {
 		|| secondPanel.width() <= bar_width) {
 		firstPanel.setWidth(width());
 		firstPanel.setLeft(left());
+		secondPanel.onDelete();
 		return firstPanel;
 	    }
 	
@@ -228,6 +229,7 @@ final class HorizontalSplit extends Split {
 		|| firstPanel.width() <= bar_width) {
 		secondPanel.setWidth(width());
 		secondPanel.setLeft(left());
+		firstPanel.onDelete();
 		return secondPanel;
 	    }
 	}

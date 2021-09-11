@@ -27,6 +27,8 @@ final class Editor extends Panel {
     public boolean is_pinned = false;
 
     Editor evaluation_target = this;
+
+    Selection selection = new Selection();
     
     public Editor(float x, float y, float w, float h,
 		  Document doc, Grab grab) {
@@ -34,6 +36,11 @@ final class Editor extends Panel {
 	document = doc;
 	transform = grab;
 	transition = new Transition(this);
+    }
+
+    @Override
+    public void onDelete() {
+
     }
     
     @Override
@@ -77,7 +84,7 @@ final class Editor extends Panel {
     public void render(Canvas canvas) {
 	
 	transform.canvas(canvas);
-	document.render(canvas);
+	document.render(canvas, 0, this);
 	transform.uncanvas(canvas);
 
 	GRASP.paint.setTypeface(GRASP.logs_font);

@@ -25,9 +25,15 @@ class Atom implements Bit {
     public void set_following_space(Space s) {
 	_following_space = s;
     }
-    
+
     @Override
     public void render(Canvas canvas) {
+	render(canvas, 0, null);
+    }
+    
+    @Override
+    public void render(Canvas canvas, int level,
+		       Editor editor) {
 	GRASP.paint.setTypeface(GRASP.symbols_font);
 	GRASP.paint.setTextSize(text_size);
 
