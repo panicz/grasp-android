@@ -192,11 +192,12 @@ class Box implements Bit {
 		float w = bit.width();
 		float h = bit.height();
 
-		if (!canvas.quickReject(accumulated_width,
-					accumulated_height,
-					accumulated_width+w,
-					accumulated_height+h,
-					Canvas.EdgeType.BW)) {
+		if (true
+		    || !canvas.quickReject(accumulated_width,
+					   accumulated_height,
+					   accumulated_width+w,
+					   accumulated_height+h,
+					   Canvas.EdgeType.BW)) {
 		
 		    //canvas.save();
 		    canvas.translate(accumulated_width,

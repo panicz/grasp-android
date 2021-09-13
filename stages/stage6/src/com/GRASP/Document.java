@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.Calendar;
 
 
-class Document extends Box {
+class Document extends Box implements DocumentOperations {
     public File file = null;
     public static List<Document> openedDocuments =
 	new ArrayList<Document>();
