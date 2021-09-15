@@ -1,6 +1,6 @@
 (set! %load-path (cons "/data/data/com.termux/files/home/.guile.d" %load-path))
 
-(use-modules (grand scheme) (grand define-keywords) (rnrs base))
+(use-modules (grand scheme))
 
 (define head (make-procedure-with-setter car set-car!))
 
@@ -24,13 +24,10 @@
 (define-syntax (update! variable value)
   (when (isnt variable equal? value)
     (set! variable value)))
-    
 
 (define-property (dotted? cell)
   (not (or (null? (tail cell))
 	   (pair? (tail cell)))))
-
-(procedure-properties dotted?)
 
 (define-property (pre-head-space cell) "")
 
@@ -49,7 +46,6 @@
 (define-property (null-tail-space cell) "")
 
 (define (show-pair p)
-    (display (pre-head-space p))
     (cond ((null? (head p))
 	   (write-char #\()
 	   (display (null-head-space p))
@@ -71,13 +67,14 @@
 	  ((null? (tail p))
 	   (write-char #\)))
 	  (else
-	   (assert (pair? (tail p)))
+	   ;;(assert (pair? (tail p)))
 	   (show-pair (tail p)))))
 
 (define (show p)
   (cond
    ((pair? p)
     (write-char #\()
+    (display (pre-head-space p))
     (show-pair p))
    (else
     (write p))))
@@ -93,10 +90,6 @@
    (with-output-to-string (lambda () (show object))))
  ===> "( 1 . (2 . (3 . ( ))) )")
 
-
-;; jak ma dzialac ten nasz algorytm?
-;; chodzi o to, zeby wywolywac 'cons' tylko tyle razy, ile trzeba.
-
 (define (separator? c)
   (or (eof-object? c)
       (char-whitespace? c)
@@ -109,15 +102,6 @@
 	  (else
 	   (set! (tail last-tail) (cons c '()))
 	   (read-atom-chars-into (tail last-tail))))))
-
-;; proces wczytywania listy:
-;; 1. wczytujemy spacje
-;; 2a. jezeli natrafilismy na eof albo nawias zamykajacy, to
-;;     zwracamy wczytane elementy oraz ostatnia spacje
-;; 2b. jezeli natrafilismy na nawias otwierajacy, to wczytujemy rekurencyjnie
-;;      element i spacje za tym elementem
-;;     - jezeli w wyniku dostajemy liste pusta, to jako null-head-space
-;;     'biezacej komorki' 
 
 (define (read-spaces)
   (define (read-spaces-into result)
@@ -137,43 +121,51 @@
 
 (define (read-list)
   (let ((result '())
-	(growth-cone '()))
-    
-    (define (add-element! element preceding-space)
+	(growth-cone '())
+	(initial-space (read-spaces)))
+
+    (define (add-element! element following-space)
       (cond ((null? result)
 	     (set! result (cons element '()))
-	     (set! growth-cone result))
+	     (set! growth-cone result)
+	     (update! (pre-head-space growth-cone)
+		      initial-space))
 	    (else
 	     (set! (tail growth-cone) (cons element '()))
 	     (set! growth-cone (tail growth-cone))))
-      (update! (pre-head-space growth-cone)
-	       preceding-space))
-
+      (update! (post-head-space growth-cone)
+	       following-space))
+    
     (define (read-next)
-      (let* ((spaces (read-spaces))
-	     (c (read-char)))
+      (let* ((c (read-char)))
     
 	(cond ((or (eof-object? c) (eq? c #\)))
-	       (unless (null? result)
-		 (update! (post-head-space result) spaces))
-	       (values result spaces))
+	       (values result initial-space))
 
-	      #|
 	      ((eq? c #\.)
-	       (update! (post-head-space growth-cone) spaces)
 	       (let* ((spaces (read-spaces))
 		      (c (read-char)))
 		 (update! (pre-tail-space growth-cone)
 			  spaces)
 		 (if (eq? c #\()
+		     (let ((result* spaces* (read-list)))
+		       (when (null? result*)
+			 (update! (null-tail-space growth-cone)
+				  spaces*))
+		       (set! (tail growth-cone) result*))
 		     (let ((output (cons c '())))
 		       (read-atom-chars-into output)
-	       )
-|#
+		       (set! (tail growth-cone)
+			     (list->symbol output))))
+		 (update! (dotted? growth-cone) #t)
+		 (set! initial-space (read-spaces))
+		 (update! (post-tail-space growth-cone)
+			  initial-space)
+		 (read-next)))
 
 	      ((eq? c #\()
 	       (let ((result* spaces* (read-list)))
-		 (add-element! result* spaces)
+		 (add-element! result* (read-spaces))
 		 (if (null? result*)
 		     (update! (null-head-space growth-cone)
 			      spaces*))
@@ -182,16 +174,19 @@
 	      (else
 	       (let ((output (cons c '())))
 		 (read-atom-chars-into output)
-		 (add-element! (list->symbol output) spaces)
+		 (add-element! (list->symbol output)
+			       (read-spaces))
 		 (read-next))))))
 
     (read-next)))
 
-(show
-(with-input-from-string "\
-x
-( a
-b (
-) )
-" read-list)
-)
+(e.g.
+ (let* ((input "( (  ) a  (   b  . (  
+
+  )  ) ) ( y g .   z ) ")
+	(parsed (with-input-from-string input read-list))
+	(reconstructed (with-output-to-string
+			 (lambda ()
+			   (show parsed)))))
+   (string=? (string-append "("input")")
+	     reconstructed))
