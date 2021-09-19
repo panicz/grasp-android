@@ -2,7 +2,9 @@
  (kawa
   (import (srfi 11) (srfi 17))
   (import (class java.util (WeakHashMap make-weak-key-hash-table)))
-
+  (import (class gnu.lists Pair))
+  (import (class java.lang System))
+  
   (define-syntax define-syntax-rule 
     (syntax-rules ()
       ((define-syntax-rule (name . args) substitution)
@@ -10,6 +12,14 @@
 	 (syntax-rules ()
 	   ((name . args)
 	    substitution))))))
+
+  ;; we override Pair with Object's default equality and hash functions
+  
+  (define-simple-class cons (Pair)
+    ((*init* a d) (invoke-special Pair (this) '*init* a d))
+    ((equals object) ::boolean (eq? object this))
+    ((hash-code) ::int (System:identity-hash-code this)))
+  
   )
  (guile
   (use-modules (srfi srfi-11))
@@ -183,7 +193,6 @@
 
 (define tail cdr)
 
-
 (cond-expand
  (kawa
   
@@ -257,6 +266,29 @@
 
 (define-property (null-tail-space cell) "")
 
+(define cell-display-properties
+  (list
+   dotted?
+   pre-head-space
+   post-head-space
+   pre-tail-space
+   post-tail-space
+   null-head-space
+   null-tail-space))
+
+(define (tree-map/preserve properties f l)
+  (define (preserve-properties original cell)
+    (for-each (lambda (property)
+		(update! (property cell)
+			 (property original)))
+	      properties)
+    cell)
+  (if (pair? l)
+      (preserve-properties
+       l (cons (tree-map/preserve properties f (head l))
+	       (tree-map/preserve properties f (tail l))))
+      (f l)))
+
 (define (show-pair p)
     (cond ((null? (head p))
 	   (write-char #\()
@@ -299,6 +331,7 @@
   (set! (dotted? (tail (tail object))) #t)
   (set! (null-tail-space (tail (tail object))) " ")
   (show object)
+  (newline)
   (newline))
 
 (define (separator? c)
@@ -385,7 +418,21 @@
 
     (read-next)))
 
-(let ((input "( (  ) (y g)  (   b  . (   )  ) ) ( ( y   g  ) .   z ) "))
+(let ((input "( (  ) (y g)  (   b  . (
+
+   )  ) ) ( ( y   g  ) .   z ) "))
   (let-values (((parsed spc) (with-input-from-string input read-list)))
     (show parsed)
+    (newline)
+    (newline)
+    (show (tree-map/preserve
+	   cell-display-properties
+	   (let ((counter 0))
+	     (lambda (arg)
+	       (cond ((null? arg) '())
+		     (else
+		      (set! counter (+ counter 1))
+		      counter))))
+	   parsed))
+    (newline)
     (newline)))

@@ -45,6 +45,30 @@
 
 (define-property (null-tail-space cell) "")
 
+(define cell-display-properties
+  (list
+   dotted?
+   pre-head-space
+   post-head-space
+   pre-tail-space
+   post-tail-space
+   null-head-space
+   null-tail-space))
+
+(define ((tree-map/preserve properties f) l)
+  (define (preserve-properties original cell)
+    (for-each (lambda (property)
+		(update! (property cell)
+			 (property original)))
+	      properties)
+    cell)
+  
+  (let ((recur (tree-map/preserve properties f)))
+    (if (pair? l)
+	(preserve-properties
+	 l (cons (recur (head l)) (recur (tail l))))
+	(f l))))
+	
 (define (show-pair p)
     (cond ((null? (head p))
 	   (write-char #\()
@@ -189,4 +213,24 @@
 			 (lambda ()
 			   (show parsed)))))
    (string=? (string-append "("input")")
-	     reconstructed))
+	     reconstructed)))
+
+
+(e.g.
+ (let* ((input "( (  ) a  (   b  . (  
+
+  )  ) ) ( y g .   z ) ")
+	(parsed (with-input-from-string input read-list)))
+   (with-output-to-string
+     (lambda ()
+       (show ((tree-map/preserve
+	       cell-display-properties
+	       (let ((counter 0))
+		 (lambda (arg)
+		   (cond ((null? arg) '())
+			 (else
+			  (set! counter (+ counter 1))
+			  counter))))) parsed)))))
+ ===> "( (  ) 1  (   2  . (  
+
+  )  ) ) ( 3 4 .   5 ) ")
