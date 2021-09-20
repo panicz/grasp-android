@@ -7,6 +7,8 @@ import gnu.mapping.InPort;
 import gnu.mapping.Values;
 import gnu.lists.Pair;
 import gnu.lists.LList;
+import java.lang.Exception;
+
 
 class Lura {
     
@@ -18,6 +20,14 @@ class Lura {
 	if (scheme == null) {scheme = new Scheme();}
 	Scheme.registerEnvironment();
 	Environment.setCurrent(scheme.getEnvironment());
+	try {
+	    InPort in = new InPort(GRASP.instance.getAssets()
+				   .open("init.scm"));
+	    Environment env = Environment.getCurrent();
+	    Scheme.eval(in, env);
+	} catch(Exception e) {
+	    GRASP.log(e.toString());
+	}
     }
 
     static DragAround insert = new
