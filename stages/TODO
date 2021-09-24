@@ -1,4 +1,99 @@
-6805
+24.09.2021 jak wydostac sie z tej matni!
+
+na razie robilem rozeznanie w obszarze dzialania kompilatora Kawa,
+probujac (dosc bezskutecznie) budowac projekty z repozytoriow
+KawaDroid i android-kawa.
+
+Kiedy to sie uda, chcielibysmy moc sobie wewnetrznie kompilowac
+np. plik inicjalizacyjny do katalogu cache, i pomalu probowac
+odchodzic od reprezenracji opartej na interlinii.
+
+
+12.09.2021 na razie idea jest taka, ze chcemy zmienic reprezentacje
+z 'pudelek' na po prostu komorki (tzn gnu.lists.Pair)
+
+11.09.2021 chcielibyśmy mieć jakiś protokół, za pośrednictwem którego
+dokonywalibyśmy działań na dokumencie. Na razie mamy takie działania:
+- przesunięcie elementu z danej lokacji do innej lokacji
+(w obrębie tego samego dokumentu) - zolty
+
+(move-node! #;in document #;from source #;to destination)
+
+- usunięcie elementu z danej lokacji - czerwony
+
+(delete-node! #;in document #;containing value #;at location)
+
+- wstawienie elementu dondanej lokacji - zielony
+
+(insert-node! #;in document #;containing value #;at location)
+
+- edycja atomu - zolty
+
+(replace-atom! #;in document #;at location #;containing old-value
+ #;with replacement)
+
+- zmiana rozmiaru pudelka - szary
+
+(resize-box! #;in document #;at location #;from initial-size
+              #;to final-size)
+
+
+jeszcze mamy splice'owanie i tworzenie pudelka
+
+
+Dla każdej operacji chcemy też mieć odwrorność tej operacji
+
+Inne grupy operacji:
+- operacje ma panelach (splitting and merging)
+- operacje na edytorze (otwieranie, zapisywanie plikow)
+
+
+9.09.2021 Kawa osadzona! naaet jako tako dziala. Teraz
+mamy do zrobienia w kolejnym rzucie:
+- edycje z klawiatury
+- sledzenie historii
+- pelna skladnie lispa (pary kropkowane, stringi, komentarze)
+
+tym, co gdzies nieopodal przebakuje, jest "teoria kursorow"
+oraz model operacji na dokumencie
+
+przede wszystkim zakladamy, ze kursor jest skojarzony
+z edytorem, a nie z dokumentem - zebna tym samym dokumencie
+mozemy miec wiecej niz jeden kursor. wynika stad, ze
+edycja dokumentu w jednym edytorze moze doprowadzic do
+zmiany albo inwalidacji kursora w drugim dokumencie.
+
+stad tez mamy do wyboru dwie strategie zachowania:
+1 edytowany dokument obserwuje wszystkie edytory i ich
+kursory
+2 kursor posiada dodatkowe informacje o wyrazeniach, na ktore
+wskazuje
+
+wydaje sie, ze podejscie 2 jest rozsadniejsze
+
+
+
+4.09.2021 wnioski z badan terenowych:
+- jezeli klasy wspolzaleza od siebie, to nie uda sie
+ich przepisac 'nieatomowo' na Kawe
+- najlepiej byloby  napisac calosc w Scheme
+- sprobujemy jednak osadzic kawe (starsza wersje)
+
+Bedzie to wymagalo:
+- inicjalizacji interpretera
+- konwersji Box i Atom do Kawy
+- modul bedzie sie nazywal 'Lura'
+
+
+2.09.2021 po ICFP, dalsze kroki
+- modyfikacja systemu buildow do osobnej kompilacji
+plikow .class
+- zastapienie jakiegos javowego modulu modulem
+napisanym w Kawa (otwarcie drogi do przeportowania)
+- ewaluacja wyrazen lispowych
+- sledzenie historii
+- edycja z klawiatury
+
 
 8.07.2021 plan kolejnych zmian:
 - nie ladujemy predefiniowanego dokumentu, tylko brudnopis
@@ -10,7 +105,7 @@
   - umozliwiamy zapis dokumentow
 
 
-7.07.2021 implementacja onDragOver i onDragOut:
+7.07.2021 implementacaaja onDragOver i onDragOut:
 - Popup powinien tak dzialac, ze jego metoda move
 sprawdza, czy poprzednio jego target byl hovered,
 i czy nadal jest hovered, i na tej podstawie
