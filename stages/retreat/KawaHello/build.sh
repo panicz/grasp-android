@@ -24,11 +24,11 @@ do
        	SCMFILES="$SCMFILES $SCMFILE"
 done
 
-java -cp $KAWA_JAR:$ANDROID_JAR kawa.repl -d obj -P $PKGNAME \
-     -T kawa.android.hello -C $SCMFILES
+java -cp $KAWA_JAR:$ANDROID_JAR kawa.repl -d obj -P $PKGNAME.  -T $PKGNAME.hello -C $SCMFILES
+
 
 dx --dex --min-sdk-version=24 \
-   --output=bin/classes.dex obj $KAWA_JAR 
+   --output=bin/classes.dex obj #$KAWA_JAR 
 
 aapt package -f \
        	-M AndroidManifest.xml \
@@ -40,9 +40,14 @@ cd bin
 
 aapt  add -f "$PKGNAME.apk" classes.dex
 
-apksigner sign --min-sdk-version=24 --cert "../opt/key/certificate.pem" --key "../opt/key/key.pk8" "$PKGNAME.apk"
+zipalign -p 4 "$PKGNAME.apk" "aligned-$PKGNAME.apk"
+mv "aligned-$PKGNAME.apk" "$PKGNAME.apk"
 
-apksigner verify --verbose "$PKGNAME.apk"
+if [ ! -s ~/pland.keystore ]; then
+    keytool -genkey -v -keystore ~/pland.keystore -alias pland -keyalg RSA -keysize 2048 -validity 10000
+fi
+    
+jarsigner -storepass quack01 -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ~/pland.keystore "$PKGNAME.apk" pland
 
 mv "$PKGNAME.apk" ..
 
@@ -55,4 +60,4 @@ then
     cp "$PKGNAME.apk" "$HOME/storage/downloads/GRASP/"
 fi
 
-rm -rf bin/ obj/ gen/
+#rm -rf bin/ obj/ gen/
