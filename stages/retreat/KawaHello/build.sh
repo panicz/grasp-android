@@ -24,7 +24,8 @@ do
        	SCMFILES="$SCMFILES $SCMFILE"
 done
 
-java -cp $KAWA_JAR:$ANDROID_JAR kawa.repl -d obj -P $PKGNAME -C $SCMFILES
+java -cp $KAWA_JAR:$ANDROID_JAR kawa.repl -d obj -P $PKGNAME \
+     -T kawa.android.hello -C $SCMFILES
 
 dx --dex --min-sdk-version=24 \
    --output=bin/classes.dex obj $KAWA_JAR 
