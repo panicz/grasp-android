@@ -27,6 +27,12 @@ import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.PreserveAspectRatio;
 import java.lang.Exception;
 
+import android.hardware.SensorListener;
+import android.hardware.SensorManager;
+import android.content.Context;
+import java.lang.UnsupportedOperationException;
+import android.widget.Toast;
+
 //import java.lang.System;
 //import java.util.Arrays;
 
@@ -35,7 +41,8 @@ public class GRASP
     extends Activity
     implements GestureDetector.OnGestureListener,
 	       GestureDetector.OnDoubleTapListener,
-	       OnKeyListener
+	       OnKeyListener,
+	       SensorListener
 	    //   implements OnTouchListener
 {
     enum ScreenOrientation {
@@ -57,10 +64,13 @@ public class GRASP
     GestureDetector gestureDetector;
     public static Logger _log = null;
     public Screen screen;
-    private static Screen last_known_screen_instance = null;
+    private static Screen last_known_screen_instance =
+	null;
     public static Paint paint = null;
 
     public static GRASP instance;
+
+    SensorManager sensorManager;
     
     public static void log(String s) {
 	_log.log(s);
@@ -72,6 +82,78 @@ public class GRASP
 	    .actionToString(e.getActionMasked());
     }
 
+    long lastUpdate;
+    float last_x = 0, last_y = 0, last_z = 0;
+    float vx, vy, vz;
+    float last_vx, last_vy, last_vz;
+    long vx_time, vy_time, vz_time;
+    
+    
+    @Override
+    public void onAccuracyChanged(int sensor,
+				  int accuracy) { }
+    
+    @Override
+    public void onSensorChanged(int sensor,
+				float[] values) {
+	if (sensor == (SensorManager
+		       .SENSOR_ACCELEROMETER)) {
+	    long curTime = System.currentTimeMillis();
+
+	    long diffTime = (curTime - lastUpdate);
+	    if (diffTime == 0) {
+		return;
+	    }
+  
+	    vx = (values[SensorManager.DATA_X]
+		  - last_x)/diffTime;
+	    vy = (values[SensorManager.DATA_Y]
+		  - last_y)/diffTime;
+	    vz = (values[SensorManager.DATA_Z]
+		  - last_z)/diffTime;
+
+	    if (vx <= -0.1 || 0.1 <= vx) {
+		if ((curTime - vx_time) < 1000
+		    && S.ign(last_vx) != S.ign(vx)
+		    && screen.onShakeSideways(vx)) {
+		    screen.invalidate();
+		}
+		last_vx = vx;
+		vx_time = curTime;
+	    }
+
+	    if (vy <= -0.1 || 0.1 <= vy) {
+		if ((curTime - vy_time) < 1000
+		    && S.ign(last_vy) != S.ign(vy)
+		    && screen.onShakeUpAndDown(vy)) {
+		    screen.invalidate();
+		}
+		last_vy = vy;
+		vy_time = curTime;
+	    }
+ 
+	    if (vz <= -0.1 || 0.1 <= vz) {
+		if ((curTime - vz_time) < 1000
+		    && S.ign(last_vz) != S.ign(vz)
+		    && screen
+		    .onShakeBackAndForth(vz,
+					 (curTime
+					  - vz_time))) {
+		    screen.invalidate();
+		}
+		last_vz = vz;
+		vz_time = curTime;
+	    }
+
+	    last_x = values[SensorManager.DATA_X];
+	    last_y = values[SensorManager.DATA_Y];
+	    last_z = values[SensorManager.DATA_Z];
+
+	    lastUpdate = curTime;
+	}
+
+    }
+    
     @Override
     public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
@@ -122,7 +204,8 @@ public class GRASP
 	    _log = new Logger(120);
 	}
 
-	PreserveAspectRatio preserve = PreserveAspectRatio.START;
+	PreserveAspectRatio preserve =
+	    PreserveAspectRatio.START;
 	
 	if (empty_file_icon == null) {
 	    try {
@@ -177,7 +260,16 @@ public class GRASP
 	gestureDetector = new GestureDetector(this, this);
         gestureDetector.setOnDoubleTapListener(this);
 
+	sensorManager = (SensorManager)
+	    getSystemService(SENSOR_SERVICE);
 
+	sensorManager
+	    .registerListener(this,
+			      SensorManager
+			      .SENSOR_ACCELEROMETER,
+			      SensorManager
+			      .SENSOR_DELAY_GAME);
+	
 	DisplayMetrics metrics =
 	    getResources()
 	    .getDisplayMetrics();
@@ -300,10 +392,12 @@ public class GRASP
                                          grantResults);
         if (grantResults.length > 0) {
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-		permissionGranted.onPermissionGranted(requestCode,
-						      permissions,
-						      grantResults);
-		permissionGranted = NoActionOnPermissionGranted.instance;
+		permissionGranted
+		    .onPermissionGranted(requestCode,
+					 permissions,
+					 grantResults);
+		permissionGranted =
+		    NoActionOnPermissionGranted.instance;
 	    }
 	}
     }

@@ -58,7 +58,6 @@ class UnderscoreGesture extends Gesture {
 	if(screen.panel.at(p4) != target) {
 	    return false;
 	}
-
 	
 	if (!(p2.y > top
 	      && p3.x > left

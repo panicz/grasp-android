@@ -140,6 +140,66 @@ class Screen extends View {
 	double_generated = false;
         return true;
     }
+
+    
+    int back_and_forth_shakes = 0;
+    public boolean onShakeBackAndForth(float velocity,
+				       long ms) {
+	if (ms > 1000) {
+	    back_and_forth_shakes = 0;
+	    return false;
+	}
+	else if (++back_and_forth_shakes >= 6) {
+	    back_and_forth_shakes = 0;
+	    Toast
+		.makeText(activity.
+			  getApplicationContext(),
+			  "shake",
+			  Toast.LENGTH_SHORT)
+		.show();
+	    Iterator<Tile> it =  overlay.iterator();
+
+	    while(it.hasNext()) {
+		Tile tile = it.next();
+		if (tile instanceof DragAround) {
+		    Bit bit = ((DragAround)tile).target;
+		    if (bit instanceof Box) {
+			((Box)bit).normalize();
+		    }
+		}
+	    }
+
+	    return true;
+	}
+	return false;
+    }
+    
+    public boolean onShakeUpAndDown(float velocity) {
+	/*
+	if (velocity > 0) {
+	    GRASP.log("up");
+	}
+	else {
+	    GRASP.log("down");
+	}
+	return true;
+	*/
+	return false;
+    }
+    
+    public boolean onShakeSideways(float velocity) {
+	/*
+	if (velocity > 0) {
+	    GRASP.log("left");
+	}
+	else {
+	    GRASP.log("right");
+	}
+	return true;
+	*/
+	return false;
+    }
+
     
     public boolean onDown(MotionEvent event) {
 	
