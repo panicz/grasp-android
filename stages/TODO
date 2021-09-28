@@ -1,3 +1,4 @@
+
 24.09.2021 jak wydostac sie z tej matni!
 
 na razie robilem rozeznanie w obszarze dzialania kompilatora Kawa,
@@ -93,6 +94,53 @@ napisanym w Kawa (otwarcie drogi do przeportowania)
 - ewaluacja wyrazen lispowych
 - sledzenie historii
 - edycja z klawiatury
+
+28.08.2021
+- modyfikacja systemu buildow, tzn. zamiast
+mkapk bedziemy uzywac make, sprobujemy
+budowac odrebne pliki osobno
+
+
+23.08.2021 pomysly na najblizsze sprinty:
+- uzyc kawy zamiast ecj
+- edycja z klawiatury
+- logowanie historii operacji
+
+
+
+18.08.2021 na najblizsze trzy dni:
+- gest podkreslania
+  - wykrywanie
+  - dodawanie atomow z pop-upem
+- kasowanie atomow przy zamknieciu atom editora
+
+opcjonalnie:
+- zerowanie kamery pustego dokumentu i powstrzymanie
+przed jej rotacja
+- wyswietlanie na szaro obszaru poza granicami dokumenu
+
+przed warsztatami:
+- plik z licencja
+- dokumentacja
+
+
+17.08.2021 trzeba opracowac mechanizmy do tego,
+zeby
+- wcisniecie enter zamykalo pop-upa
+- przy zamknieciu pop-upa byla wykonywana akcja
+- ta akcja bylo kasowanie pustych atomow
+
+16.08.2021 dwie rzeczy do prezentacji:
+- klikniecie na atom otwiera pop-up z mozliwoscia
+edycji zawartosci atomu
+- gest underscore tworzy nowy atom i otwiera taki
+pop-up
+
+
+12.08.2021 co jeszcze trzeba zrobic przed prezentacja na ICFP:
+- "wyciaganie dywanu"
+- gest podkreslenia (do tworzenia atomu)
+- zmiana rozmiaru w lewym gornym rogu
 
 
 8.07.2021 plan kolejnych zmian:

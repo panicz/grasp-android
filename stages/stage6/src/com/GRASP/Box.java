@@ -245,6 +245,42 @@ class Box implements Bit {
 	canvas.translate(-(w+parenWidth), 0);
 	GRASP.paint.setColor(previous_color);
     }
+    
+    public void normalize() {
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line
+		 .next_interline) {
+
+	    interline.height = 0;
+	    
+	    Line line = interline.remove_empty_lines();
+	    
+	    if(line == null) {
+		break;
+	    }
+	    
+	    for (Space preceding_space = line.first_space;
+		 preceding_space != null;
+		 preceding_space =
+		     preceding_space
+		     .following_bit
+		     .following_space()) {
+
+		preceding_space.width = 16;
+		
+		Bit bit = preceding_space.following_bit;
+	       
+		if (bit == null) {
+		    break;
+		}
+
+		if (bit instanceof Box) {
+		    ((Box) bit).normalize();
+		}
+	    }	    
+	}
+    }
 
     
     @Override

@@ -12,7 +12,9 @@ can be moved from one view to another);
 
 stage 4: lisp files can be imported and exported
 
-stage 5: shapes can be drawn and associated with names
+stage 5: atom editing and basic gestutes:
+- box
+- underscore
 
   box -> list
 
@@ -38,6 +40,7 @@ stage 11: expressions can be pinned (context menu)  and maximized
 actions in its own way.
 
 
+
 misc:
 
   vertical bar -> comment / dotted tail
@@ -45,4 +48,3 @@ misc:
   Q - magnifying glass
 
   straight line between two editors - start targets end
-

@@ -5,47 +5,19 @@ import android.graphics.Canvas;
 /*
 
 
-Bit = Atom :rightward (Space|null) :inward String
-    | Box :rightward (Space|null) :inward Interline;
-Space = Space :width float :rightward (Bit|null);
+Bit = Atom :following_space (Space|null) 
+           :text String
+    | Box :following_space (Space|null) 
+          :first_interline Interline;
 
-Interline = Interline :height float :downward (Line|null);
-Line = Line :rightward (Space|null) :downward (Interline|null);
+Space = Space :width float 
+              :following_bit (Bit|null);
 
-SExp = SAtom :preceding_whitespace String :text String
-    | SList :preceding_whitespace String
-            :elements [SExp ...]
-            :ultimate_whitespace String
-    | SDotted :preceding_whitespace String
-              :elements [SExp ...]
-              :whitespace_before_dots String
-              :tail SExp
-              :ultimate_whitespace String;
+Interline = Interline :height float 
+                      :following_line (Line|null);
 
-bit : SExp -> Bit
-bit (SAtom :preceding_whitespace ws :text s) = Atom :inward s
-bit (SList :preceding_whitespace ws
-           :elements xs
-           :ultimate_whitespace us) =
-
-ogolnie jest tak, ze jak konwertujemy SList do Box,
-to dla kazdego elementu mamy tak, ze:
-- jezeli preceding_whitespace nie zawiera znaku nowej linii,
-to przechodzi nam w Space
-- w przeciwnym razie, tzn. gdy znak nowej linii sie pojawia sie,
-to wszystko przed nim przechodzi nam w 'czopujacy' Space,
-ale kolejny element jest juz dodany do nowej linii
-(a zeby stworzyc nowa linie, trzeba tez dodac interlinie)
-
-jakie operacje wydaja sie naturalne?
-
-Bit = Atom :following-space Space :contents String
-    | Box :following-space Space :first-interline Interline;
-Space = Space :width float :following-bit (Bit|null);
-
-Interline = Interline :height float :folowing-line (Line|null);
-Line = Line :first-space Space 
-            :next-interline Interline;
+Line = Line :first_space (Space|null) 
+            :next_interline (Interline|null);
 
 */
 interface Bit extends Tile {

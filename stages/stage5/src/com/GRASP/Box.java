@@ -143,12 +143,11 @@ class Box implements Bit {
 	     interline != null;
 	     interline = interline.following_line
 		 .next_interline) {
-	    /*	    
 	    canvas.drawRect(20,accumulated_height,
 			    40,accumulated_height
 			    +interline.height,
 			    GRASP.paint);
-	    */
+
 	    accumulated_height += interline.height;
 
 	    if(interline.following_line == null) {
@@ -167,14 +166,14 @@ class Box implements Bit {
 		     preceding_space
 		     .following_bit
 		     .following_space()) {
-		/*
+
 		canvas.drawRect(accumulated_width,
 				accumulated_height,
 				accumulated_width
 				+preceding_space.width,
 				accumulated_height+20,
 				GRASP.paint);
-		*/
+
 		accumulated_width +=
 		    preceding_space.width;
 		
@@ -207,6 +206,42 @@ class Box implements Bit {
 
     }
 
+    public void normalize() {
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = interline.following_line
+		 .next_interline) {
+
+	    interline.height = 0;
+	    
+	    Line line = interline.remove_empty_lines();
+	    
+	    if(line == null) {
+		break;
+	    }
+	    
+	    for (Space preceding_space = line.first_space;
+		 preceding_space != null;
+		 preceding_space =
+		     preceding_space
+		     .following_bit
+		     .following_space()) {
+
+		preceding_space.width = 16;
+		
+		Bit bit = preceding_space.following_bit;
+	       
+		if (bit == null) {
+		    break;
+		}
+
+		if (bit instanceof Box) {
+		    ((Box) bit).normalize();
+		}
+	    }	    
+	}
+    }
+    
     
     @Override
     public void render(Canvas canvas) {
