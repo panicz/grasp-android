@@ -28,7 +28,7 @@ java -cp $KAWA_JAR:$ANDROID_JAR kawa.repl -d obj -P $PKGNAME.  -T $PKGNAME.hello
 
 
 dx --dex --min-sdk-version=24 \
-   --output=bin/classes.dex obj #$KAWA_JAR 
+   --output=bin/classes.dex obj $KAWA_JAR 
 
 aapt package -f \
        	-M AndroidManifest.xml \
@@ -60,4 +60,4 @@ then
     cp "$PKGNAME.apk" "$HOME/storage/downloads/GRASP/"
 fi
 
-#rm -rf bin/ obj/ gen/
+rm -rf bin/ obj/ gen/
