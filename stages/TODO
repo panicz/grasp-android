@@ -1,3 +1,32 @@
+29.09.2021 udalo sie! (uruchomic skompilowany kod)
+
+pytanie co chcemy robic dalej:
+- zaczac nowy projekt w 100% Kawa i przenosic ficzery z GRASP
+- poprawic skrypt budujacy tak, zeby dzialal ze wszystkimi projektami
+z android-kawa
+
+28.09.2021 wprawdzie kompilacja Kawy dziala, ale skompilowanego
+programu nie spisob uruchomic
+
+
+27.09.2021 kompilacja Kawy na Androida dziala!
+
+Trzeba sie teraz zastanowic czego teraz od niej chcemy ;)
+
+Na pewno mamy parser napisany w Schemie, i chcielibysmy zastapic
+wewnetrzna reprezentacje z Interlinii itd. na komorki ze slabymi
+haszmapami.
+
+Nadto, bedziemy chcieli zastapic funkcje renderujace oraz funkcje
+do wstawiania, wyszukiwania i dodawania nowego elementu - funkcjami
+operujacymi na tej nowej-starej reprezentacji.
+
+Warto jednak rowniez skorzystac z dotychczasowej reprezentacji
+jako okazji do zaprojektowania lepszego interfejsu do dokumentu.
+
+Chodzi o to, ze chcielibysmy oddzielic warstwe zdarzen uzytkownika
+od warstwy operacji.
+
 
 24.09.2021 jak wydostac sie z tej matni!
 

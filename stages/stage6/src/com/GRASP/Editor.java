@@ -143,9 +143,7 @@ final class Editor extends Panel {
 		pending_index[i] = (byte)(k-1);
 	    }
 	}
-    }
-
-    
+    }    
     
     @Override
     public Drag stretchFrom(byte finger,
