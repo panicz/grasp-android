@@ -3,6 +3,8 @@ package org.scheme.GRASP;
 import gnu.expr.Language;
 import kawa.standard.Scheme;
 import gnu.mapping.Environment;
+import gnu.mapping.CallContext;
+
 import gnu.mapping.InPort;
 import gnu.mapping.Values;
 import gnu.lists.Pair;
@@ -10,11 +12,17 @@ import gnu.lists.LList;
 import java.lang.Exception;
 import org.scheme.parse;
 
+import java.io.StringReader;
+
 class Lura {
     
     public static Language scheme = Scheme.instance;
 
     public static Lura instance = new Lura();
+
+    parse parser;
+    
+    public static Object parsed = null;
     
     public Lura() {
 	if (scheme == null) {scheme = new Scheme();}
@@ -23,13 +31,10 @@ class Lura {
 	try {
 	    InPort in = new InPort(GRASP.instance.getAssets()
 				   .open("init.scm"));
-	    //Environment env = Environment.getCurrent();
-	    //Scheme.eval(in, env);
-	    Object parsed = parse.parse(in);
-	    
-	    GRASP.log("dupa");
-	    GRASP.log(parsed.toString());
-	    GRASP.log("cipa");
+	    parser = new parse();
+	    parser.run(CallContext.getInstance());
+	    Environment env = Environment.getCurrent();
+	    Scheme.eval(in, env);
 	    
 	} catch(Exception e) {
 	    GRASP.log(e.toString());
@@ -79,7 +84,7 @@ class Lura {
 	}
 	else {
 	    // domyslnie zwracamy atoma
-	    GRASP.log(object.getClass().toString());
+	    //GRASP.log(object.getClass().toString());
 	    result = new Atom(object.toString());
 	}
 	insert.target = result;
@@ -115,6 +120,12 @@ class Lura {
 	    addBit(result, expr, preceding_space);
 	    editor.document.preserve_distance_between_elements();
 	    //GRASP.log(result.getClass().toString()+": "+result.toString());
+	    //GRASP.log(parse.$instance.toString());
+	    //GRASP.log(parsed == null? "(null)" : parsed.toString());
+	    InPort in2 = new
+		InPort(new
+		       StringReader(" (  +    a   (  b  c  . d  ) )  ( e ) "));
+	    //GRASP.log(parse.showString(parse.parse(in2)).toString());
 	}
 	catch(Throwable e) {
 	    GRASP.log(e.toString());

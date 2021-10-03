@@ -1,7 +1,4 @@
 (import (srfi :11) (srfi :17))
-(import (java util WeakHashMap))
-(import (gnu lists Pair))
-(import (java lang System))
 
 (define-alias make-weak-key-hash-table java.util.WeakHashMap)
 (define-alias Pair gnu.lists.Pair)
@@ -16,6 +13,7 @@
 	  substitution))))))
 
 ;; we override Pair with Object's default equality and hash functions
+;; (TODO: patch the Kawa implementation of Cons)
 
 (define-simple-class cons (Pair)
   ((*init* a d) (invoke-special Pair (this) '*init* a d))
@@ -138,6 +136,11 @@
    (else
     (write p))))
 
+(define (show-string p)
+  (with-output-to-string
+    (lambda ()
+      (show p))))
+
 (define (separator? c)
   (or (eof-object? c)
       (char-whitespace? c)
@@ -224,4 +227,5 @@
 
 (define (parse port)
   (parameterize ((current-input-port port))
-    (read-list)))
+    (let-values (((result spaces) (read-list)))
+      result)))

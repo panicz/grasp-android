@@ -4,7 +4,7 @@
 # Contributeur : https://github.com/HemanthJabalpuri
 # Invocation : $HOME/buildAPKs/scripts/sh/build/build.sh
 #####################################################################
-set +x
+set -x
 [ -z "${RDR:-}" ] && RDR=".." # "$HOME/buildAPKs"
 for CMD in aapt apksigner dx ecj
 do
@@ -34,7 +34,7 @@ PKGNAME="$(grep -o "package=.*" AndroidManifest.xml | cut -d\" -f2)"
 ANDROID_JAR='/data/data/com.termux/files/usr/share/java/android.jar'
 KAWA_JAR=lib/kawa-1.13.jar
 
-
+rm -rf obj
 [ -d assets ] || mkdir assets
 [ -d res ] || mkdir res
 mkdir -p bin
@@ -52,9 +52,12 @@ aapt package -f -m \
 for SCMFILE in $(find ./src/ -type f -name "*.scm")
 do
     java -cp $KAWA_JAR:$ANDROID_JAR kawa.repl -d obj \
-	 -P $(dirname $SCMFILE | sed 's/.*src\///' | tr / .). -C $SCMFILE
+	 -P $(dirname $SCMFILE | sed 's/.*src\///' | tr / .). \
+	 --module-static -C $SCMFILE
 done
 
+
+set +x
 for JAVAFILE in $(find ./src/ -type f -name "*.java")
 do
        	JAVAFILES="$JAVAFILES $JAVAFILE"
@@ -67,6 +70,7 @@ do
     CLASSFILES="$CLASSFILES:$JARFILE"
     JARFILES="$JARFILES $JARFILE"
 done
+set -x
 
 
 ecj -d obj -sourcepath . $JAVAFILES -classpath $CLASSFILES -source 1.5 -target 1.5 || _UNTP_
