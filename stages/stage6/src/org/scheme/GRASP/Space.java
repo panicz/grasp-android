@@ -3,7 +3,7 @@ import android.graphics.Paint;
 import java.lang.Math;
 
 
-class Space implements Location {
+class Space {
     public float width;
     public Bit following_bit = null;
 

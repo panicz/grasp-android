@@ -2,7 +2,7 @@ package org.scheme.GRASP;
 import java.lang.Math;
 
 
-class Line implements Location {
+class Line {
     public Space first_space = null;
     public Interline next_interline = null;
     

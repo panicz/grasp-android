@@ -48,7 +48,7 @@ Line = Line :first-space Space
             :next-interline Interline;
 
 */
-interface Bit extends Tile, Location {
+interface Bit extends Tile {
     /* following_space should be a field, but Java interfaces
        won't allow it, and we cannot make it an abstract class
        for other reasons */
