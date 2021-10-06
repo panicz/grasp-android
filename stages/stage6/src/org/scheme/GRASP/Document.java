@@ -127,7 +127,7 @@ class Document extends Box implements DocumentOperations {
     }
 
     @Override
-    public  void trySetSize(float x, float y) {}
+    public void trySetSize(float x, float y) {}
 
     // used in Box's public dragAround method
     @Override
@@ -313,6 +313,31 @@ class Document extends Box implements DocumentOperations {
 	    delete_last_char(sb);
 	}
 	return result;
+    }
+
+    @Override
+    public Track track(float x, float y) {
+	return null;
+    }
+
+    @Override
+    public Bit take(Track track) {
+	return null;
+    }
+
+    @Override
+    public Bit copy(Track track) {
+	return null;
+    }
+
+    @Override
+    public Bit refer(Track track) {
+	return null;
+    }
+
+    @Override
+    public void insert(Bit bit, Track track) {
+
     }
 
 }

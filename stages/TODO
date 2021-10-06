@@ -1,9 +1,78 @@
+04.10.2021 refaktor: Document staje sie interfejsem, a jego
+dotychczasowa implementacja staje sie ... implementacja interfejsu.
+
+Dzialania w oparciu o gesty staja sie zaposredniczone w interfejsie
+dokumentu.
+
+Zacznijmy od tego, zeby zlokalizowac wszystkie odwolania
+do operacji edycji.
+
+Po pierwsze - w gestach (Screen):
+
+known_gestures.add(new BoxGesture(30.0f));
+known_gestures.add(new UnderscoreGesture(30.0f));
+known_gestures.add(new EvalGesture(30.0f));
+
+Po drugie: w obsludze zdarzen, mamy
+
+screen.onDown -> panel.onPress = editor.onPress
+-> document.dragAround(takeOriginal)
+
+screen.onMotion -> panel.onSecondPress = editor.onSecondPress
+-> document.dragAround(takeCopy)
+
+powyzsze zdarzenia wywoduja tez:
+
+screen.overlay.removeLastOccurrence(this);
+oraz ewentualnie screen.panel.insertAt(x, y, this, null);
+(w przypadku DragAround)
+oraz jakies dziwne operacje (w przypadku Resize)
+
+Do tego dochodzi jeszcze opcja edycji atomow
+
+
+
+02.10.2021 zippery z grubsza zbadane, ale wydają się mieć wiele
+cech niepożądanych z naszej perspektywy: przede wszystkim, zmieniają
+tożsamość komórek podczas iteracji, co kłóci się z naszą słabotablicową
+reprezentacją białych znaków
+
+no dobra, to teraz chcemy zastąpić 'interliniową' reprezentację
+taką 'słabo-haszmapową' - i trzeba opracować plan działania
+
+
+1. parser V
+2. rendrowanie i obliczanie rozmiaru
+3. wyciaganie i wkladanie elementow
+4. zmiana rozmiaru
+5. dodawanie nowych elementow
+
+od strony technicznej zamienilibysmy klase 'Document' na interfejs
+i biezaca implementacja dostalaby nazwe np. BoxDocument.
+
+
+01.10.2021 udalo sie zintegrowac kod scheme'owy z buildem GRASP
+i wywolac skompilowane metody z poziomu Javy (jupi!). Mozemy
+zatem uzyc parsera napisanego w Scheme do parsowania dokumentow.
+
+Jednakze konieczne bedzie napisanie funkcji renderujacej oraz funkcji
+manipulujacych dokumentami tak, zeby korzystaly z nowej reprezentacji.
+
+(zgrywa sie to z planem stworzenia interfejsu operacji na dokumencie)
+
+na razie jednak zaimplementujemy strukture Zipper
+
+
 29.09.2021 udalo sie! (uruchomic skompilowany kod)
 
 pytanie co chcemy robic dalej:
-- zaczac nowy projekt w 100% Kawa i przenosic ficzery z GRASP
+- zaczac nowy projekt w 100% Kawa i przenosic ficzery z GRASP [na razie nie]
 - poprawic skrypt budujacy tak, zeby dzialal ze wszystkimi projektami
-z android-kawa
+z android-kawa [nie zapowiada sie]
+- zintegrowac napisany w Kawie parser z kodem w Javie, albo napisac
+konwerter ze Scheme'u do Javy (moze tak naprawde z tej Kawy lepiej
+sie wycofac?) [udalo sie bez pisania konwertera]
+
 
 28.09.2021 wprawdzie kompilacja Kawy dziala, ale skompilowanego
 programu nie spisob uruchomic
