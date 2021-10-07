@@ -317,7 +317,82 @@ class Document extends Box implements DocumentOperations {
 
     @Override
     public Track track(float x, float y) {
-	return null;
+	Track track = new Track();
+
+	Box that = this, last = null;
+	
+	while(that != last) {
+	    last = that;
+	    int current = 0;
+	    Line line = null;
+	    float vfront = 0;
+	    
+	    lines:
+	    for (Interline interline = that.first_interline;
+		 interline != null;
+		 interline = line.next_interline) {
+
+		vfront += interline.height;
+		
+		line = interline.following_line;
+
+		if (line == null) {
+		    return track;
+		}
+		
+		Bit bit = null;
+
+		float lineheight = 0;	       
+		float hfront = parenWidth;
+		
+		for (Space space = line.first_space;
+		     space != null;
+		     space = bit.following_space()) {
+
+		    hfront += space.width;
+			
+		    bit = space.following_bit;
+
+		    if (bit == null) {
+			break;
+		    }
+		    
+		    ++current;
+
+		    float w = bit.width();
+		    float h = bit.height();
+
+		    if (h > lineheight) {
+			lineheight = h;
+		    }
+		    
+		    if (hfront <= x && x <= hfront + w
+			&& vfront <= y && y <= vfront + h) {
+			track.turns.add(current);
+			if (bit instanceof Box) {
+			    last = that; 
+			    that = (Box) bit;
+			    y -= vfront;
+			    x -= hfront;
+			    break lines;
+			}
+			else {
+			    return track;
+			}
+		    }
+
+		    hfront += w;
+
+		    ++current;
+		}
+
+		vfront += lineheight;
+		if (vfront > y) {
+		    return track;
+		}
+	    }   
+	}
+	return track;
     }
 
     @Override

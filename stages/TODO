@@ -1,3 +1,9 @@
+06.10.2021 zdefiniowalismy sobie zarys interfejsu edycji dokumentu,
+i mamy zdefiniowana funkcje, ktora zwraca nam 'sciezke' do wyrazenia.
+teraz trzeba by bylo re sciezke przetestowac:
+- do funkcji onPress dodamy wyszukanie sciezki i dopisanie jej
+do logow
+
 04.10.2021 refaktor: Document staje sie interfejsem, a jego
 dotychczasowa implementacja staje sie ... implementacja interfejsu.
 
@@ -28,8 +34,7 @@ oraz ewentualnie screen.panel.insertAt(x, y, this, null);
 (w przypadku DragAround)
 oraz jakies dziwne operacje (w przypadku Resize)
 
-Do tego dochodzi jeszcze opcja edycji atomow
-
+Do tego dochodzi jeszcze opcja edycji atomow.
 
 
 02.10.2021 zippery z grubsza zbadane, ale wydają się mieć wiele
