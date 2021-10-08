@@ -396,18 +396,61 @@ class Document extends Box implements DocumentOperations {
     }
 
     @Override
+    public String toString() {
+	    return "Document";
+    }
+
+    Ref<Line> line = new Ref<Line>(null);
+
+    @Override
+    public Bit refer(Track track) {
+	Bit result = this;
+
+	for(int turn : track.turns) {
+	    if (result instanceof Box) {
+		Indexable thing = ((Box)result).get(turn, line);
+		if (thing instanceof Bit) {
+		    result = (Bit)thing;
+		}
+		else {
+		    return null;
+		}
+	    }
+	}
+	return result;
+    }
+    
+    @Override
     public Bit take(Track track) {
-	return null;
+	int size = track.turns.size();
+	if (size == 0) {
+	    return null;
+	}
+
+	int last = track.turns.get(size-1);
+
+	assert(last % 2 == 1); 
+	track.turns.set(size-1, last-1);
+
+	//Ref<Line> line = new
+	Indexable thing = refer(track);
+	assert(thing instanceof Space);
+	Bit result = ((Space)thing).remove_following_bit(line.ref);
+
+	track.turns.set(size-1, last);
+	    
+	return result;
     }
 
     @Override
     public Bit copy(Track track) {
-	return null;
-    }
-
-    @Override
-    public Bit refer(Track track) {
-	return null;
+	Bit reference = refer(track);
+	if (reference == this || reference == null) {
+	    return null;
+	}
+	Bit copy = reference.shallow_copy();
+	copy.set_following_space(null);
+	return copy.deep_copy();
     }
 
     @Override

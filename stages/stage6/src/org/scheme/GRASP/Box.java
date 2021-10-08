@@ -1103,5 +1103,50 @@ class Box implements Bit {
 	return head;
     }
 
-    
+    public Indexable get(int index, Ref<Line> ln) {
+	Line line = null;
+	int current = 0;
+	
+	for (Interline interline = first_interline;
+	     interline != null;
+	     interline = line.next_interline) {
+
+	    line = interline.following_line;
+
+	    if (line == null) {
+		return null;
+	    }
+		
+	    Bit bit = null;
+		
+	    for (Space space = line.first_space;
+		 space != null;
+		 space = bit.following_space()) {
+
+		if (index == current) {
+		    if(ln != null) {
+			ln.ref = line;
+		    }
+		    return space;
+		}
+		++current;
+		
+		bit = space.following_bit;
+
+		if (index == current) {
+		    if(ln != null) {
+			ln.ref = line;
+		    }
+		    return bit;
+		}
+		++current;
+		
+		if (bit == null) {
+		    break;
+		}
+	    }
+	}
+
+	return null;
+    }
 }

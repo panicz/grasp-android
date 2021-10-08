@@ -3,7 +3,7 @@ import android.graphics.Paint;
 import java.lang.Math;
 
 
-class Space {
+class Space implements Indexable {
     public float width;
     public Bit following_bit = null;
 
