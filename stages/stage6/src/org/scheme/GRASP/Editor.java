@@ -191,6 +191,19 @@ final class Editor extends Panel {
 	    return new Stretch(this, finger, x, y);
 	}
 
+	Track target =
+	    document.track(transform.unx(x, y),
+			   transform.uny(x, y));
+
+	GRASP.log(target.toString());
+	
+	Bit reference = document.refer(target);
+
+	if (reference != null
+	    && reference != document) {
+	    GRASP.log(reference.toString());
+	}
+	
 	Drag drag =
 	    document.dragAround(transform.unx(x, y),
 				transform.uny(x, y),

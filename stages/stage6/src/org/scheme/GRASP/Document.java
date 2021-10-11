@@ -344,18 +344,25 @@ class Document extends Box implements DocumentOperations {
 
 		float lineheight = 0;	       
 		float hfront = parenWidth;
+
+		int spaceindex = -1;
 		
 		for (Space space = line.first_space;
 		     space != null;
 		     space = bit.following_space()) {
-
-		    hfront += space.width;
-			
+		    		    
 		    bit = space.following_bit;
+
+		    if ((hfront <= x && x <= hfront + space.width)) {
+			assert(current % 2 == 0);
+			spaceindex = current;
+		    }
 
 		    if (bit == null) {
 			break;
 		    }
+
+		    hfront += space.width;
 		    
 		    ++current;
 
@@ -377,6 +384,8 @@ class Document extends Box implements DocumentOperations {
 			    break lines;
 			}
 			else {
+			    track.x = x - hfront;
+			    track.y = y - vfront;
 			    return track;
 			}
 		    }
@@ -388,9 +397,17 @@ class Document extends Box implements DocumentOperations {
 
 		vfront += lineheight;
 		if (vfront > y) {
+		    if (x <= hfront && spaceindex >= 0) {
+			assert(spaceindex % 2 == 0);
+			track.turns.add(spaceindex);
+		    }
+		    else {
+			assert(current % 2 == 0);
+			track.turns.add(current);
+		    }
 		    return track;
 		}
-	    }   
+	    }
 	}
 	return track;
     }
@@ -405,8 +422,12 @@ class Document extends Box implements DocumentOperations {
     @Override
     public Bit refer(Track track) {
 	Bit result = this;
-
+	int i = 0, size = track.turns.size();
 	for(int turn : track.turns) {
+	    if (turn % 2 == 0) {
+		assert(i == size-1);
+		break;
+	    }
 	    if (result instanceof Box) {
 		Indexable thing = ((Box)result).get(turn, line);
 		if (thing instanceof Bit) {
@@ -416,6 +437,7 @@ class Document extends Box implements DocumentOperations {
 		    return null;
 		}
 	    }
+	    ++i;
 	}
 	return result;
     }
@@ -429,11 +451,19 @@ class Document extends Box implements DocumentOperations {
 
 	int last = track.turns.get(size-1);
 
-	assert(last % 2 == 1); 
+	if(last % 2 == 0) {
+	    // for tracks that lead to spaces,
+	    // we take the box which contaibs that space
+	    track.turns.remove(size-1);
+	    Bit result = take(track);
+	    track.turns.add(size-1, last);
+	    return result;
+	}
+	
 	track.turns.set(size-1, last-1);
 
-	//Ref<Line> line = new
 	Indexable thing = refer(track);
+	// sets 'line' behind the scenes
 	assert(thing instanceof Space);
 	Bit result = ((Space)thing).remove_following_bit(line.ref);
 
