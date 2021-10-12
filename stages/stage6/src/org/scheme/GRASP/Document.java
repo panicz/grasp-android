@@ -422,8 +422,9 @@ class Document extends Box implements DocumentOperations {
     @Override
     public Bit refer(Track track) {
 	Bit result = this;
-	int i = 0, size = track.turns.size();
-	for(int turn : track.turns) {
+	int size = track.turns.size();
+	for(int i = 0; i < size; ++i) {
+	    int turn = track.turns.get(i);
 	    if (turn % 2 == 0) {
 		assert(i == size-1);
 		break;
@@ -437,7 +438,6 @@ class Document extends Box implements DocumentOperations {
 		    return null;
 		}
 	    }
-	    ++i;
 	}
 	return result;
     }
@@ -485,7 +485,22 @@ class Document extends Box implements DocumentOperations {
 
     @Override
     public void insert(Bit bit, Track track) {
+	int size = track.turns.size();
+	if (size == 0
+	    || track.turns.get(size-1)%2 != 0) {
+	    GRASP.log("unable to insert "+bit+" at "+track);
+	    return;
+	}
+	
+	Box target = this;
 
+	for(int i = 0; i < size; ++i) {
+	    int turn = track.turns.get(i);
+	    Indexable tip = target.get(turn, line);
+	    if (tip instanceof Space) {
+		assert(i == size-1);
+		((Space)tip).insertAfter(track.x, bit);
+	    }
+	}
     }
-
 }

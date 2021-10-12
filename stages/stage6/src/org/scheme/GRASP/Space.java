@@ -105,10 +105,24 @@ class Space implements Indexable {
 	following_bit.set_following_space(nextSpace);
 	return true;
     }
+
+    public void insertAfter(float x, Bit bit) {
+
+	Space nextSpace = new
+	    Space(width-x-bit.width(),
+		  following_bit);
+       
+	if(x < width || following_bit == null) {
+ 	    width = Math.max(min_width, x);
+	}
+	following_bit = bit;
+	following_bit.set_following_space(nextSpace);
+    }
     
     public Bit remove_following_bit(Line line) {
 	Bit removed = following_bit;
 	float initial_height = line.height();
+	
 	if (following_bit != null) {
 	    float dw = following_bit.width();
 	    width += dw;
