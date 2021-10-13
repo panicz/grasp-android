@@ -44,13 +44,14 @@
 (define (hashq-ref table::java.util.WeakHashMap key default)
   (if (table:contains-key key)
       (table:get key)
-      default))
+      (default)))
 
 (define-syntax-rule (define-property (property-name object) default)
   (define property-name
     (let* ((override (make-weak-key-hash-table))
 	   (getter (lambda (object)
-		     (hashq-ref override object default))))
+		     (hashq-ref override object
+				(lambda () default)))))
       (set! (setter getter) (lambda (arg value)
 			      (hashq-set! override arg value)))
       getter)))
