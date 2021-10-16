@@ -195,25 +195,14 @@ final class Editor extends Panel {
 	    document.track(transform.unx(x, y),
 			   transform.uny(x, y));
 
-	GRASP.log(target.toString());
-	
-	Bit reference = document.refer(target);
-
-	if (reference != null
-	    && reference != document) {
-	    GRASP.log(reference.toString());
-	}
-	
-	Drag drag =
-	    document.dragAround(transform.unx(x, y),
-				transform.uny(x, y),
-				takeOriginal);
-
-	if (drag != null) {
-	    if (drag instanceof DragAround) {
+	if (target.turns.size() > 0) {
+	    Bit taken = document.take(target);
+	    if (taken != null) {
+		Drag drag = new DragAround(taken,
+					   x-target.x, y-target.y);
 		screen.overlay.push((DragAround)drag);
+		return drag.outwards(transform);
 	    }
-	    return drag.outwards(transform);
 	}
 
 	return null;

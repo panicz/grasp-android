@@ -400,11 +400,14 @@ class Document extends Box implements DocumentOperations {
 		    if (x <= hfront && spaceindex >= 0) {
 			assert(spaceindex % 2 == 0);
 			track.turns.add(spaceindex);
+			track.x = x;
 		    }
 		    else {
 			assert(current % 2 == 0);
 			track.turns.add(current);
+			//track.x = x - hfront;			
 		    }
+		    track.y = y - (vfront - lineheight);
 		    return track;
 		}
 	    }
@@ -420,24 +423,13 @@ class Document extends Box implements DocumentOperations {
     Ref<Line> line = new Ref<Line>(null);
 
     @Override
-    public Bit refer(Track track) {
-	Bit result = this;
+    public Indexable refer(Track track) {
+	Indexable result = this;
 	int size = track.turns.size();
 	for(int i = 0; i < size; ++i) {
 	    int turn = track.turns.get(i);
-	    if (turn % 2 == 0) {
-		assert(i == size-1);
-		break;
-	    }
-	    if (result instanceof Box) {
-		Indexable thing = ((Box)result).get(turn, line);
-		if (thing instanceof Bit) {
-		    result = (Bit)thing;
-		}
-		else {
-		    return null;
-		}
-	    }
+	    assert(result instanceof Box);
+	    result = ((Box)result).get(turn, line);
 	}
 	return result;
     }
@@ -455,6 +447,7 @@ class Document extends Box implements DocumentOperations {
 	    // for tracks that lead to spaces,
 	    // we take the box which contaibs that space
 	    track.turns.remove(size-1);
+	    GRASP.log("taking "+track+" instead");
 	    Bit result = take(track);
 	    track.turns.add(size-1, last);
 	    return result;
@@ -463,22 +456,23 @@ class Document extends Box implements DocumentOperations {
 	track.turns.set(size-1, last-1);
 
 	Indexable thing = refer(track);
-	// sets 'line' behind the scenes
 	assert(thing instanceof Space);
 	Bit result = ((Space)thing).remove_following_bit(line.ref);
 
 	track.turns.set(size-1, last);
-	    
+	
 	return result;
     }
 
     @Override
     public Bit copy(Track track) {
-	Bit reference = refer(track);
-	if (reference == this || reference == null) {
+	Indexable reference = refer(track);
+	if (reference == this
+	    || reference == null
+	    || !(reference instanceof Bit)) {
 	    return null;
 	}
-	Bit copy = reference.shallow_copy();
+	Bit copy = ((Bit)reference).shallow_copy();
 	copy.set_following_space(null);
 	return copy.deep_copy();
     }

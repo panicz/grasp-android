@@ -12,6 +12,6 @@ class Track {
     
     @Override
     public String toString() {
-	return turns.toString();
+	return turns.toString()+"("+(int)x+", "+(int)y+")";
     }
 }
