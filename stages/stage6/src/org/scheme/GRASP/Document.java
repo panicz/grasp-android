@@ -345,7 +345,7 @@ class Document extends Box implements DocumentOperations {
 		float lineheight = 0;	       
 		float hfront = parenWidth;
 
-		int spaceindex = -1;
+		int spaceindex = 0;
 		
 		for (Space space = line.first_space;
 		     space != null;
@@ -405,7 +405,7 @@ class Document extends Box implements DocumentOperations {
 		    else {
 			assert(current % 2 == 0);
 			track.turns.add(current);
-			//track.x = x - hfront;			
+			track.x = x;
 		    }
 		    track.y = y - (vfront - lineheight);
 		    return track;
@@ -447,7 +447,7 @@ class Document extends Box implements DocumentOperations {
 	    // for tracks that lead to spaces,
 	    // we take the box which contaibs that space
 	    track.turns.remove(size-1);
-	    GRASP.log("taking "+track+" instead");
+
 	    Bit result = take(track);
 	    track.turns.add(size-1, last);
 	    return result;

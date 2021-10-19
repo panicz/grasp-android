@@ -191,15 +191,17 @@ final class Editor extends Panel {
 	    return new Stretch(this, finger, x, y);
 	}
 
+	float lx = transform.unx(x, y);
+	float ly = transform.uny(x, y);
+	
 	Track target =
-	    document.track(transform.unx(x, y),
-			   transform.uny(x, y));
+	    document.track(lx, ly);
 
 	if (target.turns.size() > 0) {
 	    Bit taken = document.take(target);
 	    if (taken != null) {
 		Drag drag = new DragAround(taken,
-					   x-target.x, y-target.y);
+					   lx-target.x, ly-target.y);
 		screen.overlay.push((DragAround)drag);
 		return drag.outwards(transform);
 	    }
