@@ -461,9 +461,14 @@ class Document extends Box implements DocumentOperations {
 	track.turns.set(size-1, last-1);
 
 	Indexable thing = refer(track);
-	assert(thing instanceof Space);
-	Bit result = ((Space)thing).remove_following_bit(line.ref);
+	if(!(thing instanceof Space)) {
+	    track.turns.set(size-1, last);
 
+	    GRASP.log("obtained space from "+track+", last = "+last);
+	    return null;
+	}
+
+	Bit result = ((Space)thing).remove_following_bit(line.ref);
 	track.turns.set(size-1, last);
 	
 	return result;
