@@ -428,8 +428,13 @@ class Document extends Box implements DocumentOperations {
 	int size = track.turns.size();
 	for(int i = 0; i < size; ++i) {
 	    int turn = track.turns.get(i);
-	    assert(result instanceof Box);
-	    result = ((Box)result).get(turn, line);
+	    if (result instanceof Box) {
+		result = ((Box)result).get(turn, line);
+	    }
+	    else {
+		GRASP.log("index "+i+" of "+track+" is not a box");
+		break;
+	    }
 	}
 	return result;
     }
