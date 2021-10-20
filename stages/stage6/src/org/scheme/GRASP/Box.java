@@ -148,7 +148,7 @@ class Box implements Bit {
 	     interline != null;
 	     interline = interline.following_line
 		 .next_interline) {
-	    /*	    
+	    /*
 	    canvas.drawRect(20,accumulated_height,
 			    40,accumulated_height
 			    +interline.height,
@@ -1114,6 +1114,7 @@ class Box implements Bit {
 	    line = interline.following_line;
 
 	    if (line == null) {
+		GRASP.log("line for "+index+" in "+this+" is null");
 		return null;
 	    }
 		
@@ -1123,15 +1124,20 @@ class Box implements Bit {
 		 space != null;
 		 space = bit.following_space()) {
 
+		bit = space.following_bit;
+		if (bit == null) {
+		    break;
+		}
+		
 		if (index == current) {
 		    if(ln != null) {
 			ln.ref = line;
 		    }
 		    return space;
 		}
-		++current;
 		
-		bit = space.following_bit;
+		++current;
+	       
 
 		if (index == current) {
 		    if(ln != null) {
@@ -1140,12 +1146,9 @@ class Box implements Bit {
 		    return bit;
 		}
 		++current;
-		
-		if (bit == null) {
-		    break;
-		}
 	    }
 	}
+	GRASP.log("index "+index+" in "+this+" not found");
 
 	return null;
     }

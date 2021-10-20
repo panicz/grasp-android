@@ -337,12 +337,14 @@ class Document extends Box implements DocumentOperations {
 		line = interline.following_line;
 
 		if (line == null) {
+		    track.x = x;
+		    track.y = y;
 		    return track;
 		}
 		
 		Bit bit = null;
 
-		float lineheight = 0;	       
+		float lineheight = Box.min_height;	       
 		float hfront = parenWidth;
 
 		int spaceindex = 0;
@@ -395,23 +397,26 @@ class Document extends Box implements DocumentOperations {
 		    ++current;
 		}
 
-		vfront += lineheight;
-		if (vfront > y) {
+		if (vfront + lineheight > y) {
 		    if (x <= hfront && spaceindex >= 0) {
 			assert(spaceindex % 2 == 0);
 			track.turns.add(spaceindex);
 			track.x = x;
+			track.y = y;
 		    }
 		    else {
 			assert(current % 2 == 0);
 			track.turns.add(current);
 			track.x = x;
+			track.y = y;
 		    }
-		    track.y = y - (vfront - lineheight);
 		    return track;
 		}
+		vfront += lineheight;
+
 	    }
 	}
+
 	return track;
     }
 
@@ -462,9 +467,8 @@ class Document extends Box implements DocumentOperations {
 
 	Indexable thing = refer(track);
 	if(!(thing instanceof Space)) {
+	    GRASP.log("no space at "+track+", last = "+last);
 	    track.turns.set(size-1, last);
-
-	    GRASP.log("obtained space from "+track+", last = "+last);
 	    return null;
 	}
 
