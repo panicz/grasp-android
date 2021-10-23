@@ -8,10 +8,12 @@ class Track {
     // odd -> bits
     public List<Integer> turns = new ArrayList<Integer>();
     //public Object last = null;
-    float x, y;
+    float sx = 0, sy = 0, dx = 0, dy = 0;
     
     @Override
     public String toString() {
-	return turns.toString()+"("+(int)x+", "+(int)y+")";
+	return turns.toString()
+	    +"("+(int)sx+", "+(int)sy+", "
+	    +(int)dx+", "+(int)dy+")";
     }
 }

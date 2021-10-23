@@ -197,14 +197,55 @@ final class Editor extends Panel {
 	Track target =
 	    document.track(lx, ly);
 
-	if (target.turns.size() > 0) {
+	int size = target.turns.size();
+
+	/*
+	GRASP.log("target "+target+", x "+(int)x+", y "+(int)y
+		  +", lx "+(int)lx+", ly "+(int)ly);
+	*/
+	if (size == 0) {
+	    //GRASP.log("grabbed document");
+	    return null;
+	}
+	
+	int last = target.turns.get(size-1);
+
+	if (last % 2 == 0) {
+	    target.turns.remove(size-1);
+	}
+
+	size = target.turns.size();
+	
+	if (size == 0) {
+	    //GRASP.log("grabbed docspace");
+	    return null;
+	}
+	
+	Indexable reference =
+	    document.refer(target);
+
+	if (!(reference instanceof Bit)) {	    
+	    //GRASP.log("grabbed "+reference.getClass().toString());
+	    return null;
+	}
+	
+	if (reference instanceof Atom
+	    || target.dx <= 2*Box.parenWidth) {
 	    Bit taken = document.take(target);
 	    if (taken != null) {
-		Drag drag = new DragAround(taken,
-					   lx-target.x, ly-target.y);
+		Drag drag = new
+		    DragAround(taken,
+			       lx-target.dx,
+			       ly-target.dy);
 		screen.overlay.push((DragAround)drag);
 		return drag.outwards(transform);
 	    }
+	}
+
+	float width = ((Bit)reference).width();
+	
+	if(target.dx > width - 2*Box.parenWidth) {
+	    GRASP.log("resize "+reference);
 	}
 
 	return null;

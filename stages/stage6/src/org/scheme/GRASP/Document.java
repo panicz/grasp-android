@@ -58,7 +58,6 @@ class Document extends Box implements DocumentOperations {
 
 	first_interline = new Interline(0, null);
 	_following_space = new Space(0, null);
-
     }
     
     public static Document fromBox(Box prototype) {
@@ -320,6 +319,8 @@ class Document extends Box implements DocumentOperations {
 	Track track = new Track();
 
 	Box that = this, last = null;
+
+	float vbase = 0, hbase = 0;
 	
 	while(that != last) {
 	    last = that;
@@ -331,21 +332,24 @@ class Document extends Box implements DocumentOperations {
 	    for (Interline interline = that.first_interline;
 		 interline != null;
 		 interline = line.next_interline) {
-
+		float hfront = 0;
 		vfront += interline.height;
 		
 		line = interline.following_line;
 
 		if (line == null) {
-		    track.x = x;
-		    track.y = y;
+		    track.dx = x;
+		    track.dy = y;
+		    track.sx = hbase+hfront;
+		    track.sy = vbase+vfront;
 		    return track;
 		}
 		
 		Bit bit = null;
 
-		float lineheight = Box.min_height;	       
-		float hfront = parenWidth;
+		float lineheight = Box.min_height;
+
+		hfront += parenWidth;
 
 		int spaceindex = 0;
 		
@@ -383,11 +387,15 @@ class Document extends Box implements DocumentOperations {
 			    that = (Box) bit;
 			    y -= vfront;
 			    x -= hfront;
+			    hbase += hfront;
+			    vbase += vfront;
 			    break lines;
 			}
 			else {
-			    track.x = x - hfront;
-			    track.y = y - vfront;
+			    track.dx = x - hfront;
+			    track.dy = y - vfront;
+			    track.sx = hbase+hfront;
+			    track.sy = vbase+vfront;
 			    return track;
 			}
 		    }
@@ -401,19 +409,19 @@ class Document extends Box implements DocumentOperations {
 		    if (x <= hfront && spaceindex >= 0) {
 			assert(spaceindex % 2 == 0);
 			track.turns.add(spaceindex);
-			track.x = x;
-			track.y = y;
 		    }
 		    else {
 			assert(current % 2 == 0);
 			track.turns.add(current);
-			track.x = x;
-			track.y = y;
 		    }
+		    track.dx = x;
+		    track.dy = y;
+		    track.sx = hbase;
+		    track.sy = vbase;
+
 		    return track;
 		}
 		vfront += lineheight;
-
 	    }
 	}
 
@@ -507,7 +515,7 @@ class Document extends Box implements DocumentOperations {
 	    Indexable tip = target.get(turn, line);
 	    if (tip instanceof Space) {
 		assert(i == size-1);
-		((Space)tip).insertAfter(track.x, bit);
+		((Space)tip).insertAfter(track.dx, bit);
 	    }
 	}
     }
