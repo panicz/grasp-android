@@ -158,27 +158,7 @@ final class Editor extends Panel {
 
 	transform.towards(pending_x, pending_y, pending);
     }
-    
-    class TakeOriginal implements TakeBit {
-	@Override
-	public Bit from(Space space, Line line) {
-	    return space.remove_following_bit(line);
-	}
-    }
-
-    TakeBit takeOriginal = new TakeOriginal();
-
-    class TakeCopy implements TakeBit {
-	@Override
-	public Bit from(Space space, Line line) {
-	    Bit copy = space.following_bit.shallow_copy();
-	    copy.set_following_space(null);
-	    return copy.deep_copy();
-	}
-    }
-
-    TakeBit takeCopy = new TakeCopy();
-    
+        
     @Override
     public Drag onPress(Screen screen,
 			byte finger,
