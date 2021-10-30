@@ -146,6 +146,10 @@ abstract class Panel implements Pad, Parcelable {
     public abstract Space insertAt(float x, float y,
 				   DragAround bit,
 				   Ref<Line> line);
+
+    public abstract void insertAt(float x, float y,
+				  DragAround bit);
+
     
     protected static final Shift shift = new Shift();
     

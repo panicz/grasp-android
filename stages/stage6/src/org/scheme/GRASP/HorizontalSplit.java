@@ -328,6 +328,24 @@ final class HorizontalSplit extends Split {
     }
 
     @Override
+    public void insertAt(float x, float y,
+			  DragAround bit) {
+	if (x <= firstPanel.width()) {
+	    firstPanel.insertAt(x, y, bit);
+	}
+	else if (x >= firstPanel.width() + bar_width) {
+	    secondPanel.insertAt(x - (firstPanel.width()
+					     + bar_width), y,
+					(DragAround)
+					translate(bit,
+						  -(firstPanel.
+						    width()
+						    + bar_width),0));
+	}
+    }
+
+    
+    @Override
     public void writeDataToParcel(Parcel out, int flags) {
 	out.writeFloat(_left);
 	out.writeFloat(_top);

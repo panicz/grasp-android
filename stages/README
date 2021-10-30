@@ -20,26 +20,21 @@ stage 5: atom editing and basic gestutes:
 
   underscore -> atom
 
-stage 6: port to Kawa
+stage 6: 
+- expressions can be evaluated (port to Kawa)
+(change the internal representation to use cons cells?)
+- undoing and history tracking
+- gesture framework
+- support for cursors within expressions and keyboard editing
 
-further plans:
-
-stage 7: undoing and history tracking
-
-stage 8: expressions can be evaluated
-
-stage 9: support for cursors within expressions and
-keyboard editing
-
-stage 10: interaction extension mechanism: certain kinds
+stage 7: interaction extension mechanism: certain kinds
 of expressions can be interpreted visually. an example:
 A* on graphs
 
-stage 11: expressions can be pinned (context menu)  and maximized
+stage 8: expressions can be pinned (context menu) and maximized
 (double tap). a pinned expression interprets touch
-actions in its own way.
-
-
+actions in its own way. APKs can be generated. Support for
+module ecosystem (via network)
 
 misc:
 
@@ -48,3 +43,4 @@ misc:
   Q - magnifying glass
 
   straight line between two editors - start targets end
+

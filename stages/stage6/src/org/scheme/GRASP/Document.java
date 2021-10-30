@@ -117,23 +117,9 @@ class Document extends Box implements DocumentOperations {
     public Bit deep_copy() {
 	return fromBox((Box) super.deep_copy());
     }
-
-    // used in Box's public dragAround method
-    @Override
-    protected Drag dragAround() {
-	// prevent the whole document from being dragged around
-	return null;
-    }
-
+    
     @Override
     public void trySetSize(float x, float y) {}
-
-    // used in Box's public dragAround method
-    @Override
-    protected Drag resize(float x, float y) {
-	// prevent the whole document from being resized
-	return null;
-    }
 
     // used in Box's insertAt method
     @Override
@@ -516,6 +502,9 @@ class Document extends Box implements DocumentOperations {
 	    if (tip instanceof Space) {
 		assert(i == size-1);
 		((Space)tip).insertAfter(track.dx, bit);
+	    }
+	    else if(tip instanceof Box) {
+		target = (Box) tip;
 	    }
 	}
     }

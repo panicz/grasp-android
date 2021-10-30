@@ -105,25 +105,11 @@ class Atom implements Bit {
 	return text.length();
     }
 
-    @Override
-    public Drag dragAround(float x, float y, TakeBit _) {
-	return new DragAround(this, 0, 0);
-    }
 
     @Override
     public  void trySetSize(float x, float y) {
 	// atoms aren't resizable
     }
-
-    @Override
-    public Bit itemAt(float x, float y) {
-	assert(0 <= x);
-	assert(x <= width());
-	assert(0 <= y);
-	assert(y <= height());
-	return this;
-    }
-    
     @Override
     public Space insertAt(float x, float y,
 			  DragAround item,
@@ -145,11 +131,4 @@ class Atom implements Bit {
 	}
 	return copy;
     }
-
-
-    @Override
-    public Object toKawa() {
-	return text.intern();
-    }
-    
 }

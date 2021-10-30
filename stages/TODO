@@ -1,3 +1,184 @@
+29.10.2021 na razie mamy na poly dzialajace
+wstawianie za pomoca 'insert'. z pewnoscia
+bedzie to trzeba naprawic, i zaimplementowac
+'wyciaganie dywanu' jako funkcje API, zeby
+nastepnie te akcje rejestrowac i moc cofac.
+
+kiedy juz to bedzie zrobione, bedziemy chcieli
+na powaznie zajac sie edytorem gestow, tak aby:
+- mozna bylo zdefiniowac istniejace gesty
+(box, underscore, eval) z pomoca tego frameworka
+- mozna bylo zdefiniowac nowe gesty (circle,
+undo, redo, ...)
+- spiac gesty 'undo' i 'redo' z operacjami cofania
+i 'odcofania', na razie bez edytora historii
+
+oprocz tego chcemy moc nawigowac po naszym kodzie
+za pomoca klawiatury (szczalki) i edytowac symbole
+bez dodatkowego okienka, a takze (a jakze!)
+wspierac pelna skladnie Lispa
+
+Te funkcjonalnosci, oraz mozliwosc wizualizacji struktur
+danych oraz definiowania nowych rodzajow interakcji
+powinny wystarczyc do stworzenia Kluczowego Dema,
+a mianowicie algorytmu A*
+
+ale oprocz niego
+
+kolko i krzyzyk
+szachy?
+
+
+27.10.2021 ok, lewy nawias wydaje sie dzialac.
+Jeszcze tylko bysmy chcieli, zeby DragAroumd
+i Resize korzystaly z API 'DocumentOperations',
+zeby moc wywalic funkcje DocumentOperations:insert
+
+25.10.2021 chwytanie za prawy nawias rozwiazane,
+teraz bysmy dla odmiany zajeli sie podwojnym kliknieciem,
+za lewy nawias (kopia) i za prawy nawias (docelowo
+powinno zmieniac rozmiar i zachowywac odleglosc od lewego,
+a nie prawego nawiasu)
+
+23.10.2021 chwytanie tylko za lewy nawias zrobione,
+teraz sie zajmiemy chwytaniem za prawy nawias
+
+no i tym, ze w top-levelu mamy przemieszczenie
+
+20.10.2021
+cos caly czas nie tryka przy braniu wyrazen w sytuacji,
+kiedy chwytamy za wyrazenie w kolejnej linii
+
+ok, juz tryka. no to teraz tak:
+
+- chwytanie tylko za lewy nawias v
+- zmiana rozmiaru za prawy nawias v
+- zlapanie i puszczenie wyrazenia nie powinno zmieniac jego
+polozenia
+- kopiowanie podwojnym kliknieciem
+- 'wyciaganie obrusa'
+
+a co dalej:
+- edycja z klawiatury: poruszanie kursorem, itp.
+- zapamietywanie historii
+- cofanie historii
+
+18.10.2021
+- post na stackoverflow
+- poprawa dzialania przy 'przesunietej kamerze'
+- przenoszenie tylko w przypadku lewego nawiasu
+- zmiana rozmiaru w przypadku prawego nawiasu
+
+
+17.10.2021 musimy dokonczyc sledzenie pozycji (x, y) wskaznika
+
+13.10.2021 przepiszmy sobie listę operacji z zeszytu
+
+(define-type in-document-context
+  :in context::document := (current-document))
+
+(define-type document-operation
+  (extend in-document-context
+    (either
+      (move-expression :from source::track :to destination::track)
+      (copy-expression :from source::track :to destination::track)
+      (replace expression :at track::track :with another-expression)
+      (remove expression :at track::track)
+      (insert expression :at track::track)
+      (splice-box :spanning [x::real y::real w::real h::real]
+                  :at track::track)
+      (create-box :spanning [x::real y::real w::real h::real]
+                  :at track::track)
+      (improperize-box :at track::track)
+      (properize-box :at track::track)
+) ) )
+
+(declare reciprocal : document-operation -> document-operation)
+
+(define (reciprocal operation)
+  (parameterize ((current-document (:in operation)))
+    (match operation
+      [(move-expression :from source :to destination)
+       (move-expression :from destination :to source)]
+      [(copy-expression :from source :to destination)
+       ...]
+      [(replace expression :at track :with another-expression)
+       (replace another-expression :at track :with expression)]
+      [(remove expression :at track)
+       (insert expression :at (previous-track track))]
+      [(insert expression :at track)
+       (remove expression :at (subsequent-track track))]
+      [(splice-box :spanning [x y w h] :at track)
+       (create-box :spanning [x y w h] ...?)]
+      [(create-box :spanning [x y w h] :at track)
+       (splice-box :spanning [x y w h] ...?)]
+      [(improperize-box :at track)
+       (properize-box :at track)]
+      [(properize-box :at track)
+       (improperize-box :at track)]
+) ) )
+
+    O
++-------+
+|       |
++-------+
+    o-----------|
++-------+   +-------+
+|       |   |       |
++-------+   +-------+
+    |           |
++-------+   +-------+
+|       |   |       |
++-------+   +-------+
+
+12.10.2021 powinno nam teraz zalezec na tym, zeby zaposredniczyc
+wszystkie operacje na dokumencie w DocumentOperations.
+
+zostaje nam jeszcze:
+
+- zmiana rozmiaru
+- tworzenie pudelek
+- splice'owanie
+
+No i oczywiscie podmiana funkcji (i usuniecie starych)
+
+Ale nastepnie (i to jest ekscytujace) bedzie trzeba:
+- logowac wszystkie operacje
+- stworzyc 'interpreter historii'
+- napisac 'funkcje odwrotna' wzgledem historii
+- stworzyc mozliwosc cofania historii
+
+
+11.10.2021 trzeba bedzie poprawic 'track' w taki sposob, zeby
+dla pudelek zwracac indeks pustego pola, bo to nam bedzie
+potem potrzebne przy niektorych operacjach
+
+i co dalej?
+
+08.10.2021 refer dziala. zrobienie z niego 'copy' bedzie
+latwe, natomiast 'take' bedzie wymagalo cofniecia ostatniego
+indeksu o 1 (wzięcia spacji) i wyodrębnienia elementu za spacją
+
+(ale chyba rowniez to sie udalo zrobic?)
+
+Funkcjonalnosci zaimplementowane, ale jeszcze nieprzetestowane.
+
+Jeszcze bedzie trzeba wzbogacic interfejs DocumentOperations
+o bardziej ziarniste operacje. Kiedy to bedzie gotowe, będzie można
+podmienić wywołania opisane ponizej na wywołania zapośredniczone
+w interfejsie operacji dokumentu
+
+
+
+07.10.2021 wyglada na to, ze sciezki dzialaja. Teraz pozostaje
+nam do implementacji:
+- operacja refer, ktora zwraca referencje do danego wyrazenia
+w obrebie sciezki v
+- operacja 'copy', ktora zwraca kopie rego wyrazenia v
+- operacja 'take', ktora usuwa wyrazenie z dokumentu
+i przekazuje je jako wartosc zwracana v
+
+
 06.10.2021 zdefiniowalismy sobie zarys interfejsu edycji dokumentu,
 i mamy zdefiniowana funkcje, ktora zwraca nam 'sciezke' do wyrazenia.
 teraz trzeba by bylo re sciezke przetestowac:

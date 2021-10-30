@@ -69,16 +69,9 @@ interface Bit extends Tile, Indexable {
     
     int buildString(StringBuilder sb, int indent);
     int buildString(StringBuilder sb);
-
-    Object toKawa();    
     Space insertAt(float x, float y,
 		   DragAround item,
 		   Ref<Line> ln);
-
-    Bit itemAt(float x, float y);
-    //  Bit takeFrom(float x, float y);
-
-    Drag dragAround(float x, float y, TakeBit take);
     
     Bit shallow_copy();
     Bit deep_copy();

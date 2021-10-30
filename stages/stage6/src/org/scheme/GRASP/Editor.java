@@ -10,6 +10,7 @@ import java.util.Iterator;
 import android.os.Environment;
 import java.io.File;
 import android.net.Uri;
+import java.lang.Exception;
 
 import java.lang.Math;
 
@@ -195,29 +196,9 @@ final class Editor extends Panel {
 	float ly = transform.uny(x, y);
 	
 	Track target =
-	    document.track(lx, ly);
+	    document.track(lx, ly).bit();
 
-	int size = target.turns.size();
-
-	/*
-	GRASP.log("target "+target+", x "+(int)x+", y "+(int)y
-		  +", lx "+(int)lx+", ly "+(int)ly);
-	*/
-	if (size == 0) {
-	    //GRASP.log("grabbed document");
-	    return null;
-	}
-	
-	int last = target.turns.get(size-1);
-
-	if (last % 2 == 0) {
-	    target.turns.remove(size-1);
-	}
-
-	size = target.turns.size();
-	
-	if (size == 0) {
-	    //GRASP.log("grabbed docspace");
+	if (target == null) {
 	    return null;
 	}
 	
@@ -244,8 +225,9 @@ final class Editor extends Panel {
 
 	float width = ((Bit)reference).width();
 	
-	if(target.dx > width - 2*Box.parenWidth) {
-	    GRASP.log("resize "+reference);
+	if(target.dx > width - 2*Box.parenWidth
+	   && reference instanceof Box) {
+	    return new Resize((Bit)reference, x, y);
 	}
 
 	return null;
@@ -278,19 +260,43 @@ final class Editor extends Panel {
     public Drag onSecondPress(Screen screen,
 			      byte finger,
 			      float x, float y) {
-	Drag drag =
-	    document.dragAround(transform.unx(x, y),
-				transform.uny(x, y),
-					takeCopy);
+	float lx = transform.unx(x, y);
+	float ly = transform.uny(x, y);
 
-	if (drag != null) {
-	    if (drag instanceof DragAround) {
-		screen.overlay.push((DragAround)drag);
-	    }
+	Track target =
+	    document.track(lx, ly).bit();
 
-	    return drag.outwards(transform);
+	if (target == null) {
+	    return stretchFrom(finger, x, y);
 	}
 
+	Indexable reference =
+	    document.refer(target);
+
+	if (!(reference instanceof Bit)) {
+	    return stretchFrom(finger, x, y);
+	}
+
+	if (reference instanceof Atom
+	    || target.dx <= 2*Box.parenWidth) {
+	    Bit copy = document.copy(target);
+	    if (copy != null) {
+		Drag drag = new
+		    DragAround(copy,
+			       lx-target.dx,
+			       ly-target.dy);
+		screen.overlay.push((DragAround)drag);
+		return drag.outwards(transform);
+	    }
+	}
+
+	float width = ((Bit)reference).width();
+	
+	if(target.dx > width - 2*Box.parenWidth
+	   && reference instanceof Box) {
+	    return new Resize((Bit)reference, x, y);
+	}
+	
 	return stretchFrom(finger, x, y);
     }
 
@@ -495,6 +501,41 @@ final class Editor extends Panel {
 				 ln);
     }
 
+    @Override
+    public void insertAt(float x, float y,
+			 DragAround bit) {
+	float lx = transform.unx(x, y);
+	float ly = transform.uny(x, y);
+	bit = (DragAround)bit.inwards(transform);
+
+	try {
+	    Track track = document.track(lx, ly);
+	
+	    if (track != null) {
+		//GRASP.log(track.toString());
+		Indexable reference =
+		    document.refer(track);
+		if (reference != null) {
+		    //GRASP.log(reference.toString());
+		    //document.insert(bit.target, track);
+		    //return;
+		}
+		else {
+		    //GRASP.log("null reference");
+		}
+	    }
+	    else {
+		//GRASP.log("null track");
+	    }
+	}
+	catch (Exception e) {
+	    GRASP.log(e.toString());
+	}
+	
+	document.insertAt(lx, ly, bit, null);
+    }
+
+    
     @Override
     public void writeDataToParcel(Parcel out, int flags) {
 	out.writeFloat(_left);
