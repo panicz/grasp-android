@@ -1,0 +1,140 @@
+(import (conversions))
+(import (define-syntax-rule))
+(import (assert))
+(import (define-interface))
+
+;;(define-alias Cloneable java.lang.Cloneable)
+
+
+(define-simple-class Record ()
+  interface: #t
+  ((typename) :: String #!abstract)
+  ((fields->string) :: String #!abstract)
+  ((toString) :: String #!abstract)
+  ((assign source :: Record) :: Record #!abstract)
+  ((clone) :: Record #!abstract))
+
+
+#|
+(define-interface Record ()
+  (typename) :: String
+  (fields->string) :: String
+  (toString) :: String
+  ;;(embedded-in? object)::boolean
+  (assign source :: Record) :: Record
+  (clone) :: Record
+  ;;(deep-copy)::Record
+  )
+|#
+
+(define-simple-class Base (Record)
+  ((typename)::String #!abstract)
+  ((fields->string)::String "")
+  ((toString)::String
+   (string-append "["(typename) (fields->string)"]"))
+  ((embedded-in? object)::boolean (instance? object Base))
+  ((assign source::Record)::Record (this))
+  ((clone)::Record (Base)))
+
+(define-syntax-rule (define-type (type-name . fields) . spec)
+  (type-definition type-name Base () fields () spec ()))
+
+(define-syntax type-definition
+  (lambda (stx)
+    (syntax-case stx (Base extending implementing with :=)
+
+      ((_ type-name parent interfaces
+	  () ((slot-symbol . slot-spec) ...) () (methods ...))
+       #'(define-simple-class type-name (parent . interfaces)
+	   ((typename):: String
+	    (symbol->string 'type-name))
+	   
+	   ((fields->string):: String
+	    (string-append
+	     (invoke-special parent (this) 'fields->string)
+	     (string-append " " (symbol->string 'slot-symbol)
+			    ": "(java.lang.String:valueOf slot-symbol))
+	     ...))
+	   	   
+	   ((embedded-in? object):: boolean
+	    (and (instance? object type-name)
+		 (invoke-special parent (this) 'embedded-in? object)
+		 (equal? slot-symbol (field object 'slot-symbol))
+		 ...))
+
+	   ((equals object):: boolean
+	    (and (instance? object type-name)
+		 (invoke (as type-name object) 'embedded-in? (this))))
+	   
+	   ((clone):: type-name
+	    (let ((copy (type-name)))
+	      (invoke copy 'assign (as parent (this)))
+	      ;;(invoke-special parent copy 'assign (this))
+	      (set! (field copy 'slot-symbol) slot-symbol)
+	      ...
+	      copy))
+
+	   ((assign source :: type-name):: type-name
+	    (invoke-special parent (this) 'assign (as parent source))
+	    (set! slot-symbol (field source 'slot-symbol))
+	    ...
+	    (this))
+
+	   (slot-symbol . slot-spec)
+	   ...
+	   methods ...))
+
+      ((_ type-name parent interfaces
+	  (slot-keyword slot-type := value . fields)
+	  (slot-definitions ...) spec methods)
+       (keyword? (syntax->datum #'slot-keyword))
+       (with-syntax ((slot-symbol (datum->syntax
+				   stx
+				   (keyword->symbol
+				    (syntax->datum #'slot-keyword)))))
+	 #'(type-definition
+	    type-name parent interfaces fields
+	    (slot-definitions ... (slot-symbol type: slot-type
+					       init: value))
+	    spec methods)))
+
+      ((_ type-name parent interfaces
+	  (slot-keyword slot-type . fields)
+	  (slot-definitions ...) spec methods)
+       (keyword? (syntax->datum #'slot-keyword))
+       (with-syntax ((slot-symbol (datum->syntax
+				   stx
+				   (keyword->symbol
+				    (syntax->datum #'slot-keyword)))))
+	 #'(type-definition
+	    type-name parent interfaces fields
+	    (slot-definitions ... (slot-symbol type: slot-type))
+	    spec methods)))
+
+      ((_ type-name parent interfaces
+	  () slots (implementing interface
+				 with (method . body) . spec)
+	  (methods ...))
+       #'(type-definition
+	  type-name parent (interface . interfaces) () slots
+	  spec (methods ... (method . body))))
+
+      ((_ type-name Base interfaces
+	  () slots (extending
+		    parent
+		    with (method . body) . spec) (methods ...))
+       #'(type-definition
+	  type-name parent interfaces () slots spec
+	  (methods ... (method . body))))
+
+      ((_ type-name Base interfaces
+	  () slots (extending parent . spec) methods)
+       #'(type-definition
+	  type-name parent interfaces () slots spec methods))
+
+      ((_ type-name parent interfaces
+	  () slots ((method . body) . spec) (methods ...))
+       #'(type-definition
+	  type-name parent interfaces () slots
+	  spec (methods ... (method . body))))
+      )))

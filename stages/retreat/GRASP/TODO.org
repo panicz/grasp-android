@@ -1,0 +1,246 @@
+* Plan implementacji GRASP w Kawa
+
+  1. Bedziemy opierac wyswietlanie 'porzadku
+     tekstowego' na slabych hasz-mapach
+
+  2. Dla pozostalych form interakcji chcemy
+     miec kombinatory Beside, Below, Over
+
+  3. Chcemy miec dwie implementacje:
+     - taka, ktora mozemy sobie testowac
+       w Emacsie (i ktora byc moze stanie
+       sie trybem dla Emacsa)
+
+     - taka, ktora bedzie appka androidowa
+
+  4. w zwiazku z tym, bedziemy chcieli miec
+     jeden interfejs i dwie implementacje
+     
+     i teraz caly szkopul w tym zeby okreslic
+     zakres odpowiedzialnosci tego interfejsu
+
+     (define-type (Point left: real top: real))
+  
+     (define-interface Screen ()
+       (clear!)::void
+       (translate! x::real y::real)::void
+       (open-paren! height::real)::void
+       (close-paren! height::real)::void
+       (width object)::real ; szerokosc w jednostkach ekranowych
+       (height object)::real ; wysokosc w jednostkach ekranowych
+       (draw! object cursor)::Point
+       ;;(draw-line! x0::real y0::real x1::real y1::real)::void
+       (draw-text! text::String)::void
+       (draw-rectangle! w::real h::real)::void
+       )
+
+  5. jedna implementacja bedzie dzialac w zwyklej sesji
+     Emacsa
+
+     (define-simple-class Terminal (Screen)
+       (shift-left :: real)
+       (shift-top :: real)
+       (width :: int)
+       (height :: int)
+       (data :: char[])
+
+       ((put! c::char row::real col::real)::void
+        (let ((x::int (as int (+ col shift-left)))
+	      (y::int (as int (+ row shift-top))))
+	  ;; mozna zrobic tak zeby rozszerzac bufor
+	  ;; kiedy wychodzimy poza zakres
+	  (when (and (< x width) (>= x 0)
+	             (< y height (>= y 0)))
+            (set! (data (+ (* width y) x)) c))))
+       
+       ((*init* w::int h::int)
+        (set! width w)
+        (set! height h)
+        (set! data (char[] length: (* w h)))
+        (clear))
+	 
+       ((clear!)::void
+        (for line from 0 below height
+           (for row from 0 below width
+               (set! (data (+ (* line width) row))
+                    #\space))))
+  
+       ((toString)::String
+        (with-output-to-string
+          (lambda ()
+            (for line from 0 below height
+               (for row from 0 below width
+                   (write-char (data (+ (* line width) row))))
+                   (write-char #\newline)))))
+
+       ((translate! x::real y::real)::void
+        (set! shift-left (+ shift-left x))
+	(set! shift-top (+ shift-top y)))
+
+       ((open-paren! height::real)::void
+        (put! #\/ 0 0)
+        (for i from 1 below (- height 2)
+	  (put! #\| i 0))
+        (put! #\\ (- height 1) 0))
+       
+       ((close-paren! height::real)::void
+        (put! #\\ 0 0)
+        (for i from 1 below (- height 2)
+	  (put! #\| i 0))
+        (put! #\/ (- height 1) 0))
+  
+       ((pair-width pair::Pair)::real
+        (+ 2
+	   (string-width (pre-head-space pair))
+           (if (null? (head pair))
+	       (+ paren-width
+	          (string-width (null-head-space pair))
+		  paren-width)
+	       (width (head pair)))
+	   
+           2))
+
+       ((string-width s::String)::real
+        (let ((line-length 0)
+	      (max-length 0))
+	  (for c in s
+	      (match c
+	        (#\newline
+		 (set! max-length (max max-length line-length))
+		 (set! line-length 0))
+		(_
+		 (set! line-length (+ line-length 1)))))
+          (max max-length line-length)))
+         
+       ((width object)::real
+        (cond ((pair? object)
+	       (pair-width object))
+	      ((string? object)
+	       (+ (string-width object) 2))
+	      ((symbol? object)
+	       (string-length (symbol->string object))))
+
+       ((string-width s::String)::real
+        (let ((total-lines 0))
+	  (for c in s
+	      (match c
+	        (#\newline
+		 (set! total-lines (+ total-lines 1)))
+		(_
+		 (begin))))
+          total-lines))
+  
+       ((height object)::real
+        (cond ((pair? object)
+	       (pair-height object))
+	      ((string? object)
+	       (string-height object))
+	      ((symbol? object)
+	       1)))
+
+       ((draw-string! s::String)::Point
+        (put! #\" 0 0)  ;")
+        (let ((row 0)
+              (col 1)
+              (width 1))
+          (for c in s
+             (match c
+               (#\newline
+	        (set! row (+ row 1))
+	        (set! col 1))
+	       (_
+	        (put! c row col)
+		(set! col (+ col 1))
+		(set! width (smax width col)))))
+	  (put! #\" row width) ;")
+	  (Point left: (+ width 1) top: (+ row 1))))
+
+       ((draw-symbol! symbol)::Point
+        (translate! 0 1)
+	(let ((width (draw-text! (symbol->string symbol)))
+	  (translate! 0 -1)
+          (Point left: width top: 3)))
+	       
+       ((draw-pair! pair width::real)::Point
+        (show-head p)
+  (display (post-head-space p))
+  (cond ((dotted? p)
+  (show-dotted-tail p))
+  ((pair? (tail p))
+  (show-pair (tail p)))))
+       
+        (draw-head! )
+        )
+       
+       ((draw! object)::Point
+        (cond ((pair? object)
+	       (translate! 2 0)
+	       (match (draw-pair! object)
+	         ((Point left: width top: height)
+                  (translate! -2 0)
+		  (open-paren! height)
+		  (translate! (+ 3 width) 0)
+		  (close-paren! height)
+		  (translate! (- (+ 3 width)) 0)
+		  (Point left: (+ width 4)
+		         top: height))
+                 (_ #!null)))		  
+		 
+	      ((string? object)
+	       (draw-string! object))
+	      ((symbol? object)
+	       (draw-symbol! object))
+	      (else
+	       #!null)))
+  
+       ;((draw-line! x0::real y0::real x1::real y1::real)::void ...)
+	
+       ((draw-text! text::String)::real
+        (for i from 0 below (string-length text)
+	    (put! (string-ref text i) 0 i))
+	(string-length text))
+
+       ((draw-rectangle! w::real h::real)::void
+        (put! #\+ 0 0)
+	(put! #\+ 0 (- w 1))
+	(put! #\+ (- h 1) 0)
+	(put! #\+ (- w 1) (- h 1))
+	(for i in 1 below (- w 1)
+	  (put! #\- 0 i)
+	  (put! #\- (- h 1) i))
+	(for i in 1 below (- h 1)
+	  (put! #\| i 0)
+	  (put! #\| i (- w 1))))
+       )
+  
+  6. porzadek tekstowy: pomiar wyrazen, rysowanie oraz przekazywanie
+     zdarzen bedzie sie odbywac wedlug ujednoliconego schematu:
+
+     1. najpierw mamy lewy nawias
+
+     2. oraz przestrzen za lewym nawiasem (pre-head-space)
+	
+     3. nastepnie mamy 'glowe', ktorej trescia moze byc
+	1. lista pusta, w ktorym to przypadku wypelniamy
+	   ja okreslona przestrzenia (null-head-space)
+
+	2. dowolny inny element, ktory po prodtu rysujemy
+
+     4. nastepnie mamy post-head-space
+
+     5. w dalszej kolejnosci mamy nastepujace mozliwosci:
+	1. lista jest kropkowana. w takim wypadku musimy
+	   okreslic, czy rysujemy kropke pionowo, czy poziomo
+
+	   (ponadto musimy stwierdzic, czy ogon to lista pusta,
+	   i jesli tak, wypelnic go (null-tail-space)
+
+	   wowczas po narysowaniu kropki dajemy pre-tail-space,
+	   a po narysowaniu elementu - post-tail-space
+  
+	2. jezeli ogon to jest niekropkowana lista pusta,
+	   to po prostu zamykamy nawias
+
+	3. jezeli ogon tez jest para, to rysujemy glowe
+	   jak w p. 3 powyzej
+	  

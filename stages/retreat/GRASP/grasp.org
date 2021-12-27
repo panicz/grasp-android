@@ -1,0 +1,109 @@
+* GRASP - The GRAphical Scheme Programming
+
+GRASP is a structural editor for the Scheme programming language
+optimized for working with touch-based interfaces.
+
+The most important feature of GRASP is its support for
+custom visual interactions via extension mechanism.
+
+It also supports user-defined gestures for smooth editing.
+
+** org-mode evaluation
+
+This file contains interactive code snippets that can
+be executed from within Emacs' org-mode. To enable
+shell script execution, evaluate the following code snippet:
+
+(Hint: Evaluation is performed by pressing C-c C-c when
+the cursor is placed within the code snippet)
+
+#+NAME: configure-emacs-org-mode-interactions
+#+BEGIN_SRC emacs-lisp
+
+  ;; enable shell in org-mode
+  (org-babel-do-load-languages
+   'org-babel-load-languages '((shell . t)))
+
+  ;; inhibit yes/no question before executing snippets
+  (setq org-confirm-babel-evaluate
+	#'(lambda (lang body)
+	    nil))
+
+  ;; provide a non-controversial return value
+  'shell-interaction-enabled
+#+END_SRC
+
+#+RESULTS: configure-emacs-org-mode-interactions
+: shell-interaction-enabled
+
+
+** Building GRASP on Android
+
+Being an Android app, GRASP has mostly been developed on Android.
+In order to be built, it requires a UNIX environment (such as
+Termux) with Android SDK packages installed on it.
+
+#+NAME: prepare-termux
+#+BEGIN_SRC sh
+pkg install aapt apksigner dx ecj git
+#+END_SRC
+
+GRASP is written in Kawa, which is a Java-based
+implementation of the Scheme programming language.
+
+An appropriate implementation of Kawa is shipped
+along with this repository. In order to build the
+classed required for GRASP, one needs to pass
+the appropritate Scheme files (in the order resulting
+from their dependencies) to the Kawa compiler.
+
+#+NAME: android.jar-location
+#+BEGIN_SRC sh
+locate android.jar
+#+END_SRC
+
+#+RESULTS: android.jar-location
+| /data/data/com.termux/files/usr/share/aapt/android.jar |
+| /data/data/com.termux/files/usr/share/java/android.jar |
+
+
+The files to be compiled are stored in the
+[file:./sources.list] file (use C-c C-o if younwant to follow
+the link).
+
+#+NAME: build-classes
+#+BEGIN_SRC sh
+  SOURCES=$(cat sources.list)
+
+  cd src
+
+  VERSION=$($KAWA --version 2>&1| head -n 1 |sed 's/^Kawa \([^ ]*\).*/\1/')
+  BUILDDIR="build-$VERSION"
+
+  mkdir -p ../$BUILDDIR
+  rm ../$BUILDDIR/*
+
+  $KAWA -C $SOURCES
+  mv *.class ../$BUILDDIR
+  cd ..
+
+#+END_SRC
+
+#+BEGIN_SRC sh :noweb yes :var ANDROID=android.jar-location[-1] :results output silent 
+  KAWA="java -cp $ANDROID:../libs/kawa.jar kawa.repl"
+  <<build-classes>>
+#+END_SRC
+
+#+RESULTS:
+
+It is, however, fairly old (version 1.13), and it does
+not seem to support module import at the interpreter level
+(or at least I didn't manage to figure out what to do about it),
+so it may be desirable to use a more recent version for
+testing and incremental development:
+
+#+BEGIN_SRC sh :noweb yes :results output silent 
+  KAWA=kawa
+  <<build-classes>>
+#+END_SRC
+
