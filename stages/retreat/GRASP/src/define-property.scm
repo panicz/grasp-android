@@ -11,3 +11,7 @@
       (set! (setter getter) (lambda (arg value)
 			      (hash-set! override arg value)))
       getter)))
+
+(define-syntax-rule (update! (property object) value)
+  (when (not (equal? (property object) value))
+    (set! (property object) value)))

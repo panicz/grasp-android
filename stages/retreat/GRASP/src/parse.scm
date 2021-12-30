@@ -1,16 +1,9 @@
 (import (srfi :11) (srfi :17))
+(import (conversions))
+(import (define-property))
 
-(define-alias make-weak-key-hash-table java.util.WeakHashMap)
 (define-alias Pair gnu.lists.Pair)
 (define-alias System java.lang.System)
-
-(define-syntax define-syntax-rule 
-  (syntax-rules ()
-    ((define-syntax-rule (name . args) substitution)
-     (define-syntax name
-       (syntax-rules ()
-	 ((name . args)
-	  substitution))))))
 
 ;; we override Pair with Object's default equality and hash functions
 ;; (TODO: patch the Kawa implementation of Cons)
@@ -23,43 +16,6 @@
 (define head car)
 
 (define tail cdr)
-
-(define (list->symbol l)
-  (string->symbol (list->string l)))
-
-(define (with-output-to-string proc)
-  (call-with-output-string
-    (lambda (port)
-      (parameterize ((current-output-port port))
-	(proc)))))
-
-(define (with-input-from-string s proc)
-  (call-with-input-string s
-    (lambda (port)
-      (parameterize ((current-input-port port))
-	(proc)))))
-
-(define (hashq-set! table::java.util.WeakHashMap key value)
-  (table:put key value))
-
-(define (hashq-ref table::java.util.WeakHashMap key default)
-  (if (table:contains-key key)
-      (table:get key)
-      (default)))
-
-(define-syntax-rule (define-property (property-name object) default)
-  (define property-name
-    (let* ((override (make-weak-key-hash-table))
-	   (getter (lambda (object)
-		     (hashq-ref override object
-				(lambda () default)))))
-      (set! (setter getter) (lambda (arg value)
-			      (hashq-set! override arg value)))
-      getter)))
-
-(define-syntax-rule (update! (property object) value)
-  (when (not (equal? (property object) value))
-    (set! (property object) value)))
 
 (define-property (dotted? cell)
   (not (or (null? (tail cell))
@@ -193,7 +149,6 @@
     (let-values (((result spaces) (read-list)))
       result)))
 
-
 (define (show-empty-list space)
   (write-char #\()
   (display space)
@@ -213,6 +168,7 @@
   (display (post-tail-space p)))
 
 (define (show-pair p)
+  (display (pre-head-space p))  
   (show-head p)
   (display (post-head-space p))
   (cond ((dotted? p)
@@ -224,7 +180,6 @@
   (cond
    ((pair? p)
     (write-char #\()
-    (display (pre-head-space p))
     (show-pair p)
     (write-char #\)))
    (else
@@ -234,100 +189,3 @@
   (with-output-to-string
     (lambda ()
       (show p))))
-
-
-(define-alias Parameter gnu.mapping.LocationProc) 
-
-
-;; chcemy zdefiniowac nastepujace funkcje:
-;; - pozycja dziecka wewnatrz rodzica
-;; - pozycja potomka wewnatrz przodka
-;; - szerokosc elementu
-;; - wysokosc elementu
-
-(e.g.
- (let ((parsed "\
-(* a b
-   c d)
-"))
-   (and (= (raw-width (car parsed)) 7)
-	(= (raw-height (car parsed)) 2))))
-
-(define (raw-width x)
-  (cond ((pair? x)
-	 ...)
-	((symbol? x)
-	 (string-length (symbol->string x)))
-	((string? x)
-	 (let ((line 0)
-	       (current-width 0)
-	       (max-width 0))
-	   (for char in x
-		(if (eq? char #\newline)
-		    
-	       
-
-(define (position #;of expression #;in parent)
-  (let ((left 0)
-	(top 0))
-    
-    (define (skip-space! space)
-      (for char in space
-	   (match char
-	     (#\space
-	      (set! left (+ left 1)))
-	     (#\newline 
-	      (set! left 0)
-	      (set! top (+ top 1)))
-	     (#\tab
-	      (set! left (+ left (tab-width)))))))
-
-    (define (position-in sequence)
-      (if (pair? sequence)
-	  (if (eq? (car sequence) expression)
-	      (values left top)
-	      (cond ((eq? (cdr sequence) expression)
-		     (assert (dotted? sequence))
-		     
-
-		  
-	  (if (dotted? sequence)
-	      ...
-	      
-    
-    (cond ((pair? parent)
-	   (skip-space! (pre-head-space parent))
-	   (if (eq?
-    ...))
-
-
-(let* ((input "( (  ) a  (   b  . (  
-
-  )  ) ) ( y g .   z ) ")
-       (parsed (call-with-input-string input parse)))
-  (show parsed))
-
-(let* ((input "( (  ) a  (   b  . (  
-
-  )  ) ) ( y g .   z ) ")
-	(parsed (call-with-input-string input parse)))
-  (show (tree-map/preserve
-	 cell-display-properties
-	 (let ((counter 0))
-	   (lambda (arg)
-	     (cond ((null? arg) '())
-		   (else
-		    (set! counter (+ counter 1))
-		    counter)))) parsed)))
-
-(for-each (lambda (x) (write x)) "abc")
-    
-
-(let ((object '(1 2 3)))
-  (set! (dotted? object) #t)
-  (set! (pre-head-space object) "\n")
-  (set! (post-tail-space object) "  \n")
-  (set! (dotted? (tail object)) #t)
-  (set! (dotted? (tail (tail object))) #t)
-  (set! (null-tail-space (tail (tail object))) "   ")
-  (show object))

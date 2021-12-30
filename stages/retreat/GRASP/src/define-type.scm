@@ -5,36 +5,35 @@
 
 ;;(define-alias Cloneable java.lang.Cloneable)
 
-
-(define-simple-class Record ()
+(define-simple-class Struct ()
   interface: #t
   ((typename) :: String #!abstract)
   ((fields->string) :: String #!abstract)
   ((toString) :: String #!abstract)
-  ((assign source :: Record) :: Record #!abstract)
-  ((clone) :: Record #!abstract))
-
+  ((assign source :: Struct) :: Struct #!abstract)
+  ((clone) :: Struct #!abstract))
 
 #|
-(define-interface Record ()
+(define-interface Struct ()
   (typename) :: String
   (fields->string) :: String
   (toString) :: String
   ;;(embedded-in? object)::boolean
-  (assign source :: Record) :: Record
-  (clone) :: Record
-  ;;(deep-copy)::Record
+  (assign source :: Struct) :: Struct
+  (clone) :: Struct
+  ;;(deep-copy)::Struct
   )
 |#
 
-(define-simple-class Base (Record)
+  
+(define-simple-class Base (Struct)
   ((typename)::String #!abstract)
   ((fields->string)::String "")
   ((toString)::String
    (string-append "["(typename) (fields->string)"]"))
   ((embedded-in? object)::boolean (instance? object Base))
-  ((assign source::Record)::Record (this))
-  ((clone)::Record (Base)))
+  ((assign source::Struct)::Struct (this))
+  ((clone)::Struct (Base)))
 
 (define-syntax-rule (define-type (type-name . fields) . spec)
   (type-definition type-name Base () fields () spec ()))

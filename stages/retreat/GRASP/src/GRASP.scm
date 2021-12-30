@@ -27,7 +27,7 @@
   ((un-y xt::float yt::float)::float
    (+ yt vertically)))
   
-(define-external-interface Event ()
+(define-interface Event ()
   (transform! t::Transform2D)::Event
   (untransform! t::Transform2D)::Event)
 
@@ -92,7 +92,7 @@
 (define-type (KeyRelease ...)
   extending KeyEvent)
 
-(define-external-interface Pad ()
+(define-interface Pad ()
   (width)::float
   (height)::float
   (render canvas::Canvas)::void
