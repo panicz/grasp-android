@@ -1,17 +1,35 @@
 (import (srfi :11) (srfi :17))
 (import (conversions))
 (import (define-property))
-
-(define-alias Pair gnu.lists.Pair)
-(define-alias System java.lang.System)
+(import (screen))
+(import (draw))
 
 ;; we override Pair with Object's default equality and hash functions
 ;; (TODO: patch the Kawa implementation of Cons)
 
-(define-simple-class cons (Pair)
-  ((*init* a d) (invoke-special Pair (this) '*init* a d))
+(define-simple-class cons (gnu.lists.Pair Tile)
+  ((*init* a d) (invoke-special gnu.lists.Pair (this) '*init* a d))
   ((equals object) ::boolean (eq? object (this)))
-  ((hash-code) ::int (System:identity-hash-code (this))))
+  ((hash-code) ::int (java.lang.System:identity-hash-code (this)))
+  ((draw! screen::Screen)::Extent
+   (draw-parenthesized! draw-sequence! (this) screen)))
+
+;; Docelowo bedziemy musieli patchowac Kawe, chociazby po to,
+;; zeby takie obiekty, jak Symbol czy FString (IString? MString?)
+;; implementowaly Tile.
+;;
+;; Na razie jednak zrobmy tak, zeby nie uzywac tych typow
+;; bezposrednio w edytorze, a zamiast tego korzystac sobie
+;; z owijek
+
+(define-simple-class Symbol (Tile)
+  (name :: string)
+  ((*init* source::string)
+   (set! name source))
+  ((toString)::String
+   (name:toString))
+  ((draw! screen::Screen)::Extent
+   (screen:draw-atom! name)))
 
 (define head car)
 
@@ -116,7 +134,7 @@
 		     (let ((output (cons c '())))
 		       (read-atom-chars-into output)
 		       (set! (tail growth-cone)
-			     (list->symbol output))))
+			     (Symbol (list->string output)))))
 		 (update! (pre-tail-space growth-cone)
 			  spaces)
 		 (update! (dotted? growth-cone) #t)
@@ -138,7 +156,7 @@
 	      (else
 	       (let ((output (cons c '())))
 		 (read-atom-chars-into output)
-		 (add-element! (list->symbol output)
+		 (add-element! (Symbol (list->string output))
 			       (read-spaces))
 		 (read-next))))))
 

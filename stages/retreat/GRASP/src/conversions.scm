@@ -18,3 +18,6 @@
 
 (define (symbol->keyword s)
   (string->keyword (symbol->string s)))
+
+(define (digit->char digit)
+  (integer->char (+ digit (char->integer #\0))))

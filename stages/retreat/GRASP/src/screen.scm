@@ -4,7 +4,6 @@
 (import (for))
 (import (examples))
 
-
 (define-type (Extent width: real
                      height: real))
 
@@ -15,9 +14,58 @@
   (draw-string! s::string left::real top::real)::Extent
   (draw-text! s::string left::real top::real)::real
   (draw-atom! text::string)::Extent
+  (draw-finger! left::real top::real index::byte)::Extent
   (open-paren! height::real left::real top::real)::void
   (close-paren! height::real left::real top::real)::void
   )
+
+(define-interface Tile ()
+  (draw! screen::Screen)::Extent
+  )
+
+;; trzeba by bylo tak zrobic, zeby komorki "cons"
+;; oraz symbole implementowaly interfejs Tile
+
+(define-type (Over back: Tile front: Tile)
+  implementing Tile
+  with
+  ((draw! screen::Screen)::Extent
+   (let* ((back-extent (back:draw! screen))
+          (front-extent (front:draw! screen)))
+     (Extent width: (max front-extent:width
+                         back-extent:width)
+             height: (max front-extent:height
+                          back-extent:height)))))
+
+(define-type (Below top: Tile bottom: Tile)
+  implementing Tile
+  with
+  ((draw! screen::Screen)::Extent
+   (let* ((top-extent (top:draw! screen))
+          (bottom-extent (with-translation screen (0 top-extent:height)
+                           (bottom:draw! screen))))
+     (Extent width: (max top-extent:width bottom-extent:width)
+             height: (+ top-extent:height bottom-extent:height)))))
+
+(define-type (Beside left: Tile right: Tile)
+  implementing Tile
+  with
+  ((draw! screen::Screen)::Extent
+   (let* ((left-extent (left:draw! screen))
+          (right-extent (with-translation screen (left-extent:width 0)
+                          (right:draw! screen))))
+     (Extent width: (+ left-extent:width right-extent:width)
+             height: (max left-extent:height right-extent:height)))))
+
+(define-type (Finger left: real
+                     top: real
+                     index: byte)
+  implementing Tile
+  with
+  ((draw! screen::Screen)::Extent
+   (let ((finger (screen:draw-finger! left top index)))
+     (Extent width: (+ left finger:width)
+             height: (+ top finger:height)))))
 
 (define (string-extent s::string)::Extent
   (let ((line-length 0)
@@ -70,6 +118,9 @@ def") ===> "def")
   
   ((draw-atom! text::string)::Extent
    (Extent width: (string-length text) height: 1))
+
+  ((draw-finger! left::real top::real index::byte)::Extent
+   (Extent width: 1 height: 1))
   
   ((open-paren! height::real left::real top::real)::void
    (values))

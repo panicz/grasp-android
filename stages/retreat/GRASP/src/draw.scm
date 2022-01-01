@@ -24,6 +24,8 @@
     (screen:draw-atom! (number->string object)))
    ((string? object)
     (screen:draw-string! object 0 0))
+   ((instance? object Tile)
+    ((as Tile object):draw! screen))
    (else
     (error "Unsupported object type: " object))))
 
@@ -62,6 +64,7 @@
     (define (draw-dotted-tail! pair)::Extent
       ;; trzeba narysowac "kropke", czyli
       ;; albo kreske pionowa, albo pozioma
+      
       (with-translation screen (left top)
         (if (null? (tail pair))
             (draw-empty-list! (null-tail-space pair))
