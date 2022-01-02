@@ -51,21 +51,24 @@
             (draw! (head pair) screen))))
 
     (define (should-draw-horizontal-bar? dotted-pair)
-      (and (string-any (is _ eq? #\newline) (post-head-space dotted-pair))
-           (string-any (is _ eq? #\newline) (pre-tail-space dotted-pair))))
-    
+      (and (string-index (post-head-space dotted-pair) (is _ eq? #\newline))
+           (string-index (pre-tail-space dotted-pair) (is _ eq? #\newline))))
+
     (define (draw-dotted-tail! pair)::Extent
       (cond ((should-draw-horizontal-bar? pair)
-             (let ((bottom (+ top max-line-height)))
-               (skip-spaces! (post-head-space pair))
-               (skip-spaces! (pre-tail-space pair))
-               (advance! (with-translation screen (left top)
-                           (if (null? (tail pair))
-                               (draw-empty-list! (null-tail-space pair))
-                               (draw! (tail pair) screen))))
-               (skip-spaces! (post-tail-space pair))
-               (with-translation screen (0 bottom)
-                 (screen:draw-horizontal-bar! max-width))))
+             => (lambda (post-bar-newline-index)
+                  (let ((bottom (+ top max-line-height))
+                        (post-bar-space (pre-tail-space pair)))
+                    (skip-spaces! (post-head-space pair))
+                    (skip-spaces! (string-drop post-bar-space
+                                               (+ 1 post-bar-newline-index)))
+                    (advance! (with-translation screen (left top)
+                                (if (null? (tail pair))
+                                    (draw-empty-list! (null-tail-space pair))
+                                    (draw! (tail pair) screen))))
+                    (skip-spaces! (post-tail-space pair))
+                    (with-translation screen (0 bottom)
+                      (screen:draw-horizontal-bar! max-width)))))
             (else
              (skip-spaces! (post-head-space pair))
              (let ((previous-left left)
@@ -96,3 +99,6 @@
              (Extent width: max-width
                      height: (+ top max-line-height)))))
     ))
+
+
+

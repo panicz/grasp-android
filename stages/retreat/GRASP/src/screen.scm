@@ -97,14 +97,11 @@ def") ===> [Extent width: 3 height: 2])
              (set! last-newline (+ i 1))))
     (substring s last-newline n)))
 
-
 (e.g.
  (string-last-line "\
 abc
 def") ===> "def")
 
-;;(define (string-skip-first-line s::string)::string
-  
 (define-simple-class NullScreen (Screen)
   ((paren-width)::real 0)
 
