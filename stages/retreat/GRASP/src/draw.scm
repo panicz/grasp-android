@@ -4,8 +4,9 @@
 (import (examples))
 (import (screen))
 (import (parse))
+(import (infix))
 
-(define (draw-parenthesized! proc/object+screen object screen::Screen)::Extent
+(define (parenthesized! proc/object+screen object screen::Screen)::Extent
   (let* ((paren-width (screen:paren-width))
          (extent (with-translation screen (paren-width 0)
                    (as Extent (proc/object+screen object screen)))))
@@ -14,20 +15,8 @@
     (Extent width: (+ paren-width extent:width paren-width)
             height: extent:height)))
 
-(define (draw! object #!optional (screen::Screen (current-screen)))::Extent
-  (cond 
-   ((pair? object)
-    (draw-parenthesized! draw-sequence! object screen))
-   ((symbol? object)
-    (screen:draw-atom! (symbol->string object)))
-   ((number? object)
-    (screen:draw-atom! (number->string object)))
-   ((string? object)
-    (screen:draw-string! object 0 0))
-   ((instance? object Tile)
-    ((as Tile object):draw! screen))
-   (else
-    (error "Unsupported object type: " object))))
+(define (draw! object::Tile #!optional (screen::Screen (current-screen)))::Extent
+  (object:draw! screen))
 
 (define (draw-sequence! elems #!optional (screen::Screen (current-screen)))::Extent
   (let ((max-width 0)
@@ -51,7 +40,7 @@
       (set! max-width (max left max-width)))
 
     (define (draw-empty-list! spaces::string)::Extent
-      (draw-parenthesized! (lambda (spaces screen)
+      (parenthesized! (lambda (spaces screen)
                              (string-extent spaces))
                            spaces screen))
 
@@ -61,26 +50,49 @@
             (draw-empty-list! (null-head-space pair))
             (draw! (head pair) screen))))
 
+    (define (should-draw-horizontal-bar? dotted-pair)
+      (and (string-any (is _ eq? #\newline) (post-head-space dotted-pair))
+           (string-any (is _ eq? #\newline) (pre-tail-space dotted-pair))))
+    
     (define (draw-dotted-tail! pair)::Extent
-      ;; trzeba narysowac "kropke", czyli
-      ;; albo kreske pionowa, albo pozioma
-      
-      (with-translation screen (left top)
-        (if (null? (tail pair))
-            (draw-empty-list! (null-tail-space pair))
-            (draw! (tail pair) screen)))
-      (skip-spaces! (post-tail-space pair)))
+      (cond ((should-draw-horizontal-bar? pair)
+             (let ((bottom (+ top max-line-height)))
+               (skip-spaces! (post-head-space pair))
+               (skip-spaces! (pre-tail-space pair))
+               (advance! (with-translation screen (left top)
+                           (if (null? (tail pair))
+                               (draw-empty-list! (null-tail-space pair))
+                               (draw! (tail pair) screen))))
+               (skip-spaces! (post-tail-space pair))
+               (with-translation screen (0 bottom)
+                 (screen:draw-horizontal-bar! max-width))))
+            (else
+             (skip-spaces! (post-head-space pair))
+             (let ((previous-left left)
+                   (previous-top top))
+               (advance! (Extent width: (screen:vertical-bar-width)
+                                 height: 0))
+               (skip-spaces! (pre-tail-space pair))
+               (advance! (with-translation screen (left top)
+                           (if (null? (tail pair))
+                               (draw-empty-list! (null-tail-space pair))
+                               (draw! (tail pair) screen))))
+               (skip-spaces! (post-tail-space pair))
+               (with-translation screen (previous-left previous-top)
+                 (screen:draw-vertical-bar! max-line-height)))))
+      (skip-spaces! (post-tail-space pair))
+      (Extent width: max-width
+              height: (+ top max-line-height)))
 
     (let draw-pair! ((pair elems))
       (skip-spaces! (pre-head-space pair))
       (advance! (draw-head! pair))
-      (skip-spaces! (post-head-space pair))
       (cond ((dotted? pair)
              (draw-dotted-tail! pair))
             ((pair? (tail pair))
+             (skip-spaces! (post-head-space pair))
              (draw-pair! (tail pair)))
             (else
              (Extent width: max-width
                      height: (+ top max-line-height)))))
-
     ))

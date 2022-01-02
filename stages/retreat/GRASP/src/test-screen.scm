@@ -6,7 +6,8 @@
         (parse)
         (draw)
         (examples)
-        (assert))
+        (assert)
+        (infix))
 
 ;; this is what we're aiming at:
 
@@ -41,7 +42,9 @@
 
 (draw! (head parsed))
 
-(assert
+(display ((current-screen):toString))
+
+#;(assert
  (screen-displays? &{&-
 /        /             \              \
 | define | factorial n |              |
@@ -61,13 +64,15 @@
              front: (Finger left: 8
                             top: 4)))
 
-(assert
+(display ((current-screen):toString))
+
+#;(assert
  (screen-displays? &{&-
 /        /             \              \
 | define | factorial n |              |
 |        \             /              |
 |   /    /        \                 \ |
-|   | if_| <= n 0 |                 | |
+|   | if@| <= n 0 |                 | |
 |   |    \        /                 | |
 |   |                               | |
 |   |       1                       | |
@@ -77,10 +82,33 @@
 \   \       \     \   \       / / / / /
 }))
 
+(define dotted (call-with-input-string "\
+(head
+.
+tail) (((a b)
+(c d))  .  ((e f)
+(g h)))" parse))
+
+
+((current-screen):clear!)
+
+(let ((e (draw! (head dotted))))
+  (with-translation (current-screen) ((+ 1 e:width) 0)
+    (draw! (head (tail dotted)))))
+
+(display ((current-screen):toString))
 
 #|
 (e.g.
  (cursor at: (Finger left: 8 top: 4)
-         in: parsed)
- ===> ...)
+         in: (head parsed))
+ ===> (5 2 0))
 |#
+
+;; Iteracja po wyrazeniach:
+;; Schemat iteracji, ktorego uzywamy do rysowania sekwencji,
+;; chcielibysmy rowniez wykorzystywac do przekazywania
+;; zdarzen dotyku do poszczegolnych komponentow, a w szczegolnosci
+;; do "wyciagania" podwyrazen, oraz do umieszczania kursora.
+;;
+;; Chcemy miec operacje, ktora

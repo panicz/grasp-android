@@ -26,6 +26,8 @@
 
   ((paren-width)::real 2)
 
+  ((vertical-bar-width)::real 1)
+  
   ((clear!)::void
    (for line from 0 below height
         (for row from 0 below width
@@ -55,7 +57,15 @@
           (put! (digit->char index) top left)
           (put! #\) top (+ left 1))
           (Extent width: 3 height: 1))))
-         
+
+  ((draw-horizontal-bar! width::real)::void
+   (for i from 0 below width
+        (put! #\_ -1 i)))
+   
+  ((draw-vertical-bar! height::real)::void
+   (for i from 0 below height
+        (put! #\| i 0)))
+  
   ((open-paren! height::real left::real top::real)::void
    (put! #\/ top left)
    (for i from 1 to (- height 2)
@@ -81,7 +91,7 @@
                  (put! c row col)
                  (set! col (+ col 1))
                  (set! width (max width (- col left))))))
-     (put! #\" row (+ left width)) ;")
+     (put! #\" row (+ left width))
      (Extent width: (+ width 2)
              height: (- (+ row 1) top))))
 
@@ -92,6 +102,6 @@
 
   ((draw-atom! text::string)::Extent
    (Extent width: (draw-text! text 0 1)
-           height: 3))  
+           height: 3))
 
   )

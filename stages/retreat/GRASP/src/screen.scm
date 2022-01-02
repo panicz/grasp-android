@@ -9,12 +9,15 @@
 
 (define-interface Screen ()
   (paren-width)::real
+  (vertical-bar-width)::real
   (clear!)::void
   (translate! x::real y::real)::void
   (draw-string! s::string left::real top::real)::Extent
   (draw-text! s::string left::real top::real)::real
   (draw-atom! text::string)::Extent
   (draw-finger! left::real top::real index::byte)::Extent
+  (draw-horizontal-bar! width::real)::void
+  (draw-vertical-bar! height::real)::void
   (open-paren! height::real left::real top::real)::void
   (close-paren! height::real left::real top::real)::void
   )
@@ -86,7 +89,7 @@
 abc
 def") ===> [Extent width: 3 height: 2])
 
-(define (last-line s::string)::string
+(define (string-last-line s::string)::string
   (let ((n (string-length s))
         (last-newline 0))
     (for i from 0 below n
@@ -96,14 +99,17 @@ def") ===> [Extent width: 3 height: 2])
 
 
 (e.g.
- (last-line "\
+ (string-last-line "\
 abc
 def") ===> "def")
 
-
+;;(define (string-skip-first-line s::string)::string
+  
 (define-simple-class NullScreen (Screen)
   ((paren-width)::real 0)
-  
+
+  ((vertical-bar-width)::real 0)
+ 
   ((clear!)::void
    (values))
   
@@ -121,6 +127,12 @@ def") ===> "def")
 
   ((draw-finger! left::real top::real index::byte)::Extent
    (Extent width: 1 height: 1))
+
+  ((draw-horizontal-bar! width::real)::void
+   (values))
+  
+  ((draw-vertical-bar! height::real)::void
+   (values))
   
   ((open-paren! height::real left::real top::real)::void
    (values))

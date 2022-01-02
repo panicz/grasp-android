@@ -12,7 +12,7 @@
   ((equals object) ::boolean (eq? object (this)))
   ((hash-code) ::int (java.lang.System:identity-hash-code (this)))
   ((draw! screen::Screen)::Extent
-   (draw-parenthesized! draw-sequence! (this) screen)))
+   (parenthesized! draw-sequence! (this) screen)))
 
 ;; Docelowo bedziemy musieli patchowac Kawe, chociazby po to,
 ;; zeby takie obiekty, jak Symbol czy FString (IString? MString?)
