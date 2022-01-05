@@ -1,5 +1,6 @@
 (import (match))
 (import (conversions))
+(import (only (kawa standard define) (defineRaw %define)))
 
 (define-syntax lambda/kw
   (lambda (stx)
@@ -7,33 +8,37 @@
       ((_ args . body)
        (identifier? #'args)
        #'(lambda args . body))
-      
+
       ((_ args . body)
        #'(%lambda/kw args #;req () #;opt () #;kw () #;destruct () body)))))
 
 (define-syntax %lambda/kw
   (lambda (stx)
     (syntax-case stx (:= ::)
+            
       ((_ () (req ...) (opt ...) (kw ...) (pat ...) (:: type . body))
        #'(lambda (req ... #!optional opt ... #!key kw ...) :: type
-           (match-let* (pat ...) . body)))
+            (match-let* (pat ...) . body)))
       
-      ((_ () (req ...) (opt ...) (kw ...) (pat ...) rest (:: type . body))
-       #'(lambda (req ... #!optional opt ... #!key kw ... #!rest rest) :: type
-           (match-let* (pat ...) . body)))
+      ((_ tail (req ...) (opt ...) (kw ...) (pat ...) (:: type . body))
+       (identifier? #'tail)
+       #'(lambda (req ... #!optional opt ... #!key kw ... #!rest tail) :: type
+            (match-let* (pat ...) . body)))
 
       ((_ () (req ...) (opt ...) (kw ...) (pat ...) body)
        #'(lambda (req ... #!optional opt ... #!key kw ...)
            (match-let* (pat ...) . body)))
       
-      ((_ () (req ...) (opt ...) (kw ...) (pat ...) rest body)
-       #'(lambda (req ... #!optional opt ... #!key kw ... #!rest rest)
+      ((_ tail (req ...) (opt ...) (kw ...) (pat ...) body)
+       (identifier? #'tail)
+       #'(lambda (req ... #!optional opt ... #!key kw ... #!rest tail)
            (match-let* (pat ...) . body)))
       
       ;; keyword arguments:
       
       ((_ (key pattern :: type := init . rest) req opt (kw ...) (pat ...) body)
        (keyword? (syntax->datum #'key))
+
        (with-syntax ((sym (datum->syntax stx
                             (keyword->symbol
                              (syntax->datum #'key)))))
@@ -54,6 +59,14 @@
                             (keyword->symbol
                              (syntax->datum #'key)))))
          #'(%lambda/kw rest req opt (kw ... (sym init))
+                       (pat ... (pattern sym)) body)))
+
+      ((_ (key pattern . rest) req opt (kw ...) (pat ...) body)
+       (keyword? (syntax->datum #'key))
+       (with-syntax ((sym (datum->syntax stx
+                            (keyword->symbol
+                             (syntax->datum #'key)))))
+         #'(%lambda/kw rest req opt (kw ... (sym))
                        (pat ... (pattern sym)) body)))
 
       ;; optional arguments:
@@ -87,14 +100,9 @@
       ((_ (pattern . rest) (req ...) opt kw (pat ...) body)
        #'(%lambda/kw rest (req ... var) opt kw
                      (pat ... (pattern var)) body))
-
-      ;; the dotted tail:
-
-      ((_ tail req opt kw pat body)
-       (identifier? #'tail)
-       #'(%lambda/kw () req opt kw pat tail body))
       
       )))
+
 
 (define-syntax define/kw
   (syntax-rules (is ::)
@@ -108,11 +116,11 @@
      (define/kw (head . tail) (lambda/kw args . body)))
 
     ((_ (name . args) . body)
-     (define name (lambda/kw args . body)))
-
+     (%define name 0 #!null (lambda/kw args . body)))
+    
     ((_ name :: type value)
-     (define name :: type value))
+     (%define name 1 type value))
 
     ((_ name value)
-     (define name value))
+     (%define name 0 #!null value))
     ))
