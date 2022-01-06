@@ -177,3 +177,20 @@
                        ((variable path) . bindings/final)
                        actions ... alternative))
       )))
+
+(define-syntax match-let*
+  (lambda (stx)
+    (syntax-case stx ()
+      ((_ ((pattern value) . rest) . body)
+       (identifier? #'pattern)
+       #'(let ((pattern value))
+           (match-let* rest . body)))
+      
+      ((_ ((pattern value) . rest) . body)
+       #'(match value
+           (pattern
+            (match-let* rest . body))
+           (_
+            (error "Value failed to match pattern: "'value 'pattern))))
+      ((_ () . body)
+       #'(let () . body)))))

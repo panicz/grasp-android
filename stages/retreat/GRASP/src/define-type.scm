@@ -87,10 +87,9 @@
 	  (slot-keyword slot-type := value . fields)
 	  (slot-definitions ...) spec methods)
        (keyword? (syntax->datum #'slot-keyword))
-       (with-syntax ((slot-symbol (datum->syntax
-				   stx
-				   (keyword->symbol
-				    (syntax->datum #'slot-keyword)))))
+       (with-syntax ((slot-symbol (datum->syntax stx
+                                    (keyword->symbol
+                                     (syntax->datum #'slot-keyword)))))
 	 #'(type-definition
 	    type-name parent interfaces fields
 	    (slot-definitions ... (slot-symbol type: slot-type

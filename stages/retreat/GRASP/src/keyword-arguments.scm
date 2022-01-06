@@ -1,6 +1,5 @@
 (import (match))
 (import (conversions))
-(import (only (kawa standard define) (defineRaw %define)))
 
 (define-syntax lambda/kw
   (lambda (stx)
@@ -116,11 +115,6 @@
      (define/kw (head . tail) (lambda/kw args . body)))
 
     ((_ (name . args) . body)
-     (%define name 0 #!null (lambda/kw args . body)))
+     (define name (lambda/kw args . body)))
     
-    ((_ name :: type value)
-     (%define name 1 type value))
-
-    ((_ name value)
-     (%define name 0 #!null value))
     ))

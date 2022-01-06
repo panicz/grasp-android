@@ -1,10 +1,25 @@
+(import (cell-display-properties))
+(import (rename (keyword-arguments) (define/kw define*)))
 (import (define-type))
 (import (define-interface))
 (import (for))
 (import (examples))
 (import (screen))
-(import (parse))
 (import (infix))
+(import (match))
+
+;; Jaki mamy teraz pomysl
+;; funkcja renderujaca bedzie miala dwa dodatkowe argumenty:
+;; - kontekst, ktory jest odwroconym kursorem wyrazenia
+;; - biezacy kursor, o ile renderowane wyrazenie lezy na sciezce
+;;   tego kursora, albo #f w przeciwnym przypadku
+;;
+;; Dodatkowo trzeba podjac decyzje, w jaki sposob
+;; kursor "przenika przez" kombinatory Over, Beside, Below.
+;; Ale tu sprawa wydaje sie jasna:
+;; top w Below, left w Beside i back to 0, natomiast
+;; bottom, right oraz front to 1
+
 
 (define (parenthesized! proc/object+screen object screen::Screen)::Extent
   (let* ((paren-width (screen:paren-width))
@@ -15,10 +30,20 @@
     (Extent width: (+ paren-width extent:width paren-width)
             height: extent:height)))
 
-(define (draw! object::Tile #!optional (screen::Screen (current-screen)))::Extent
-  (object:draw! screen))
+(define* (draw! object::Tile
+                on: screen::Screen := (current-screen)
+                ;;within: context::List := '()
+                ;;at: cursor::Cursor := #f
+                )
+  ::Extent
+  (object:draw! screen #;context #;cursor))
 
-(define (draw-sequence! elems #!optional (screen::Screen (current-screen)))::Extent
+(define* (draw-sequence! elems
+                         on: screen :: Screen := (current-screen)
+                         ;;within: context::List := '()
+                         ;;at: cursor::Cursor := #f
+                         )
+  ::Extent
   (let ((max-width 0)
         (max-line-height 1)
         (top 0)
@@ -48,7 +73,7 @@
       (with-translation screen (left top)
         (if (null? (head pair))
             (draw-empty-list! (null-head-space pair))
-            (draw! (head pair) screen))))
+            (draw! (head pair) on: screen))))
 
     (define (should-draw-horizontal-bar? dotted-pair)
       (and (string-index (post-head-space dotted-pair) (is _ eq? #\newline))
@@ -65,7 +90,7 @@
                     (advance! (with-translation screen (left top)
                                 (if (null? (tail pair))
                                     (draw-empty-list! (null-tail-space pair))
-                                    (draw! (tail pair) screen))))
+                                    (draw! (tail pair) on: screen))))
                     (skip-spaces! (post-tail-space pair))
                     (with-translation screen (0 bottom)
                       (screen:draw-horizontal-bar! max-width)))))
@@ -79,7 +104,7 @@
                (advance! (with-translation screen (left top)
                            (if (null? (tail pair))
                                (draw-empty-list! (null-tail-space pair))
-                               (draw! (tail pair) screen))))
+                               (draw! (tail pair) on: screen))))
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (previous-left previous-top)
                  (screen:draw-vertical-bar! max-line-height)))))

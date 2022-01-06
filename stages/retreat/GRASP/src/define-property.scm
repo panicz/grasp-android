@@ -13,5 +13,5 @@
       getter)))
 
 (define-syntax-rule (update! (property object) value)
-  (when (not (equal? (property object) value))
+  (unless (equal? (property object) value)
     (set! (property object) value)))

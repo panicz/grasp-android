@@ -1,82 +1,8 @@
+(import (define-property))
+(import (cell-display-properties))
 (import (srfi :11) (srfi :17))
 (import (conversions))
-(import (define-property))
-(import (screen))
-(import (draw))
-
-;; we override Pair with Object's default equality and hash functions
-;; (TODO: patch the Kawa implementation of Cons)
-
-(define-simple-class cons (gnu.lists.Pair Tile)
-  ((*init* a d) (invoke-special gnu.lists.Pair (this) '*init* a d))
-  ((equals object) ::boolean (eq? object (this)))
-  ((hash-code) ::int (java.lang.System:identity-hash-code (this)))
-  ((draw! screen::Screen)::Extent
-   (parenthesized! draw-sequence! (this) screen)))
-
-;; Docelowo bedziemy musieli patchowac Kawe, chociazby po to,
-;; zeby takie obiekty, jak Symbol czy FString (IString? MString?)
-;; implementowaly Tile.
-;;
-;; Na razie jednak zrobmy tak, zeby nie uzywac tych typow
-;; bezposrednio w edytorze, a zamiast tego korzystac sobie
-;; z owijek
-
-(define-simple-class Symbol (Tile)
-  (name :: string)
-  ((*init* source::string)
-   (set! name source))
-  ((toString)::String
-   (name:toString))
-  ((draw! screen::Screen)::Extent
-   (screen:draw-atom! name)))
-
-(define head car)
-
-(define tail cdr)
-
-(define-property (dotted? cell)
-  (not (or (null? (tail cell))
-	   (pair? (tail cell)))))
-
-(define-property (pre-head-space cell) "")
-
-(define-property (post-head-space cell)
-  (if (and (not (dotted? cell))
-	   (null? (tail cell)))
-      ""
-      " "))
-
-(define-property (pre-tail-space cell) " ")
-
-(define-property (post-tail-space cell) "")
-
-(define-property (null-head-space cell) "")
-
-(define-property (null-tail-space cell) "")
-
-(define cell-display-properties
-  (list
-   dotted?
-   pre-head-space
-   post-head-space
-   pre-tail-space
-   post-tail-space
-   null-head-space
-   null-tail-space))
-
-(define (tree-map/preserve properties f l)
-  (define (preserve-properties original cell)
-    (for-each (lambda (property)
-		(update! (property cell)
-			 (property original)))
-	      properties)
-    cell)
-  (if (pair? l)
-      (preserve-properties
-       l (cons (tree-map/preserve properties f (head l))
-	       (tree-map/preserve properties f (tail l))))
-      (f l)))
+(import (primitive))
 
 (define (separator? c)
   (or (eof-object? c)

@@ -4,6 +4,13 @@
 (import (for))
 (import (examples))
 
+(define-alias List gnu.lists.LList)
+
+;; Unfortunately, Kawa's type system isn't capable
+;; of expressing this, so: a cursor is either a list
+;; of integers, or a #f value
+(define-alias Cursor java.lang.Object)
+
 (define-type (Extent width: real
                      height: real))
 
@@ -23,11 +30,8 @@
   )
 
 (define-interface Tile ()
-  (draw! screen::Screen)::Extent
+  (draw! screen::Screen #|context::List cursor::Cursor|#)::Extent
   )
-
-;; trzeba by bylo tak zrobic, zeby komorki "cons"
-;; oraz symbole implementowaly interfejs Tile
 
 (define-type (Over back: Tile front: Tile)
   implementing Tile

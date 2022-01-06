@@ -27,7 +27,7 @@
   ((paren-width)::real 2)
 
   ((vertical-bar-width)::real 1)
-  
+
   ((clear!)::void
    (for line from 0 below height
         (for row from 0 below width
@@ -63,8 +63,10 @@
         (put! #\_ -1 i)))
    
   ((draw-vertical-bar! height::real)::void
-   (for i from 0 below height
-        (put! #\| i 0)))
+   (put! #\: 0 0)
+   (for i from 1 below (- height 1)
+        (put! #\| i 0))
+   (put! #\: (- height 1) 0))
   
   ((open-paren! height::real left::real top::real)::void
    (put! #\/ top left)
