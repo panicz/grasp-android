@@ -1,13 +1,16 @@
-(import (define-interface)
-        (define-type)
-        (conversions)
-        (screen)
-        (text-screen)
-        (parse)
-        (draw)
-        (examples)
-        (assert)
-        (infix))
+(import
+ (keyword-arguments)
+ (cell-display-properties)
+ (define-interface)
+ (define-type)
+ (conversions)
+ (screen)
+ (text-screen)
+ (parse)
+ (draw)
+ (examples)
+ (assert)
+ (infix))
 
 ;; this is what we're aiming at:
 
@@ -82,21 +85,28 @@
 \   \       \     \   \       / / / / /
 }))
 
-(define dotted (call-with-input-string "\
+(define horizontal-dotted (call-with-input-string "\
 (head
 .
-tail) (((a b)
+tail)" parse))
+
+(define vertical-dotted (call-with-input-string "\
+(((a b)
 (c d))  .  ((e f)
 (g h)))" parse))
 
+((current-screen):clear!)
+
+(draw! (head horizontal-dotted))
+
+(display ((current-screen):toString))
 
 ((current-screen):clear!)
 
-(let ((e (draw! (head dotted))))
-  (with-translation (current-screen) ((+ 1 e:width) 0)
-    (draw! (head (tail dotted)))))
+(draw! (head vertical-dotted))
 
 (display ((current-screen):toString))
+
 
 #|
 (e.g.
