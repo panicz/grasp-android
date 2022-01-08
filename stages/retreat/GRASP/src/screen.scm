@@ -3,13 +3,9 @@
 (import (define-type))
 (import (for))
 (import (examples))
+(import (match))
 
 (define-alias List gnu.lists.LList)
-
-;; Unfortunately, Kawa's type system isn't capable
-;; of expressing this, so: a cursor is either a list
-;; of integers, or a #f value
-(define-alias Cursor java.lang.Object)
 
 (define-type (Extent width: real
                      height: real))
@@ -27,11 +23,58 @@
   (draw-vertical-bar! height::real)::void
   (open-paren! height::real left::real top::real)::void
   (close-paren! height::real left::real top::real)::void
+
+  ;;(end-line! line-height::real)::void
+  ;;(cursor-at left::real top::real)::Cursor
   )
 
 (define-interface Tile ()
   (draw! screen::Screen #|context::List cursor::Cursor|#)::Extent
+
+  ;; for pairs with null head or null tail, the `final` variable
+  ;; is used to decide whether we should return null-head/tail-space
+  ;; or just the empty list (which, unlike cons cells, has no instance
+  ;; identity)
+  (part-at index::int final::boolean)::Tile
+  (subindices)::int
   )
+
+;; A Cursor is a list of non-negative integers. Each integer
+;; corresponds to the index at a given level, where the first
+;; index refers to the innermost expression's context, and the
+;; last index corresponds to the outermost expression.
+;;
+;; This order doesn't allow to select the expression pointed to by
+;; a cursor in a tail-recursive manner: we need to reach the last
+;; index in order to choose a sub-expression on a top-level.
+;;
+;; The reason we chose this "reverse" order has to do with
+;; the way we build those indices: we start from a top level,
+;; and we descend deeper recursively; therefore, we "cons"
+;; the inermost expressions' indices last.
+;;
+;; Also, this strategy maximizes "structural sharing"
+;; between cursors to different expressions
+;; (which I think is beautiful), and reverting this
+;; order would be wasteful
+;;
+;; Another thing with cursors is that, when refering to
+;; normal boxes,  even indices usually refer to spaces,
+;; and odd indices refer to subsequent elements in a list.
+;;
+;; The exception is in the case of a dotted tail:
+;; the odd index refers to the tail itself, as if it was
+;; an element, and the next odd index refers to the
+;; cdr of the list.
+(define-alias Cursor gnu.lists.LList)
+
+(define (part-at cursor::Cursor tile::Tile)::Tile
+  (match cursor
+    ('() tile)
+    (`(,index . ,indices)
+     ((part-at indices tile):part-at index
+      (null? indices)))
+    (_ #!null)))
 
 (define-type (Over back: Tile front: Tile)
   implementing Tile
@@ -42,7 +85,14 @@
      (Extent width: (max front-extent:width
                          back-extent:width)
              height: (max front-extent:height
-                          back-extent:height)))))
+                          back-extent:height))))
+  ((part-at index::int final::boolean)::Tile
+   (if (= index 0)
+       back
+       front))
+  ((subindices)::int
+   2)
+  )
 
 (define-type (Below top: Tile bottom: Tile)
   implementing Tile
@@ -52,7 +102,14 @@
           (bottom-extent (with-translation screen (0 top-extent:height)
                            (bottom:draw! screen))))
      (Extent width: (max top-extent:width bottom-extent:width)
-             height: (+ top-extent:height bottom-extent:height)))))
+             height: (+ top-extent:height bottom-extent:height))))
+  ((part-at index::int final::boolean)::Tile
+   (if (= index 0)
+       top
+       bottom))
+  ((subindices)::int
+   2))
+
 
 (define-type (Beside left: Tile right: Tile)
   implementing Tile
@@ -62,7 +119,13 @@
           (right-extent (with-translation screen (left-extent:width 0)
                           (right:draw! screen))))
      (Extent width: (+ left-extent:width right-extent:width)
-             height: (max left-extent:height right-extent:height)))))
+             height: (max left-extent:height right-extent:height))))
+  ((part-at index::int final::boolean)::Tile
+   (if (= index 0)
+       left
+       right))
+  ((subindices)::int
+   2))
 
 (define-type (Finger left: real
                      top: real
@@ -72,7 +135,11 @@
   ((draw! screen::Screen)::Extent
    (let ((finger (screen:draw-finger! left top index)))
      (Extent width: (+ left finger:width)
-             height: (+ top finger:height)))))
+             height: (+ top finger:height))))
+  ((part-at index::int final::boolean)
+   #!null)
+  ((subindices)::int
+   0))
 
 (define (string-extent s::string)::Extent
   (let ((line-length 0)
