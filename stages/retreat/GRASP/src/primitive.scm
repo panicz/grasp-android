@@ -5,6 +5,9 @@
 (import (assert))
 (import (infix))
 (import (rename (keyword-arguments) (define/kw define*)))
+(import (extent))
+(import (cursor))
+(import (match))
 
 ;; we override Pair with Object's default equality and hash functions
 ;; (TODO: patch the Kawa implementation of Cons)
@@ -18,7 +21,15 @@
 ;;  0 1 2
 ;; (  x  )
 
-(define* (cell-subindices cell::gnu.lists.Pair initial::int := 3)::int
+(define (part-at cursor::Cursor tile::Tile)::Tile
+  (match cursor
+    ('() tile)
+    (`(,index . ,indices)
+     ((part-at indices tile):part-at index
+      (null? indices)))
+    (_ #!null)))
+
+(define* (cell-subindices cell::pair initial::int := 3)::int
   (cond ((dotted? cell)
          (+ initial 4))
         ((pair? (tail cell))
@@ -29,8 +40,7 @@
 (define-property (head-tail-separator cell)
   #!null)
 
-
-(define (cell-index cell::gnu.lists.Pair index::int final::boolean)
+(define (cell-index cell::pair index::int final::boolean)
   (assert (is index >= 0))
   (cond ((= index 0)
          (pre-head-space cell)) ;; trzeba jakos rzutowac do Tile
@@ -56,9 +66,9 @@
         (else
          (cell-index (cdr cell) (- index 2) final))))
 
-(define-simple-class cons (gnu.lists.Pair Tile)
+(define-simple-class cons (pair Tile)
   ((*init* a d)
-   (invoke-special gnu.lists.Pair (this) '*init* a d))
+   (invoke-special pair (this) '*init* a d))
 
   ((equals object)::boolean
    (eq? object (this)))
@@ -73,7 +83,7 @@
 
   ((part-at index::int final::boolean)::Tile
    (as Tile (cell-index (this) index final)))
-
+  
   ((subindices)::int
    (cell-subindices (this)))
   )
@@ -104,3 +114,4 @@
   ((subindices)::int
    0)
   )
+

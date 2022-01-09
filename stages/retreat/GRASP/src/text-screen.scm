@@ -1,39 +1,62 @@
 (import (for))
 (import (screen))
 (import (conversions))
+(import (infix))
+(import (extent))
 
 (define-simple-class TextScreen (Screen)
   (shift-left :: real init-value: 0)
   (shift-top :: real init-value: 0)
-  (width :: int)
-  (height :: int)
+  (width :: int init-value: 0)
+  (height :: int init-value: 0)
   (data :: char[])
 
+  ((get row::real col::real)::char
+   (let ((x (+ col shift-left))
+         (y (+ row shift-top)))
+     (if (and (is 0 <= x < width)
+              (is 0 <= y < height))
+         (data (+ (* width y) x))
+         #\space)))
+  
   ((put! c::char row::real col::real)::void
    (let ((x (+ col shift-left))
          (y (+ row shift-top)))
-     ;; mozna zrobic tak zeby rozszerzac bufor
-     ;; kiedy wychodzimy poza zakres
-     (when (and (< x width) (>= x 0)
-                (< y height) (>= y 0))
+     (when (and (is x >= 0)
+                (is y >= 0))
+       (when (or (is x >= width)
+                 (is y >= height))
+         (let* ((new-width (if (is x >= width)
+                               (+ x 1)
+                               width))
+                (new-height (if (is y >= height)
+                                (+ y 1)
+                                height))
+                (new-data (char[] length: (* new-width new-height))))
+             (for line from 0 below new-height
+                  (for column from 0 below new-width
+                       (set! (new-data (+ (* new-width line)
+                                          column))
+                             (if (and (is column < width)
+                                      (is line < height))
+                                 (data (+ (* width line)
+                                          column))
+                                 #\space))))
+             (set! width new-width)
+             (set! height new-height)
+             (set! data new-data)))
        (set! (data (+ (* width y) x)) c))))
-
-  ((*init* w::int h::int)
-   (set! width w)
-   (set! height h)
-   (set! data (char[] length: (* w h)))
-   (clear!))
 
   ((paren-width)::real 2)
 
-  ((min-line-height)::real 1)
+  ((min-line-height)::real 3)
   
   ((vertical-bar-width)::real 1)
 
   ((clear!)::void
    (for line from 0 below height
-        (for row from 0 below width
-             (set! (data (+ (* line width) row))
+        (for column from 0 below width
+             (set! (data (+ (* line width) column))
                    #\space)))
    (set! shift-left 0)
    (set! shift-top 0))
@@ -41,9 +64,10 @@
   ((toString)::String
    (with-output-to-string
      (lambda ()
+       (write-char #\newline)
        (for line from 0 below height
-            (for row from 0 below width
-                 (write-char (data (+ (* line width) row))))
+            (for column from 0 below width
+                 (write-char (data (+ (* line width) column))))
             (write-char #\newline)))))
 
   ((translate! x::real y::real)::void
@@ -62,7 +86,8 @@
 
   ((draw-horizontal-bar! width::real)::void
    (for i from 0 below width
-        (put! #\_ -1 i)))
+        (when (eq? (get -1 i) #\space)
+          (put! #\_ -1 i))))
    
   ((draw-vertical-bar! height::real)::void
    (put! #\: 0 0)

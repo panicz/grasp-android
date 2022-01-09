@@ -7,18 +7,16 @@
 (import (screen))
 (import (infix))
 (import (match))
+(import (extent))
+(import (string-extras))
+
 
 ;; Jaki mamy teraz pomysl
 ;; funkcja renderujaca bedzie miala dwa dodatkowe argumenty:
 ;; - kontekst, ktory jest odwroconym kursorem wyrazenia
 ;; - biezacy kursor, o ile renderowane wyrazenie lezy na sciezce
 ;;   tego kursora, albo #f w przeciwnym przypadku
-;;
-;; Dodatkowo trzeba podjac decyzje, w jaki sposob
-;; kursor "przenika przez" kombinatory Over, Beside, Below.
-;; Ale tu sprawa wydaje sie jasna:
-;; top w Below, left w Beside i back to 0, natomiast
-;; bottom, right oraz front to 1
+
 
 
 (define (parenthesized! proc/object+screen object screen::Screen)::Extent
@@ -60,6 +58,7 @@
                  (else
                   (set! left (+ left 1))
                   (set! max-width (max max-width left))))))
+
 
     (define (advance! extent::Extent)::void
       (set! left (+ left extent:width))
@@ -114,17 +113,22 @@
       (Extent width: max-width
               height: (+ top max-line-height)))
 
-    (let draw-pair! ((pair elems))
+    (define (draw-next! pair)
       (skip-spaces! (pre-head-space pair))
       (advance! (draw-head! pair))
       (cond ((dotted? pair)
              (draw-dotted-tail! pair))
+
             ((pair? (tail pair))
              (skip-spaces! (post-head-space pair))
-             (draw-pair! (tail pair)))
+             (draw-next! (tail pair)))
+
             (else
+             (skip-spaces! (post-head-space pair))
              (Extent width: max-width
                      height: (+ top max-line-height)))))
+    
+    (draw-next! elems)
     ))
 
 
