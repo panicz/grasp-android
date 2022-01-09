@@ -72,6 +72,15 @@
                        bindings
                        actions ... alternative))
 
+      ((match-clause ((`datum root) . rest)
+                     conditions
+                     bindings
+                     actions ... alternative)
+       #'(match-clause (('datum root) . rest)
+                        conditions
+                       bindings
+                       actions ... alternative))
+      
       ((match-clause (((_ . fields) root) . rest)
                      (and conditions ...)
                      bindings
@@ -203,3 +212,63 @@
             (error "Value failed to match pattern: "'value 'pattern))))
       ((_ () . body)
        #'(let () . body)))))
+
+
+(define-syntax and-let*
+  (lambda (stx)
+    (syntax-case stx (values)
+
+      ((_)
+       #'#t)
+
+      ((_ ())
+       #'#t)
+
+      ((_ () . body)
+       #'(let () . body))
+
+      ((_ ((name binding) . rest) . body)
+       (identifier? #'name)
+       #'(let ((name binding))
+           (and name
+                (and-let* rest
+                  . body))))
+
+      ((_ (((values . structure) binding) . rest) . body)
+       #'(call-with-values (lambda () expression)
+           (lambda args
+             (match args
+               (structure
+                (and-let* rest . body))
+               (_ #f)))))
+
+      ((_ ((value binding) . rest) . body)
+       #'(match binding
+           (value
+            (and-let* rest
+              . body))
+           (_ #f)))
+
+      ((_ ((condition) . rest) . body)
+       #'(and condition
+              (and-let* rest . body)))
+
+      ((_ ((value * ... expression) . rest) . body)
+       (identifier? #'value)
+       #'(call-with-values (lambda () expression)
+           (lambda args
+             (match args
+               ((value * ... . _)
+                (and value
+                     (and-let* rest . body)))
+               (_ #f)))))
+
+      ((_ ((value ... expression) . rest) . body)
+       #'(call-with-values (lambda () expression)
+           (lambda args
+             (match args
+               ((value ... . _)
+                (and-let* rest . body))
+               (_ #f)))))
+
+      )))
