@@ -12,6 +12,7 @@
 
 (define-interface Screen ()
   (paren-width)::real
+  (min-line-height)::real
   (vertical-bar-width)::real
   (clear!)::void
   (translate! x::real y::real)::void
@@ -176,6 +177,8 @@ def") ===> "def")
 (define-simple-class NullScreen (Screen)
   ((paren-width)::real 0)
 
+  ((min-line-height)::real 0)
+  
   ((vertical-bar-width)::real 0)
  
   ((clear!)::void

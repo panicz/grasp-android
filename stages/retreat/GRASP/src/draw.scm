@@ -45,16 +45,18 @@
                          )
   ::Extent
   (let ((max-width 0)
-        (max-line-height 1)
+        (max-line-height (screen:min-line-height))
         (top 0)
         (left 0))
 
     (define (skip-spaces! spaces::string)::void
       (for char in spaces
            (cond ((eq? char #\newline)
+                  ;; powinnismy dodac wszystkie obiekty z tej linii
+                  ;; do detekcji
                   (set! top (+ top max-line-height))
                   (set! left 0)
-                  (set! max-line-height 1))
+                  (set! max-line-height (screen:min-line-height)))
                  (else
                   (set! left (+ left 1))
                   (set! max-width (max max-width left))))))

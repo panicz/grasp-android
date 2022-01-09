@@ -26,6 +26,8 @@
 
   ((paren-width)::real 2)
 
+  ((min-line-height)::real 1)
+  
   ((vertical-bar-width)::real 1)
 
   ((clear!)::void
