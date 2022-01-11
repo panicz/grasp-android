@@ -78,7 +78,7 @@
 
   ((draw! screen::Screen)::Extent
    (parenthesized! (lambda (object screen)
-                     (draw-sequence! object on: screen))
+                     (draw-sequence! object screen: screen))
                    (this) screen))
 
   ((part-at index::int final::boolean)::Tile

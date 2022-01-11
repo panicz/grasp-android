@@ -9,7 +9,8 @@
 (import (match))
 (import (extent))
 (import (string-extras))
-
+(import (cursor))
+(import (define-cache))
 
 ;; Jaki mamy teraz pomysl
 ;; funkcja renderujaca bedzie miala dwa dodatkowe argumenty:
@@ -28,24 +29,28 @@
     (Extent width: (+ paren-width extent:width paren-width)
             height: extent:height)))
 
-(define* (draw! object::Tile
-                on: screen::Screen := (current-screen)
-                ;;within: context::List := '()
-                ;;at: cursor::Cursor := #f
-                )
+(define (draw! object::Tile #!key
+               (screen::Screen  (current-screen))
+               (cursor::Cursor '())
+               (context::Cursor '()))
   ::Extent
-  (object:draw! screen #;context #;cursor))
+  (object:draw! screen #;context #;cursor
+                ))
 
-(define* (draw-sequence! elems
-                         on: screen :: Screen := (current-screen)
-                         ;;within: context::List := '()
-                         ;;at: cursor::Cursor := #f
-                         )
+;; Jakie problemy probujemy rozwiazac?
+;; - odwzorowanie wspolrzednych ekranowych w kursory
+;; - odwzorowanie kursorow we wspolrzedne ekranowe
+
+(define (draw-sequence! elems #!key
+                        (screen :: Screen (current-screen))
+                        (cursor::Cursor '())
+                        (context::Cursor '()))
   ::Extent
   (let ((max-width 0)
         (max-line-height (screen:min-line-height))
         (top 0)
-        (left 0))
+        (left 0)
+        (index 0))
 
     (define (skip-spaces! spaces::string)::void
       (for char in spaces
@@ -57,13 +62,14 @@
                   (set! max-line-height (screen:min-line-height)))
                  (else
                   (set! left (+ left 1))
-                  (set! max-width (max max-width left))))))
-
+                  (set! max-width (max max-width left)))))
+      (set! index (+ index 1)))
 
     (define (advance! extent::Extent)::void
       (set! left (+ left extent:width))
       (set! max-line-height (max extent:height max-line-height))
-      (set! max-width (max left max-width)))
+      (set! max-width (max left max-width))
+      (set! index (+ index 1)))
 
     (define (draw-empty-list! spaces::string)::Extent
       (parenthesized! (lambda (spaces screen)
@@ -74,29 +80,28 @@
       (with-translation screen (left top)
         (if (null? (head pair))
             (draw-empty-list! (null-head-space pair))
-            (draw! (head pair) on: screen))))
+            (draw! (head pair) screen: screen))))
 
     (define (should-draw-horizontal-bar? dotted-pair)
       (and (string-index (post-head-space dotted-pair) (is _ eq? #\newline))
            (string-index (pre-tail-space dotted-pair) (is _ eq? #\newline))))
 
     (define (draw-dotted-tail! pair)::Extent
+      (skip-spaces! (post-head-space pair))
       (cond ((should-draw-horizontal-bar? pair)
-             => (lambda (post-bar-newline-index)
-                  (let ((bottom (+ top max-line-height))
-                        (post-bar-space (pre-tail-space pair)))
-                    (skip-spaces! (post-head-space pair))
-                    (skip-spaces! (string-drop post-bar-space
-                                               (+ 1 post-bar-newline-index)))
-                    (advance! (with-translation screen (left top)
-                                (if (null? (tail pair))
-                                    (draw-empty-list! (null-tail-space pair))
-                                    (draw! (tail pair) on: screen))))
-                    (skip-spaces! (post-tail-space pair))
-                    (with-translation screen (0 bottom)
-                      (screen:draw-horizontal-bar! max-width)))))
+             (let* ((bottom top)
+                    (stored-index index))
+               (skip-spaces! (pre-tail-space pair))
+               (set! top (- top (screen:min-line-height)))
+               (advance! (with-translation screen (left top)
+                           (if (null? (tail pair))
+                               (draw-empty-list! (null-tail-space pair))
+                               (draw! (tail pair) screen: screen)))
+                         )
+               (skip-spaces! (post-tail-space pair))
+               (with-translation screen (0 bottom)
+                 (screen:draw-horizontal-bar! max-width))))
             (else
-             (skip-spaces! (post-head-space pair))
              (let ((previous-left left)
                    (previous-top top))
                (advance! (Extent width: (screen:vertical-bar-width)
@@ -105,7 +110,7 @@
                (advance! (with-translation screen (left top)
                            (if (null? (tail pair))
                                (draw-empty-list! (null-tail-space pair))
-                               (draw! (tail pair) on: screen))))
+                               (draw! (tail pair) screen: screen))))
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (previous-left previous-top)
                  (screen:draw-vertical-bar! max-line-height)))))
@@ -130,6 +135,3 @@
     
     (draw-next! elems)
     ))
-
-
-
