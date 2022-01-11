@@ -96,8 +96,7 @@
                (advance! (with-translation screen (left top)
                            (if (null? (tail pair))
                                (draw-empty-list! (null-tail-space pair))
-                               (draw! (tail pair) screen: screen)))
-                         )
+                               (draw! (tail pair) screen: screen))))
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (0 bottom)
                  (screen:draw-horizontal-bar! max-width))))
@@ -114,7 +113,6 @@
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (previous-left previous-top)
                  (screen:draw-vertical-bar! max-line-height)))))
-      (skip-spaces! (post-tail-space pair))
       (Extent width: max-width
               height: (+ top max-line-height)))
 
