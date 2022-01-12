@@ -1,8 +1,15 @@
 
-;; A Cursor is a list of non-negative integers. Each integer
-;; corresponds to the index at a given level, where the first
-;; index refers to the innermost expression's context, and the
-;; last index corresponds to the outermost expression.
+;; A Cursor is a list of things that can be used for
+;; indexing tiles. Those can be any objects that can be
+;; compared using the 'eqv?' predicate, but in practice
+;; those values can either be integers, symbols or
+;; characters.
+;;
+;; The order of elements in the cursor list is such that
+;; the first element of the list is an index of the
+;; innermost element relative to its parent (which is
+;; pointed to by the second element of the list, or
+;; is the currently considered node if there isn't one)
 ;;
 ;; This order doesn't allow to select the expression pointed to by
 ;; a cursor in a tail-recursive manner: we need to reach the last

@@ -8,6 +8,7 @@
 (import (extent))
 (import (cursor))
 (import (match))
+(import (examples))
 
 ;; we override Pair with Object's default equality and hash functions
 ;; (TODO: patch the Kawa implementation of Cons)
@@ -21,24 +22,15 @@
 ;;  0 1 2
 ;; (  x  )
 
+
 (define (part-at cursor::Cursor tile::Tile)::Tile
   (match cursor
     ('() tile)
     (`(,index . ,indices)
-     ((part-at indices tile):part-at index
-      (null? indices)))
+     (otherwise #!null
+       (and-let* ((parent (part-at indices tile)))
+         (parent:part-at index (null? indices)))))
     (_ #!null)))
-
-(define* (cell-subindices cell::pair initial::int := 3)::int
-  (cond ((dotted? cell)
-         (+ initial 4))
-        ((pair? (tail cell))
-         (cell-subindices (tail cell) (+ initial 2)))
-        (else
-         initial)))
-
-(define-property (head-tail-separator cell)
-  #!null)
 
 (define (cell-index cell::pair index::int final::boolean)
   (assert (is index >= 0))
@@ -66,6 +58,17 @@
         (else
          (cell-index (cdr cell) (- index 2) final))))
 
+(define* (last-cell-index cell::pair initial::int := 2)::int
+  (cond ((dotted? cell)
+         (+ initial 4))
+        ((pair? (tail cell))
+         (last-cell-index (tail cell) (+ initial 2)))
+        (else
+         initial)))
+
+(define-property (head-tail-separator cell)
+  #!null)
+
 (define-simple-class cons (pair Tile)
   ((*init* a d)
    (invoke-special pair (this) '*init* a d))
@@ -81,11 +84,29 @@
                      (draw-sequence! object screen: screen))
                    (this) screen))
 
-  ((part-at index::int final::boolean)::Tile
-   (as Tile (cell-index (this) index final)))
+  ((part-at index::Index final::boolean)::Tile
+   (if (or (eq? index #\() (eq? index #\)))
+       (this)
+       (as Tile (cell-index (this) (as int index) final))))
+  ((first-index)::Index
+   #\()
+   
+  ((last-index)::Index
+   #\))
+
+  ((next-index index::Index)::Index
+   (if (eq? index #\()
+       0
+       (if (and (integer? index)
+                (is index < (last-cell-index (this))))
+           (+ index 1)
+           #\))))
   
-  ((subindices)::int
-   (cell-subindices (this)))
+  ((previous-index index::Index)::Index
+   (if (and (integer? index)
+            (is index > 0))
+       (- index 1)
+       #\())
   )
 
 ;; Docelowo bedziemy musieli patchowac Kawe, chociazby po to,
@@ -108,10 +129,25 @@
   ((draw! screen::Screen)::Extent
    (screen:draw-atom! name))
 
-  ((part-at index::int final::boolean)::Tile
-   #!null)
+  ((part-at index::Index final::boolean)::Tile
+   #!null
+   )
 
-  ((subindices)::int
+  ((first-index)::Index
    0)
+
+  ((last-index)::Index
+   (max 0 (string-length name)))
+  
+  ((next-index index::Index)::Index
+   (let ((last::int (as int (last-index))))
+     (if (is index < last)
+         (+ index 1)
+         last)))
+   
+  ((previous-index index::Index)::Index
+   (if (is index > 0)
+       (- index 1)
+       0))
   )
 

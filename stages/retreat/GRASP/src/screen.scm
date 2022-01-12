@@ -7,6 +7,11 @@
 (import (string-extras))
 (import (cursor))
 
+;; Each tile can choose whatever it pleases to be its index.
+;; For built-in types (boxes, combinators, atoms) indices are
+;; typically either integers or characters or symbols
+(define-alias Index java.lang.Object)
+
 (define-interface Screen ()
   (paren-width)::real
   (min-line-height)::real
@@ -33,8 +38,13 @@
   ;; is used to decide whether we should return null-head/tail-space
   ;; or just the empty list (which, unlike cons cells, has no instance
   ;; identity)
-  (part-at index::int final::boolean)::Tile
-  (subindices)::int
+  (part-at index::Index final::boolean)::Tile
+  
+  (first-index)::Index
+  (last-index)::Index
+  
+  (next-index index::Index)::Index
+  (previous-index index::Index)::Index
   )
 
 (define-type (Finger left: real
@@ -46,10 +56,22 @@
    (let ((finger (screen:draw-finger! left top index)))
      (Extent width: (+ left finger:width)
              height: (+ top finger:height))))
-  ((part-at index::int final::boolean)
+  ((part-at index::Index final::boolean)::Tile
    #!null)
-  ((subindices)::int
-   0))
+  
+  ((first-index)::Index
+   #!null)
+  
+  ((last-index)::Index
+   #!null)
+  
+  ((next-index index::Index)::Index
+   #!null)
+  
+  ((previous-index index::Index)::Index
+   #!null)
+  
+  )
 
 (define-simple-class NullScreen (Screen)
   ((paren-width)::real 0)

@@ -272,3 +272,12 @@
                (_ #f)))))
 
       )))
+
+(define-syntax otherwise
+  (syntax-rules ()
+    ((_)
+     #f)
+    ((_ value)
+     value)
+    ((_ default . precedents)
+     (or (otherwise . precedents) default))))
