@@ -1,14 +1,21 @@
 (import (screen))
 (import (define-type))
 (import (extent))
-
+(import (define-cache))
+(import (cursor))
 
 (define-type (Over back: Tile front: Tile)
   implementing Tile
   with
-  ((draw! screen::Screen)::Extent
-   (let* ((back-extent (back:draw! screen))
-          (front-extent (front:draw! screen)))
+  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+   (let* ((back-context (recons 'back context))
+          (front-context (recons 'front context))
+          (back-extent (back:draw! screen
+                                   (subcursor cursor back-context)
+                                   back-context))
+          (front-extent (front:draw! screen
+                                     (subcursor cursor front-context)
+                                     front-context)))
      (Extent width: (max front-extent:width
                          back-extent:width)
              height: (max front-extent:height
@@ -34,10 +41,14 @@
 (define-type (Below top: Tile bottom: Tile)
   implementing Tile
   with
-  ((draw! screen::Screen)::Extent
-   (let* ((top-extent (top:draw! screen))
+  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+   (let* ((top-context (recons 'top context))
+          (bottom-context (recons 'bottom context))
+          (top-extent (top:draw! screen (subcursor cursor top-context)
+                                 top-context))
           (bottom-extent (with-translation screen (0 top-extent:height)
-                           (bottom:draw! screen))))
+                           (bottom:draw! screen (subcursor cursor bottom-context)
+                                         bottom-context))))
      (Extent width: (max top-extent:width bottom-extent:width)
              height: (+ top-extent:height bottom-extent:height))))
   ((part-at index::Index final::boolean)::Tile
@@ -62,10 +73,14 @@
 (define-type (Beside left: Tile right: Tile)
   implementing Tile
   with
-  ((draw! screen::Screen)::Extent
-   (let* ((left-extent (left:draw! screen))
+  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+   (let* ((left-context (recons 'left context))
+          (right-context (recons 'right context))
+          (left-extent (left:draw! screen (subcursor cursor left-context)
+                                   left-context))
           (right-extent (with-translation screen (left-extent:width 0)
-                          (right:draw! screen))))
+                          (right:draw! screen (subcursor cursor right-context)
+                                       right-context))))
      (Extent width: (+ left-extent:width right-extent:width)
              height: (max left-extent:height right-extent:height))))
   ((part-at index::Index final::boolean)::Tile

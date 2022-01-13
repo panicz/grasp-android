@@ -20,26 +20,55 @@
 
 
 
-(define (parenthesized! proc/object+screen object screen::Screen)::Extent
+(define (parenthesized! proc/object+screen+cursor+context object #!key
+                        (screen::Screen (current-screen))
+                        (cursor::Cursor #f)
+                        (context::Cursor '())
+                        )::Extent
   (let* ((paren-width (screen:paren-width))
          (extent (with-translation screen (paren-width 0)
-                   (as Extent (proc/object+screen object screen)))))
+                   (as Extent (proc/object+screen+cursor+context
+                               object screen cursor context)))))
     (screen:open-paren! extent:height 0 0)
     (screen:close-paren! extent:height (+ paren-width extent:width) 0)
     (Extent width: (+ paren-width extent:width paren-width)
             height: extent:height)))
 
 (define (draw! object::Tile #!key
-               (screen::Screen  (current-screen))
+               (screen::Screen (current-screen))
                (cursor::Cursor '())
                (context::Cursor '()))
   ::Extent
-  (object:draw! screen #;context #;cursor
-                ))
+  (object:draw! screen cursor context))
 
 ;; Jakie problemy probujemy rozwiazac?
 ;; - odwzorowanie wspolrzednych ekranowych w kursory
 ;; - odwzorowanie kursorow we wspolrzedne ekranowe
+
+
+;;
+;; +--------------------------------------------------+
+;; |       |  |   |   |        |        |       |     |
+;; |-------|  |   |   |        |        |       |     |
+;; |       |  |-------|        |        |       |     |
+;; |       |  | |   | |        |        |       |     |
+;; +--------------------------------------------------+
+;; |     |   |      |      |     |        |           |
+;; |     |   |      |      |     |        |           |
+;; +--------------------------------------------------+
+;; |      |      |        |_______|     |_____|       |
+;; |      |      |        |   |   |     |     |       |
+;; +--------------------------------------------------+
+;; |         |        |      |    |  |                |
+;; |         |--------|      |-------|                |
+;; |         |        |      |  |    |                |
+;; +--------------------------------------------------+
+;; |       |       |       |        |       |         |
+;; |       |       |       |--------|       |         |
+;; |       |-------|       |        |       |---------|
+;; |       |       |       |        |       |         |
+;; +--------------------------------------------------+
+
 
 (define (draw-sequence! elems #!key
                         (screen :: Screen (current-screen))
@@ -74,13 +103,20 @@
     (define (draw-empty-list! spaces::string)::Extent
       (parenthesized! (lambda (spaces screen)
                              (string-extent spaces))
-                           spaces screen))
+                      spaces
+                      screen: screen
+                      cursor: cursor
+                      context: context))
 
     (define (draw-head! pair)::Extent
-      (with-translation screen (left top)
-        (if (null? (head pair))
-            (draw-empty-list! (null-head-space pair))
-            (draw! (head pair) screen: screen))))
+      (let ((context (recons index context)))
+        (with-translation screen (left top)
+          (if (null? (head pair))
+              (draw-empty-list! (null-head-space pair))
+              (draw! (head pair)
+                     screen: screen
+                     cursor: (subcursor cursor context)
+                     context: context)))))
 
     (define (should-draw-horizontal-bar? dotted-pair)
       (and (string-index (post-head-space dotted-pair) (is _ eq? #\newline))
@@ -93,10 +129,14 @@
                     (stored-index index))
                (skip-spaces! (pre-tail-space pair))
                (set! top (- top (screen:min-line-height)))
-               (advance! (with-translation screen (left top)
-                           (if (null? (tail pair))
-                               (draw-empty-list! (null-tail-space pair))
-                               (draw! (tail pair) screen: screen))))
+               (let ((context (recons index context)))
+                 (advance! (with-translation screen (left top)
+                             (if (null? (tail pair))
+                                 (draw-empty-list! (null-tail-space pair))
+                                 (draw! (tail pair)
+                                        screen: screen
+                                        cursor: (subcursor cursor context)
+                                        context: context)))))
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (0 bottom)
                  (screen:draw-horizontal-bar! max-width))))
@@ -106,10 +146,14 @@
                (advance! (Extent width: (screen:vertical-bar-width)
                                  height: 0))
                (skip-spaces! (pre-tail-space pair))
-               (advance! (with-translation screen (left top)
-                           (if (null? (tail pair))
-                               (draw-empty-list! (null-tail-space pair))
-                               (draw! (tail pair) screen: screen))))
+               (let ((context (recons cursor context)))
+                 (advance! (with-translation screen (left top)
+                             (if (null? (tail pair))
+                                 (draw-empty-list! (null-tail-space pair))
+                                 (draw! (tail pair)
+                                        screen: screen
+                                        cursor: (subcursor cursor context)
+                                        context: context)))))
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (previous-left previous-top)
                  (screen:draw-vertical-bar! max-line-height)))))

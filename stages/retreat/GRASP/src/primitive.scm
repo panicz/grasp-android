@@ -27,10 +27,9 @@
   (match cursor
     ('() tile)
     (`(,index . ,indices)
-     (otherwise #!null
-       (and-let* ((parent (part-at indices tile)))
-         (parent:part-at index (null? indices)))))
-    (_ #!null)))
+     (and-let* ((parent (part-at indices tile)))
+       (parent:part-at index (null? indices))))
+    (_ #f)))
 
 (define (cell-index cell::pair index::int final::boolean)
   (assert (is index >= 0))
@@ -79,11 +78,17 @@
   ((hash-code)::int
    (java.lang.System:identity-hash-code (this)))
 
-  ((draw! screen::Screen)::Extent
-   (parenthesized! (lambda (object screen)
-                     (draw-sequence! object screen: screen))
-                   (this) screen))
-
+  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+   (parenthesized! (lambda (object screen cursor context)
+                     (draw-sequence! object
+                                     screen: screen
+                                     cursor: cursor
+                                     context: context))
+                   (this)
+                   screen: screen
+                   cursor: cursor
+                   context: context))
+  
   ((part-at index::Index final::boolean)::Tile
    (if (or (eq? index #\() (eq? index #\)))
        (this)
@@ -126,7 +131,7 @@
   ((toString)::String
    (name:toString))
 
-  ((draw! screen::Screen)::Extent
+  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
    (screen:draw-atom! name))
 
   ((part-at index::Index final::boolean)::Tile

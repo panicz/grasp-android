@@ -32,7 +32,7 @@
   )
 
 (define-interface Tile ()
-  (draw! screen::Screen #|context:: cursor::Cursor|#)::Extent
+  (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
 
   ;; for pairs with null head or null tail, the `final` variable
   ;; is used to decide whether we should return null-head/tail-space
@@ -52,7 +52,7 @@
                      index: byte)
   implementing Tile
   with
-  ((draw! screen::Screen)::Extent
+  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
    (let ((finger (screen:draw-finger! left top index)))
      (Extent width: (+ left finger:width)
              height: (+ top finger:height))))
