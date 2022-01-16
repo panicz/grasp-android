@@ -4,7 +4,6 @@
 (import (for))
 (import (examples))
 (import (extent))
-(import (string-extras))
 (import (cursor))
 
 ;; Each tile can choose whatever it pleases to be its index.

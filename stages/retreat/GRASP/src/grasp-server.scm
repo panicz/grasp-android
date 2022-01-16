@@ -7,7 +7,7 @@
  (text-screen)
  (combinators)
  (parse)
- (draw)
+ (primitive)
  (examples)
  (assert)
  (for)
@@ -73,26 +73,37 @@
   (define (process-input)
     (let ((line (read-delim #\newline input)))
       (unless (eof-object? line)
-        (respond
-         (match (parse-string line)
-           (`(cursor-next)
-            (screen:cursor-next!)
-            `(,(screen:cursor-left) ,(screen:cursor-top)))
-           
-           (`(cursor-back)
-            (screen:cursor-back!)
-            `(,(screen:cursor-left) ,(screen:cursor-top)))
-           
-           (`(cursor-up)
-            (screen:cursor-up!)
-            `(,(screen:cursor-left) ,(screen:cursor-top)))
-           
-           (`(cursor-down)
-            (screen:cursor-down!)
-            `(,(screen:cursor-left) ,(screen:cursor-top)))
-           
-           (`(screen-state)
-            (screen:toString))))
+        (let ((message (parse-string line)))
+          (respond
+           (match message
+             (`(cursor-next)
+              (screen:cursor-next!)
+              `(,(screen:cursor-left) ,(screen:cursor-top)))
+             
+             (`(cursor-back)
+              (screen:cursor-back!)
+              `(,(screen:cursor-left) ,(screen:cursor-top)))
+             
+             (`(cursor-up)
+              (screen:cursor-up!)
+              `(,(screen:cursor-left) ,(screen:cursor-top)))
+             
+             (`(cursor-down)
+              (screen:cursor-down!)
+              `(,(screen:cursor-left) ,(screen:cursor-top)))
+             
+             (`(screen-state)
+              (screen:toString))
+
+             (_
+              (display "Unsupported message: ")
+              (display message)
+              (display " list? ")(display (list? message))
+              (display (length message))
+              (display (head message))
+              (display (eq? (head message) 'cursor-next))
+              (newline)
+              'unsupported-message))))
         (process-input))))
 
   (process-input))

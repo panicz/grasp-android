@@ -1,8 +1,8 @@
 (import (screen))
 (import (define-type))
 (import (extent))
-(import (define-cache))
 (import (cursor))
+(import (primitive))
 
 (define-type (Over back: Tile front: Tile)
   implementing Tile

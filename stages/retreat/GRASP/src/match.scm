@@ -10,7 +10,7 @@
     ((match/evaluated value)
      ;; This behavior is unspecified, and an "unspecified"
      ;; value would also be fine here.
-     (error 'no-matching-pattern))
+     (error 'no-matching-pattern value))
 
     ((match/evaluated value (pattern actions ...) . clauses)
      (match-clause ((pattern value))

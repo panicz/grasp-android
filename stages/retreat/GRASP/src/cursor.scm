@@ -1,5 +1,4 @@
 (import (match))
-(import (string-extras))
 (import (infix))
 
 ;; A Cursor is a list of things that can be used for
@@ -48,6 +47,18 @@
 
 (define-alias Cursor java.lang.Object) ;;gnu.lists.LList)
 
+(define (drop k::integer #;elements-from s::list)::list
+  (if (is k <= 0)
+      s
+      (drop (- k 1) #;elements-from (cdr s))))
+
+(define (suffix? ending::list stem::list)::boolean
+  (let ((m ::integer (length ending))
+        (n ::integer (length stem)))
+    (and (is m <= n)
+         (let ((r ::integer (- n m)))
+           (equal? (drop r stem) ending)))))
+  
 (define (subcursor cursor::Cursor context::Cursor)::Cursor
   (and cursor
        (is context suffix? cursor)))

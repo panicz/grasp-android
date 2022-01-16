@@ -1,7 +1,6 @@
 (import (srfi :17))
 (import (define-syntax-rule))
 (import (hash-table))
-(import (primitive))
 
 (define-syntax-rule (cache (object) formula)
   (let* ((override (make-weak-key-hash-table))
@@ -19,9 +18,3 @@
   (define property-name
     (cache (object) default)))
 
-(define-cache (heads tail)
-  (cache (head)
-    (cons head tail)))
-
-(define (recons head tail)::cons
-  ((heads tail) head))

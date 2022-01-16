@@ -7,9 +7,9 @@
  (text-screen)
  (combinators)
  (parse)
- (draw)
  (examples)
  (assert)
+ (primitive)
  (infix))
 
 ;; this is what we're aiming at:
