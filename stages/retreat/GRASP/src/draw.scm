@@ -41,35 +41,6 @@
   ::Extent
   (object:draw! screen cursor context))
 
-;; Jakie problemy probujemy rozwiazac?
-;; - odwzorowanie wspolrzednych ekranowych w kursory
-;; - odwzorowanie kursorow we wspolrzedne ekranowe
-
-
-;;
-;; +--------------------------------------------------+
-;; |       |  |   |   |        |        |       |     |
-;; |-------|  |   |   |        |        |       |     |
-;; |       |  |-------|        |        |       |     |
-;; |       |  | |   | |        |        |       |     |
-;; +--------------------------------------------------+
-;; |     |   |      |      |     |        |           |
-;; |     |   |      |      |     |        |           |
-;; +--------------------------------------------------+
-;; |      |      |        |_______|     |_____|       |
-;; |      |      |        |   |   |     |     |       |
-;; +--------------------------------------------------+
-;; |         |        |      |    |  |                |
-;; |         |--------|      |-------|                |
-;; |         |        |      |  |    |                |
-;; +--------------------------------------------------+
-;; |       |       |       |        |       |         |
-;; |       |       |       |--------|       |         |
-;; |       |-------|       |        |       |---------|
-;; |       |       |       |        |       |         |
-;; +--------------------------------------------------+
-
-
 (define (draw-sequence! elems #!key
                         (screen :: Screen (current-screen))
                         (cursor::Cursor '())
@@ -109,6 +80,7 @@
                       context: context))
 
     (define (draw-head! pair)::Extent
+      ;;(display "pair ")(display pair)(display " is at ")(display context)(newline)
       (let ((context (recons index context)))
         (with-translation screen (left top)
           (if (null? (head pair))

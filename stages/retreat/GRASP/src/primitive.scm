@@ -132,6 +132,7 @@
    (name:toString))
 
   ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+   ;;(display "atom ")(display name)(display " is at ")(display context)(newline)
    (screen:draw-atom! name))
 
   ((part-at index::Index final::boolean)::Tile

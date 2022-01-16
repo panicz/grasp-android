@@ -16,6 +16,7 @@
   (paren-width)::real
   (min-line-height)::real
   (vertical-bar-width)::real
+
   (clear!)::void
   (translate! x::real y::real)::void
   (draw-string! s::string left::real top::real)::Extent
@@ -27,6 +28,14 @@
   (open-paren! height::real left::real top::real)::void
   (close-paren! height::real left::real top::real)::void
 
+  (cursor-left)::real
+  (cursor-top)::real
+
+  (cursor-next!)::void
+  (cursor-back!)::void
+  (cursor-up!)::void
+  (cursor-down!)::void
+  
   ;;(end-line! line-height::real)::void
   ;;(cursor-at left::real top::real)::Cursor
   )
@@ -109,6 +118,25 @@
   
   ((close-paren! height::real left::real top::real)::void
    (values))
+
+  ((cursor-left)::real
+   0)
+
+  ((cursor-top)::real
+   0)
+
+  ((cursor-next!)::void
+   (values))
+  
+  ((cursor-back!)::void
+   (values))
+  
+  ((cursor-up!)::void
+   (values))
+  
+  ((cursor-down!)::void
+   (values))
+  
   )
 
 (define-constant current-screen::parameter[Screen]

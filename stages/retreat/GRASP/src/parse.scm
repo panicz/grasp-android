@@ -7,7 +7,7 @@
 (import (rename (keyword-arguments) (define/kw define*)))
 (import (examples))
 
-(define (separator? c::char)::boolean
+(define (separator? c)::boolean
   (or (eof-object? c)
       (char-whitespace? c)
       (memq c '(#\( #\)))))
