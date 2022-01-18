@@ -124,7 +124,8 @@
 (define (recons head tail)::cons
   ((heads tail) head))
 
-(define (parenthesized! proc/object+screen+cursor+context object #!key
+(define (parenthesized! proc/object+screen+cursor+context
+			object #!key
                         (screen::Screen (current-screen))
                         (cursor::Cursor #f)
                         (context::Cursor '())
@@ -156,7 +157,6 @@
    (set! name source))
             
   ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
-   ;;(display "atom ")(display name)(display " is at ")(display context)(newline)
    (screen:draw-atom! name))
 
   ((part-at index::Index final::boolean)::Tile
@@ -227,7 +227,6 @@
                       context: context))
 
     (define (draw-head! pair)::Extent
-      ;;(display "pair ")(display pair)(display " is at ")(display context)(newline)
       (let ((context (recons index context)))
         (with-translation screen (left top)
           (if (null? (head pair))
@@ -237,13 +236,13 @@
                      cursor: (subcursor cursor context)
                      context: context)))))
 
-    (define (should-draw-horizontal-bar? dotted-pair)
+    (define (should-the-bar-be-horizontal? dotted-pair)
       (and (string-index (post-head-space dotted-pair) (is _ eq? #\newline))
            (string-index (pre-tail-space dotted-pair) (is _ eq? #\newline))))
 
     (define (draw-dotted-tail! pair)::Extent
       (skip-spaces! (post-head-space pair))
-      (cond ((should-draw-horizontal-bar? pair)
+      (cond ((should-the-bar-be-horizontal? pair)
              (let* ((bottom top)
                     (stored-index index))
                (skip-spaces! (pre-tail-space pair))

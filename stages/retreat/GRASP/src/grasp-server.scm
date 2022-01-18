@@ -95,6 +95,27 @@
              (`(screen-state)
               (screen:toString))
 
+	     (`(select-left)
+	      `(,(screen:cursor-left) ,(screen:cursor-top)))
+
+	     (`(select-right)
+	      `(,(screen:cursor-left) ,(screen:cursor-top)))
+
+	     (`(select-up)
+	      `(,(screen:cursor-left) ,(screen:cursor-top)))
+
+	     (`(select-down)
+	      `(,(screen:cursor-left) ,(screen:cursor-top)))
+
+	     (`(create-box)
+	      `(,(screen:cursor-left) ,(screen:cursor-top)))
+
+	     (`(cursor-leave)
+	      `(,(screen:cursor-left) ,(screen:cursor-top)))
+
+	     (`(insert-character ,c)
+	      `(,(screen:cursor-left) ,(screen:cursor-top)))
+	     
              (_
               (display "Unsupported message: ")
               (display message)
