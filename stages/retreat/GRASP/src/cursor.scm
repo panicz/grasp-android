@@ -1,5 +1,6 @@
 (import (match))
 (import (infix))
+(import (examples))
 
 ;; A Cursor is a list of things that can be used for
 ;; indexing tiles. Those can be any objects that can be
@@ -82,4 +83,30 @@
 ;; ( 0 1 1 1 1 1 1 1 2 )
 ;;     ( 0 1 2 3 4 )
 
-;;
+
+(e.g.
+ (let ((context (head (parse-string
+                       "  (   (   a   b   )   )"
+                       ;; ^(#\()               ;
+                       ;;  ^(0 0)              ;
+                       ;;   ^(1 0)             ;
+                       ;;    ^(2 0)            ;
+                       ;;     ^(#\( 1)         ;
+                       ;;      ^(0 0 1)        ;
+                       ;;       ^(1 0 1)       ;
+                       ;;        ^(2 0 1)      ;
+                       ;;         ^(0 1 1)     ;
+                       ;;          ^(0 2 1)    ;
+                       ;;           ^(1 2 1)   ;
+                       ;;            ^(2 2 1)  ;
+                       ;;             ^(0 3 1) ;
+                       ;;              ^(0 4 1);
+                       ;;        (1 4 1)^      ;
+                       ;;         (2 4 1)^     ;
+                       ;;          (#\) 1)^    ;
+                       ;;             (0 2)^   ;
+                       ;;              (1 2)^  ;
+                       ;;               (2 2)^ ;
+                       ;;                (#\))^;
+                       ))))
+   (and)))
