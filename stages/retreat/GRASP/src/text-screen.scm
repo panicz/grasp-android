@@ -1,5 +1,5 @@
 (import (for))
-(import (screen))
+(import (primitive))
 (import (conversions))
 (import (infix))
 (import (extent))
@@ -12,7 +12,7 @@
   (data :: char[])
   (left :: real init-value: 0)
   (top :: real init-value: 0)
-  
+ 
   ((cursor-left)::real
    left)
 

@@ -3,11 +3,10 @@
  (define-interface)
  (define-type)
  (conversions)
- (screen)
+ (primitive)
  (text-screen)
  (combinators)
  (parse)
- (primitive)
  (examples)
  (assert)
  (for)
@@ -77,6 +76,18 @@
           (respond
            (match message
              (`(cursor-next)
+	      ;; kursor nie powinien byc reprezentowany wewnatrz ekranu,
+	      ;; tylko na zewnatrz (ale wewnatrz sesji!), bo teoretycznie
+	      ;; dopuszczamy mozliwosc, ze jest wielu uzytkownikow
+	      ;; (albo wiele widokow) i kazdy ma jakies swoje zestawy
+	      ;; kursorow (i ewentualnie selekcji).
+	      ;;
+	      ;; z drugiej strony, ekran juz w tej chwili jest
+	      ;; dosc niezalezny od danej, na ktorej pracuje,
+	      ;; przez co wydaje sie, ze kursor moze byc czescia
+	      ;; ekranu
+	      
+	      
               (screen:cursor-next!)
               `(,(screen:cursor-left) ,(screen:cursor-top)))
              

@@ -3,16 +3,58 @@
  (define-interface)
  (define-type)
  (conversions)
- (screen)
+ (primitive)
  (text-screen)
  (combinators)
  (parse)
  (examples)
  (assert)
- (primitive)
  (infix))
 
 ;; this is what we're aiming at:
+
+
+(e.g.
+ (let ((document ::Tile (as Tile (parse-string "
+(define (! n)
+  (if (<= n 0)
+    1
+   (* n (! (- n 1)))))
+
+(e.g. (! 5) ===> 120)
+"))))
+   ;;(show (part-at '(5 5 1) document))
+   
+   (and (equal? (part-at '(1 1) document)
+		'define)
+	(equal? (part-at '(1 3 1) document)
+		'!)
+	(equal? (part-at '(3 3 1) document)
+	     'n)
+	(equal? (part-at '(1 5 1) document)
+	     'if)
+	(equal? (part-at '(1 3 5 1) document)
+		'<=)
+			#|
+	(equal? (part-at '(5 5 1) document)
+		1)
+	(equal? (part-at '(1 7 5 1) document)
+		'*)
+	(equal? (part-at '(3 7 5 1) document)
+		'n)
+
+	(equal? (part-at '(1 5 7 5 1) document)
+		'!)
+	(equal? (part-at '(1 3 5 7 5 1) document)
+		'-)
+	(equal? (part-at '(3 3 5 7 5 1) document)
+		'n)
+	(equal? (part-at '(5 3 5 7 5 1) document)
+		1)
+|#
+	)))
+	
+   
 
 &{
 /                       \

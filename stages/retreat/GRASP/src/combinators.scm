@@ -1,4 +1,3 @@
-(import (screen))
 (import (define-type))
 (import (extent))
 (import (cursor))

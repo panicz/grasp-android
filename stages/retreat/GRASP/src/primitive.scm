@@ -1,6 +1,8 @@
+(import (define-syntax-rule))
+(import (define-interface))
+(import (define-type))
 (import (define-property))
 (import (cell-display-properties))
-(import (screen))
 (import (assert))
 (import (infix))
 (import (extent))
@@ -9,6 +11,154 @@
 (import (examples))
 (import (define-cache))
 (import (for))
+
+;; Each tile can choose whatever it pleases to be its index
+;; (except #!null, for the reason explained below)
+;; For built-in types (boxes, combinators, atoms) indices are
+;; typically either integers or characters or symbols.
+;;
+;; The special value #!null means the absence of an index
+;;
+(define-alias Index java.lang.Object)
+
+(define-interface Screen ()
+  (paren-width)::real
+  (min-line-height)::real
+  (vertical-bar-width)::real
+
+  (clear!)::void
+  (translate! x::real y::real)::void
+  (draw-string! s::string left::real top::real)::Extent
+  (draw-text! s::string left::real top::real)::real
+  (draw-atom! text::string)::Extent
+  (draw-finger! left::real top::real index::byte)::Extent
+  (draw-horizontal-bar! width::real)::void
+  (draw-vertical-bar! height::real)::void
+  (open-paren! height::real left::real top::real)::void
+  (close-paren! height::real left::real top::real)::void
+
+  (cursor-left)::real
+  (cursor-top)::real
+
+  (cursor-next!)::void
+  (cursor-back!)::void
+  (cursor-up!)::void
+  (cursor-down!)::void
+  
+  ;;(end-line! line-height::real)::void
+  ;;(cursor-at left::real top::real)::Cursor
+  )
+
+(define-interface Tile ()
+  (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+  ;; for pairs with null head or null tail, the `final` variable
+  ;; is used to decide whether we should return null-head/tail-space
+  ;; or just the empty list (which, unlike cons cells, has no instance
+  ;; identity)
+  (part-at index::Index final::boolean)::Tile
+  
+  (first-index)::Index
+  (last-index)::Index
+  
+  (next-index index::Index)::Index
+  (previous-index index::Index)::Index
+  )
+
+       
+(define-type (Finger left: real
+                     top: real
+                     index: byte)
+  implementing Tile
+  with
+  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+   (let ((finger (screen:draw-finger! left top index)))
+     (Extent width: (+ left finger:width)
+             height: (+ top finger:height))))
+  ((part-at index::Index final::boolean)::Tile
+   #!null)
+  
+  ((first-index)::Index
+   #!null)
+  
+  ((last-index)::Index
+   #!null)
+  
+  ((next-index index::Index)::Index
+   #!null)
+  
+  ((previous-index index::Index)::Index
+   #!null)
+  
+  )
+
+(define-simple-class NullScreen (Screen)
+  ((paren-width)::real 0)
+
+  ((min-line-height)::real 0)
+  
+  ((vertical-bar-width)::real 0)
+ 
+  ((clear!)::void
+   (values))
+  
+  ((translate! x::real y::real)::void
+   (values))
+  
+  ((draw-string! s::string left::real top::real)::Extent
+   (string-extent s))
+  
+  ((draw-text! s::string left::real top::real)::real
+   (string-length s))
+  
+  ((draw-atom! text::string)::Extent
+   (Extent width: (string-length text) height: 1))
+
+  ((draw-finger! left::real top::real index::byte)::Extent
+   (Extent width: 1 height: 1))
+
+  ((draw-horizontal-bar! width::real)::void
+   (values))
+  
+  ((draw-vertical-bar! height::real)::void
+   (values))
+  
+  ((open-paren! height::real left::real top::real)::void
+   (values))
+  
+  ((close-paren! height::real left::real top::real)::void
+   (values))
+
+  ((cursor-left)::real
+   0)
+
+  ((cursor-top)::real
+   0)
+
+  ((cursor-next!)::void
+   (values))
+  
+  ((cursor-back!)::void
+   (values))
+  
+  ((cursor-up!)::void
+   (values))
+  
+  ((cursor-down!)::void
+   (values))
+  
+  )
+
+(define-constant current-screen::parameter[Screen]
+  (make-parameter (NullScreen)))
+
+(define-syntax-rule (with-translation screen (x y) . actions)
+  (let ((x! x)
+        (y! y))
+    (screen:translate! x! y!)
+    (let ((result (begin . actions)))
+      (screen:translate! (- x!) (- y!))
+      result)))
+
 
 ;; we override Pair with Object's default equality and hash functions
 ;; (TODO: patch the Kawa implementation of Cons)
@@ -21,18 +171,6 @@
 
 ;;  0 1 2
 ;; (  x  )
-
-
-(define (part-at cursor::Cursor tile::Tile)::Tile
-  (cond ((null? cursor)
-         tile)
-        ((pair? cursor)
-         (let ((parent (part-at (tail cursor) tile)))
-           (if parent
-               (parent:part-at (head cursor) (null? (tail cursor)))
-               parent)))
-        (else
-         #!null)))
 
 (define (cell-index cell::pair index::int final::boolean)
   (assert (is index >= 0))
@@ -237,8 +375,10 @@
                      context: context)))))
 
     (define (should-the-bar-be-horizontal? dotted-pair)
-      (and (string-index (post-head-space dotted-pair) (is _ eq? #\newline))
-           (string-index (pre-tail-space dotted-pair) (is _ eq? #\newline))))
+      (and (string-index (post-head-space dotted-pair)
+			 (is _ eq? #\newline))
+           (string-index (pre-tail-space dotted-pair)
+			 (is _ eq? #\newline))))
 
     (define (draw-dotted-tail! pair)::Extent
       (skip-spaces! (post-head-space pair))
@@ -295,3 +435,30 @@
     
     (draw-next! elems)
     ))
+
+
+(define (part-at cursor::Cursor tile::Tile)::Tile
+  (cond ((null? cursor)
+         tile)
+        ((pair? cursor)
+         (let ((parent (part-at (tail cursor) tile)))
+           (if parent
+               (parent:part-at (head cursor) (null? (tail cursor)))
+               parent)))
+        (else
+         #!null)))
+
+
+;; RZM37UHSPY5Z
+
+(define (cursor-next cursor::Cursor document::Tile)::Cursor
+  (match cursor
+    (`(,tip . ,root)
+     (let* ((parent (part-at root document))
+	    (next (parent:next-index tip)))
+       (if (eqv? next tip)
+	   (cursor-next root document)
+	   (recons next root))))
+    ))
+
+;; 

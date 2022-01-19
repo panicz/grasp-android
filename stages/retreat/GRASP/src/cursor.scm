@@ -59,10 +59,11 @@
     (and (is m <= n)
          (let ((r ::integer (- n m)))
            (equal? (drop r stem) ending)))))
-  
+
 (define (subcursor cursor::Cursor context::Cursor)::Cursor
   (and cursor
-       (is context suffix? cursor)))
+       (is context suffix? cursor)
+       cursor))
 
 ;; inny pomysl na kursor jest taki, ze to ciag dowolnych
 ;; obiektow, czyli np. kombinatory moga miec takie "indeksy",
@@ -83,7 +84,7 @@
 ;; ( 0 1 1 1 1 1 1 1 2 )
 ;;     ( 0 1 2 3 4 )
 
-
+#|
 (e.g.
  (let ((context (head (parse-string
                        "  (   (   a   b   )   )"
@@ -110,3 +111,4 @@
                        ;;                (#\))^;
                        ))))
    (and)))
+|#
