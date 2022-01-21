@@ -19,7 +19,9 @@
                          back-extent:width)
              height: (max front-extent:height
                           back-extent:height))))
-  ((part-at index::Index final::boolean)::Tile
+  ((has-children?)::boolean #t)
+  
+  ((part-at index::Index)::Tile
    (match index
      ('back back)
      ('front front)))
@@ -50,7 +52,10 @@
                                          bottom-context))))
      (Extent width: (max top-extent:width bottom-extent:width)
              height: (+ top-extent:height bottom-extent:height))))
-  ((part-at index::Index final::boolean)::Tile
+
+  ((has-children?)::boolean #t)
+
+  ((part-at index::Index)::Tile
    (match index
      ('top top)
      ('bottom bottom)))
@@ -82,7 +87,9 @@
                                        right-context))))
      (Extent width: (+ left-extent:width right-extent:width)
              height: (max left-extent:height right-extent:height))))
-  ((part-at index::Index final::boolean)::Tile
+  ((has-children?)::boolean #t)
+  
+  ((part-at index::Index)::Tile
    (match index
      ('left left)
      ('right right)))

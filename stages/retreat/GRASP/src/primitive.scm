@@ -49,13 +49,16 @@
   ;;(cursor-at left::real top::real)::Cursor
   )
 
+(define-constant final-part?::parameter[boolean]
+  (make-parameter #f))
+
+    
 (define-interface Tile ()
   (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
-  ;; for pairs with null head or null tail, the `final` variable
-  ;; is used to decide whether we should return null-head/tail-space
-  ;; or just the empty list (which, unlike cons cells, has no instance
-  ;; identity)
-  (part-at index::Index final::boolean)::Tile
+
+  (has-children?)::boolean
+  
+  (part-at index::Index)::Tile
   
   (first-index)::Index
   (last-index)::Index
@@ -74,7 +77,10 @@
    (let ((finger (screen:draw-finger! left top index)))
      (Extent width: (+ left finger:width)
              height: (+ top finger:height))))
-  ((part-at index::Index final::boolean)::Tile
+
+  ((has-children?)::boolean #f)
+
+  ((part-at index::Index)::Tile
    #!null)
   
   ((first-index)::Index
@@ -172,13 +178,13 @@
 ;;  0 1 2
 ;; (  x  )
 
-(define (cell-index cell::pair index::int final::boolean)
+(define (cell-index cell::pair index::int)
   (assert (is index >= 0))
   (cond ((= index 0)
          (pre-head-space cell)) ;; trzeba jakos rzutowac do Tile
         ((= index 1)
          (let ((target (car cell)))
-           (if (and (null? target) (not final))
+           (if (and (null? target) (not (final-part?)))
                (null-head-space cell)
                target)))
         ((= index 2)
@@ -190,13 +196,13 @@
                 (pre-tail-space cell)) ;; jakos rzutowac do Tile?
                ((= index 5)
                 (let ((target (cdr cell)))
-                  (if (and (null? target) (not final))
+                  (if (and (null? target) (not (final-part?)))
                       (null-tail-space cell)
                       target)))
                ((= index 6)
                 (post-tail-space cell))))
         (else
-         (cell-index (cdr cell) (- index 2) final))))
+         (cell-index (cdr cell) (- index 2)))))
 
 (define (last-cell-index cell::pair #!optional (initial::int 2))::int
   (cond ((dotted? cell)
@@ -229,11 +235,13 @@
                    screen: screen
                    cursor: cursor
                    context: context))
+
+  ((has-children?)::boolean #t)
   
-  ((part-at index::Index final::boolean)::Tile
+  ((part-at index::Index)::Tile
    (if (or (eq? index #\() (eq? index #\)))
        (this)
-       (as Tile (cell-index (this) (as int index) final))))
+       (as Tile (cell-index (this) (as int index)))))
   ((first-index)::Index
    #\()
    
@@ -297,7 +305,9 @@
   ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
    (screen:draw-atom! name))
 
-  ((part-at index::Index final::boolean)::Tile
+  ((has-children?)::boolean #f)
+  
+  ((part-at index::Index)::Tile
    #!null
    )
 
@@ -443,22 +453,107 @@
         ((pair? cursor)
          (let ((parent (part-at (tail cursor) tile)))
            (if parent
-               (parent:part-at (head cursor) (null? (tail cursor)))
+	       (parameterize ((final-part? (null? (tail cursor))))
+		 (parent:part-at (head cursor)))
                parent)))
         (else
          #!null)))
 
-
 ;; RZM37UHSPY5Z
+
+;; no dobra, jak powinien dzialac cursor-next?
+;; 1. bierzemy element spod kursora i pytamy go o pierwszy
+;; pod-indeks
+;; 2. jezeli nie ma takowego, to pytamy rodzica o kolejmy 
+;; pod-indeks wzgledem naszego
+;; 3. i teraz uwaga: jezeli rodzic nie ma kolejnego
+;; indeksu, to powinien zapytac dziadka itd. (az dojdziemy
+;; do Adama/Ewy)
 
 (define (cursor-next cursor::Cursor document::Tile)::Cursor
   (match cursor
-    (`(,tip . ,root)
-     (let* ((parent (part-at root document))
-	    (next (parent:next-index tip)))
-       (if (eqv? next tip)
-	   (cursor-next root document)
-	   (recons next root))))
-    ))
+    (`(,head . ,tail)
+     (let* ((parent (part-at tail document))
+	    (next (parent:next-index head)))
+       (if (equal? head next)
+	   (cursor-next tail document)
+	   (recons next tail))))
+    (_
+     cursor)))
 
-;; 
+(define (cursor-climb-front cursor::Cursor document::Tile)::Cursor
+
+  (define (climb-front cursor::Cursor target::Tile)::Cursor
+    (if (target:has-children?)
+	(let* ((index (target:first-index))
+	       (child (target:part-at index)))
+	  (if (eq? child target)
+	      (recons index cursor)
+	      (climb-front (recons index cursor)
+			   child)))
+	cursor))
+    
+  (climb-front cursor (part-at cursor document)))
+
+(define (cursor-back cursor::Cursor document::Tile)::Cursor
+  (match cursor
+    (`(,head . ,tail)
+     (let* ((parent (part-at tail document))
+	    (previous (parent:previous-index head)))
+       (if (equal? head previous)
+	   (cursor-back tail document)
+	   (recons previous tail))))
+    (_
+     cursor)))
+
+
+(define (cursor-climb-back cursor::Cursor document::Tile)::Cursor
+
+  (define (climb-back cursor::Cursor target::Tile)::Cursor
+    (if (target:has-children?)
+	(let* ((index (target:last-index))
+	       (child (target:part-at index)))
+	  (if (eq? child target)
+	      (recons index cursor)
+	      (climb-back (recons index cursor)
+			  child)))
+	cursor))
+    
+  (climb-back cursor (part-at cursor document)))
+
+
+;;   
+;; (   (   a   b   )   )
+;; ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^
+;; 1 1 1 1 1 1 1 1 1 1 1
+;; ( 0 1 1 1 1 1 1 1 2 )
+;;     ( 0 1 2 3 4 )
+
+#|
+(e.g.
+ (let ((context (head (parse-string
+                       "  (   (   a   b   )   )"
+                       ;; ^(#\()               ;
+                       ;;  ^(0 0)              ;
+                       ;;   ^(1 0)             ;
+                       ;;    ^(2 0)            ;
+                       ;;     ^(#\( 1)         ;
+                       ;;      ^(0 0 1)        ;
+                       ;;       ^(1 0 1)       ;
+                       ;;        ^(2 0 1)      ;
+                       ;;         ^(0 1 1)     ;
+                       ;;          ^(0 2 1)    ;
+                       ;;           ^(1 2 1)   ;
+                       ;;            ^(2 2 1)  ;
+                       ;;             ^(0 3 1) ;
+                       ;;              ^(0 4 1);
+                       ;;        (1 4 1)^      ;
+                       ;;         (2 4 1)^     ;
+                       ;;          (#\) 1)^    ;
+                       ;;             (0 2)^   ;
+                       ;;              (1 2)^  ;
+                       ;;               (2 2)^ ;
+                       ;;                (#\))^;
+                       ))))
+   (and)))
+|#
