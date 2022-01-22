@@ -1,0 +1,107 @@
+ogolnie mamy dwa rodzaje elementow:
+- kafelki
+- spacje
+
+Tym, co je laczy, jest adresowalnosc za pomoca kursora, oraz
+fakt, ze mozemy ten kursor w jakis sposob wyrenderowac.
+
+Roznica jest jednak taka, ze kafelki zawsze zajmuja obszar
+prostokatny, dzieki czemu funkcje rysujace moga zwracac
+"Extent".
+
+Spacje z kolei mozemy podzielic na dwie grupy:
+- spacja bez nowej linii (pozioma)
+- spacja z nowa linia
+
+W tym pierwszym przypadku mozemy spacje scharakteryzowac
+za pomoca szerokosci.
+
+Natomiast w tym ostatnim przypadku scharakteryzowanie
+staje sie nieco trudniejsze: musimy bowiem przechowac
+informacje o:
+- maksymalnej szerokosci linii
+- liczbie pustych linii
+- szerokosci wciecia w ostatniej linii
+
+Co wiecej, chcemy miec mozliwosc konwersji pomiedzy
+jednym a drugim typem spacji przy zachowaniu tozsamosci
+obiektu
+
+Mozemy to zrobic tak:
+
+
+#+BEGIN_SRC scheme
+(define-enum SpaceTypeId (NonBreaking Breaking))
+
+(define-interface SpaceType ()
+  (space-type-id)::SpaceTypeId)
+
+(define-type (NonBreaking width: real)
+  implementing SpaceType
+  with 
+  ((space-type-id)::SpaceTypeId SpaceTypeId:NonBreaking)
+)
+
+(define-type (Breaking line-width: real
+                       empty-lines: real
+                       indentation: real)
+  implementing SpaceType
+  with
+  ((space-type-id)::SpaceTypeId SpaceTypeId:Breaking))
+
+(define-type (Space type: SpaceType))
+#+END_SRC
+
+Problem jest jednak taki, ze taki projekt nie uwypukla
+zwiazku pomiedzy spacjami a kafelkami, przez co wydaje
+sie wybrakowany.
+
+Czego wobec tego potrzebujemy?
+
+Przede wszystkim, chcemy miec mozliwosc odwzorowania
+wspolrzednych ekranowych we wspolrzedne kursora, ktore
+beda wowczas mogly posluzyc do wydobycia danego obiektu
+spacji (albo kafelka). Kiedy jednak to sie juz wydarzy,
+chcielibysmy moc uzyskac 'wzgledne wspolrzedne' myszy
+w danej spacji, i odwzorowac owe wzgledne wspolrzedne
+w bardziej precyzyjny kursor.
+
+Czyli proces wygladalby tak:
+
+1. klikniecie powoduje odpytanie Screen o kursor
+2. poslugujemy sie kursorem do wydobycia obiektu
+z dokumentu
+3. dysponujac obiektem, mozemy odpytac o jego
+wspolrzedne ekranowe, i uzyc tych wspolrzednych
+do wyliczenia relatywnej pozycji kursora
+w obiekcie
+4. majac te relatywna pozycje, mozemy poprosic
+obiekt o doprecyzowanie kursora
+
+Tym sposobem, klikniecie powoduje, ze otrzymujemy
+sobie jakas pozycje kursora. Do przeprowadzenia
+powyzszej procedury potrzebujemy
+
+(define-type (Area left: real 
+                   top: real
+                   width: real
+                   height: real))
+
+(define-interface Screen ()
+  ...
+  (area-at cursor::Cursor)::Area
+  (cursor-under left::real top::real)::Cursor
+  ...)
+
+(define-interface Visual ()
+  (improve-cursor initial-cursor::Cursor left::real top::real)::Cursor
+  
+)
+
+Tak czy owak, mamy 3 rzeczy, ktore musimy zrobic, zeby dojsc
+do sprawnej nawigacji za pomoca kursora:
+1. tworzyc obiekty typu Space (na etapie parsowania)
+2. podczas renderowania tworzyc strukture danych odwzorowujaca
+wspolrzedne ekranowe w kursory
+3. znalezc jakas abstrakcje unifikujaca Tile i Space
+
