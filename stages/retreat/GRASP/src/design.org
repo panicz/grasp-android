@@ -32,7 +32,6 @@ Mozemy to zrobic tak:
 
 #+BEGIN_SRC scheme
 (define-enum SpaceTypeId (NonBreaking Breaking))
-
 (define-interface SpaceType ()
   (space-type-id)::SpaceTypeId)
 
@@ -78,6 +77,39 @@ w obiekcie
 4. majac te relatywna pozycje, mozemy poprosic
 obiekt o doprecyzowanie kursora
 
+
+
+#+BEGIN_SRC scheme
+;; An Element can - in practice - either be a Space
+;; or a Tile. A Space is something concrete,
+;; whereas a Tile is an interface (implemented by
+;; primitive objects such as cons cells or symbols,
+;; but also extensions provided by users implement
+;; the Tile interface)
+(define-interface Element ()
+
+  (compound?)::boolean
+
+  (cursor-under left ::real top ::real 
+                #;from base ::Cursor
+                #;on screen ::Screen)::Cursor
+)
+
+(define-interface Tile (Element)
+  (draw! screen::Screen)::Extent
+)
+#+END_SRC
+
+#+BEGIN_SRC scheme
+(define (select-cursor-under! left ::real 
+                              top ::real 
+                              screen ::Screen)::void
+  (let* ((cursor ::Cursor (screen:cursor-under left top))
+         (target ::Element (part-at cursor (screen:rendered-document)))
+         (position ::Point (screen:position target))
+    ...))
+#+END_SRC
+
 Tym sposobem, klikniecie powoduje, ze otrzymujemy
 sobie jakas pozycje kursora. Do przeprowadzenia
 powyzszej procedury potrzebujemy
@@ -89,7 +121,6 @@ powyzszej procedury potrzebujemy
 
 (define-interface Screen ()
   ...
-  (area-at cursor::Cursor)::Area
   (cursor-under left::real top::real)::Cursor
   ...)
 
@@ -102,6 +133,7 @@ Tak czy owak, mamy 3 rzeczy, ktore musimy zrobic, zeby dojsc
 do sprawnej nawigacji za pomoca kursora:
 1. tworzyc obiekty typu Space (na etapie parsowania)
 2. podczas renderowania tworzyc strukture danych odwzorowujaca
-wspolrzedne ekranowe w kursory
+wspolrzedne ekranowe w kursory (oraz w jakis sposob oznaczac
+element pod kursorem zeby byl widoczny na ekranie)
 3. znalezc jakas abstrakcje unifikujaca Tile i Space
 
