@@ -11,6 +11,8 @@
 (import (examples))
 (import (define-cache))
 (import (for))
+(import (rename (keyword-arguments) (define/kw define*)))
+
 
 ;; Each tile can choose whatever it pleases to be its index
 ;; (except #!null, for the reason explained below)
@@ -18,7 +20,7 @@
 ;; typically either integers or characters or symbols.
 ;;
 ;; The special value #!null means the absence of an index
-;;
+
 (define-alias Index java.lang.Object)
 
 (define-interface Screen ()
@@ -37,6 +39,7 @@
   (open-paren! height::real left::real top::real)::void
   (close-paren! height::real left::real top::real)::void
 
+  ;; do usuniecia:
   (cursor-left)::real
   (cursor-top)::real
 
@@ -52,24 +55,59 @@
 (define-constant final-part?::parameter[boolean]
   (make-parameter #f))
 
-    
-(define-interface Tile ()
-  (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
-
+(define-interface Indexable ()
   (has-children?)::boolean
   
-  (part-at index::Index)::Tile
+  (part-at index::Index)::Indexable
   
   (first-index)::Index
   (last-index)::Index
   
   (next-index index::Index)::Index
   (previous-index index::Index)::Index
+)
+
+(define-interface SpaceType ())
+
+(define-type (NonBreakingSpace width: real)
+  implementing SpaceType)
+
+(define-type (BreakingSpace coda: real
+			    line-width: real
+			    empty-lines: real
+			    indentation: real)
+  implementing SpaceType)
+
+(define-type (Space type: SpaceType)
+  implementing Indexable
+  with
+  ((has-children?)::boolean #t)
+  ((part-at index::Index)::Indexable (this))
+  ((first-index)::Index 0)
+  ((last-index)::Index
+   (match type
+     ((NonBreakingSpace width: width)
+      width)
+     ((BreakingSpace coda: coda
+		     line-width: line-width
+		     empty-lines: empty-lines
+		     indetation: indentation)
+      (+ coda indentation (* line-width empty-lines)))))
+  
+  ((next-index index::Index)::Index
+   (min (+ index 1) (last-index)))
+  
+  ((previous-index index::Index)::Index
+   (max (- index 1) 0)))
+  
+
+(define-interface Tile (Indexable)
+  (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
   )
 
-       
-(define-type (Finger left: real
-                     top: real
+
+(define-type (Finger left: real := 0
+                     top: real := 0
                      index: byte)
   implementing Tile
   with
@@ -80,8 +118,8 @@
 
   ((has-children?)::boolean #f)
 
-  ((part-at index::Index)::Tile
-   #!null)
+  ((part-at index::Index)::Indexable
+   (this))
   
   ((first-index)::Index
    #!null)
@@ -238,7 +276,7 @@
 
   ((has-children?)::boolean #t)
   
-  ((part-at index::Index)::Tile
+  ((part-at index::Index)::Indexable
    (if (or (eq? index #\() (eq? index #\)))
        (this)
        (as Tile (cell-index (this) (as int index)))))
@@ -307,9 +345,8 @@
 
   ((has-children?)::boolean #f)
   
-  ((part-at index::Index)::Tile
-   #!null
-   )
+  ((part-at index::Index)::Indexable
+   (this))
 
   ((first-index)::Index
    0)
@@ -329,12 +366,16 @@
        0))
   )
 
-(define (draw! object::Tile #!key
+(define (draw! object #!key
                (screen::Screen (current-screen))
                (cursor::Cursor '())
                (context::Cursor '()))
   ::Extent
-  (object:draw! screen cursor context))
+  (cond ((instance? object Tile)
+	 (invoke (as Tile object) 'draw! screen cursor context))
+
+	(else
+	 (error "Don't know how to draw "object))))
 
 (define (draw-sequence! elems #!key
                         (screen :: Screen (current-screen))
@@ -373,8 +414,8 @@
                       screen: screen
                       cursor: cursor
                       context: context))
-
-    (define (draw-head! pair)::Extent
+    
+    (define (draw-head! pair::cons)::Extent
       (let ((context (recons index context)))
         (with-translation screen (left top)
           (if (null? (head pair))
@@ -384,13 +425,13 @@
                      cursor: (subcursor cursor context)
                      context: context)))))
 
-    (define (should-the-bar-be-horizontal? dotted-pair)
-      (and (string-index (post-head-space dotted-pair)
-			 (is _ eq? #\newline))
-           (string-index (pre-tail-space dotted-pair)
-			 (is _ eq? #\newline))))
+    (define (should-the-bar-be-horizontal? dotted-pair::cons)::boolean
+      (and (string-any (is _ eq? #\newline)
+		       (post-head-space dotted-pair))
+           (string-any (is _ eq? #\newline)
+		       (pre-tail-space dotted-pair))))
 
-    (define (draw-dotted-tail! pair)::Extent
+    (define (draw-dotted-tail! pair::cons)::Extent
       (skip-spaces! (post-head-space pair))
       (cond ((should-the-bar-be-horizontal? pair)
              (let* ((bottom top)
@@ -400,10 +441,12 @@
                (let ((context (recons index context)))
                  (advance! (with-translation screen (left top)
                              (if (null? (tail pair))
-                                 (draw-empty-list! (null-tail-space pair))
+                                 (draw-empty-list! (null-tail-space
+						    pair))
                                  (draw! (tail pair)
                                         screen: screen
-                                        cursor: (subcursor cursor context)
+                                        cursor: (subcursor cursor
+							   context)
                                         context: context)))))
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (0 bottom)
@@ -417,10 +460,12 @@
                (let ((context (recons cursor context)))
                  (advance! (with-translation screen (left top)
                              (if (null? (tail pair))
-                                 (draw-empty-list! (null-tail-space pair))
+                                 (draw-empty-list! (null-tail-space
+						    pair))
                                  (draw! (tail pair)
                                         screen: screen
-                                        cursor: (subcursor cursor context)
+                                        cursor: (subcursor cursor
+							   context)
                                         context: context)))))
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (previous-left previous-top)
@@ -447,14 +492,19 @@
     ))
 
 
-(define (part-at cursor::Cursor tile::Tile)::Tile
+(define (part-at cursor::Cursor tile::Indexable)::Indexable
   (cond ((null? cursor)
          tile)
         ((pair? cursor)
-         (let ((parent (part-at (tail cursor) tile)))
+         (let ((parent (part-at (tail cursor) tile))
+	       (final? (null? (tail cursor))))
            (if parent
-	       (parameterize ((final-part? (null? (tail cursor))))
-		 (parent:part-at (head cursor)))
+	       (if final?
+		   (parameterize ((final-part? #t))
+		     (parent:part-at (head cursor)))
+		   ;; don't need to change the final-part?
+		   ;; parameter (which defaults to #f)
+		   (parent:part-at (head cursor)))
                parent)))
         (else
          #!null)))
@@ -481,9 +531,9 @@
     (_
      cursor)))
 
-(define (cursor-climb-front cursor::Cursor document::Tile)::Cursor
+(define (cursor-climb-front cursor::Cursor document::Indexable)::Cursor
 
-  (define (climb-front cursor::Cursor target::Tile)::Cursor
+  (define (climb-front cursor::Cursor target::Indexable)::Cursor
     (if (target:has-children?)
 	(let* ((index (target:first-index))
 	       (child (target:part-at index)))
@@ -495,7 +545,7 @@
     
   (climb-front cursor (part-at cursor document)))
 
-(define (cursor-back cursor::Cursor document::Tile)::Cursor
+(define (cursor-back cursor::Cursor document::Indexable)::Cursor
   (match cursor
     (`(,head . ,tail)
      (let* ((parent (part-at tail document))
@@ -507,9 +557,9 @@
      cursor)))
 
 
-(define (cursor-climb-back cursor::Cursor document::Tile)::Cursor
+(define (cursor-climb-back cursor::Cursor document::Indexable)::Cursor
 
-  (define (climb-back cursor::Cursor target::Tile)::Cursor
+  (define (climb-back cursor::Cursor target::Indexable)::Cursor
     (if (target:has-children?)
 	(let* ((index (target:last-index))
 	       (child (target:part-at index)))
