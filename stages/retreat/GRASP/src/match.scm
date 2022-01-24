@@ -90,7 +90,7 @@
                        bindings
                        actions ... alternative))
       
-      ((match-clause (((%typename) root) . rest)
+      ((match-clause (((%typename type) root) . rest)
                      (and conditions ...)
                      bindings
                      actions ... alternative)
@@ -99,30 +99,31 @@
                        bindings
                        actions ... alternative))
 
-      ((match-clause (((%typename key pat . etc) root) . rest)
+      ((match-clause (((%typename type key pat . etc) root) . rest)
                      (and conditions ...)
                      bindings
                      actions ... alternative)
-       (keyword? (syntax->datum #'key))
+       (and (keyword? (syntax->datum #'key))
+	    (identifier? #'type))
        (with-syntax ((name (datum->syntax
 			    stx
 			    (keyword->symbol (syntax->datum #'key)))))
-	 #'(match-clause (((%typename . etc) root)
-			  (pat (field root 'name)) . rest)
+	 #'(match-clause (((%typename type . etc) root)
+			  (pat (field (as type root) 'name)) . rest)
 			 (and conditions ...)
 			 bindings
 			 actions ... alternative)))
-    
+      
       ((match-clause (((typename . fields) root) . rest)
                      (and conditions ...)
                      bindings
                      actions ... alternative)
        (identifier? #'typename)
-       #'(match-clause (((%typename . fields) root) . rest)
+       #'(match-clause (((%typename typename . fields) root) . rest)
                        (and conditions ... (instance? root typename))
                        bindings
                        actions ... alternative))
-      
+
       ((match-clause ((literal root) . rest)
                      (and conditions ...)
                      bindings

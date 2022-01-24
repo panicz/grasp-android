@@ -117,6 +117,13 @@
 	  type-name parent (interface . interfaces) () slots
 	  spec (methods ... (method . body))))
 
+      ((_ type-name parent interfaces
+	  () slots (implementing interface . spec)
+	  methods)
+       #'(type-definition
+	  type-name parent (interface . interfaces) () slots
+	  spec methods))
+      
       ((_ type-name Base interfaces
 	  () slots (extending
 		    parent
