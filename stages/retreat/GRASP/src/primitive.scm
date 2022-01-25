@@ -105,7 +105,6 @@
   (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
   )
 
-
 (define-type (Finger left: real := 0
                      top: real := 0
                      index: byte)
@@ -492,18 +491,18 @@
     ))
 
 
-(define (part-at cursor::Cursor tile::Indexable)::Indexable
+(define (cursor-ref tile::Indexable cursor::Cursor)::Indexable
   (cond ((null? cursor)
          tile)
         ((pair? cursor)
-         (let ((parent (part-at (tail cursor) tile))
+         (let ((parent (cursor-ref tile (tail cursor)))
 	       (final? (null? (tail cursor))))
            (if parent
-	       (if final?
-		   (parameterize ((final-part? #t))
+	       (if (isnt final? eq? (final-part?))
+		   (parameterize ((final-part? final?))
 		     (parent:part-at (head cursor)))
 		   ;; don't need to change the final-part?
-		   ;; parameter (which defaults to #f)
+		   ;; parameter:
 		   (parent:part-at (head cursor)))
                parent)))
         (else
@@ -523,7 +522,7 @@
 (define (cursor-next cursor::Cursor document::Tile)::Cursor
   (match cursor
     (`(,head . ,tail)
-     (let* ((parent (part-at tail document))
+     (let* ((parent (cursor-ref document tail))
 	    (next (parent:next-index head)))
        (if (equal? head next)
 	   (cursor-next tail document)
@@ -543,12 +542,12 @@
 			   child)))
 	cursor))
     
-  (climb-front cursor (part-at cursor document)))
+  (climb-front cursor (cursor-ref document cursor)))
 
 (define (cursor-back cursor::Cursor document::Indexable)::Cursor
   (match cursor
     (`(,head . ,tail)
-     (let* ((parent (part-at tail document))
+     (let* ((parent (cursor-ref document tail))
 	    (previous (parent:previous-index head)))
        (if (equal? head previous)
 	   (cursor-back tail document)
@@ -569,7 +568,7 @@
 			  child)))
 	cursor))
     
-  (climb-back cursor (part-at cursor document)))
+  (climb-back cursor (cursor-ref document cursor)))
 
 
 ;;   

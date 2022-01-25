@@ -9,10 +9,8 @@
  (parse)
  (examples)
  (assert)
+ (cursor)
  (infix))
-
-;; this is what we're aiming at:
-
 
 (e.g.
  (let ((document ::Tile (as Tile (parse-string "
@@ -23,38 +21,54 @@
 
 (e.g. (! 5) ===> 120)
 "))))
-   ;;(show (part-at '(5 5 1) document))
-   
-   (and (equal? (part-at '(1 1) document)
+   ;;(show (part-at '(5 5 1)))   
+   (and (equal? (cursor-ref document '(1 1))
 		'define)
-	(equal? (part-at '(1 3 1) document)
+	(equal? (cursor-ref document '(1 3 1))
 		'!)
-	(equal? (part-at '(3 3 1) document)
+	(equal? (cursor-ref document '(3 3 1))
 	     'n)
-	(equal? (part-at '(1 5 1) document)
+	(equal? (cursor-ref document '(1 5 1))
 	     'if)
-	(equal? (part-at '(1 3 5 1) document)
+	(equal? (cursor-ref document '(1 3 5 1))
 		'<=)
-			#|
-	(equal? (part-at '(5 5 1) document)
+#|
+	(equal? (cursor-ref document '(5 5 1))
 		1)
-	(equal? (part-at '(1 7 5 1) document)
+|#
+	(equal? (cursor-ref document '(1 7 5 1))
 		'*)
-	(equal? (part-at '(3 7 5 1) document)
+	(equal? (cursor-ref document '(3 7 5 1))
 		'n)
 
-	(equal? (part-at '(1 5 7 5 1) document)
+	(equal? (cursor-ref document '(1 5 7 5 1))
 		'!)
-	(equal? (part-at '(1 3 5 7 5 1) document)
+	(equal? (cursor-ref document '(1 3 5 7 5 1))
 		'-)
-	(equal? (part-at '(3 3 5 7 5 1) document)
+	(equal? (cursor-ref document '(3 3 5 7 5 1))
 		'n)
-	(equal? (part-at '(5 3 5 7 5 1) document)
+	#|
+	(equal? (cursor-ref document '(5 3 5 7 5 1))
 		1)
 |#
 	)))
-	
-   
+
+(define (f c::Cursor)::Cursor
+  (cursor-climb-front c parsed))
+
+(define (n c::Cursor)::Cursor
+  (cursor-next c parsed))
+
+(define (b c::Cursor)::Cursor
+  (cursor-back c parsed))
+
+(define (d c::Cursor)::Cursor
+  (cursor-climb-back c parsed))
+
+
+
+;; this is what we're aiming for:
+
 
 &{
 /                       \
