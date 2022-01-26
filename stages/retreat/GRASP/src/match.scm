@@ -21,7 +21,9 @@
 
 (define-syntax match-clause
   (lambda (stx)
-    (syntax-case stx (quasiquote unquote quote and _ %typename)
+    (syntax-case stx (quasiquote
+		      unquote quote unquote-splicing
+		      and _ %typename)
       ((match-clause () condition bindings actions ... alternative)
        #'(check/unique condition bindings #f () ()
 		       actions ... alternative))
@@ -35,6 +37,24 @@
                        bindings
                        actions ... alternative))
 
+      ((match-clause ((,value root) . rest)
+                     (conditions ...)
+                     bindings
+                     actions ... alternative)
+       #'(match-clause rest
+                       (conditions ... (equal? value root))
+                       bindings
+                       actions ... alternative))
+
+      ((match-clause ((,@predicate root) . rest)
+                     (conditions ...)
+                     bindings
+                     actions ... alternative)
+       #'(match-clause rest
+                       (conditions ... (predicate root))
+                       bindings
+                       actions ... alternative))
+      
       ((match-clause ((_ root) . rest)
                      condition
                      bindings
