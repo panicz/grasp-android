@@ -12,6 +12,12 @@
  (cursor)
  (infix))
 
+(define parsed (parse-string "\
+(define (factorial n)
+  (if (<= n 0)
+      1
+      (* n (! (- n 1)))))"))
+
 (e.g.
  (let ((document ::Tile (as Tile (parse-string "
 (define (! n)
@@ -76,10 +82,10 @@
 |   ___          /   \  |
 |  /   \   __-->|  B  | |
 | |  A  |--      \___/  |
-|  \___/\        /      |
-|        \      |       |
-|         \     |       |
-|          _|___v       |
+|  \___/\          /    |
+|        \        /     |
+|         \      /      |
+|          v ___v       |
 |           /   \       |
 |          |  C  |      |
 |           \___/       |
@@ -103,11 +109,6 @@
       (draw! (head parsed)))
     (current-screen)))
       
-(define parsed (call-with-input-string "\
-(define (factorial n)
-  (if (<= n 0)
-      1
-      (* n (! (- n 1)))))" parse))
 
 (set! (current-screen) (TextScreen))
 

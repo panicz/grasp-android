@@ -11,7 +11,7 @@
 (import (examples))
 (import (define-cache))
 (import (for))
-(import (rename (keyword-arguments) (define/kw define*)))
+;;(import (rename (keyword-arguments) (define/kw define*)))
 
 
 ;; Each tile can choose whatever it pleases to be its index
@@ -67,6 +67,7 @@
   (previous-index index::Index)::Index
 )
 
+#|
 (define-interface SpaceType ())
 
 (define-type (NonBreakingSpace width: real)
@@ -91,7 +92,7 @@
      ((BreakingSpace coda: coda
 		     line-width: line-width
 		     empty-lines: empty-lines
-		     indetation: indentation)
+		     indentation: indentation)
       (+ coda indentation (* line-width empty-lines)))))
   
   ((next-index index::Index)::Index
@@ -99,7 +100,8 @@
   
   ((previous-index index::Index)::Index
    (max (- index 1) 0)))
-  
+
+|#
 
 (define-interface Tile (Indexable)
   (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
@@ -302,7 +304,7 @@
 
 (define-cache (heads tail)
   (cache (head)
-    (cons head tail)))
+	 (cons head tail)))
 
 (define (recons head tail)::cons
   ((heads tail) head))
