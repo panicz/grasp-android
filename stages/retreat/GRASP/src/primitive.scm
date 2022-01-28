@@ -67,6 +67,12 @@
   (previous-index index::Index)::Index
 )
 
+(define (part-at index::Index object)
+  (cond ((instance? object Indexable)
+	 (invoke (as Indexable object) 'part-at index))
+
+	(else
+	 (error "Don't know how to extract "index" from "object))))
 #|
 (define-interface SpaceType ())
 
@@ -106,6 +112,18 @@
 (define-interface Tile (Indexable)
   (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
   )
+
+(define (draw! object #!key
+               (screen::Screen (current-screen))
+               (cursor::Cursor '())
+               (context::Cursor '()))
+  ::Extent
+  (cond ((instance? object Tile)
+	 (invoke (as Tile object) 'draw! screen cursor context))
+
+	(else
+	 (error "Don't know how to draw "object))))
+
 
 (define-type (Finger left: real := 0
                      top: real := 0
@@ -367,17 +385,6 @@
        0))
   )
 
-(define (draw! object #!key
-               (screen::Screen (current-screen))
-               (cursor::Cursor '())
-               (context::Cursor '()))
-  ::Extent
-  (cond ((instance? object Tile)
-	 (invoke (as Tile object) 'draw! screen cursor context))
-
-	(else
-	 (error "Don't know how to draw "object))))
-
 (define (draw-sequence! elems #!key
                         (screen :: Screen (current-screen))
                         (cursor::Cursor '())
@@ -502,10 +509,10 @@
            (if parent
 	       (if (isnt final? eq? (final-part?))
 		   (parameterize ((final-part? final?))
-		     (parent:part-at (head cursor)))
+		     (part-at (head cursor) parent))
 		   ;; don't need to change the final-part?
 		   ;; parameter:
-		   (parent:part-at (head cursor)))
+		   (part-at (head cursor) parent))
                parent)))
         (else
          #!null)))
@@ -537,7 +544,7 @@
   (define (climb-front cursor::Cursor target::Indexable)::Cursor
     (if (target:has-children?)
 	(let* ((index (target:first-index))
-	       (child (target:part-at index)))
+	       (child (part-at index target)))
 	  (if (eq? child target)
 	      (recons index cursor)
 	      (climb-front (recons index cursor)
@@ -563,7 +570,7 @@
   (define (climb-back cursor::Cursor target::Indexable)::Cursor
     (if (target:has-children?)
 	(let* ((index (target:last-index))
-	       (child (target:part-at index)))
+	       (child (part-at index target)))
 	  (if (eq? child target)
 	      (recons index cursor)
 	      (climb-back (recons index cursor)
