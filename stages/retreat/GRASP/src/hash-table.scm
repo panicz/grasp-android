@@ -1,9 +1,6 @@
 (define-alias make-weak-key-hash-table java.util.WeakHashMap)
 (define-alias make-hash-table java.util.HashMap)
 
-;;(define-alias Pair gnu.lists.Pair)
-;;(define-alias System java.lang.System)
-
 (define (hash-set! table::java.util.Map key value)
   (table:put key value))
 
@@ -12,3 +9,14 @@
       (table:get key)
       (if (not (null? default))
 	  ((car default)))))
+
+;; hash-ref+ is like hash-ref, but it stores
+;; the result of evaluating the "default" thunk
+;; in the hash table
+(define (hash-ref+ table::java.util.Map key . default)
+  (if (table:contains-key key)
+      (table:get key)
+      (if (not (null? default))
+	  (let ((value ((car default))))
+	    (table:put key value)
+	    value))))

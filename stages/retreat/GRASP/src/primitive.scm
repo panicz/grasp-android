@@ -73,17 +73,38 @@
 
 	(else
 	 (error "Don't know how to extract "index" from "object))))
-#|
-(define-interface SpaceType ())
+
+(define-alias StringBuilder java.lang.StringBuilder)
+
+(define-interface SpaceType ()
+  ;; a SpaceType is either a NonBreakingSpace or a BreakingSpace
+  ;; (see below)
+  )
 
 (define-type (NonBreakingSpace width: real)
-  implementing SpaceType)
+  implementing SpaceType
+  with
+  ((toString)::String
+   (let ((builder (StringBuilder)))
+     (for c from 0 below width
+	  (builder:append #\space))
+     (builder:toString))))
 
 (define-type (BreakingSpace coda: real
 			    line-width: real
 			    empty-lines: real
 			    indentation: real)
-  implementing SpaceType)
+  implementing SpaceType
+  with
+  ((toString)::String
+   (let ((builder (StringBuilder)))
+     (for c from 0 below coda
+	  (builder:append #\space))
+     (for l from 0 to empty-lines
+	  (builder:append #\newline))
+     (for c from 0 below indentation
+	  (builder:append #\space))
+     (builder:toString))))
 
 (define-type (Space type: SpaceType)
   implementing Indexable
@@ -105,9 +126,10 @@
    (min (+ index 1) (last-index)))
   
   ((previous-index index::Index)::Index
-   (max (- index 1) 0)))
+   (max (- index 1) 0))
 
-|#
+  ((toString)::String
+   (type:toString)))
 
 (define-interface Tile (Indexable)
   (draw! screen::Screen cursor::Cursor context::Cursor)::Extent

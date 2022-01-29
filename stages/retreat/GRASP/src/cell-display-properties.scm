@@ -4,25 +4,25 @@
 
 (define tail cdr)
 
-(define-property (dotted? cell)
+(define-property+ (dotted? cell)
   (not (or (null? (tail cell))
 	   (pair? (tail cell)))))
 
-(define-property (pre-head-space cell) "")
+(define-property+ (pre-head-space cell) "")
 
-(define-property (post-head-space cell)
+(define-property+ (post-head-space cell)
   (if (and (not (dotted? cell))
 	   (null? (tail cell)))
       ""
       " "))
 
-(define-property (pre-tail-space cell) " ")
+(define-property+ (pre-tail-space cell) " ")
 
-(define-property (post-tail-space cell) "")
+(define-property+ (post-tail-space cell) "")
 
-(define-property (null-head-space cell) "")
+(define-property+ (null-head-space cell) "")
 
-(define-property (null-tail-space cell) "")
+(define-property+ (null-tail-space cell) "")
 
 (define cell-display-properties
   (list

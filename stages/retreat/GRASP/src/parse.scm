@@ -98,7 +98,7 @@
 (define (parse-string s::string)::list
   (call-with-input-string s parse))
 
-(define (show-empty-list space::string)::void
+(define (show-empty-list space)::void
   (write-char #\()
   (display space)
   (write-char #\)))
