@@ -22,7 +22,7 @@
       (* n (! (- n 1)))))
 ")
 
-(define parsed ::list (parse-string input))
+(define document ::list (parse-string input))
 
 (define input-extent ::Extent (string-extent input))
 
@@ -43,19 +43,34 @@
 	   (type ::KeyType (key:getKeyType)))
 
       (io:setCursorPosition 0 0)
-      (io:putString (show->string parsed))
+      (io:putString (show->string document))
       (io:setCursorPosition 0 (+ 2 input-extent:height))
       (io:putString (show->string cursor))
       (io:setCursorPosition 0 (+ 4 input-extent:height))
-      (io:putString (show->string (cursor-ref parsed cursor)))
+      
+      (try-catch
+       (begin
+	 (io:putString (show->string (cursor-ref document cursor))))
+       (ex java.lang.Throwable
+	   (io:putString (ex:toString))))
+       
       (io:flush)
       
       (match type	
 	(,KeyType:ArrowLeft
+	 (try-catch
+	  (set! cursor (cursor-climb-back (cursor-back cursor document) document))
+	  (ex java.lang.Throwable
+	      (io:putString (ex:toString))))
 	 (io:setCursorPosition (max 0 (- col 1)) row)
 	 (continue))
 	
 	(,KeyType:ArrowRight
+	 (try-catch
+	  (set! cursor (cursor-climb-front (cursor-next cursor document) document))
+	  (ex java.lang.Throwable
+	      (io:putString (ex:toString))))
+
 	 (io:setCursorPosition (min (+ col 1) (- width 1)) row)
 	 (continue))
 	
