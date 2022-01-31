@@ -24,20 +24,24 @@
 
 (define document ::list (parse-string input))
 
+;; powinien byc raczej TerminalScreen
+(set! (current-screen) (TextScreen))
+
 (define input-extent ::Extent (string-extent input))
+
+(define output-extent (draw! (head document)))
 
 (define cursor ::Cursor '())
 
 (define (run-editor #!optional (io ::Terminal (make-terminal)))::void
   (io:enterPrivateMode)
-  (io:setCursorPosition 0 0)
   (let continue ()
     (io:clearScreen)
     (io:setCursorPosition 0 0)
-    (io:putString (show->string document))
-    (io:setCursorPosition 0 (+ 2 input-extent:height))
+    (io:putString ((current-screen):toString))
+    (io:setCursorPosition 0 (+ 2 output-extent:height))
     (io:putString (with-output-to-string (lambda () (write cursor))))
-    (io:setCursorPosition 0 (+ 4 input-extent:height))
+    (io:setCursorPosition 0 (+ 4 output-extent:height))
     (try-catch
      (begin
        (io:putString (show->string (cursor-ref document cursor))))

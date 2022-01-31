@@ -1,0 +1,50 @@
+31.01.2022 mamy juz nawigowanie strzalkami w lewo i prawo.
+i to jako tako dziala. co chcemy teraz?
+- chcemy, zeby edytor wyswietlal wyrazenia za pomoca naszej
+  funkcji renderujacej
+- i zeby mozna sie bylo poruszac strzalkami po tych wyrazeniach
+- i zeby mozna bylo uzywac klikniecia myszy do umiejscowienia
+  kursora w odpowiednim miejscu
+
+a w dalszej kolejnosci:
+
+- zaznaczanie wyrazen
+- drag&drop (lewy nawias) oraz zmiany rozmiaru (prawy nawias)
+- poruszanie sie strzalkami po liniach
+
+
+------------------
+
+Duzo decyzji projektowych przed nami!
+
+oto ficzery, ktore miec chcemy:
+- nawigowanie strzalkami kursora po wyrazeniach
+- zaznaczanie wyrazen (shift + szczalka)
+- wiele paneli (podzial pionowy i poziomy)
+- wycinanie (ctrl+x), kopiowanie (ctrl+c) i wklejanie (ctrl+v)
+- sledzenie historii, 'undo' (ctrl+z)
+
+No dopsz. To teraz jak to reprezentowac?
+
+
+#+BEGIN_SRC
+(define-interface Panel ()
+  ...)
+
+(define-type (Split first: Panel
+                    second: Panel
+		    first%: real)
+  implementing Panel
+  with
+  ...)
+
+(define-type (Editor document: Document
+                     cursor: Cursor
+		     selection-start: Cursor
+		     screen: Screen)
+  implementing Panel
+  with
+  ...)
+
+#+END_SRC
+
