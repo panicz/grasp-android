@@ -55,10 +55,12 @@
 (define-constant final-part?::parameter[boolean]
   (make-parameter #f))
 
+(define-alias Indexable* java.lang.Object)
+
 (define-interface Indexable ()
   (has-children?)::boolean
   
-  (part-at index::Index)::Indexable
+  (part-at index::Index)::Indexable*
   
   (first-index)::Index
   (last-index)::Index
@@ -67,69 +69,61 @@
   (previous-index index::Index)::Index
 )
 
-(define (part-at index::Index object)
-  (cond ((instance? object Indexable)
+(define (has-children? object)
+  (cond ((Indexable? object)
+	 (invoke (as Indexable object) 'has-children?))
+
+	(else
+	 #f)))
+
+(define (part-at index::Index object)::Indexable*
+  (cond ((Indexable? object)
 	 (invoke (as Indexable object) 'part-at index))
 
 	(else
 	 (error "Don't know how to extract "index" from "object))))
 
-(define-alias StringBuilder java.lang.StringBuilder)
+(define (first-index object)
+  (cond ((Indexable? object)
+	 (invoke (as Indexable object) 'first-index))
 
-(define-interface SpaceType ()
-  ;; a SpaceType is either a NonBreakingSpace or a BreakingSpace
-  ;; (see below)
-  )
+	((string? object)
+	 0)
+	
+	(else
+	 (error "Don't know how to obtain first index from "object))))
 
-(define-type (NonBreakingSpace width: real)
-  implementing SpaceType
-  with
-  ((toString)::String
-   (let ((builder (StringBuilder)))
-     (for c from 0 below width
-	  (builder:append #\space))
-     (builder:toString))))
+(define (last-index object)
+  (cond ((Indexable? object)
+	 (invoke (as Indexable object) 'last-index))
 
-(define-type (BreakingSpace coda: real
-			    line-width: real
-			    empty-lines: real
-			    indentation: real)
-  implementing SpaceType
-  with
-  ((toString)::String
-   (let ((builder (StringBuilder)))
-     (for c from 0 below coda
-	  (builder:append #\space))
-     (for l from 0 to empty-lines
-	  (builder:append #\newline))
-     (for c from 0 below indentation
-	  (builder:append #\space))
-     (builder:toString))))
+	((string? object)
+	 (string-length (as string object)))
+	 
+	(else
+	 (error "Don't know how to obtain last index from "object))))
 
-(define-type (Space type: SpaceType)
-  implementing Indexable
-  with
-  ((has-children?)::boolean #t)
-  ((part-at index::Index)::Indexable (this))
-  ((first-index)::Index 0)
-  ((last-index)::Index
-   (match type
-     ((NonBreakingSpace width: width)
-      width)
-     ((BreakingSpace coda: coda
-		     line-width: line-width
-		     empty-lines: empty-lines
-		     indentation: indentation)
-      (+ coda indentation (* line-width empty-lines)))))
-  
-  ((next-index index::Index)::Index
-   (min (+ index 1) (last-index)))
-  
-  ((previous-index index::Index)::Index
-   (max (- index 1) 0))
+(define (next-index index::Index object)::Index
+  (cond ((Indexable? object)
+	 (invoke (as Indexable object) 'next-index index))
 
-  ((toString)::String
-   (type:toString)))
+	((string? object)
+	 (min (string-length object) (+ index 1)))
+	
+	(else
+	 (error "Don't know how to obtain next index to "index
+		" in "object))))
+
+(define (previous-index index::Index object)::Index
+  (cond ((Indexable? object)
+	 (invoke (as Indexable object) 'previous-index index))
+
+	((string? object)
+	 (max 0 (- index 1)))
+	
+	(else
+	 (error "Don't know how to obtain previous index to "index
+		" in "object))))
 
 (define-interface Tile (Indexable)
   (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
@@ -159,7 +153,7 @@
 
   ((has-children?)::boolean #f)
 
-  ((part-at index::Index)::Indexable
+  ((part-at index::Index)::Indexable*
    (this))
   
   ((first-index)::Index
@@ -317,10 +311,10 @@
 
   ((has-children?)::boolean #t)
   
-  ((part-at index::Index)::Indexable
+  ((part-at index::Index)::Indexable*
    (if (or (eq? index #\() (eq? index #\)))
        (this)
-       (as Tile (cell-index (this) (as int index)))))
+       (cell-index (this) (as int index))))
   ((first-index)::Index
    #\()
    
@@ -328,18 +322,20 @@
    #\))
   
   ((next-index index::Index)::Index
-   (if (eq? index #\()
-       0
-       (if (and (integer? index)
-                (is index < (last-cell-index (this))))
-           (+ index 1)
-           #\))))
+   (match index
+     (#\( 0)
+     (#\) #\))
+     (,@(is _ < (last-cell-index (this)))
+      (+ index 1))
+     (_
+      #\))))
   
   ((previous-index index::Index)::Index
-   (if (and (integer? index)
-            (is index > 0))
-       (- index 1)
-       #\())
+   (match index
+     (0 #\()
+     (#\) (last-cell-index (this)))
+     (#\( #\()
+     (_ (- index 1))))
   )
 
 (define-cache (heads tail)
@@ -386,25 +382,20 @@
 
   ((has-children?)::boolean #f)
   
-  ((part-at index::Index)::Indexable
+  ((part-at index::Index)::Indexable*
    (this))
 
   ((first-index)::Index
    0)
 
   ((last-index)::Index
-   (max 0 (string-length name)))
+   (string-length name))
   
   ((next-index index::Index)::Index
-   (let ((last::int (as int (last-index))))
-     (if (is index < last)
-         (+ index 1)
-         last)))
+   (min (last-index) (+ index 1)))
    
   ((previous-index index::Index)::Index
-   (if (is index > 0)
-       (- index 1)
-       0))
+   (max 0 (- index 1)))
   )
 
 (define (draw-sequence! elems #!key
@@ -522,19 +513,14 @@
     ))
 
 
-(define (cursor-ref tile::Indexable cursor::Cursor)::Indexable
+(define (cursor-ref tile cursor::Cursor)
   (cond ((null? cursor)
          tile)
         ((pair? cursor)
-         (let ((parent (cursor-ref tile (tail cursor)))
-	       (final? (null? (tail cursor))))
+         (let ((parent (cursor-ref tile (tail cursor))))
            (if parent
-	       (if (isnt final? eq? (final-part?))
-		   (parameterize ((final-part? final?))
-		     (part-at (head cursor) parent))
-		   ;; don't need to change the final-part?
-		   ;; parameter:
-		   (part-at (head cursor) parent))
+	       (parameterize ((final-part? (null? (tail cursor))))
+		 (part-at (head cursor) parent))
                parent)))
         (else
          #!null)))
@@ -550,51 +536,58 @@
 ;; indeksu, to powinien zapytac dziadka itd. (az dojdziemy
 ;; do Adama/Ewy)
 
-(define (cursor-next cursor::Cursor document::Tile)::Cursor
+(define (cursor-next cursor::Cursor document)::Cursor
   (match cursor
     (`(,head . ,tail)
      (let* ((parent (cursor-ref document tail))
-	    (next (parent:next-index head)))
+	    (next (next-index head parent)))
        (if (equal? head next)
 	   (cursor-next tail document)
 	   (recons next tail))))
     (_
      cursor)))
 
-(define (cursor-climb-front cursor::Cursor document::Indexable)::Cursor
+(define (cursor-climb-front cursor::Cursor document)::Cursor
 
-  (define (climb-front cursor::Cursor target::Indexable)::Cursor
-    (if (target:has-children?)
-	(let* ((index (target:first-index))
+  (define (climb-front cursor::Cursor target)::Cursor
+    (if (has-children? target)
+	(let* ((index (first-index target))
 	       (child (part-at index target)))
 	  (if (eq? child target)
-	      (recons index cursor)
+	      (if (and (pair? cursor)
+		       (eq? (cursor-ref document (tail cursor))
+			    target))
+		  cursor
+		  (recons index cursor))
 	      (climb-front (recons index cursor)
 			   child)))
 	cursor))
     
   (climb-front cursor (cursor-ref document cursor)))
 
-(define (cursor-back cursor::Cursor document::Indexable)::Cursor
+(define (cursor-back cursor::Cursor document)::Cursor
   (match cursor
     (`(,head . ,tail)
      (let* ((parent (cursor-ref document tail))
-	    (previous (parent:previous-index head)))
+	    (previous (previous-index head parent)))
        (if (equal? head previous)
 	   (cursor-back tail document)
 	   (recons previous tail))))
     (_
      cursor)))
 
+(define (cursor-climb-back cursor::Cursor document)::Cursor
 
-(define (cursor-climb-back cursor::Cursor document::Indexable)::Cursor
-
-  (define (climb-back cursor::Cursor target::Indexable)::Cursor
-    (if (target:has-children?)
-	(let* ((index (target:last-index))
+  (define (climb-back cursor::Cursor target)::Cursor
+    (if (has-children? target)
+	(let* ((index (last-index target))
 	       (child (part-at index target)))
 	  (if (eq? child target)
-	      (recons index cursor)
+	      (if (and (pair? cursor)
+		       (eq? (cursor-ref document (tail cursor))
+			    target))
+		  cursor
+		  (recons index cursor))
 	      (climb-back (recons index cursor)
 			  child)))
 	cursor))

@@ -18,7 +18,8 @@
       (set! (tail last-tail) (cons (read-char) '()))
       (read-atom-chars-into (tail last-tail)))))
 
-(define (read-spaces)::string
+
+(define (read-spaces)
   (define (read-spaces-into result)
     (let ((c (peek-char)))
       (if (or (eof-object? c)
@@ -26,6 +27,7 @@
 	  result
 	  (read-spaces-into (cons (read-char) result)))))
   (list->string (reverse (read-spaces-into '()))))
+
 
 (define (read-list)
   (let ((result '())
