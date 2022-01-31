@@ -12,25 +12,7 @@
   (data :: char[])
   (left :: real init-value: 0)
   (top :: real init-value: 0)
- 
-  ((cursor-left)::real
-   left)
-
-  ((cursor-top)::real
-   top)
-
-  ((cursor-next!)::void
-   (set! left (min (+ left 1) (- width 1))))
-  
-  ((cursor-back!)::void
-   (set! left (max (- left 1) 0)))
-  
-  ((cursor-up!)::void
-   (set! top (max (- top 1) 0)))
-  
-  ((cursor-down!)::void
-   (set! top (min (+ top 1) (- height 1))))
-  
+   
   ((get row::real col::real)::char
    (let ((x (+ col shift-left))
          (y (+ row shift-top)))

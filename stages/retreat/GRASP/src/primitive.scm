@@ -39,15 +39,6 @@
   (open-paren! height::real left::real top::real)::void
   (close-paren! height::real left::real top::real)::void
 
-  ;; do usuniecia:
-  (cursor-left)::real
-  (cursor-top)::real
-
-  (cursor-next!)::void
-  (cursor-back!)::void
-  (cursor-up!)::void
-  (cursor-down!)::void
-  
   ;;(end-line! line-height::real)::void
   ;;(cursor-at left::real top::real)::Cursor
   )
@@ -72,14 +63,14 @@
 (define (has-children? object)
   (cond ((Indexable? object)
 	 (invoke (as Indexable object) 'has-children?))
-
+	
 	(else
 	 #f)))
 
 (define (part-at index::Index object)::Indexable*
   (cond ((Indexable? object)
 	 (invoke (as Indexable object) 'part-at index))
-
+	
 	(else
 	 (error "Don't know how to extract "index" from "object))))
 
@@ -207,24 +198,6 @@
   ((close-paren! height::real left::real top::real)::void
    (values))
 
-  ((cursor-left)::real
-   0)
-
-  ((cursor-top)::real
-   0)
-
-  ((cursor-next!)::void
-   (values))
-  
-  ((cursor-back!)::void
-   (values))
-  
-  ((cursor-up!)::void
-   (values))
-  
-  ((cursor-down!)::void
-   (values))
-  
   )
 
 (define-constant current-screen::parameter[Screen]

@@ -29,7 +29,7 @@
 
 (define input-extent ::Extent (string-extent input))
 
-(define output-extent (draw! (head document)))
+(define output-extent ::Extent (draw! (head document)))
 
 (define cursor ::Cursor '())
 
