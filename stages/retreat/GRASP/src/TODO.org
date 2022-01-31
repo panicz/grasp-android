@@ -12,6 +12,10 @@ a w dalszej kolejnosci:
 - drag&drop (lewy nawias) oraz zmiany rozmiaru (prawy nawias)
 - poruszanie sie strzalkami po liniach
 
+No dobra. To co sie musi tak naprawde dziac?
+
+
+
 
 ------------------
 
