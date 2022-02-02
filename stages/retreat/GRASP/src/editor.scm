@@ -1,9 +1,11 @@
 (import
  (cell-display-properties)
+ (define-syntax-rule)
  (define-interface)
  (define-type)
  (extent)
  (conversions)
+ (indexable)
  (primitive)
  (text-screen)
  (combinators)
@@ -39,6 +41,9 @@
     ((as ExtendedTerminal io):setMouseCaptureMode
      MouseCaptureMode:CLICK_RELEASE_DRAG))
   (let ((warning ""))
+    (define-syntax-rule (WARN msg ...)
+      (set! warning (string-append "\n" msg ... warning)))
+    
     (let continue ()
       (io:setCursorVisible #f)
       (io:clearScreen)
@@ -51,11 +56,11 @@
        (begin
 	 (io:putString (show->string (cursor-ref document cursor))))
        (ex java.lang.Throwable
-	   (io:putString (ex:toString))))
+	   (WARN (ex:toString))))
       (io:putString warning)
       (io:flush)
       (io:setCursorVisible #t)
-      (set! warning "")
+      ;;(set! warning "")
       (let* ((key ::KeyStroke (io:readInput))
 	     (type ::KeyType (key:getKeyType)))
         
@@ -66,30 +71,31 @@
 			  (cursor-back cursor document)
 			  document))
 	    (ex java.lang.Throwable
-		(set! warning (ex:toString))))
+		(WARN (ex:toString))))
 	   (continue))
 	  
 	  (,KeyType:ArrowRight
 	   (try-catch
-	    (set! cursor (cursor-climb-front
-			  (cursor-next cursor document)
-			  document))
+	    (begin
+	      (set! cursor (cursor-climb-front
+			    (cursor-next cursor document)
+			    document)))
 	    (ex java.lang.Throwable
-		(set! warning (ex:toString))))
+		(WARN (ex:toString))))
 	   (continue))
 	  
 	  (,KeyType:ArrowUp
 	   (try-catch
 	    (set! cursor (cursor-climb-front cursor document))
 	    (ex java.lang.Throwable
-		(set! warning (ex:toString))))
+		(WARN (ex:toString))))
 	   (continue))
 	  
 	  (,KeyType:ArrowDown
 	   (try-catch
 	    (set! cursor (cursor-climb-back cursor document))
 	    (ex java.lang.Throwable
-		(set! warning (ex:toString))))
+		(WARN (ex:toString))))
 	   (continue))
 	  
 	  (,KeyType:EOF
@@ -102,32 +108,21 @@
 	   (let* ((action ::MouseAction (as MouseAction key))
 		  (position ::TerminalPosition (action:getPosition)))
 	     (cond ((action:isMouseMove)
-		    (set! warning
-			  (string-append "mouse move to "
-					 (position:toString))))
+		    (WARN "mouse move to " (position:toString)))
 		   ((action:isMouseDown)
 		    (match (action:getButton)
 		      (,MouseButton:Left
-		       (set! warning
-			     (string-append "left mouse at "
-					    (position:toString))))
+		       (WARN "left mouse at " (position:toString)))
 		      (,MouseButton:Right
-		       (set! warning
-			     (string-append "right mouse at "
-					    (position:toString))))
+		       (WARN "right mouse at " (position:toString)))
 		      (_
-		       (set! warning
-			     (string-append (action:toString)
-					    " mouse at "
-					    (position:toString))))))
+		       (WARN (action:toString) " mouse at "
+			     (position:toString)))))
 		   ((action:isMouseDrag)
-		    (set! warning
-			  (string-append "mouse move to "
-					 (position:toString))))
+		    (WARN "mouse move to " (position:toString)))
 		   ((action:isMouseUp)
-		    (set! warning
-			  (string-append "mouse released at "
-					 (position:toString))))))
+		    (WARN "mouse released at "
+			  (position:toString)))))
 	   (continue))
 	  
 	  (_

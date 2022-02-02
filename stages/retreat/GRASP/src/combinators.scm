@@ -2,6 +2,7 @@
 (import (extent))
 (import (cursor))
 (import (primitive))
+(import (indexable))
 
 (define-type (Over back: Tile front: Tile)
   implementing Tile
