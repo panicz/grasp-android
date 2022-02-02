@@ -21,6 +21,23 @@
 ;;
 ;; The special value #!null means the absence of an index
 
+(define-alias StringBuilder java.lang.StringBuilder)
+
+(define-interface StringBuilding ()
+  (buildString out::StringBuilder)::StringBuilder)
+
+(define-type (Space width: real next: Space)
+  implementing StringBuilding
+  with
+  ((buildString out::StringBuilder)::StringBuilder
+   (for i from 0 below width
+     (out:append #\space))
+   (if next
+       (next:buildString (out:append #\newline))
+       out))
+  ((toString)::String
+   (invoke (buildString (StringBuilder)) 'toString)))
+
 (define-alias Index java.lang.Object)
 
 (define-interface Screen ()
