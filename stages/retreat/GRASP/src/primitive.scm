@@ -35,9 +35,6 @@
   ;;(cursor-at left::real top::real)::Cursor
   )
 
-(define-constant final-part?::parameter[boolean]
-  (make-parameter #f))
-
 
 (define-interface Tile (Indexable)
   (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
@@ -409,18 +406,6 @@
     ))
 
 
-(define (cursor-ref tile cursor::Cursor)
-  (cond ((null? cursor)
-         tile)
-        ((pair? cursor)
-         (let ((parent (cursor-ref tile (tail cursor))))
-           (if parent
-	       (parameterize ((final-part? (null? (tail cursor))))
-		 (part-at (head cursor) parent))
-               parent)))
-        (else
-         #!null)))
-
 ;; RZM37UHSPY5Z
 
 ;; no dobra, jak powinien dzialac cursor-next?
@@ -432,97 +417,5 @@
 ;; indeksu, to powinien zapytac dziadka itd. (az dojdziemy
 ;; do Adama/Ewy)
 
-(define (cursor-next cursor::Cursor document)::Cursor
-  (match cursor
-    (`(,head . ,tail)
-     (let* ((parent (cursor-ref document tail))
-	    (next (next-index head parent)))
-       (if (equal? head next)
-	   (cursor-next tail document)
-	   (recons next tail))))
-    (_
-     cursor)))
-
-(define (cursor-climb-front cursor::Cursor document)::Cursor
-
-  (define (climb-front cursor::Cursor target)::Cursor
-    (if (has-children? target)
-	(let* ((index (first-index target))
-	       (child (part-at index target)))
-	  (if (eq? child target)
-	      (if (and (pair? cursor)
-		       (eq? (cursor-ref document (tail cursor))
-			    target))
-		  cursor
-		  (recons index cursor))
-	      (climb-front (recons index cursor)
-			   child)))
-	cursor))
-    
-  (climb-front cursor (cursor-ref document cursor)))
-
-(define (cursor-back cursor::Cursor document)::Cursor
-  (match cursor
-    (`(,head . ,tail)
-     (let* ((parent (cursor-ref document tail))
-	    (previous (previous-index head parent)))
-       (if (equal? head previous)
-	   (cursor-back tail document)
-	   (recons previous tail))))
-    (_
-     cursor)))
-
-(define (cursor-climb-back cursor::Cursor document)::Cursor
-
-  (define (climb-back cursor::Cursor target)::Cursor
-    (if (has-children? target)
-	(let* ((index (last-index target))
-	       (child (part-at index target)))
-	  (if (eq? child target)
-	      (if (and (pair? cursor)
-		       (eq? (cursor-ref document (tail cursor))
-			    target))
-		  cursor
-		  (recons index cursor))
-	      (climb-back (recons index cursor)
-			  child)))
-	cursor))
-    
-  (climb-back cursor (cursor-ref document cursor)))
 
 
-;;   
-;; (   (   a   b   )   )
-;; ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^
-;; 1 1 1 1 1 1 1 1 1 1 1
-;; ( 0 1 1 1 1 1 1 1 2 )
-;;     ( 0 1 2 3 4 )
-
-#|
-(e.g.
- (let ((context (head (parse-string
-                       "  (   (   a   b   )   )"
-                       ;; ^(#\()               ;
-                       ;;  ^(0 0)              ;
-                       ;;   ^(1 0)             ;
-                       ;;    ^(2 0)            ;
-                       ;;     ^(#\( 1)         ;
-                       ;;      ^(0 0 1)        ;
-                       ;;       ^(1 0 1)       ;
-                       ;;        ^(2 0 1)      ;
-                       ;;         ^(0 1 1)     ;
-                       ;;          ^(0 2 1)    ;
-                       ;;           ^(1 2 1)   ;
-                       ;;            ^(2 2 1)  ;
-                       ;;             ^(0 3 1) ;
-                       ;;              ^(0 4 1);
-                       ;;        (1 4 1)^      ;
-                       ;;         (2 4 1)^     ;
-                       ;;          (#\) 1)^    ;
-                       ;;             (0 2)^   ;
-                       ;;              (1 2)^  ;
-                       ;;               (2 2)^ ;
-                       ;;                (#\))^;
-                       ))))
-   (and)))
-|#
