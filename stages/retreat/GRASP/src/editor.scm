@@ -1,5 +1,4 @@
 (import
- (cell-display-properties)
  (define-syntax-rule)
  (define-interface)
  (define-type)

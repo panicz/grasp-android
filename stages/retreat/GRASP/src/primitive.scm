@@ -2,7 +2,6 @@
 (import (define-interface))
 (import (define-type))
 (import (define-property))
-(import (cell-display-properties))
 (import (assert))
 (import (infix))
 (import (extent))
@@ -13,7 +12,6 @@
 (import (indexable))
 (import (for))
 ;;(import (rename (keyword-arguments) (define/kw define*)))
-
 
 (define-interface Screen ()
   (paren-width)::real
@@ -50,7 +48,6 @@
 
 	(else
 	 (error "Don't know how to draw "object))))
-
 
 (define-type (Finger left: real := 0
                      top: real := 0
@@ -143,43 +140,6 @@
 
 ;;  0 1 2
 ;; (  x  )
-
-(define (cell-index cell::pair index::int)
-  (assert (is index >= 0))
-  (cond ((= index 0)
-         (pre-head-space cell)) ;; trzeba jakos rzutowac do Tile
-        ((= index 1)
-         (let ((target (car cell)))
-           (if (and (null? target) (not (final-part?)))
-               (null-head-space cell)
-               target)))
-        ((= index 2)
-         (post-head-space cell)) ;; jak wyzej
-        ((dotted? cell)
-         (cond ((= index 3)
-                (head-tail-separator cell))
-               ((= index 4)
-                (pre-tail-space cell)) ;; jakos rzutowac do Tile?
-               ((= index 5)
-                (let ((target (cdr cell)))
-                  (if (and (null? target) (not (final-part?)))
-                      (null-tail-space cell)
-                      target)))
-               ((= index 6)
-                (post-tail-space cell))))
-        (else
-         (cell-index (cdr cell) (- index 2)))))
-
-(define (last-cell-index cell::pair #!optional (initial::int 2))::int
-  (cond ((dotted? cell)
-         (+ initial 4))
-        ((pair? (tail cell))
-         (last-cell-index (tail cell) (+ initial 2)))
-        (else
-         initial)))
-
-(define-property (head-tail-separator cell)
-  #!null)
 
 (define-simple-class cons (pair Tile)
   ((*init* a d)

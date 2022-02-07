@@ -4,6 +4,9 @@
 (import (infix))
 (import (match))
 (import (hash-table))
+(import (mapping))
+(import (print))
+(import (for))
 
 (define (matching string pattern)
   (regex-match pattern string))
@@ -32,52 +35,42 @@
 	  (walk #;from novel #;into visited))))
   (walk #;from (graph node) #;into '()))
 
-(define (callable hash)
-  (lambda (key)
-    (hash-ref hash key)))
+(define (all-scm-files-from-current-directory)
+  (only (is _ matching "\\.scm$") (string-split (shell "ls") "\n")))
 
-(let* ((filenames (string-split (shell "ls") "\n"))
-       (scheme-files (only (is _ matching "\\.scm$")
-			   filenames))
-       (files+imports (map (lambda (file)
-			     (let* ((contents (with-input-from-file file read-all))
-				    (imports (only (lambda (top-level)
-						     (and-let* ((`(import . ,modules) top-level))))
-						   contents))
-				    (modules (apply append
-						    (map (lambda (clause)
-							   (map (lambda (module)
-								  (match module
-								    (`(rename ,module . ,_)
-								     module)
-								    (_
-								     module)))
-								(cdr clause)))
-							 imports))))
-			       `((,(string->symbol (string-drop-right file 4))) ,modules)))
-			   scheme-files))
-       (dependencies (let ((dependencies (make-hash-table)))
-		       (for-each (lambda (module+dependencies)
-				   (match module+dependencies
-				     (`(,module ,imports)
-				      (hash-set! dependencies module imports))))
-				 files+imports)
-		       dependencies))
-       (leaves (map (lambda (module+imports)
-		      (match module+imports
-			(`(,module ,imports)
-			 module)))
-		    files+imports)))
-    
-  ;; no dobra, to teraz tak: zaczynajac od lisci, sledzimy zaleznosci zaleznosci
-  ;; do czasu, az osiagniemy nasycenie
-  
-  (for-each (lambda (leaf)
-	      (let ((chain (reach (callable dependencies) leaf)))
-		(when (is leaf in chain)
-		  (display "circular dependency from ")
-		  (display leaf)
-		  (display": ")
-		  (display chain)
-		  (newline))))
-	      leaves))
+(define files
+  (match (command-line)
+    (`(,command)
+     (all-scm-files-from-current-directory))
+    (`(,command . ,args)
+     args)))
+
+(define (dependency-graph files)
+  (let ((dependencies (mapping (module) '())))
+    (for file in files
+      (let* ((contents (with-input-from-file file read-all))
+	     (imports (apply
+		       append
+		       (map (lambda (expression)
+			      (match expression
+				(`(import . ,modules)
+				 (map (lambda (module-spec)
+					(match module-spec
+					  (`(rename ,module . ,_)
+					   module)
+					  (_
+					   module-spec)))
+				      modules))
+				(_
+				 '()))) contents)))
+	     (source-module `(,(string->symbol
+				(string-drop-right file 4)))))
+	(set! (dependencies source-module) imports)))
+    dependencies))
+
+(define files-dependency-graph (dependency-graph files))
+
+(for module in (keys files-dependency-graph)
+  (let ((dependencies (reach files-dependency-graph module)))
+    (when (is module in dependencies)
+      (print "circular dependency from "module": "dependencies))))

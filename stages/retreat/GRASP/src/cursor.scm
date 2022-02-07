@@ -1,4 +1,3 @@
-(import (cell-display-properties))
 (import (indexable))
 (import (match))
 (import (infix))
@@ -50,9 +49,6 @@
 ;;
 
 (define-alias Cursor java.lang.Object) ;;gnu.lists.LList)
-
-(define-constant final-part?::parameter[boolean]
-  (make-parameter #f))
 
 (define (cursor-ref tile cursor::Cursor)
   (cond ((null? cursor)

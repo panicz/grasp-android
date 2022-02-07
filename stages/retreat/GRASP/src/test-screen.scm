@@ -1,8 +1,8 @@
 (import
- (cell-display-properties)
  (define-interface)
  (define-type)
  (conversions)
+ (indexable)
  (primitive)
  (text-screen)
  (combinators)

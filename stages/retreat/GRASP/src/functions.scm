@@ -101,5 +101,12 @@
 (e.g.
  (same-sets? '(a b c) '(b a c)))
 
+(define (concatenate list)
+  (apply append list))
+
+(e.g.
+ (concatenate '((a b) (c) (d e f)))
+ ===> (a b c d e f))
+
 (define (pass x . functions)
   (fold-left (lambda (x f) (f x)) x functions))

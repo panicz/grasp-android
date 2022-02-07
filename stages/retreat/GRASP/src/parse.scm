@@ -1,11 +1,10 @@
 (import (define-property))
-(import (cell-display-properties))
 (import (srfi :11) (srfi :17))
 (import (conversions))
 (import (primitive))
 (import (infix))
-(import (rename (keyword-arguments) (define/kw define*)))
 (import (examples))
+(import (indexable))
 
 (define (separator? c)::boolean
   (or (eof-object? c)
@@ -92,7 +91,7 @@
 
     (read-next)))
 
-(define* (parse port := (current-input-port))::list
+(define (parse #!optional (port (current-input-port)))::list
   (parameterize ((current-input-port port))
     (let-values (((result spaces) (read-list)))
       result)))

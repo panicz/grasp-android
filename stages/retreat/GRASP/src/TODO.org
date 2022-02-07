@@ -1,4 +1,71 @@
-* 01.02.2022 podczas rysowania chcemy tworzyc pomocnicza
+* 06.02.2022
+
+interfejs do budowania struktury pomocniczej 
+przypisujacej wspolrzednym ekranowym kursory
+z oryginalnego wyrazenia:
+
+- dodaj element (szerokosc, wspolrzedna kursora)
+- zakoncz biezaca linie (wysokosc)
+
+Zalozenia implementacyjne:
+- kolejne przerysowywanie takiego samego dokumentu
+nie powinno powodowac dodatkowych alokacji
+
+- lokalne zmmiany nie powinny inwalidowac zbyt wielu
+elementow (a w kazdym razie powinny maksymalizowac
+uzywanie zaalokowanych zasobow)
+
+(define-interface CursorMap ()
+  (finish-line!)::void
+  (add-entry! width::real cursor::Cursor)::void
+
+  (cursor-at left::real top::real)::Cursor
+  (position cursor::Cursor)::Point)
+
+
+* 05.02.2022
+
+(cursor-ref document::Indexable cursor::Cursor) -> element
+(screen:cursor-at left::real top::real) -> Cursor
+(screen:position cursor::Cursor) -> Point
+(screen:extent cursor::Cursor) -> Extent
+
+Teraz pomysł jest taki, żeby wynikiem renderowania byla
+struktura podobna do tej ze starego prototypu, tzn.
+lista linii zawierajaca liste elementow, gdzie kazdy
+z elementow albo jest finalnym elementem, albo
+kontenerem zawierajacym liste
+
+* 04.02.2022
+
+wczoraj i przedwczoraj zajmowalem sie glownie analizatorem
+zaleznosci i refaktoryzacja modulow, majaca na celu znalezienie
+odpowiedniego miejsca do przechowywania spacji.
+
+Nowy typ "spacji" zostal juz co prawda zdefiniowany, ale jeszcze
+nie jest uzywany, i wymaga sporo dopracowania.
+
+Czyli plan wyglada na razie tak: wyodrebniamy typ spacji,
+okreslamy reguly indeksowania i zastepujemy aktualna reprezentacje
+spacji w parserze, funkcji wyswietlajacej oraz funkcji rysujacej
+
+Nastepnie chcielibysmy stworzyc odwzorowania dla elementow
+przestrzennych w ich polozenie i rozmiary
+
+* 02.02.2022 
+
+wczoraj narodzil sie taki pomysl, zeby utrzymywac mape
+z polozeniami tylko dla nieparzystych indeksow
+
+ogolnie wydaje sie tez, ze niezbedne bedzie wydzielenie
+spacji jako osobnego typu, przy czym moze byc tak, ze
+bedziemy owe spacje reprezentowac po prostu jako listy
+liczb calkowitych, gdzie liczba oznacza spacje, zas
+przejscie do nastepnego elementu oznacza nowa linie.
+
+
+* 01.02.2022 
+podczas rysowania chcemy tworzyc pomocnicza
 strukture, ktora po pierwsze bedzie nam odwzorowywac
 obszary ekranu w kursory widgetow, a po drugie bedzie
 umozliwiac odwzorowywanie kursorow w polozenia widgetow
@@ -157,7 +224,9 @@ kursora.
 Ale 
 
 
-* 31.01.2022 mamy juz nawigowanie strzalkami w lewo i prawo.
+* 31.01.2022
+
+mamy juz nawigowanie strzalkami w lewo i prawo.
 
 i to jako tako dziala. co chcemy teraz?
 - chcemy, zeby edytor wyswietlal wyrazenia za pomoca naszej
@@ -174,7 +243,7 @@ a w dalszej kolejnosci:
 
 No dobra. To co sie musi tak naprawde dziac?
 
-------------------
+* starsze
 
 Duzo decyzji projektowych przed nami!
 
