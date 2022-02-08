@@ -1,3 +1,24 @@
+* 08.02.2022
+
+Dodanie opcji recyklingu do konstruowania obiektow, parametryzowanego
+typem. Mozemy sobie pisac
+
+(Recycled Line next: null height: real)
+
+i mamy wowczas mozliwosc otrzymania obiektu z odzysku (po wywolaniu
+(recycle Line)).
+
+No i pieknie. I teraz podczas rysowania bedziemy sobie tworzyc
+strukture, moze
+
+ArrayList<Line> lines;
+
+(define-type (Section width: real cursor: Cursor inner: ArrayList[Line]))
+(define-type (Line height: real content: ArrayList[Section]))
+
+
+
+
 * 07.02.2022
 trzeba wreszcie zaimplementowac te klikania, przy czym mamy
 do wyboru dwie strategie implementacyjne:
