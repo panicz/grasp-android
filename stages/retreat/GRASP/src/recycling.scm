@@ -1,6 +1,7 @@
 (import (define-syntax-rule))
 (import (define-interface))
 (import (define-property))
+(import (define-type))
 (import (infix))
 (import (conversions))
 (import (while))
@@ -16,7 +17,6 @@
   ;; has ended. Further allocations might reuse the
   ;; objects from the previous round.
   (recycle)::void)
-
 
 (define-property+ (recycling constructor)
   (object (Recycling)
@@ -34,28 +34,14 @@
 	      result))))
     ((recycle)::void
      (while (is next-index < (storage:size))
-	    (storage:remove (- (storage:size) 1)))
+       (storage:remove (- (storage:size) 1)))
      (set! next-index 0))))
 
-(define-syntax set-fields!
-  (lambda (stx)
-    (syntax-case stx ()
-      ((_ instance key value . rest)
-       (keyword? (syntax->datum #'key))
-       (with-syntax ((symbol (datum->syntax
-			      stx
-			      (keyword->symbol
-			       (syntax->datum #'key)))))
-	 #'(begin
-	     (set! (instance symbol) value)
-	     (set-fields! instance . rest))))
-      ((_ instance)
-       #'instance))))
-
-(define (Recycled constructor args ...)
-  (let* ((reconstruct (recycling constructor))
+(define-syntax-rule (Recycled constructor args ...)
+  (let* ((reconstruct ::Recycling (recycling constructor))
 	 (instance (reconstruct:recycled-element)))
-    (set-fields! instance args ...)))
+    (set-fields! instance args ...)
+    instance))
 
 (define (recycle object-type)
   (invoke (as Recycling (recycling object-type)) 'recycle))

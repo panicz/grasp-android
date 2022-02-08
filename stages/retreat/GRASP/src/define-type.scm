@@ -5,6 +5,7 @@
 
 ;;(define-alias Cloneable java.lang.Cloneable)
 
+
 (define-simple-class Struct ()
   interface: #t
   ((typename) :: String #!abstract)
@@ -143,3 +144,18 @@
 	  type-name parent interfaces () slots
 	  spec (methods ... (method . body))))
       )))
+
+(define-syntax set-fields!
+  (lambda (stx)
+    (syntax-case stx ()
+      ((_ instance key value . rest)
+       (keyword? (syntax->datum #'key))
+       (with-syntax ((symbol (datum->syntax
+			      stx
+			      (keyword->symbol
+			       (syntax->datum #'key)))))
+	 #'(begin
+	     (slot-set! instance 'symbol value)
+	     (set-fields! instance . rest))))
+      ((_ instance)
+       #'(values)))))
