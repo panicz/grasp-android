@@ -1,3 +1,51 @@
+* 07.02.2022
+trzeba wreszcie zaimplementowac te klikania, przy czym mamy
+do wyboru dwie strategie implementacyjne:
+1. parametryzacja funkcji "draw!" w taki sposob, zeby otrzymywala
+opcjonalnie predykat decydujacy o tym, ze sie ma zakonczyc, 
+2. generowanie struktury pomocniczej
+
+Ogolnie jestem bardziej przychylny opcji 2, poniewaz wydaje sie
+prostsza implementacyjnie i wydajniejsza. (A przy tym problemem
+w opcji 1 jest to, ze nie znamy wysokosci linii do czasu, az
+nie dojdziemy do ostatniego elementu)
+
+Trzeba przy tym jednak pamietac, ze ta sama komorka ("cons-cell")
+moze byc wyswietlona kilkukrotnie, w zwiazku z tym raczej nie 
+powinna byc kluczem dla niczego zwiazanego z wyswietlaniem.
+
+Natomiast tym, co w naszym renderowaniu niewatpliwie jest unikatowe
+(choc na swoj sposob efemetyczne) sa kursory, ktore "wewnetrznie"
+sa alokowane za pomoca "hash-consingu" - acz jezeli zostanie
+uzyta w charakterze mocnej referencji, to jej efemeryczny charakter
+nie powinien byc problemem.
+
+Czyli na razie sobie wyobrazam, ze rysowanie na obiekt Screen
+bedzie jednoczesnie utrzymywac pomocnicza strukture postaci:
+
+Linia (Jej Wysokosc): Przedzial (Jego Szerokosc, Kursor, Linia?) ...
+
+(define-type (Line next: Line 
+                   height: real))
+
+(define-type (Section width: real 
+                      cursor: Cursor 
+                      inner: Line))
+
+I teraz tak: w momencie, gdy dokument zrodlowy sie zmieni,
+struktura pomocnicza przestanie byc aktualna i trzeba ja bedzie
+wygenerowac od nowa. Pytanie: czy mozliwe jest, zeby w jakis
+sposob minimalizowac ilosc generowanego smiecia?
+
+I co wiecej, w jaki sposob mozemy zapewnic, ze powtorne
+wyrenderowanie takiej samej struktury nie spowoduje nowej alokacji?
+
+No coz. Moglibysmy zrobic tak, ze zaalokowane elementy bedziemy
+sobie cache'owac w tablicy. Przy czym ta tablica moze byc albo
+slabym haszem indeksowanym kursorami (czyli np. property+),
+albo sekwencja indeksowana kolejnymi liczbami naturalnymi.
+
+
 * 06.02.2022
 
 interfejs do budowania struktury pomocniczej 
