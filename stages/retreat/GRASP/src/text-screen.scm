@@ -3,6 +3,7 @@
 (import (conversions))
 (import (infix))
 (import (extent))
+(import (screen))
 
 (define-simple-class TextScreen (Screen)
   (shift-left :: real init-value: 0)

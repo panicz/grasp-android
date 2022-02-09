@@ -10,7 +10,8 @@
  (examples)
  (assert)
  (cursor)
- (infix))
+ (infix)
+ (screen))
 
 (define parsed (parse-string "\
 (define (factorial n)

@@ -3,6 +3,7 @@
 (import (cursor))
 (import (primitive))
 (import (indexable))
+(import (screen))
 
 (define-type (Over back: Tile front: Tile)
   implementing Tile

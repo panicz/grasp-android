@@ -14,7 +14,8 @@
  (cursor)
  (infix)
  (match)
- (term))
+ (term)
+ (screen))
 
 (define input ::string "
 (define (factorial n)
@@ -62,7 +63,6 @@
       ;;(set! warning "")
       (let* ((key ::KeyStroke (io:readInput))
 	     (type ::KeyType (key:getKeyType)))
-        
 	(match type	
 	  (,KeyType:ArrowLeft
 	   (try-catch
