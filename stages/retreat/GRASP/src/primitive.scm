@@ -1,6 +1,7 @@
 (import (define-syntax-rule))
 (import (define-interface))
 (import (define-type))
+(import (define-object))
 (import (define-property))
 (import (assert))
 (import (infix))
@@ -16,7 +17,9 @@
 ;;(import (rename (keyword-arguments) (define/kw define*)))
 
 (define-interface Tile (Indexable)
-  (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+  (draw! screen::Screen
+	 cursor::Cursor
+	 context::Cursor)::Extent
   )
 
 (define (draw! object #!key
@@ -29,35 +32,6 @@
 
 	(else
 	 (error "Don't know how to draw "object))))
-
-(define-type (Finger left: real := 0
-                     top: real := 0
-                     index: byte)
-  implementing Tile
-  with
-  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
-   (let ((finger (screen:draw-finger! left top index)))
-     (Extent width: (+ left finger:width)
-             height: (+ top finger:height))))
-
-  ((has-children?)::boolean #f)
-
-  ((part-at index::Index)::Indexable*
-   (this))
-  
-  ((first-index)::Index
-   #!null)
-  
-  ((last-index)::Index
-   #!null)
-  
-  ((next-index index::Index)::Index
-   #!null)
-  
-  ((previous-index index::Index)::Index
-   #!null)
-  
-  )
 
 
 (define-syntax-rule (with-translation screen (x y) . actions)
@@ -81,55 +55,54 @@
 ;;  0 1 2
 ;; (  x  )
 
-(define-simple-class cons (pair Tile)
-  ((*init* a d)
-   (invoke-special pair (this) '*init* a d))
-
-  ((equals object)::boolean
+(define-object (cons a d)::Tile
+  (define (equals object)::boolean
    (eq? object (this)))
 
-  ((hash-code)::int
-   (java.lang.System:identity-hash-code (this)))
+  (define (hash-code)::int
+    (java.lang.System:identity-hash-code (this)))
 
-  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
-   (parenthesized! (lambda (object screen cursor context)
-                     (draw-sequence! object
-                                     screen: screen
-                                     cursor: cursor
-                                     context: context))
-                   (this)
-                   screen: screen
-                   cursor: cursor
-                   context: context))
+  (define (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+    (parenthesized! (lambda (object screen cursor context)
+                      (draw-sequence! object
+                                      screen: screen
+                                      cursor: cursor
+                                      context: context))
+                    (this)
+                    screen: screen
+                    cursor: cursor
+                    context: context))
 
-  ((has-children?)::boolean #t)
+  (define (has-children?)::boolean #t)
   
-  ((part-at index::Index)::Indexable*
-   (if (or (eq? index #\() (eq? index #\)))
-       (this)
-       (cell-index (this) (as int index))))
-  ((first-index)::Index
-   #\()
+  (define (part-at index::Index)::Indexable*
+    (if (or (eq? index #\() (eq? index #\)))
+	(this)
+	(cell-index (this) (as int index))))
+  
+  (define (first-index)::Index
+    #\()
    
-  ((last-index)::Index
-   #\))
+  (define (last-index)::Index
+    #\))
   
-  ((next-index index::Index)::Index
-   (match index
-     (#\( 0)
-     (#\) #\))
-     (,@(is _ < (last-cell-index (this)))
-      (+ index 1))
-     (_
-      #\))))
+  (define (next-index index::Index)::Index
+    (match index
+      (#\( 0)
+      (#\) #\))
+      (,@(is _ < (last-cell-index (this)))
+       (+ index 1))
+      (_
+       #\))))
   
-  ((previous-index index::Index)::Index
-   (match index
-     (0 #\()
-     (#\) (last-cell-index (this)))
-     (#\( #\()
-     (_ (- index 1))))
-  )
+  (define (previous-index index::Index)::Index
+    (match index
+      (0 #\()
+      (#\) (last-cell-index (this)))
+      (#\( #\()
+      (_ (- index 1))))
+
+  (pair a d))
 
 (define-cache (heads tail)
   (cache (head)
@@ -161,35 +134,31 @@
 ;; bezposrednio w edytorze, a zamiast tego korzystac sobie
 ;; z owijek
 
-(define-simple-class Symbol (Tile gnu.mapping.SimpleSymbol)
-
-  (name :: string)
+(define-object (Symbol source::string)::Tile
+  (define name :: string)
   
-  ((*init* source::string)
-   (invoke-special gnu.mapping.SimpleSymbol (this) '*init*
-                   ((source:toString):intern))
-   (set! name source))
-            
-  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+  (define (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
    (screen:draw-atom! name))
 
-  ((has-children?)::boolean #f)
+  (define (has-children?)::boolean #f)
   
-  ((part-at index::Index)::Indexable*
+  (define (part-at index::Index)::Indexable*
    (this))
 
-  ((first-index)::Index
+  (define (first-index)::Index
    0)
-
-  ((last-index)::Index
-   (string-length name))
   
-  ((next-index index::Index)::Index
+  (define (last-index)::Index
+    (string-length name))
+  
+  (define (next-index index::Index)::Index
    (min (last-index) (+ index 1)))
-   
-  ((previous-index index::Index)::Index
-   (max 0 (- index 1)))
-  )
+  
+  (define (previous-index index::Index)::Index
+    (max 0 (- index 1)))
+
+  (gnu.mapping.SimpleSymbol ((source:toString):intern))
+  (set! name source))
 
 (define (draw-sequence! elems #!key
                         (screen :: Screen (current-screen))

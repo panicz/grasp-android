@@ -1,4 +1,5 @@
 (import (define-interface))
+(import (define-object))
 (import (extent))
 
 (define-interface Screen ()
@@ -21,41 +22,41 @@
   ;;(cursor-at left::real top::real)::Cursor
   )
 
-(define-simple-class NullScreen (Screen)
-  ((paren-width)::real 0)
+(define-object (NullScreen)::Screen
+  (define (paren-width)::real 0)
 
-  ((min-line-height)::real 0)
+  (define (min-line-height)::real 0)
   
-  ((vertical-bar-width)::real 0)
+  (define (vertical-bar-width)::real 0)
  
-  ((clear!)::void
-   (values))
+  (define (clear!)::void
+    (values))
   
-  ((translate! x::real y::real)::void
-   (values))
+  (define (translate! x::real y::real)::void
+    (values))
   
-  ((draw-string! s::string left::real top::real)::Extent
-   (string-extent s))
+  (define (draw-string! s::string left::real top::real)::Extent
+    (string-extent s))
   
-  ((draw-text! s::string left::real top::real)::real
-   (string-length s))
+  (define (draw-text! s::string left::real top::real)::real
+    (string-length s))
   
-  ((draw-atom! text::string)::Extent
-   (Extent width: (string-length text) height: 1))
+  (define (draw-atom! text::string)::Extent
+    (Extent width: (string-length text) height: 1))
 
-  ((draw-finger! left::real top::real index::byte)::Extent
+  (define (draw-finger! left::real top::real index::byte)::Extent
    (Extent width: 1 height: 1))
 
-  ((draw-horizontal-bar! width::real)::void
+  (define (draw-horizontal-bar! width::real)::void
    (values))
   
-  ((draw-vertical-bar! height::real)::void
+  (define (draw-vertical-bar! height::real)::void
    (values))
   
-  ((open-paren! height::real left::real top::real)::void
-   (values))
+  (define (open-paren! height::real left::real top::real)::void
+    (values))
   
-  ((close-paren! height::real left::real top::real)::void
+  (define (close-paren! height::real left::real top::real)::void
    (values))
 
   )

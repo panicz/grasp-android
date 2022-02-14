@@ -1,6 +1,7 @@
 (import
  (define-interface)
  (define-type)
+ (define-object)
  (conversions)
  (indexable)
  (primitive)
@@ -135,6 +136,36 @@
 |   |       | * n | ! | - n 1 | | | | |
 \   \       \     \   \       / / / / /
 }))
+
+
+(define-type (Finger left: real := 0
+                     top: real := 0
+                     index: byte)
+  implementing Tile
+  with
+  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+   (let ((finger (screen:draw-finger! left top index)))
+     (Extent width: (+ left finger:width)
+             height: (+ top finger:height))))
+
+  ((has-children?)::boolean #f)
+
+  ((part-at index::Index)::Indexable*
+   (this))
+  
+  ((first-index)::Index
+   #!null)
+  
+  ((last-index)::Index
+   #!null)
+  
+  ((next-index index::Index)::Index
+   #!null)
+  
+  ((previous-index index::Index)::Index
+   #!null)
+  
+  )
 
 (draw! (Over back: (head parsed)
              front: (Finger left: 8
