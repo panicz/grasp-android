@@ -1,10 +1,11 @@
 (import (define-interface))
 (import (define-type))
+(import (define-property))
 (import (match))
 (import (infix))
 (import (assert))
-(import (define-property))
 (import (for))
+(import (string-building))
 
 ;; Each tile can choose whatever it pleases to be its index
 ;; (except #!null, for the reason explained below)
@@ -12,11 +13,6 @@
 ;; typically either integers or characters or symbols.
 ;;
 ;; The special value #!null means the absence of an index
-
-(define-alias StringBuilder java.lang.StringBuilder)
-
-(define-interface StringBuilding ()
-  (buildString out::StringBuilder)::StringBuilder)
 
 (define-alias Index java.lang.Object)
 
