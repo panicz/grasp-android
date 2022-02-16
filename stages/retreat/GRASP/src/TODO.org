@@ -1,3 +1,77 @@
+* 15.02.2022
+
+integracja map kursorowych z funkcja renderujaca wydaje sie
+na razie raczej trudna. stad rodzi sie nam Zupelnie Nowy Pomysl,
+zeby s-wyrazenia konwertowac do struktury posredniej, ktora
+z jednej strony bedzie mozna wyrenderowac na ekran, a z drugiej
+nawigowac za pomoca kursora
+
+Bedziemy zatem oprocz klasy Screen miec klase Sheet (albo Projection?),
+ktora bedzie mniej wiecej odpowiadac temu, co wymyslilismy w javowym
+prototypie albo w implementacji LinearCursorMap.
+
+No dobrze, to sie wydaje calkiem fajny pomysl. Ale jest jeszcze
+kilka "ale".
+
+
+(define-interface DocumentOperations ()
+  (add expression::SExpression cursor::Cursor)::void
+  (remove expression::SExpression cursor::Cursor)::void
+  (move source::Cursor target::Cursor))
+
+(define-interace PlanarProjection ()
+  (draw! screen::Screen)::void
+  (area-under left::real top::real)::Area)
+
+Tutaj mamy jakies czarodziejstwa z TODO-listy ze 'stages':
+
+(define-type document-operation
+  (extend in-document-context
+    (either
+      (move-expression :from source::track :to destination::track)
+      (copy-expression :from source::track :to destination::track)
+      (replace expression :at track::track :with another-expression)
+      (remove expression :at track::track)
+      (insert expression :at track::track)
+      (splice-box :spanning [x::real y::real w::real h::real]
+                  :at track::track)
+      (create-box :spanning [x::real y::real w::real h::real]
+                  :at track::track)
+      (improperize-box :at track::track)
+      (properize-box :at track::track)
+) ) )
+
+(declare reciprocal : document-operation -> document-operation)
+
+(define (reciprocal operation)
+  (parameterize ((current-document (:in operation)))
+    (match operation
+      [(move-expression :from source :to destination)
+       (move-expression :from destination :to source)]
+      [(copy-expression :from source :to destination)
+       ...]
+      [(replace expression :at track :with another-expression)
+       (replace another-expression :at track :with expression)]
+      [(remove expression :at track)
+       (insert expression :at (previous-track track))]
+      [(insert expression :at track)
+       (remove expression :at (subsequent-track track))]
+      [(splice-box :spanning [x y w h] :at track)
+       (create-box :spanning [x y w h] ...?)]
+      [(create-box :spanning [x y w h] :at track)
+       (splice-box :spanning [x y w h] ...?)]
+      [(improperize-box :at track)
+       (properize-box :at track)]
+      [(properize-box :at track)
+       (improperize-box :at track)]
+) ) )
+
+
+* 14.02.2022
+  
+pomysl: interpreter lispa, w ktorym funkcje ze skutkami ubocznymi
+ewaluuja sie gorliwie, a te bez skutkow ubocznych - leniwie.
+
 * 11.02.2022
 
 

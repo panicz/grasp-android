@@ -1,16 +1,18 @@
 (import (define-syntax-rule))
+(import (assert))
 (import (define-interface))
 (import (define-type))
 (import (define-object))
 (import (define-property))
-(import (assert))
-(import (infix))
-(import (extent))
-(import (cursor))
+(import (define-cache))
 (import (match))
 (import (examples))
-(import (define-cache))
+(import (infix))
+
+(import (extent))
+(import (cursor))
 (import (indexable))
+(import (cursor-map))
 (import (for))
 (import (screen))
 
@@ -138,21 +140,21 @@
   (define name :: string)
   
   (define (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
-   (screen:draw-atom! name))
+    (screen:draw-atom! name))
 
   (define (has-children?)::boolean #f)
   
   (define (part-at index::Index)::Indexable*
-   (this))
+    (this))
 
   (define (first-index)::Index
-   0)
+    0)
   
   (define (last-index)::Index
     (string-length name))
   
   (define (next-index index::Index)::Index
-   (min (last-index) (+ index 1)))
+    (min (last-index) (+ index 1)))
   
   (define (previous-index index::Index)::Index
     (max 0 (- index 1)))
@@ -165,7 +167,8 @@
                         (cursor::Cursor '())
                         (context::Cursor '()))
   ::Extent
-  (let ((max-width 0)
+  (let (;(cursor-map ::CursorMap (LinearCursorMap))
+	(max-width 0)
         (max-line-height (screen:min-line-height))
         (top 0)
         (left 0)
@@ -174,11 +177,12 @@
     (define (skip-spaces! spaces::string)::void
       (for char in spaces
            (cond ((eq? char #\newline)
-                  ;; powinnismy dodac wszystkie obiekty z tej linii
-                  ;; do detekcji
+                  ;; powinnismy dodac wszystkie obiekty
+		  ;; z tej linii do detekcji
                   (set! top (+ top max-line-height))
                   (set! left 0)
-                  (set! max-line-height (screen:min-line-height)))
+                  (set! max-line-height
+		    (screen:min-line-height)))
                  (else
                   (set! left (+ left 1))
                   (set! max-width (max max-width left)))))
@@ -186,7 +190,8 @@
 
     (define (advance! extent::Extent)::void
       (set! left (+ left extent:width))
-      (set! max-line-height (max extent:height max-line-height))
+      (set! max-line-height
+	(max extent:height max-line-height))
       (set! max-width (max left max-width))
       (set! index (+ index 1)))
 
@@ -252,7 +257,8 @@
                                         context: context)))))
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (previous-left previous-top)
-                 (screen:draw-vertical-bar! max-line-height)))))
+				 (screen:draw-vertical-bar! max-line-height)))))
+      ;;(as Extent cursor-map)
       (Extent width: max-width
               height: (+ top max-line-height)))
 
@@ -268,12 +274,12 @@
 
             (else
              (skip-spaces! (post-head-space pair))
+	     ;;(as Extent cursor-map)
              (Extent width: max-width
                      height: (+ top max-line-height)))))
     
     (draw-next! elems)
     ))
-
 
 ;; RZM37UHSPY5Z
 

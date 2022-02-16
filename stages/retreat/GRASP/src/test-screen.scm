@@ -1,18 +1,21 @@
 (import
- (define-interface)
- (define-type)
- (define-object)
- (conversions)
- (indexable)
- (primitive)
- (text-screen)
- (combinators)
- (parse)
- (examples)
- (assert)
- (cursor)
- (infix)
- (screen))
+  (define-interface)
+  (define-type)
+  (define-object)
+  (conversions)
+  (extent)
+  (indexable)
+  (screen)
+  (cursor)
+  (primitive)
+  (combinators)
+  (text-screen)
+  (parse)
+  (examples)
+  (assert)
+  (infix)
+  )
+
 
 (define parsed (parse-string "\
 (define (factorial n)
@@ -110,7 +113,6 @@
     (let ((parsed (call-with-input-string expression parse)))
       (draw! (head parsed)))
     (current-screen)))
-      
 
 (set! (current-screen) (TextScreen))
 
