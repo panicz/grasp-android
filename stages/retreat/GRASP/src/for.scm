@@ -1,5 +1,9 @@
 (define-syntax for
-  (syntax-rules (in from to below by)
+  (syntax-rules (in from to below by ::)
+
+    ((_ var :: type in collection . actions)
+     (for-each (lambda (var :: type) . actions) collection))
+
     ((_ var in collection . actions)
      (for-each (lambda (var) . actions) collection))
 
