@@ -4,3 +4,6 @@
   (display elements)
   ...
   (newline))
+
+(define-syntax-rule (dump expr)
+  (print 'expr ": "expr))
