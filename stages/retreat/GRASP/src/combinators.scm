@@ -1,6 +1,5 @@
 (import (define-type))
 (import (extent))
-(import (cursor))
 (import (primitive))
 (import (indexable))
 (import (screen))

@@ -11,7 +11,6 @@
  (parse)
  (examples)
  (assert)
- (cursor)
  (infix)
  (match)
  (term)

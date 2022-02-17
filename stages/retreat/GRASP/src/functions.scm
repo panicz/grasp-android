@@ -2,6 +2,25 @@
 (import (examples))
 (import (infix))
 
+(define (drop k::integer #;elements-from s::list)::list
+  (if (is k <= 0)
+      s
+      (drop (- k 1) #;elements-from (cdr s))))
+
+(e.g.
+ (drop 2 '(1 2 3))
+ ===> (3))
+
+(define (suffix? ending::list stem::list)::boolean
+  (let ((m ::integer (length ending))
+        (n ::integer (length stem)))
+    (and (is m <= n)
+         (let ((r ::integer (- n m)))
+           (equal? (drop r stem) ending)))))
+
+(e.g.
+ (is '(4 5) suffix? '(1 2 3 4 5)))
+
 (define (fold-left f x0 xs)
   (match xs
     ('() x0)

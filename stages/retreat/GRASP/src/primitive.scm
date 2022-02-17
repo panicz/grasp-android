@@ -10,9 +10,7 @@
 (import (infix))
 
 (import (extent))
-(import (cursor))
 (import (indexable))
-(import (cursor-map))
 (import (for))
 (import (screen))
 

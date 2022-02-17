@@ -6,7 +6,6 @@
   (extent)
   (indexable)
   (screen)
-  (cursor)
   (primitive)
   (combinators)
   (text-screen)
