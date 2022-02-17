@@ -1,3 +1,12 @@
+* 16.02.2022
+
+strategua dzialania jest teraz taka:
+1. projektujemy warstwe interfejsow na dokumencie
+2. tworzymy generowana z lispowych par strukture posrednia
+3. implementujemy renderowanie, nawigacje itd. albo za pomoca
+struktury posredniej, albo - jezeli cos sie okaze nie tak
+- za pomoca dotychczasowego podejscia
+
 * 15.02.2022
 
 integracja map kursorowych z funkcja renderujaca wydaje sie
