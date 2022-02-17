@@ -7,7 +7,7 @@
 (import (for))
 (import (examples))
 (import (define-cache))
-
+(import (print))
 (import (string-building))
 (import (functions))
 
@@ -124,7 +124,7 @@
    null-head-space
    null-tail-space))
 
-(define (copy-properties original cell)
+(define (copy-properties properties original cell)
   (for property in properties
     (update! (property cell) (property original)))
   cell)
@@ -132,6 +132,7 @@
 (define (tree-map/preserve properties f l)
   (if (pair? l)
       (copy-properties
+       properties
        l (cons (tree-map/preserve properties f (head l))
 	       (tree-map/preserve properties f (tail l))))
       (f l)))
@@ -184,7 +185,7 @@
   (next-index index::Index)::Index
   (previous-index index::Index)::Index
 
-  ;;(take-part-at! index::Index)::Indexable*
+  ;;(take-part-at! cursor::Cursor)::Indexable*
 )
 
 (define (has-children? object)
@@ -209,76 +210,68 @@
 	(else
 	 (error "Don't know how to extract "index" from "object))))
 
+(define (cursor-ref tile cursor::Cursor)
+  (cond ((null? cursor)
+         tile)
+        ((pair? cursor)
+         (let ((parent (cursor-ref tile (tail cursor))))
+           (if parent
+	       (parameterize ((final-part? (null? (tail cursor))))
+		 (part-at (head cursor) parent))
+               parent)))
+        (else
+         (error "Unable to refer to cursor "cursor" in "tile))))
 
-#|
+(define (take-cell-at! cursor::Cursor expression::pair)
+  (match cursor
+    (`(,,@(isnt _ integer?) . ,root)
+     (take-cell-at! root expression))
+    (`(,,@(is _ <= 1) ,parent-index . ,root)
+     (let* ((grandparent ::pair (cursor-ref expression root))
+	    (cell (drop (quotient parent-index 2) grandparent))
+	    (removed (head cell)))
+       (set! (head cell) (tail removed))
+       (set! (tail removed) '())
+       removed))
+    (`(,index . ,root)
+     (let* ((parent ::pair (cursor-ref expression root))
+	    (preceding (drop (- (quotient index 2) 1) parent))
+	    (removed (tail preceding)))
+       (set! (tail preceding) (tail removed))
+       (set! (tail removed) '())
+       removed))
+    (_
+     expression)))
+
+
+
+(define (take-part-at! cursor::Cursor object)
+  (cond #;((Indexable? object)
+	 (invoke (as Indexable object) 'take-part-at! cursor))
+
+   ((pair? object)
+    (take-cell-at! cursor object))
+
+   (else
+    (error "Don't know how to take "cursor" from "object))))
+
 (e.g.
  (let* ((input (list 1 3 5))
-	(taken (take-part-at! 1 input)))
-   (and (eqv? taken 1)
-	(equal? input '(3 5)))))
+	(taken (take-cell-at! '(3) input)))
+   (and (equal? input '(1 5))
+	(equal? taken '(3)))))
 
 (e.g.
  (let* ((input (list 1 3 5))
-	(taken (take-part-at! 3 input)))
-   (and (eqv? taken 3)
-	(equal? input '(1 5)))))
+	(taken (take-cell-at! '(5) input)))
+   (and (equal? input '(1 3))
+	(equal? taken '(5)))))
 
 (e.g.
- (let* ((input (list 1 3 5))
-	(taken (take-part-at! 5 input)))
-   (and (eqv? taken 5)
-	(equal? input '(1 3)))))
-
-(e.g.
- (let* ((input (list 1 3))
-	(taken (take-part-at! 1 input)))
-   (and (eqv? taken 1)
-	(equal? input '(3)))))
-
-(e.g.
- (let* ((input (list 1 3))
-	(taken (take-part-at! 3 input)))
-   (and (eqv? taken 3)
-	(equal? input '(1)))))
-
-;; note that this cannot be implemented, because
-;; we cannot convert a pair into an empty list:
-;;
-;; (e.g.
-;;   (let* ((input (list 1))
-;;          (taken (take-part-at! 1 input)))
-;;     (and (eqv? taken 1)
-;;          (equal? input '()))))
-;;
-;; but we
-
-  
-(define (take-part-at! index::Index object)::Indexable*
-  (cond ((Indexable? object)
-	 (invoke (as Indexable object) 'take-part-at! index))
-
-	((pair? object)
-	 (cond ((isnt index integer?)
-		object)
-	       ((and (odd? index) #f)
-		;; we should check whether the space is
-		;; non-empty.
-		;; but it can also be safe to assume
-		;; that w
-		#f)
-	       (else
-		(let* ((skip (quotient index 2))
-		       (cell (drop skip object))
-		       (removed (head cell))
-		       (replacement (tail cell)))
-		  (set! (head cell) (head (tail cell)))
-		  (set! (tail cell) (tail (tail cell)))
-		  (copy-properties (tail cell) cell)
-		  removed))))
-	 
-	(else
-	 (error "Don't know how to remove "index" from "object))))
-|#
+ (let* ((input (list (list 1 3 5)))
+	(taken (take-cell-at! '(1 1) input)))
+   (and (equal? input '((3 5)))
+	(equal? taken '(1)))))
 
 (define (first-index object)
   (cond ((Indexable? object)
@@ -343,18 +336,6 @@
 	(else
 	 (error "Don't know how to obtain previous index to "index
 		" in "object))))
-
-(define (cursor-ref tile cursor::Cursor)
-  (cond ((null? cursor)
-         tile)
-        ((pair? cursor)
-         (let ((parent (cursor-ref tile (tail cursor))))
-           (if parent
-	       (parameterize ((final-part? (null? (tail cursor))))
-		 (part-at (head cursor) parent))
-               parent)))
-        (else
-         (error "Unable to refer to cursor "cursor" in "tile))))
 
 (define (base-cursor cursor object)
   (match cursor
