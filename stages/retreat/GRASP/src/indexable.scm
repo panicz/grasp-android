@@ -103,6 +103,9 @@
       ""
       " "))
 
+;; pre- and post-tail-space only appear
+;; in the dotted tails
+
 (define-property+ (pre-tail-space cell) " ")
 
 (define-property+ (post-tail-space cell) "")
@@ -111,8 +114,16 @@
 
 (define-property+ (null-tail-space cell) "")
 
+(define-simple-class HeadTailSeparator ()
+  ((toString)::String "."))
+
+(define-constant head/tail-separator (HeadTailSeparator))
+
+(define (head/tail-separator? x)
+  (instance? x HeadTailSeparator))
+
 (define-property (head-tail-separator cell)
-  #!null)
+  head/tail-separator)
 
 (define cell-display-properties
   (list
@@ -127,6 +138,18 @@
 (define (copy-properties properties original cell)
   (for property in properties
     (update! (property cell) (property original)))
+  cell)
+
+(define (tail-space-to-head original cell)
+  (update! (pre-head-space cell) (pre-tail-space original))
+  (update! (post-head-space cell) (post-tail-space original))
+  (update! (null-head-space cell) (null-tail-space original))
+  cell)
+
+(define (head-space-to-tail original cell)
+  (update! (pre-tail-space cell) (pre-head-space original))
+  (update! (post-tail-space cell) (post-head-space original))
+  (update! (null-tail-space cell) (null-head-space original))
   cell)
 
 (define (tree-map/preserve properties f l)
@@ -221,57 +244,6 @@
                parent)))
         (else
          (error "Unable to refer to cursor "cursor" in "tile))))
-
-(define (take-cell-at! cursor::Cursor expression::pair)
-  (match cursor
-    (`(,,@(isnt _ integer?) . ,root)
-     (take-cell-at! root expression))
-    (`(,,@(is _ <= 1) ,parent-index . ,root)
-     (let* ((grandparent ::pair (cursor-ref expression root))
-	    (cell (drop (quotient parent-index 2) grandparent))
-	    (removed (head cell)))
-       (set! (head cell) (tail removed))
-       (set! (tail removed) '())
-       removed))
-    (`(,index . ,root)
-     (let* ((parent ::pair (cursor-ref expression root))
-	    (preceding (drop (- (quotient index 2) 1) parent))
-	    (removed (tail preceding)))
-       (set! (tail preceding) (tail removed))
-       (set! (tail removed) '())
-       removed))
-    (_
-     expression)))
-
-
-
-(define (take-part-at! cursor::Cursor object)
-  (cond #;((Indexable? object)
-	 (invoke (as Indexable object) 'take-part-at! cursor))
-
-   ((pair? object)
-    (take-cell-at! cursor object))
-
-   (else
-    (error "Don't know how to take "cursor" from "object))))
-
-(e.g.
- (let* ((input (list 1 3 5))
-	(taken (take-cell-at! '(3) input)))
-   (and (equal? input '(1 5))
-	(equal? taken '(3)))))
-
-(e.g.
- (let* ((input (list 1 3 5))
-	(taken (take-cell-at! '(5) input)))
-   (and (equal? input '(1 3))
-	(equal? taken '(5)))))
-
-(e.g.
- (let* ((input (list (list 1 3 5)))
-	(taken (take-cell-at! '(1 1) input)))
-   (and (equal? input '((3 5)))
-	(equal? taken '(1)))))
 
 (define (first-index object)
   (cond ((Indexable? object)
