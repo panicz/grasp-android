@@ -10,6 +10,9 @@
       (if (not (null? default))
 	  ((car default)))))
 
+(define (hash-remove! table::java.util.Map key)
+  (table:remove key))
+  
 ;; hash-ref+ is like hash-ref, but it stores
 ;; the result of evaluating the "default" thunk
 ;; in the hash table
