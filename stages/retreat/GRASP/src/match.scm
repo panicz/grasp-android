@@ -19,9 +19,6 @@
                    actions ...
                    (match/evaluated value . clauses)))))
 
-(define-constant match=::parameter[procedure]
-  (make-parameter equal?))
-
 (define-syntax match-clause
   (lambda (stx)
     (syntax-case stx (quasiquote
@@ -45,7 +42,7 @@
                      bindings
                      actions ... alternative)
        #'(match-clause rest
-                       (conditions ... ((match=) value root))
+                       (conditions ... (equal? value root))
                        bindings
                        actions ... alternative))
 
@@ -82,7 +79,7 @@
                      bindings
                      actions ... alternative)
        #'(match-clause rest
-                       (and conditions ... ((match=) root 'datum))
+                       (and conditions ... (equal? root 'datum))
                        bindings
                        actions ... alternative))
       
@@ -152,7 +149,7 @@
                      bindings
                      actions ...)
        #'(match-clause rest
-                       (and conditions ... ((match=) literal root))
+                       (and conditions ... (equal? literal root))
                        bindings
                        actions ...))
       )))
@@ -186,7 +183,7 @@
                      bindings/final
                      actions ... alternative)
        (bound-identifier=? #'variable #'variable+)
-       #'(check/unique (and conditions ... ((match=) path path+))
+       #'(check/unique (and conditions ... (equal? path path+))
                        bindings
                        (variable+ path+)
                        bindings/checked
