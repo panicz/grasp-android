@@ -1,3 +1,38 @@
+* 20-21.02.2022
+
+mamy zaimplementowane operacje:
+
+take-cell-at!
+put-into-cell-at!
+
+pewnie beda wymagaly jeszcze dopracowania
+(np. obsluga list elementow, zamiast pojedynczych elementow),
+ale moze bedzie mozna ich uzyc do implementacji operacji
+na dokumencie.
+
+Ogolnie, nasz dokument jest reprezentowany przez "pudelko".
+czyli komorke, ktorej "car" jest wlasciwym dokumentem
+(ktory moze byc lista pusta, jezeli dokument jest pusty),
+a ktorej "cdr" nie ma znaczenia (ale zasada najmniejszego 
+zaskoczenia nakazuje nam oczekiwac, ze to bedzie '())
+ 
+Teraz chcielibysmy zrobic tak, zeby operacje, ktore sobie
+zdefiniowalismy w document-operations byly realizowane
+za posrednictwem naszych implementacyj.
+
+Ale do tego pozostaje jeszcze kwestia, w jaki sposob
+pogodzic ze soba te operacje oraz interfejs edytora.
+
+Wydaje sie, ze tutaj problem jest taki, ze nie wiemy,
+w ktorym miejscu na ekranie powinien sie znajdowac kursor.
+
+Stad moja "chamska" propozycja jest taka, zeby podczas
+renderowania sprawdzac, czy kursor danego elementu jest
+identyczny z aktualnym kursorem, i jezeli tak, to
+zapisywac aktualna pozycje rysowania w jakiejs zmiennej.
+
+(pozniej to oczywiscie zmienimy, hehe)
+
 * 16.02.2022
 
 strategua dzialania jest teraz taka:
