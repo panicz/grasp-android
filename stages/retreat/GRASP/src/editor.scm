@@ -2,6 +2,7 @@
  (define-syntax-rule)
  (define-interface)
  (define-type)
+ (define-object)
  (extent)
  (conversions)
  (indexable)
@@ -14,7 +15,10 @@
  (infix)
  (match)
  (term)
- (screen))
+ (functions)
+ (print)
+ (screen)
+ (for))
 
 (define input ::string "
 (define (factorial n)
@@ -34,15 +38,38 @@
 
 (define cursor ::Cursor '())
 
+(define-object (editor-message-handler size::int)::MessageHandler
+  (define messages ::list '())
+
+  (define history-length ::int)
+  
+  (define (add-message message::list)::void
+    (let ((message-string (with-output-to-string
+			    (lambda ()
+			      (display "\n")
+			      (for word in message
+				(display word))
+			      ))))
+      (set! messages `(,message-string . ,messages))
+      (drop-after! history-length messages)))
+  
+  (define (display-messages output::Object)::void
+    (let ((io ::Terminal (as Terminal output)))
+      (for message in messages
+	(io:putString message))))
+
+  (Object)
+  (set! history-length size))
+    
+
 (define (run-editor #!optional (io ::Terminal (make-terminal)))::void
   (io:enterPrivateMode)
   (when (instance? io ExtendedTerminal)
     ((as ExtendedTerminal io):setMouseCaptureMode
      MouseCaptureMode:CLICK_RELEASE_DRAG))
-  (let ((warning ""))
-    (define-syntax-rule (WARN msg ...)
-      (set! warning (string-append "\n" msg ... warning)))
-    
+
+  (parameterize ((current-message-handler (editor-message-handler 10)))
+  
     (let continue ()
       (io:setCursorVisible #f)
       (io:clearScreen)
@@ -56,10 +83,9 @@
 	 (io:putString (show->string (cursor-ref document cursor))))
        (ex java.lang.Throwable
 	   (WARN (ex:toString))))
-      (io:putString warning)
+      (invoke (current-message-handler) 'display-messages io)
       (io:flush)
       (io:setCursorVisible #t)
-      ;;(set! warning "")
       (let* ((key ::KeyStroke (io:readInput))
 	     (type ::KeyType (key:getKeyType)))
 	(match type	
