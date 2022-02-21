@@ -11,6 +11,44 @@
  (drop 2 '(1 2 3))
  ===> (3))
 
+(define (drop-after! k::integer #;elements-in s::list)::list
+  (define (lastmost-tail n::integer l::list)
+    (if (or (<= n 1) (isnt l pair?))
+	l
+	(lastmost-tail (- n 1) (cdr l))))
+  (let ((trail (lastmost-tail k s)))
+    (when (pair? trail)
+      (set! (cdr trail) '())))
+  s)
+
+
+(e.g.
+ ;; if the input is a pair, then the output must also be a pair
+ ;; (we cannot return an empty list)
+ (let ((items (list 'a 'b 'c)))
+   (drop-after! 0 items))
+ ===> (a))
+
+(e.g.
+ ;; but if the input is not a pair, we get it back no problem
+ (drop-after! 100 '()) ===> ())
+
+(e.g.
+ (let ((items (list 'a 'b 'c)))
+   (drop-after! 1 items))
+ ===> (a))
+
+(e.g.
+ (let ((items (list 'a 'b 'c)))
+   (drop-after! 2 items))
+ ===> (a b))
+
+(e.g.
+ (let ((items (list 'a 'b 'c)))
+   (drop-after! 5 items))
+ ===> (a b c))
+
+
 (define (suffix? ending::list stem::list)::boolean
   (let ((m ::integer (length ending))
         (n ::integer (length stem)))
