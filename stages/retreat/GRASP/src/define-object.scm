@@ -1,7 +1,7 @@
 (import (define-syntax-rule))
 
 (define-syntax object-definition
-  (syntax-rules (define ::)
+  (syntax-rules (define :: set!)
 
     ((object-definition (object-name . args) (supers ...)
 			slots methods
@@ -43,6 +43,16 @@
      (define-simple-class object-name (supers ...)
        slots ... methods ...))
 
+    ((object-definition (object-name . args) (supers ...)
+			slots (methods ...)
+			((set! property value) . init))
+     (object-definition (object-name) (supers ...) slots
+			(methods
+			 ...
+			 ((*init* . args)
+			  (set! property value) . init))
+			()))
+    
     ((object-definition (object-name . args) (supers ...)
 			slots (methods ...)
 			((super . args*) . init))
