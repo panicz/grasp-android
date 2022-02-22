@@ -344,7 +344,8 @@
                  (else
                   (set! left (+ left 1))
                   (set! max-width (max max-width left)))))
-      (set! index (+ index 1)))
+      (when (even? index)
+	(set! index (+ index 1))))
 
     (define (advance! extent::Extent)::void
       (set! left (+ left extent:width))
@@ -403,7 +404,7 @@
                (advance! (Extent width: (screen:vertical-bar-width)
                                  height: 0))
                (skip-spaces! (pre-tail-space pair))
-               (let ((context (recons cursor context)))
+               (let ((context (recons index context)))
                  (advance! (with-translation screen (left top)
                              (if (null? (tail pair))
                                  (draw-empty-list! (null-tail-space
