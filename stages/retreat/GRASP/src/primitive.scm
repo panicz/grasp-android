@@ -15,6 +15,7 @@
 (import (functions))
 (import (print))
 
+
 ;;(import (rename (keyword-arguments) (define/kw define*)))
 
 (define-interface Tile (Indexable)
@@ -33,7 +34,6 @@
 
 	(else
 	 (error "Don't know how to draw "object))))
-
 
 (define-syntax-rule (with-translation screen (x y) . actions)
   (let ((x! x)
@@ -344,10 +344,16 @@
                  (else
                   (set! left (+ left 1))
                   (set! max-width (max max-width left)))))
+      (when (equal? cursor (recons index context))
+	;;(WARN "skip-spaces! - cursor: "(recons index context))
+	(screen:remember-offset! (- left 1) top))
       (when (even? index)
 	(set! index (+ index 1))))
 
     (define (advance! extent::Extent)::void
+      (when (equal? cursor (recons index context))
+	;;(WARN "advance! - cursor: "(recons index context))
+	(screen:remember-offset! left top))
       (set! left (+ left extent:width))
       (set! max-line-height
 	(max extent:height max-line-height))

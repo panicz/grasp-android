@@ -18,6 +18,10 @@
   (open-paren! height::real left::real top::real)::void
   (close-paren! height::real left::real top::real)::void
 
+  (remember-offset! +left::real +top::real)::void
+  (remembered-left)::real
+  (remembered-top)::real
+  
   ;;(end-line! line-height::real)::void
   ;;(cursor-at left::real top::real)::Cursor
   )
@@ -59,6 +63,15 @@
   (define (close-paren! height::real left::real top::real)::void
    (values))
 
+  (define (remember-offset! +left::real +top::real)::void
+    (values))
+  
+  (define (remembered-left)::real
+    0)
+  
+  (define (remembered-top)::real
+    0)
+  
   )
 
 (define-constant current-screen::parameter[Screen]

@@ -12,8 +12,19 @@
   (define width ::int 0)
   (define height ::int 0)
   (define data ::char[])
+  
   (define left ::real 0)
   (define top ::real 0)
+
+  (define (remember-offset! +left::real +top::real)::void
+    (set! left (+ shift-left +left))
+    (set! top (+ shift-top +top)))
+  
+  (define (remembered-left)::real
+    left)
+  
+  (define (remembered-top)::real
+    top)
   
   (define (get row::real col::real)::char
     (let ((x (+ col shift-left))
