@@ -1,3 +1,25 @@
+* 22.02.2022
+
+Wyglada na to, ze trzeba na powaznie przemyslec kwestie
+iterowania po kursorze w trakcie renderowania.
+
+Na razie udalo sie zrobic cos co jako tako dziala dla list,
+ale nie do konca sie wpisuje we framework "rzeczy indeksowalnych".
+
+Kuszace wydaje sie to, zeby juz podczas renderowania umieszczac
+kursor w odpowiednim miejscu w obiekcie Screen.
+
+Do tego dochodzi jeszcze kwestia poruszania sie po symbolach
+i spacjach, ktora tez trzeba bedzie rozwiazac, podobnie jak
+kwestie integracji z kursorem myszy itp.
+
+Ewentualnie te ostatnia mozna rozwiazac w taki sposob, ze obiekt
+Screen bedzie przechowywal wspolrzedna dotyku, i podczas
+"normalnego" rysowania bedziemy sprawdzac, czy akurat znajdujemy sie
+gdzies w jego zakresie.
+
+Hmm... wyglada nawet obiecujaco.
+
 * 20-21.02.2022
 
 mamy zaimplementowane operacje:
