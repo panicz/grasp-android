@@ -21,16 +21,25 @@
 (define-interface Tile (Indexable)
   (draw! screen::Screen
 	 cursor::Cursor
-	 context::Cursor)::Extent
+	 context::Cursor)::void
+	 
+  (extent screen::Screen)::Extent
   )
 
 (define (draw! object #!key
                (screen::Screen (current-screen))
                (cursor::Cursor '())
                (context::Cursor '()))
-  ::Extent
+  ::void
   (cond ((instance? object Tile)
 	 (invoke (as Tile object) 'draw! screen cursor context))
+
+	(else
+	 (error "Don't know how to draw "object))))
+
+(define (extent object screen::Screen)::Extent
+  (cond ((instance? object Tile)
+	 (invoke (as Tile object) 'extent screen))
 
 	(else
 	 (error "Don't know how to draw "object))))
@@ -63,7 +72,7 @@
   (define (hash-code)::int
     (java.lang.System:identity-hash-code (this)))
 
-  (define (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+  (define (draw! screen::Screen cursor::Cursor context::Cursor)::void
     (parenthesized! (lambda (object screen cursor context)
                       (draw-sequence! object
                                       screen: screen
@@ -74,6 +83,11 @@
                     cursor: cursor
                     context: context))
 
+  (define (extent screen::Screen)::Extent
+    (let ((extent ::Extent (sequence-extent! (this) screen)))
+      (Extent width: (+ extent:width (* 2 (screen:paren-width)))
+	      height: extent:height)))
+    
   (define (has-children?)::boolean #t)
   
   (define (part-at index::Index)::Indexable*
@@ -296,9 +310,13 @@
 (define-object (Symbol source::string)::Tile
   (define name :: string)
   
-  (define (draw! screen::Screen cursor::Cursor context::Cursor)::Extent
+  (define (draw! screen::Screen cursor::Cursor context::Cursor)::void
     (screen:draw-atom! name))
 
+  (define (extent screen::Screen)::Extent
+    (Extent width: (screen:atom-width source)
+	    height: (screen:min-line-height)))
+  
   (define (has-children?)::boolean #f)
   
   (define (part-at index::Index)::Indexable*
@@ -319,12 +337,35 @@
   (gnu.mapping.SimpleSymbol ((source:toString):intern))
   (set! name source))
 
+(define (empty-space-extent spaces::string Screen::screen)::Extent
+  (let ((inner (string-extent spaces)))
+    (Extent width: (+ inner:width
+		      (* 2 (screen:paren-width)))
+	    height: inner:height)))
+
+(define (head-extent pair::cons screen::Screen)::void
+  (if (null? (head pair))
+      (empty-space-extent (null-head-space pair) screen)
+      (extent (head pair) screen)))
+
+
+(define (tail-extent pair::cons screen::Screen)
+  (if (null? (tail pair))
+      (empty-space-extent (null-tail-space pair) screen)
+      (extent (tail pair) screen)))
+
+(define (should-the-bar-be-horizontal? dotted-pair::cons)::boolean
+  (assert (dotted? dotted-pair))
+  (and (string-any (is _ eq? #\newline)
+		   (post-head-space dotted-pair))
+       (string-any (is _ eq? #\newline)
+		   (pre-tail-space dotted-pair))))
 
 (define (draw-sequence! elems #!key
                         (screen :: Screen (current-screen))
                         (cursor::Cursor '())
                         (context::Cursor '()))
-  ::Extent
+  ::void
   (let (;(cursor-map ::CursorMap (LinearCursorMap))
 	(max-width 0)
         (max-line-height (screen:min-line-height))
@@ -355,8 +396,7 @@
 	;;(WARN "advance! - cursor: "(recons index context))
 	(screen:remember-offset! left top))
       (set! left (+ left extent:width))
-      (set! max-line-height
-	(max extent:height max-line-height))
+      (set! max-line-height (max extent:height max-line-height))
       (set! max-width (max left max-width))
       (set! index (+ index 1)))
 
@@ -368,7 +408,7 @@
                       cursor: cursor
                       context: context))
     
-    (define (draw-head! pair::cons)::Extent
+    (define (draw-head! pair::cons)::void
       (let ((context (recons index context)))
         (with-translation screen (left top)
           (if (null? (head pair))
@@ -378,13 +418,7 @@
                      cursor: (subcursor cursor context)
                      context: context)))))
 
-    (define (should-the-bar-be-horizontal? dotted-pair::cons)::boolean
-      (and (string-any (is _ eq? #\newline)
-		       (post-head-space dotted-pair))
-           (string-any (is _ eq? #\newline)
-		       (pre-tail-space dotted-pair))))
-
-    (define (draw-dotted-tail! pair::cons)::Extent
+    (define (draw-dotted-tail! pair::cons)::void
       (skip-spaces! (post-head-space pair))
       (cond ((should-the-bar-be-horizontal? pair)
              (let* ((bottom top)
@@ -392,34 +426,35 @@
                (skip-spaces! (pre-tail-space pair))
                (set! top (- top (screen:min-line-height)))
                (let ((context (recons index context)))
-                 (advance! (with-translation screen (left top)
-                             (if (null? (tail pair))
-                                 (draw-empty-list! (null-tail-space
-						    pair))
-                                 (draw! (tail pair)
-                                        screen: screen
-                                        cursor: (subcursor cursor
-							   context)
-                                        context: context)))))
+		 (with-translation screen (left top)
+                   (if (null? (tail pair))
+                       (draw-empty-list! (null-tail-space
+					  pair))
+                       (draw! (tail pair)
+                              screen: screen
+                              cursor: (subcursor cursor
+						 context)
+                              context: context))))
+               (advance! (tail-extent pair screen))
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (0 bottom)
                  (screen:draw-horizontal-bar! max-width))))
             (else
              (let ((previous-left left)
                    (previous-top top))
-               (advance! (Extent width: (screen:vertical-bar-width)
-                                 height: 0))
+               (advance! (screen:vertical-bar-width) height: 0)
                (skip-spaces! (pre-tail-space pair))
                (let ((context (recons index context)))
-                 (advance! (with-translation screen (left top)
-                             (if (null? (tail pair))
-                                 (draw-empty-list! (null-tail-space
-						    pair))
-                                 (draw! (tail pair)
-                                        screen: screen
-                                        cursor: (subcursor cursor
-							   context)
-                                        context: context)))))
+		 (with-translation screen (left top)
+                   (if (null? (tail pair))
+                       (draw-empty-list! (null-tail-space
+					  pair))
+                       (draw! (tail pair)
+                              screen: screen
+                              cursor: (subcursor cursor
+						 context)
+                              context: context))))
+               (advance! (tail-extent pair screen))
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (previous-left previous-top)
 				 (screen:draw-vertical-bar!
@@ -430,7 +465,10 @@
 
     (define (draw-next! pair)
       (skip-spaces! (pre-head-space pair))
-      (advance! (draw-head! pair))
+      (let ((width (width/head pair))
+	    (height (height/head pair)))
+	(draw-head! pair)
+	(advance! (head-extent pair screen)))
       (cond ((dotted? pair)
              (draw-dotted-tail! pair))
 
@@ -446,6 +484,61 @@
     
     (draw-next! elems)
     ))
+
+
+(define (sequence-extent sequence::pair screen::Screen)::Extent
+  (let ((max-width 0)
+        (max-line-height (screen:min-line-height))
+        (top 0)
+        (left 0))
+
+    (define (skip-spaces! spaces::string)::void
+      (for char in spaces
+        (cond ((eq? char #\newline)
+               ;; powinnismy dodac wszystkie obiekty
+	       ;; z tej linii do detekcji
+               (set! top (+ top max-line-height))
+               (set! left 0)
+               (set! max-line-height
+		     (screen:min-line-height)))
+              (else
+               (set! left (+ left 1))
+               (set! max-width (max max-width left))))))
+
+    (define (advance! extent::Extent)::void
+      (set! left (+ left extent:width))
+      (set! max-line-height (max extent:height max-line-height))
+      (set! max-width (max left max-width)))
+          
+    (define (dotted-tail-extent pair::cons)::void
+      (skip-spaces! (post-head-space pair))
+      (unless (should-the-bar-be-horizontal? pair)
+	(advance! (Extent width: (screen:vertical-bar-width)
+			  height: 0)))
+      (skip-spaces! (pre-tail-space pair))
+      (advance! (tail-extent pair screen))
+      (skip-spaces! (post-tail-space pair))
+      (Extent width: max-width
+              height: (+ top max-line-height)))
+
+    (define (grow-ahead! pair)
+      (skip-spaces! (pre-head-space pair))
+      (advance! (head-extent pair screen))
+      (cond ((dotted? pair)
+             (dotted-tail-extent pair))
+
+            ((pair? (tail pair))
+             (skip-spaces! (post-head-space pair))
+             (grow-ahead! (tail pair)))
+
+            (else
+             (skip-spaces! (post-head-space pair))
+             (Extent width: max-width
+                     height: (+ top max-line-height)))))
+    
+    (grow-ahead! elems)
+    ))
+
 
 ;; RZM37UHSPY5Z
 

@@ -63,19 +63,6 @@
 |#
 	)))
 
-(define (f c::Cursor)::Cursor
-  (cursor-climb-front c parsed))
-
-(define (n c::Cursor)::Cursor
-  (cursor-next c parsed))
-
-(define (b c::Cursor)::Cursor
-  (cursor-back c parsed))
-
-(define (d c::Cursor)::Cursor
-  (cursor-climb-back c parsed))
-
-
 
 ;; this is what we're aiming for:
 
@@ -138,57 +125,6 @@
 \   \       \     \   \       / / / / /
 }))
 
-
-(define-type (Finger left: real := 0
-                     top: real := 0
-                     index: byte)
-  implementing Tile
-  with
-  ((draw! screen::Screen cursor::Cursor context::Cursor)::Extent
-   (let ((finger (screen:draw-finger! left top index)))
-     (Extent width: (+ left finger:width)
-             height: (+ top finger:height))))
-
-  ((has-children?)::boolean #f)
-
-  ((part-at index::Index)::Indexable*
-   (this))
-  
-  ((first-index)::Index
-   #!null)
-  
-  ((last-index)::Index
-   #!null)
-  
-  ((next-index index::Index)::Index
-   #!null)
-  
-  ((previous-index index::Index)::Index
-   #!null)
-  
-  )
-
-(draw! (Over back: (head parsed)
-             front: (Finger left: 8
-                            top: 4)))
-
-(display ((current-screen):toString))
-
-#;(assert
- (screen-displays? &{
-/        /             \              \
-| define | factorial n |              |
-|        \             /              |
-|   /    /        \                 \ |
-|   | if@| <= n 0 |                 | |
-|   |    \        /                 | |
-|   |                               | |
-|   |       1                       | |
-|   |                               | |
-|   |       /     /   /       \ \ \ | |
-|   |       | * n | ! | - n 1 | | | | |
-\   \       \     \   \       / / / / /
-}))
 
 (define horizontal-dotted (call-with-input-string "\
 (head
