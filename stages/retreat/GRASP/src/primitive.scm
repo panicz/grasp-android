@@ -48,10 +48,8 @@
   (let ((x! x)
         (y! y))
     (screen:translate! x! y!)
-    (let ((result (begin . actions)))
-      (screen:translate! (- x!) (- y!))
-      result)))
-
+    (begin . actions)
+    (screen:translate! (- x!) (- y!))))
 
 ;; we override Pair with Object's default equality and hash functions
 ;; (TODO: patch the Kawa implementation of Cons)
@@ -73,18 +71,19 @@
     (java.lang.System:identity-hash-code (this)))
 
   (define (draw! screen::Screen cursor::Cursor context::Cursor)::void
-    (parenthesized! (lambda (object screen cursor context)
-                      (draw-sequence! object
-                                      screen: screen
-                                      cursor: cursor
-                                      context: context))
-                    (this)
-                    screen: screen
-                    cursor: cursor
-                    context: context))
+    (let ((inner (extent screen))
+	  (paren-width (screen:paren-width)))
+      (screen:open-paren! inner:height 0 0)
+      (with-translation screen (paren-width 0)
+	(draw-sequence! object
+			screen: screen
+			cursor: cursor
+			context: context))
+      (screen:close-paren! inner:height
+			   (+ paren-width inner:width) 0)))
 
   (define (extent screen::Screen)::Extent
-    (let ((extent ::Extent (sequence-extent! (this) screen)))
+    (let ((extent ::Extent (sequence-extent (this) screen)))
       (Extent width: (+ extent:width (* 2 (screen:paren-width)))
 	      height: extent:height)))
     
@@ -284,21 +283,6 @@
    document) ===> ((1 3 5)))
 
 
-(define (parenthesized! proc/object+screen+cursor+context
-			object #!key
-                        (screen::Screen (current-screen))
-                        (cursor::Cursor #f)
-                        (context::Cursor '())
-                        )::Extent
-  (let* ((paren-width (screen:paren-width))
-         (extent (with-translation screen (paren-width 0)
-                   (as Extent (proc/object+screen+cursor+context
-                               object screen cursor context)))))
-    (screen:open-paren! extent:height 0 0)
-    (screen:close-paren! extent:height (+ paren-width extent:width) 0)
-    (Extent width: (+ paren-width extent:width paren-width)
-            height: extent:height)))
-
 ;; Docelowo bedziemy musieli patchowac Kawe, chociazby po to,
 ;; zeby takie obiekty, jak Symbol czy FString (IString? MString?)
 ;; implementowaly Tile.
@@ -314,7 +298,7 @@
     (screen:draw-atom! name))
 
   (define (extent screen::Screen)::Extent
-    (Extent width: (screen:atom-width source)
+    (Extent width: (screen:atom-width name)
 	    height: (screen:min-line-height)))
   
   (define (has-children?)::boolean #f)
@@ -337,7 +321,7 @@
   (gnu.mapping.SimpleSymbol ((source:toString):intern))
   (set! name source))
 
-(define (empty-space-extent spaces::string Screen::screen)::Extent
+(define (empty-space-extent spaces::string screen::Screen)::Extent
   (let ((inner (string-extent spaces)))
     (Extent width: (+ inner:width
 		      (* 2 (screen:paren-width)))
@@ -401,12 +385,11 @@
       (set! index (+ index 1)))
 
     (define (draw-empty-list! spaces::string)::Extent
-      (parenthesized! (lambda (spaces screen)
-                             (string-extent spaces))
-                      spaces
-                      screen: screen
-                      cursor: cursor
-                      context: context))
+      (let ((inner (empty-space-extent spaces screen))
+	    (paren-width (screen:paren-width)))
+	(screen:open-paren! inner:height 0 0)
+	(screen:close-paren! inner:height
+			     (+ paren-width inner:width) 0)))
     
     (define (draw-head! pair::cons)::void
       (let ((context (recons index context)))
@@ -465,10 +448,8 @@
 
     (define (draw-next! pair)
       (skip-spaces! (pre-head-space pair))
-      (let ((width (width/head pair))
-	    (height (height/head pair)))
-	(draw-head! pair)
-	(advance! (head-extent pair screen)))
+      (draw-head! pair)
+      (advance! (head-extent pair screen))
       (cond ((dotted? pair)
              (draw-dotted-tail! pair))
 
@@ -536,7 +517,7 @@
              (Extent width: max-width
                      height: (+ top max-line-height)))))
     
-    (grow-ahead! elems)
+    (grow-ahead! sequence)
     ))
 
 
