@@ -75,7 +75,7 @@
 	  (paren-width (screen:paren-width)))
       (screen:open-paren! inner:height 0 0)
       (with-translation screen (paren-width 0)
-	(draw-sequence! object
+	(draw-sequence! (this)
 			screen: screen
 			cursor: cursor
 			context: context))
@@ -264,7 +264,6 @@
      (values))
   ))
 
-
 (e.g.
  (let ((document `((,1 ,5))))
    (put-into-cell-at! '(2 1) `(,3) document)
@@ -327,13 +326,13 @@
 		      (* 2 (screen:paren-width)))
 	    height: inner:height)))
 
-(define (head-extent pair::cons screen::Screen)::void
+(define (head-extent pair::cons screen::Screen)::Extent
   (if (null? (head pair))
       (empty-space-extent (null-head-space pair) screen)
       (extent (head pair) screen)))
 
 
-(define (tail-extent pair::cons screen::Screen)
+(define (tail-extent pair::cons screen::Screen)::Extent
   (if (null? (tail pair))
       (empty-space-extent (null-tail-space pair) screen)
       (extent (tail pair) screen)))
@@ -345,7 +344,7 @@
        (string-any (is _ eq? #\newline)
 		   (pre-tail-space dotted-pair))))
 
-(define (draw-sequence! elems #!key
+(define (draw-sequence! elems::cons #!key
                         (screen :: Screen (current-screen))
                         (cursor::Cursor '())
                         (context::Cursor '()))
@@ -384,7 +383,7 @@
       (set! max-width (max left max-width))
       (set! index (+ index 1)))
 
-    (define (draw-empty-list! spaces::string)::Extent
+    (define (draw-empty-list! spaces::string)::void
       (let ((inner (empty-space-extent spaces screen))
 	    (paren-width (screen:paren-width)))
 	(screen:open-paren! inner:height 0 0)
@@ -425,7 +424,8 @@
             (else
              (let ((previous-left left)
                    (previous-top top))
-               (advance! (screen:vertical-bar-width) height: 0)
+               (advance! (Extent width: (screen:vertical-bar-width)
+				 height: 0))
                (skip-spaces! (pre-tail-space pair))
                (let ((context (recons index context)))
 		 (with-translation screen (left top)
@@ -441,12 +441,9 @@
                (skip-spaces! (post-tail-space pair))
                (with-translation screen (previous-left previous-top)
 				 (screen:draw-vertical-bar!
-				  max-line-height)))))
-      ;;(as Extent cursor-map)
-      (Extent width: max-width
-              height: (+ top max-line-height)))
+				  max-line-height))))))
 
-    (define (draw-next! pair)
+    (define (draw-next! pair::cons)::void
       (skip-spaces! (pre-head-space pair))
       (draw-head! pair)
       (advance! (head-extent pair screen))
@@ -459,15 +456,13 @@
 
             (else
              (skip-spaces! (post-head-space pair))
-	     ;;(as Extent cursor-map)
-             (Extent width: max-width
-                     height: (+ top max-line-height)))))
+             )))
     
     (draw-next! elems)
     ))
 
 
-(define (sequence-extent sequence::pair screen::Screen)::Extent
+(define (sequence-extent elems screen::Screen)::Extent
   (let ((max-width 0)
         (max-line-height (screen:min-line-height))
         (top 0)
@@ -476,8 +471,6 @@
     (define (skip-spaces! spaces::string)::void
       (for char in spaces
         (cond ((eq? char #\newline)
-               ;; powinnismy dodac wszystkie obiekty
-	       ;; z tej linii do detekcji
                (set! top (+ top max-line-height))
                (set! left 0)
                (set! max-line-height
@@ -491,7 +484,7 @@
       (set! max-line-height (max extent:height max-line-height))
       (set! max-width (max left max-width)))
           
-    (define (dotted-tail-extent pair::cons)::void
+    (define (dotted-tail-extent pair::cons)::Extent
       (skip-spaces! (post-head-space pair))
       (unless (should-the-bar-be-horizontal? pair)
 	(advance! (Extent width: (screen:vertical-bar-width)
@@ -517,7 +510,7 @@
              (Extent width: max-width
                      height: (+ top max-line-height)))))
     
-    (grow-ahead! sequence)
+    (grow-ahead! elems)
     ))
 
 

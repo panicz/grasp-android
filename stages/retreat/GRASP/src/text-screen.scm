@@ -136,7 +136,7 @@
   (define (draw-atom! text::string)::void
     (draw-text! text 0 1))
 
-  (define (atom-width text::String)::real
+  (define (atom-width text::string)::real
     (string-length text))
   
   )

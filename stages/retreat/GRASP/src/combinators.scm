@@ -92,10 +92,11 @@
   with
   ((draw! screen::Screen cursor::Cursor context::Cursor)::void
    (let ((left-context (recons 'left context))
-          (right-context (recons 'right context)))
+         (right-context (recons 'right context))
+	 (left-extent (left:extent screen)))
      (left:draw! screen (subcursor cursor left-context)
                  left-context)
-     (with-translation screen ((left:width screen) 0)
+     (with-translation screen (left-extent:width 0)
        (right:draw! screen (subcursor cursor right-context)
                     right-context))))
 
