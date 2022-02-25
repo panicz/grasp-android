@@ -1,6 +1,5 @@
 (import (define-interface))
 (import (define-object))
-(import (extent))
 
 (define-interface Screen ()
   (paren-width)::real
@@ -9,10 +8,12 @@
 
   (clear!)::void
   (translate! x::real y::real)::void
-  (draw-string! s::string left::real top::real)::Extent
-  (draw-text! s::string left::real top::real)::real
-  (draw-atom! text::string)::Extent
-  (draw-finger! left::real top::real index::byte)::Extent
+  (draw-string! s::string left::real top::real)::void
+  (draw-text! s::string left::real top::real)::void
+  (draw-atom! text::string)::void
+  
+  (atom-width text::string)::real
+
   (draw-horizontal-bar! width::real)::void
   (draw-vertical-bar! height::real)::void
   (open-paren! height::real left::real top::real)::void
@@ -39,18 +40,18 @@
   (define (translate! x::real y::real)::void
     (values))
   
-  (define (draw-string! s::string left::real top::real)::Extent
-    (string-extent s))
+  (define (draw-string! s::string left::real top::real)::void
+    (values))
   
   (define (draw-text! s::string left::real top::real)::real
     (string-length s))
   
-  (define (draw-atom! text::string)::Extent
-    (Extent width: (string-length text) height: 1))
+  (define (draw-atom! text::string)::void
+    (values))
 
-  (define (draw-finger! left::real top::real index::byte)::Extent
-   (Extent width: 1 height: 1))
-
+  (define (atom-width text::string)::real
+    0)
+  
   (define (draw-horizontal-bar! width::real)::void
    (values))
   

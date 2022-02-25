@@ -1,3 +1,50 @@
+* 23.02.2022
+
+** rano:
+
+Kolejne rzeczy, ktore chcielibysmy zrobic:
+- iterowanie po kazdej literce symbolu, i po kazdej spacji
+  (przy okazji - zmiana reprezentacji spacji (1) w parserze,
+   (2) w funkcji show i (3) w funkcji draw!)
+- mapowanie polozenia myszy we wspolrzedne dokumentu
+- edycja dokumentu, czyli:
+  - dodawanie nowych symboli
+  - edycja symboli
+  - kasowanie symboli i list
+  - zaznaczanie wyrazen
+  - tworzenie nowych list
+- poruszanie sie w gore i w dol
+- obsluga komentarzy
+  - liniowych (jako panel obok oryginalnego wyrazenia)
+  - blokowych (jako "karteczka" z tekstem)
+  - wyrazeniowych (jako wyszarzone wyrazenia)
+
+No dopsz. To teraz rozwazmy to, w jaki sposob musi
+dzialac obsluga myszy. Na razie myslimy o takich
+scenariuszach
+- klikniecie i puszczenie myszy powoduje selekcje
+kursora w danym miejscu
+- klikniecie na lewy nawias powoduje wyodrebnienie
+pudelka (drag&drop)
+- klikniecie na prawy nawias powoduje zmiane rozmiaru
+itd.
+
+** Z OSTATNIEJ CHWILI!
+
+Zmieniamy interfejs Tile tak, zeby metoda draw!
+nie zwracala Extenta. Zamiast tego bedziemy mieli osobne
+metody width i height, ktore w dodatku bedziemy
+cache'owac dla poszczegolnych par, i inwalidowac
+cache po kazdej iteracji
+
+W kazdym razie plan refaktoryzacji jest taki,
+ze musimy stworzyc funkcje wyliczajae rozmiary
+poszczegolnych wyrazen (tzn. wysokosc i szerokosc),
+bo one beda potrzebne przy rysowaniu.
+
+Musimy tez zaktualizowac wszystkie kombinatory zeby
+obslugiwaly nowy interfejs.
+
 * 22.02.2022
 
 Wyglada na to, ze trzeba na powaznie przemyslec kwestie

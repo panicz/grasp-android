@@ -66,10 +66,8 @@
 		 (current-screen (TextScreen)))
   
     (let continue ()
-      (let* ((output-extent ::Extent (draw! (head document)
-					    cursor: cursor
-					    context: (recons 1 '()))))
-
+      (let ((output-extent ::Extent (extent (head document))))
+	(draw! (head document) cursor: cursor context: (recons 1 '()))
 	(io:setCursorVisible #f)
 	(io:clearScreen)
 	(io:setCursorPosition 0 0)

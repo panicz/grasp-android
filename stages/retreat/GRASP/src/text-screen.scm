@@ -89,16 +89,6 @@
     (set! shift-left (+ shift-left x))
     (set! shift-top (+ shift-top y)))
 
-  (define (draw-finger! left::real top::real index::byte)::Extent
-    (cond ((= index 0)
-           (put! #\@ top left)
-           (Extent width: 1  height: 1))
-          (else
-           (put! #\( top (- left 1))
-           (put! (digit->char index) top left)
-           (put! #\) top (+ left 1))
-           (Extent width: 3 height: 1))))
-
   (define (draw-horizontal-bar! width::real)::void
     (for i from 0 below width
          (when (eq? (get -1 i) #\space)
@@ -122,7 +112,7 @@
          (put! #\| (+ i top) (+ left 1)))
     (put! #\/ (+ top (- height 1)) (+ left 1)))
 
-  (define (draw-string! s::string left::real top::real)::Extent
+  (define (draw-string! s::string left::real top::real)::void
     (put! #\" top left) 
     (let ((row top)
           (col (+ left 1))
@@ -139,13 +129,15 @@
       (Extent width: (+ width 2)
               height: (- (+ row 1) top))))
 
-  (define (draw-text! text::string left::real top::real)::real
+  (define (draw-text! text::string left::real top::real)::void
     (for i from 0 below (string-length text)
-         (put! (string-ref text i) top (+ left i)))
-    (string-length text))
+         (put! (string-ref text i) top (+ left i))))
 
-  (define (draw-atom! text::string)::Extent
-    (Extent width: (draw-text! text 0 1)
-            height: 3))
+  (define (draw-atom! text::string)::void
+    (draw-text! text 0 1))
+
+  (define (atom-width text::string)::real
+    (string-length text))
+  
   )
 
