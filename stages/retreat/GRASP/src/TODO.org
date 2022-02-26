@@ -1,3 +1,31 @@
+* 25.02.2022
+
+Byloby dobrze przemyslec interfejsy, zeby nie musiec po
+wielokroc dokonywac refaktoryzacji (choc wyglada na to,
+ze ta ostatnia nie poszla najgorzej)
+
+Bo chcemy miec mozliwosc poruszania sie strzalkami
+lewo/prawo po symbolach, ale takze po stringach, komentarzach,
+pudelkach...
+
+Po stringach cheilibysmy moc sie poruszac "gora/dol",
+i to w taki sposob, ze gora to jest poprzednia linia,
+zas dol to kolejna linia.
+
+Wydaje sie, ze wszystkie komponenty musza moc otrzymywac
+polecenia:
+
+(define-interface Editable ()
+  (type c::char)::bool
+  )
+
+(define-interface Navigable ()
+  (up)::Index
+  (down)::Index
+  (left)::Index
+  (right)::Index
+  )
+
 * 23.02.2022
 
 ** rano:
