@@ -46,7 +46,7 @@
 ;; The exception is in the case of a dotted tail:
 ;; the odd index refers to the tail itself, as if it was
 ;; an element, and the next odd index refers to the
-;; cdr of the list.
+;; tail of the list.
 ;;
 ;; Also, if the index is #\(, then it refers to the opening
 ;; parentehsis of a box, and if it is #\), it refers to its
@@ -91,11 +91,34 @@
 
 (define tail cdr)
 
-(define-property+ (dotted? cell)
+
+;; a cell is "dotted?" naturally when it is
+;; a pair whose "tail" isn't a list (so for example,
+;; if it's a symbol or a number).
+
+;; But every cell can be stipulated to be "dotted?".
+;; However, it is an error (currently unhandled)
+;; to stipulate a cell whose tail isn't a list
+;; to be not dotted, i.e. it is an error to invoke
+;;
+;; (set! (dotted? pair) #f)
+;;
+;; Instead, (unset! (dotted? pair)) should be used.
+
+(define-property (dotted? cell)
   (not (or (null? (tail cell))
 	   (pair? (tail cell)))))
 
+;; `pre-head-space` appears before the first element
+;; of a list, after the opening paren (therefore
+;; it should be considered sparse).
+
 (define-property+ (pre-head-space cell) "")
+
+;; `post-head-space` appears after each element
+;; in a list (and should therefore be considered
+;; dense: expect as many `post-head-space`s as there
+;; are cells visible in the document.
 
 (define-property+ (post-head-space cell)
   (if (and (not (dotted? cell))
@@ -103,14 +126,25 @@
       ""
       " "))
 
-;; pre- and post-tail-space only appear
-;; in the dotted tails
+;; `pre-` and `post-tail-space` only appear
+;; in the pairs that are `dotted?` (so they
+;; can both be considered sparse)
 
 (define-property+ (pre-tail-space cell) " ")
 
 (define-property+ (post-tail-space cell) "")
 
+;; `null-tail-head` only concerns a situation
+;; where the head of a list is `null?`.
+;; Since all empty lists are considered the same
+;; in Lisp, the only way to set the size
+;; of a particular 
+
 (define-property+ (null-head-space cell) "")
+
+;; the `null-tail-space` property only concerns
+;; a situation when a cell is stipulated to be `dotted?`
+;; and its tail is `null?`.
 
 (define-property+ (null-tail-space cell) "")
 
@@ -166,10 +200,11 @@
 (define (cell-index cell::pair index::int)
   (assert (is index >= 0))
   (cond ((= index 0)
-         (pre-head-space cell)) ;; trzeba jakos rzutowac do Tile
+         (pre-head-space cell)) ;; trzeba jakos rzutowac do Indexable
         ((= index 1)
          (let ((target (car cell)))
-           (if (and (null? target) (not (final-part?)))
+           (if (and (null? target)
+		    (not (final-part?)))
                (null-head-space cell)
                target)))
         ((= index 2)
@@ -178,10 +213,11 @@
          (cond ((= index 3)
                 (head-tail-separator cell))
                ((= index 4)
-                (pre-tail-space cell)) ;; jakos rzutowac do Tile?
+                (pre-tail-space cell)) ;; jakos rzutowac do Indexable
                ((= index 5)
                 (let ((target (cdr cell)))
-                  (if (and (null? target) (not (final-part?)))
+                  (if (and (null? target)
+			   (not (final-part?)))
                       (null-tail-space cell)
                       target)))
                ((= index 6)
