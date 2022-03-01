@@ -68,6 +68,8 @@
   
   (define (vertical-bar-width)::real 1)
 
+  (define (horizontal-bar-height)::real 1)
+  
   (define (clear!)::void
    (for line from 0 below height
         (for column from 0 below width

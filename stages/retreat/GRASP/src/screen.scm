@@ -4,8 +4,10 @@
 (define-interface Screen ()
   (paren-width)::real
   (min-line-height)::real
-  (vertical-bar-width)::real
 
+  (vertical-bar-width)::real
+  (horizontal-bar-height)::real
+  
   (clear!)::void
   (translate! x::real y::real)::void
   (draw-string! s::string left::real top::real)::void
@@ -33,7 +35,9 @@
   (define (min-line-height)::real 0)
   
   (define (vertical-bar-width)::real 0)
- 
+
+  (define (horizontal-bar-height)::real 0)
+  
   (define (clear!)::void
     (values))
   
