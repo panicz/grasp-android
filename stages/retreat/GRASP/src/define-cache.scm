@@ -18,8 +18,9 @@
   (define property-name
     (cache (object) default)))
 
-;; a very similar definition "recons" can be found in the
-;; (primitive) module
+;; the `hash-cons` definition presented here is only used
+;; for bootstrapping. Prefer the analogous definition of
+;; `recons` that is defined in the `(primitive)` module.
 
 (define-cache (hashed-heads tail)
   (cache (head)
@@ -27,3 +28,4 @@
 
 (define (hash-cons head tail)::pair
   ((hashed-heads tail) head))
+

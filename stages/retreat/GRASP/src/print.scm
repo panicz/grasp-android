@@ -4,10 +4,13 @@
 (import (for))
 (import (conversions))
 
+(define-constant current-display-procedure::parameter
+  (make-parameter display))
+
 (define-syntax-rule (print elements ...)
-  (display elements)
+  ((current-display-procedure) elements)
   ...
-  (newline))
+  ((current-display-procedure) #\newline))
 
 (define-syntax-rule (dump expr)
   (print 'expr ": "expr))

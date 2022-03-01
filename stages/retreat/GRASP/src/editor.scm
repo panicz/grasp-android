@@ -63,8 +63,13 @@
      MouseCaptureMode:CLICK_RELEASE_DRAG))
 
   (parameterize ((current-message-handler (editor-message-handler 22))
-		 (current-screen (TextScreen)))
-  
+		 (current-screen (TextScreen))
+		 (current-display-procedure (lambda (message)
+					      (io:putString
+					       (with-output-to-string
+						 (lambda ()
+						   (display
+						    message)))))))
     (let continue ()
       (let ((output-extent ::Extent (extent (head document))))
 	(draw! (head document) cursor: cursor context: (recons 1 '()))
@@ -131,13 +136,21 @@
 
 	    (,KeyType:MouseEvent
 	     (let* ((action ::MouseAction (as MouseAction key))
-		    (position ::TerminalPosition (action:getPosition)))
+		    (position ::TerminalPosition (action:getPosition))
+		    (left (position:getColumn))
+		    (top (position:getRow)))
 	       (cond ((action:isMouseMove)
 		      (WARN "mouse move to " (position:toString)))
 		     ((action:isMouseDown)
 		      (match (action:getButton)
 			(,MouseButton:Left
-			 (WARN "left mouse at " (position:toString)))
+			 (try-catch
+			  (let ((cursor (cursor-under left top
+						      document)))
+			    (WARN "cursor: " cursor))
+
+			  (ex java.lang.Throwable
+			      (WARN (ex:toString)))))
 			(,MouseButton:Right
 			 (WARN "right mouse at " (position:toString)))
 			(_

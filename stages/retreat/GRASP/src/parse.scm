@@ -118,7 +118,6 @@
   (display (post-tail-space p)))
 
 (define (show-pair p::pair)::void
-  (display (pre-head-space p))  
   (show-head p)
   (display (post-head-space p))
   (cond ((dotted? p)
@@ -130,6 +129,7 @@
   (cond
    ((pair? p)
     (write-char #\()
+    (display (pre-head-space p))  
     (show-pair p)
     (write-char #\)))
    (else
