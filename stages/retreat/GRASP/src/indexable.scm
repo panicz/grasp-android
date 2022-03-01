@@ -70,6 +70,10 @@
 
 (define-alias Indexable* java.lang.Object)
 
+;; we consider the Null class to be a class whose
+;; only member #!null
+(define-alias Null java.lang.Object)
+
 (define-type (Space fragments: pair)
   implementing StringBuilding
   with
