@@ -38,6 +38,9 @@
   (define messages ::list '())
 
   (define history-length ::int)
+
+  (define (clear-messages!)::void
+    (set! messages '()))
   
   (define (add-message message::list)::void
     (let ((message-string (with-output-to-string
@@ -71,8 +74,9 @@
 						   (display
 						    message)))))))
     (let continue ()
-      (let ((output-extent ::Extent (extent (head document))))
-	(draw! (head document) cursor: cursor context: (recons 1 '()))
+      (let ((output-extent ::Extent (extent (head document)))
+	    (top-cursor (recons 1 '())))
+	(draw! (head document) cursor: cursor context: top-cursor)
 	(io:setCursorVisible #f)
 	(io:clearScreen)
 	(io:setCursorPosition 0 0)
@@ -132,7 +136,10 @@
 	     (values))
 
 	    (,KeyType:Character
-	     (continue))
+	     (let ((c ::Character (key:getCharacter)))
+	       (when (eq? (#\space:charValue) (c:charValue))
+		 (invoke (current-message-handler) 'clear-messages!))
+	       (continue)))
 
 	    (,KeyType:MouseEvent
 	     (let* ((action ::MouseAction (as MouseAction key))
@@ -144,9 +151,12 @@
 		     ((action:isMouseDown)
 		      (match (action:getButton)
 			(,MouseButton:Left
+			 (invoke (current-screen) 'remember-offset! left top)
 			 (try-catch
 			  (let ((cursor (cursor-under left top
-						      document)))
+						      document
+						      context:
+						      top-cursor)))
 			    (WARN "cursor: " cursor))
 
 			  (ex java.lang.Throwable

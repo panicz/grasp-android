@@ -23,6 +23,8 @@
 
 (define-alias MouseAction com.googlecode.lanterna.input.MouseAction)
 
+(define-alias Character java.lang.Character)
+
 (define MouseButton:None ::int 0)
 (define MouseButton:Left ::int 1)
 (define MouseButton:Middle ::int 2)
