@@ -464,6 +464,12 @@ def") ===> "def")
     (draw-next! elems)
     ))
 
+(define-syntax-rule (truly actions ...)
+  (begin actions ... #t))
+
+(define-syntax-rule (falsely actions ...)
+  (begin actions ... #f))
+
 (define (cursor-under left::real top::real
 		      elems
 		      #!key
@@ -477,44 +483,47 @@ def") ===> "def")
 	(ceiling 0)
 	(index (first-index elems)))
 
-    (define (check-spaces! spaces::string
-			   #!optional (i ::int 0))
-      ::Cursor
-      (cond ((is i >= (string-length spaces))
-	     #!null)
-	    
-	    ((eq? (spaces i) #\newline)
-	     (set! ceiling (+ ceiling max-line-height))
-	     (set! side 0)
-	     (set! max-line-height
-		   (screen:min-line-height))
-	     (cond ((is top < ceiling)
-	            (recons* i index context))
-		   (else
-		    (set! index (next-index index elems))
-		    (check-spaces! spaces (+ i 1)))))
-	    
-	    (else
-	     (set! side (+ side 1))
-	     (set! max-width (max max-width side))
-	     (cond ((and (is side < left <= (+ side 1))
-			 (is top <= max-line-height))
-		    (recons* i index context))
-		   (else
-		    (set! index (next-index index elems))
-		    (check-spaces! spaces (+ i 1)))))))
-      
+    (define (check-spaces! spaces::string)::Cursor
+      (set! index (next-index index elems))
+      (let loop ((i 0))
+	(cond ((is i >= (string-length spaces))
+	       (set! index (next-index index elems))
+	       #!null)
+	      
+	      ((eq? (spaces i) #\newline)
+	       (set! ceiling (+ ceiling max-line-height))
+	       (set! side 0)
+	       (set! max-line-height
+		 (screen:min-line-height))
+	       (cond ((is top < ceiling)
+		      (WARN "space after newline")
+	              (recons* i index context))
+		     (else
+		      (loop (+ i 1)))))
+	      
+	      (else
+	       (set! side (+ side 1))
+	       (set! max-width (max max-width side))
+	       (cond ((and (is side < left <= (+ side 1))
+			   (is top <= max-line-height))
+		      (WARN "regular space")
+		      (recons* i index context))
+		     (else
+		      (loop (+ i 1))))))))
+
     (define (advance! extent::Extent)::Null
       (set! side (+ side extent:width))
       (set! max-line-height (max extent:height max-line-height))
       (set! max-width (max side max-width))
-      (set! index (next-index index elems))
       #!null)
 
     (define (check! part extent::Extent)::Cursor
+      (WARN "is "side" <= "left" <= "(+ side extent:width)"?")
+      (WARN "is "ceiling" <= "top" <= "(+ ceiling extent:height)"?")
       (if (and (is side <= left <= (+ side extent:width))
 	       (is ceiling <= top <= (+ ceiling extent:height)))
 	  (let ((cursor (recons index context)))
+	    (WARN "checked " part " at " (recons index context))
 	    (or (and (pair? part)
 		     (cursor-under (- left side)
 				   (- top ceiling)
@@ -546,16 +555,15 @@ def") ===> "def")
 		   (check-spaces! (pre-tail-space pair))
 		   (check! (tail pair) (tail-extent pair screen))
 		   (check-spaces! (post-tail-space pair))))
-	  (and (pair? pair)
-	       (check-next! pair))))
+	  (and (pair? (tail pair))
+	       (check-next! (tail pair)))))
 
     (or (and (is 0 <= left < (screen:paren-width))
 	     (is 0 <= top < box:height)
 	     (recons index context))
 	(check-spaces! (pre-head-space elems))
 	(check-next! elems)
-	(and (is (- box:width
-		    (screen:paren-width)) <= left <= box:width)
+	(and (is (- box:width (screen:paren-width)) <= left <= box:width)
 	     (is 0 <= top < box:height)
 	     (recons index context))
 	#!null)))

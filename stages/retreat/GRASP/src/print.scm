@@ -16,11 +16,15 @@
   (print 'expr ": "expr))
 
 (define-interface MessageHandler ()
+  (clear-messages!)::void
   (add-message message::list)::void
   (display-messages output::Object)::void)
 
 (define-object (default-message-handler)::MessageHandler
   (define last-message::string)
+
+  (define (clear-messages!)::void
+    (set! last-message #!null))
   
   (define (add-message message::list)::void
     (set! last-message
