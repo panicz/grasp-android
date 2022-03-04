@@ -1,3 +1,15 @@
+* 28.02.2022
+
+Dzis tak moze nieco skromniej: mamy napisany zarys funkcji
+"cursor-under". Teraz istotne jest, zeby te funkcje podlaczyc
+do kodu obslugujacego klikniecia mysza.
+
+A w dalszej kolejnosci bedziemy chcieli:
+- iterowac po spacjach i symbolach (zmienic reprezentacje spacji)
+- wydobywac wyrazenia za pomoca klikniec
+- zaznaczac wyrazenia
+- edytowac z klawiatury
+
 * 25.02.2022
 
 Byloby dobrze przemyslec interfejsy, zeby nie musiec po
