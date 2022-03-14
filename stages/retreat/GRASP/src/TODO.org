@@ -1,3 +1,127 @@
+* 13.03.2022
+
+kursor juz jako tako obsluzony, teraz jeszcze
+pozostaje nam:
+1. selekcja
+2. edycja
+3. scrollowanie dokumentu
+4. otwieranie i zapisywanie plikow
+
+i juz bedziemy miec uzyteczny edytor
+strukturalny
+
+dalsze kroki:
+5. ewaluacja lispa
+6. mechanizm rozszerzen
+
+7. klient graficzny
+8. klient androidowy
+9. system gestow
+
+
+
+
+* 12.03.2022
+
+najwazniejsze rzeczy do zrobienia:
+- umieszczanie kursora na poszczegolnych
+  literkach/spacjach
+- zaznaczanie wyrazen i podswietlanie
+  zaznaczenia
+
+Jak rozwiazac umieszczanie kursora?
+
+* 11.03.2022
+
+wydaje sie, ze powinnismy moc zrezygnowac
+z predykatu has-children?
+hmmm to sie chyba nie uda?
+raczej uda.
+
+jezeli first-index i last-index zwracalyby
+#!null, to to powinno rozwiazac problem.
+
+chcemy zatem miec:
+- spacje jako Indexable
+- indeksowanie po symbolach
+
+Wydaje sie, ze bedzie trzeba rozpoczac od spacji:
+- obsluga w parserze
+- obsluga w wyswietlaniu
+- obsluga podczas iterowania
+
+Uwaga! Implementacja take-cell-at! w naturalny
+sposob operuje na nieparzystych indeksach
+(ktore wskazuja na elementy), natomiast
+put-into-cell-at! w naturalny sposob operuje
+na parzystych indeksach (ktore wskazuja na
+spacje)
+
+
+* 10.03.2022
+
+trzeba troche popracowac koncepcyjnie nad
+fundamentami. ba razie rzecz wyglada tak, ze
+mamy interfejs Indexable o takiej postaci:
+(indexable.scm)
+
+(define-interface Indexable ()
+  (has-children?)::boolean
+  
+  (part-at index::Index)::Indexable*
+  
+  (first-index)::Index
+  (last-index)::Index
+  
+  (next-index index::Index)::Index
+  (previous-index index::Index)::Index
+)
+
+oraz jego dwie implementacje (primitive.scm): cons 
+i Symbol.
+
+Metoda has-children? jest uzywana przez
+cursor-climb-front oraz cursor-climb-back,
+podobnie jak first-index i last-index,
+odpowiednio.
+
+part-at jest dodatkowo uzywana w cursor-ref;
+next-index w cursor-next, a previous-index
+w cursor-back
+
+no dobrze, ale wyglada na to, ze chcemy
+obslugiwac kilka odrebnych czynnosci:
+- poruszanie kursora (poprzedni/nastepny)
+- wyodrebnianie elementu pod kursorem
+
+
+* 09.03.2022
+
+jeszcze chyba jakies bledy sa w tym zaznaczaniu.
+no ale niewazne.
+
+* 08.03.2022
+
+wydaje sie, ze odwzorowywanie klikniec w wyrazenia
+jako tako dziala, choc konieczne bedzie jeszcze
+przetestowanie na pc.
+
+tymczasem chcielibysmy sie skupic na kolejnym
+aspekcie, mianowicie na - z jednej strony
+- iterowaniu na pod-indeksach spacji i atomow,
+oraz - z drugiej strony - zmianie reprezentacji
+spacji
+
+reprezentacja spacji powinna byc taka, ze mamy
+sobie liste.
+i w tej liscie bedziemy mieli albo liczbe,
+albo "pudelko":
+liczba oznacza ilosc spacji (poziomych), przerwa
+miedzy liczbami - spacje pionowa, natomiast
+"pudelko" to wykomentowane wyrazene
+(przez "pudelko" rozumiem tutaj pare, ktorej ogon
+to lista pusta, albo inaczej - liste jednoelementowa)
+
 * 28.02.2022
 
 Dzis tak moze nieco skromniej: mamy napisany zarys funkcji
