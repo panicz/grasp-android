@@ -11,60 +11,74 @@
 (import (string-building))
 (import (functions))
 
+#|
 
-;; A Cursor is a list of things that can be used for
-;; indexing tiles. Those can be any objects that can be
-;; compared using the 'eqv?' predicate, but in practice
-;; those values can either be integers, symbols or
-;; characters.
-;;
-;; The order of elements in the cursor list is such that
-;; the first element of the list is an index of the
-;; innermost element relative to its parent (which is
-;; pointed to by the second element of the list, or
-;; is the currently considered node if there isn't one)
-;;
-;; This order doesn't allow to select the expression
-;; pointed to by a cursor in a tail-recursive manner:
-;; we need to reach the last index in order to choose
-;; a sub-expression on a top-level.
-;;
-;; The reason we chose this "reverse" order has to do with
-;; the way we build those indices: we start from a top level,
-;; and we descend deeper recursively; therefore, we "cons"
-;; the inermost expressions' indices last.
-;;
-;; Also, this strategy maximizes "structural sharing"
-;; between cursors to different expressions
-;; (which I think is beautiful), and reverting this
-;; order would be wasteful
-;;
-;; Another thing with cursors is that, when refering to
-;; normal boxes (or "lists"), even indices usually refer to spaces,
-;; and odd indices refer to subsequent elements in a list.
-;;
-;; The exception is in the case of a dotted tail:
-;; the odd index refers to the tail itself, as if it was
-;; an element, and the next odd index refers to the
-;; tail of the list.
-;;
-;; Also, if the index is #\(, then it refers to the opening
-;; parentehsis of a box, and if it is #\), it refers to its
-;; closing parenthesis.
+A Cursor is a list of things that can be used for
+indexing tiles. Those can be any objects that can
+be compared using the 'eqv?' predicate (except
+#!null), but in practice those values can either
+be integers, symbols orcharacters.
 
-;; Every tile manages its own cursor values, so:
-;; the source of every cursor value is a tile, which
-;; controls the indices.
-;;
+The order of elements in the cursor list is such 
+that the first element of the list is an index of
+the innermost element relative to its parent (which
+is pointed to by the second element of the list, or
+is the currently considered node if there isn't one)
 
-(define-alias Cursor java.lang.Object) ;;gnu.lists.LList)
+This order doesn't allow to select the expression
+pointed to by a cursor in a tail-recursive manner:
+we need to reach the last index in order to choose
+a sub-expression on a top-level.
+The reason we chose this "reverse" order has to do
+with the way we build those indices: we start from
+the top level, and we descend deeper recursively;
+therefore, we "cons" the inermost expressions' 
+indices last.
 
-;; Each tile can choose whatever it pleases to be its index
-;; (except #!null, for the reason explained below)
-;; For built-in types (boxes, combinators, atoms) indices are
-;; typically either integers or characters or symbols.
-;;
-;; The special value #!null means the absence of an index
+Also, this strategy maximizes "structural sharing"
+between cursors to different expressions
+(which I think is beautiful), and reverting this
+order would be wasteful; more specifically,
+tail recursion wouldn't be much of a win here,
+because the depth of expressions in a document
+is going to be bounded anyway, and having
+the boundedness of documents correspond to the
+boundedness of the stack seems ok.
+
+Another thing with cursors is that, when refering to
+normal boxes (or "lists"), even indices usually
+refer to spaces, and odd indices refer to 
+subsequent elements in a list.
+
+The exception is in the case of a dotted tail:
+the odd index refers to the tail itself, as if 
+it was an element, and the next odd index refers 
+to the tail of the list.
+
+Also, if the index is #\(, then it refers to the 
+opening parentehsis of a box, and if it is #\), 
+it refers to its closing parenthesis.
+
+Every kind of tile manages its own cursor values,
+so the source of every cursor value is a tile, which
+controls the indices.
+|#
+
+(define-alias Cursor java.lang.Object)
+;;gnu.lists.LList)
+
+#|
+Each tile can choose whatever it pleases to be 
+its index except #!null, for the reason explained
+below)
+
+For built-in types (boxes, combinators, atoms) 
+indices are typically either integers or characters
+or symbols.
+
+The special value #!null means the absence 
+of an index
+|#
 
 (define-alias Index java.lang.Object)
 
@@ -89,7 +103,8 @@
 	  (`(,_ . ,_)
 	   (process rest)))))))
   ((toString)::String
-   (invoke (buildString (StringBuilder)) 'toString)))
+   (invoke (buildString (StringBuilder)) 'toString))
+  )
 
 (define head car)
 
@@ -147,15 +162,16 @@
 (define-property+ (null-head-space cell) "")
 
 ;; the `null-tail-space` property only concerns
-;; a situation when a cell is stipulated to be `dotted?`
-;; and its tail is `null?`.
+;; a situation when a cell is stipulated to be
+;; `dotted?` and its tail is `null?`.
 
 (define-property+ (null-tail-space cell) "")
 
 (define-simple-class HeadTailSeparator ()
   ((toString)::String "."))
 
-(define-constant head/tail-separator (HeadTailSeparator))
+(define-constant head/tail-separator
+  (HeadTailSeparator))
 
 (define (head/tail-separator? x)
   (instance? x HeadTailSeparator))
@@ -179,23 +195,31 @@
   cell)
 
 (define (tail-space-to-head original cell)
-  (update! (pre-head-space cell) (pre-tail-space original))
-  (update! (post-head-space cell) (post-tail-space original))
-  (update! (null-head-space cell) (null-tail-space original))
+  (update! (pre-head-space cell)
+	   (pre-tail-space original))
+  (update! (post-head-space cell)
+	   (post-tail-space original))
+  (update! (null-head-space cell)
+	   (null-tail-space original))
   cell)
 
 (define (head-space-to-tail original cell)
-  (update! (pre-tail-space cell) (pre-head-space original))
-  (update! (post-tail-space cell) (post-head-space original))
-  (update! (null-tail-space cell) (null-head-space original))
+  (update! (pre-tail-space cell)
+	   (pre-head-space original))
+  (update! (post-tail-space cell)
+	   (post-head-space original))
+  (update! (null-tail-space cell)
+	   (null-head-space original))
   cell)
 
 (define (tree-map/preserve properties f l)
   (if (pair? l)
       (copy-properties
        properties
-       l (cons (tree-map/preserve properties f (head l))
-	       (tree-map/preserve properties f (tail l))))
+       l
+       (cons
+	(tree-map/preserve properties f (head l))
+	(tree-map/preserve properties f (tail l))))
       (f l)))
 
 (define-constant final-part?::parameter[boolean]
@@ -229,11 +253,15 @@
         (else
          (cell-index (cdr cell) (- index 2)))))
 
-(define (last-cell-index cell::pair #!optional (initial::int 2))::int
+(define (last-cell-index cell::pair
+			 #!optional
+			 (initial::int 2))
+  ::int
   (cond ((dotted? cell)
          (+ initial 4))
         ((pair? (tail cell))
-         (last-cell-index (tail cell) (+ initial 2)))
+         (last-cell-index (tail cell)
+			  (+ initial 2)))
         (else
          initial)))
 
@@ -253,9 +281,13 @@
 
 (define (has-children? object)
   (cond ((Indexable? object)
-	 (invoke (as Indexable object) 'has-children?))
+	 (invoke (as Indexable object)
+		 'has-children?))
 
 	((pair? object)
+	 #t)
+
+	((string? object)
 	 #t)
 	
 	(else
@@ -263,7 +295,8 @@
 
 (define (part-at index::Index object)::Indexable*
   (cond ((Indexable? object)
-	 (invoke (as Indexable object) 'part-at index))
+	 (invoke (as Indexable object)
+		 'part-at index))
 
 	((pair? object)
 	 (if (or (eq? index #\() (eq? index #\)))
@@ -271,23 +304,30 @@
 	     (cell-index object (as int index))))
 	 
 	(else
-	 (error "Don't know how to extract "index" from "object))))
+	 object
+	 #;(error "Don't know how to extract "index
+		" from "object))))
 
 (define (cursor-ref tile cursor::Cursor)
   (cond ((null? cursor)
          tile)
         ((pair? cursor)
-         (let ((parent (cursor-ref tile (tail cursor))))
+         (let ((parent (cursor-ref tile (tail
+					 cursor))))
            (if parent
-	       (parameterize ((final-part? (null? (tail cursor))))
+	       (parameterize ((final-part?
+			       (null? (tail
+				       cursor))))
 		 (part-at (head cursor) parent))
                parent)))
         (else
-         (error "Unable to refer to cursor "cursor" in "tile))))
+         (error "Unable to refer to cursor "cursor
+		" in "tile))))
 
 (define (first-index object)
   (cond ((Indexable? object)
-	 (invoke (as Indexable object) 'first-index))
+	 (invoke (as Indexable object)
+		 'first-index))
 
 	((string? object)
 	 0)
@@ -313,10 +353,11 @@
 
 (define (next-index index::Index object)::Index
   (cond ((Indexable? object)
-	 (invoke (as Indexable object) 'next-index index))
+	 (invoke (as Indexable object)
+		 'next-index index))
 
 	((string? object)
-	 (min (string-length object) (+ index 1)))
+	 (min (last-index object) (+ index 1)))
 
 	((pair? object)
 	 (match index
@@ -333,7 +374,8 @@
 
 (define (previous-index index::Index object)::Index
   (cond ((Indexable? object)
-	 (invoke (as Indexable object) 'previous-index index))
+	 (invoke (as Indexable object)
+		 'previous-index index))
 
 	((string? object)
 	 (max 0 (- index 1)))
@@ -361,25 +403,28 @@
      cursor)))
 
 
-(define (subcursor cursor::Cursor context::Cursor)::Cursor
+(define (subcursor cursor::Cursor context::Cursor)
+  ::Cursor
   (and cursor
        (is context suffix? cursor)
        cursor))
 
-;; inny pomysl na kursor jest taki, ze to ciag dowolnych
-;; obiektow, czyli np. kombinatory moga miec takie "indeksy",
-;; jak 'left czy 'right, ktore beda ze soba porownywane
-;; za pomoca predykatu eqv?.
+#|
+inny pomysl na kursor jest taki, ze to ciag 
+dowolnych obiektow, czyli np. kombinatory moga
+miec takie "indeksy", jak 'left czy 'right, ktore 
+beda ze soba porownywanw za pomoca predykatu eqv?.
 
-;; W kazdym razie jest tutaj jeszcze inny pomysl:
-;; zeby zamiast stringa ze spacjami, zwracac raczej
-;; obiekty: albo (Space ...) albo (LineBreak ...)
+W kazdym razie jest tutaj jeszcze inny pomysl:
+zeby zamiast stringa ze spacjami, zwracac raczej
+obiekty: albo (Space ...) albo (LineBreak ...)
 
-;; Wowczas tez sens moze miec to, zeby indeks lewego
-;; nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
+Wowczas tez sens moze miec to, zeby indeks lewego
+nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
+|#
 
-
-(define (cursor-next cursor::Cursor expression)::Cursor
+(define (cursor-next cursor::Cursor expression)
+  ::Cursor
   (match cursor
     (`(,head . ,tail)
      (let* ((parent (cursor-ref expression tail))
@@ -390,15 +435,20 @@
     (_
      cursor)))
 
-(define (cursor-climb-front cursor::Cursor expression)::Cursor
+(define (cursor-climb-front cursor::Cursor
+			    expression)
+  ::Cursor
 
-  (define (climb-front cursor::Cursor target)::Cursor
+  (define (climb-front cursor::Cursor target)
+    ::Cursor
     (if (has-children? target)
 	(let* ((index (first-index target))
 	       (child (part-at index target)))
 	  (if (eq? child target)
 	      (if (and (pair? cursor)
-		       (eq? (cursor-ref expression (tail cursor))
+		       (eq? (cursor-ref expression
+					(tail
+					 cursor))
 			    target))
 		  cursor
 		  (hash-cons index cursor))
@@ -406,9 +456,11 @@
 			   child)))
 	cursor))
     
-  (climb-front cursor (cursor-ref expression cursor)))
+  (climb-front cursor
+	       (cursor-ref expression cursor)))
 
-(define (cursor-back cursor::Cursor expression)::Cursor
+(define (cursor-back cursor::Cursor expression)
+  ::Cursor
   (match cursor
     (`(,head . ,tail)
      (let* ((parent (cursor-ref expression tail))
@@ -419,15 +471,18 @@
     (_
      cursor)))
 
-(define (cursor-climb-back cursor::Cursor expression)::Cursor
-
+(define (cursor-climb-back cursor::Cursor
+			   expression)
+  ::Cursor
   (define (climb-back cursor::Cursor target)::Cursor
     (if (has-children? target)
 	(let* ((index (last-index target))
 	       (child (part-at index target)))
 	  (if (eq? child target)
 	      (if (and (pair? cursor)
-		       (eq? (cursor-ref expression (tail cursor))
+		       (eq? (cursor-ref expression
+					(tail
+					 cursor))
 			    target))
 		  cursor
 		  (hash-cons index cursor))
@@ -435,7 +490,8 @@
 			  child)))
 	cursor))
     
-  (climb-back cursor (cursor-ref expression cursor)))
+  (climb-back cursor
+	      (cursor-ref expression cursor)))
 
 ;;   
 ;; (   (   a   b   )   )
