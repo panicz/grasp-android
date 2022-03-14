@@ -29,12 +29,12 @@
 
 (define document ::list (parse-string input))
 
-
 (define input-extent ::Extent (string-extent input))
 
 (define cursor ::Cursor '())
 
-(define-object (editor-message-handler size::int)::MessageHandler
+(define-object (editor-message-handler size::int)
+  ::MessageHandler
   (define messages ::list '())
 
   (define history-length ::int)
@@ -59,42 +59,57 @@
 
   (set! history-length size))
 
-(define (run-editor #!optional (io ::Terminal (make-terminal)))::void
+(define (run-editor #!optional
+		    (io ::Terminal (make-terminal)))
+  ::void
   (io:enterPrivateMode)
   (when (instance? io ExtendedTerminal)
-    ((as ExtendedTerminal io):setMouseCaptureMode
-     MouseCaptureMode:CLICK_RELEASE_DRAG))
+    (invoke (as ExtendedTerminal io)
+	    'setMouseCaptureMode
+	    MouseCaptureMode:CLICK_RELEASE_DRAG))
 
-  (parameterize ((current-message-handler (editor-message-handler 22))
+  (parameterize ((current-message-handler
+		  (editor-message-handler 16))
 		 (current-screen (TextScreen))
-		 (current-display-procedure (lambda (message)
-					      (io:putString
-					       (with-output-to-string
-						 (lambda ()
-						   (display
-						    message)))))))
+		 (current-display-procedure
+		  (lambda (message)
+		    (io:putString
+		     (with-output-to-string
+		       (lambda ()
+			 (display
+			  message)))))))
     (let continue ()
-      (let ((output-extent ::Extent (extent (head document)))
+      (let ((output-extent ::Extent
+			   (extent (head document)))
 	    (top-cursor (recons 1 '())))
-	(draw! (head document) cursor: cursor context: top-cursor)
+	(draw! (head document)
+	       cursor: cursor
+	       context: top-cursor)
 	(io:setCursorVisible #f)
 	(io:clearScreen)
 	(io:setCursorPosition 0 0)
 	(io:putString ((current-screen):toString))
-	(io:setCursorPosition 0 (+ 2 output-extent:height))
-	(io:putString (with-output-to-string (lambda () (write cursor))))
+	(io:setCursorPosition
+	 0
+	 (+ 2 output-extent:height))
+	(io:putString (with-output-to-string
+			(lambda () (write cursor))))
 	(try-catch
 	 (io:putString (with-output-to-string
 			 (lambda ()
-			   (write (cursor-ref document cursor)))))
+			   (write (cursor-ref
+				   document
+				   cursor)))))
 	 (ex java.lang.Throwable
 	     (WARN (ex:toString))))
-	(invoke (current-message-handler) 'display-messages io)
+	(invoke (current-message-handler)
+		'display-messages io)
 	(io:flush)
-	(io:setCursorPosition (invoke (current-screen)
-				      'remembered-left)
-			      (+ 2 (invoke (current-screen)
-					   'remembered-top)))
+	(io:setCursorPosition
+	 (invoke (current-screen)
+		 'remembered-left)
+	 (invoke (current-screen)
+		 'remembered-top))
 	(io:setCursorVisible #t)
 	(let* ((key ::KeyStroke (io:readInput))
 	       (type ::KeyType (key:getKeyType)))
@@ -102,7 +117,8 @@
 	    (,KeyType:ArrowLeft
 	     (try-catch
 	      (set! cursor (cursor-climb-back
-			    (cursor-back cursor document)
+			    (cursor-back cursor
+					 document)
 			    document))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
@@ -112,7 +128,8 @@
 	     (try-catch
 	      (begin
 		(set! cursor (cursor-climb-front
-			      (cursor-next cursor document)
+			      (cursor-next cursor
+					   document)
 			      document)))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
@@ -120,14 +137,26 @@
 	    
 	    (,KeyType:ArrowUp
 	     (try-catch
-	      (set! cursor (cursor-climb-front cursor document))
+	      (invoke (current-screen)
+		      'remember-offset!
+		      (invoke (current-screen)
+			      'remembered-left)
+		      (- (invoke (current-screen)
+				 'remembered-top)
+			 1))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
 	    
 	    (,KeyType:ArrowDown
 	     (try-catch
-	      (set! cursor (cursor-climb-back cursor document))
+	      (invoke (current-screen)
+		      'remember-offset!
+		      (invoke (current-screen)
+			      'remembered-left)
+		      (+ (invoke (current-screen)
+				 'remembered-top)
+			 1))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
@@ -136,41 +165,58 @@
 	     (values))
 
 	    (,KeyType:Character
-	     (let ((c ::Character (key:getCharacter)))
-	       (when (eq? (#\space:charValue) (c:charValue))
-		 (invoke (current-message-handler) 'clear-messages!))
+	     (let ((c::Character(key:getCharacter)))
+	       (when (eq? (#\space:charValue)
+			  (c:charValue))
+		 (invoke (current-message-handler)
+			 'clear-messages!))
 	       (continue)))
 
 	    (,KeyType:MouseEvent
-	     (let* ((action ::MouseAction (as MouseAction key))
-		    (position ::TerminalPosition (action:getPosition))
+	     (let* ((action ::MouseAction
+			    (as MouseAction key))
+		    (position ::TerminalPosition
+			      (action:getPosition))
 		    (left (position:getColumn))
 		    (top (position:getRow)))
-	       (cond ((action:isMouseMove)
-		      (WARN "mouse move to " (position:toString)))
-		     ((action:isMouseDown)
-		      (match (action:getButton)
-			(,MouseButton:Left
-			 (invoke (current-screen) 'remember-offset! left top)
-			 (try-catch
-			  (let ((cursor (cursor-under left top
-						      document
-						      context:
-						      top-cursor)))
-			    (WARN "cursor: " cursor))
+	       (cond
+		((action:isMouseMove)
+		 (WARN "mouse move to "
+		       (position:toString)))
+		((action:isMouseDown)
+		 (match (action:getButton)
+		   (,MouseButton:Left
+		    (invoke (current-screen)
+			    'remember-offset!
+			    left top)
+		    (try-catch
+		     (let ((cursor+
+			    (cursor-under
+			     left
+			     top
+			     (head document)
+			     context:
+			     top-cursor
+			     )))
+		       (set! cursor cursor+)
+		       (WARN "cursor: "
+			     cursor))
 
-			  (ex java.lang.Throwable
-			      (WARN (ex:toString)))))
-			(,MouseButton:Right
-			 (WARN "right mouse at " (position:toString)))
-			(_
-			 (WARN (action:toString) " mouse at "
-			       (position:toString)))))
-		     ((action:isMouseDrag)
-		      (WARN "mouse move to " (position:toString)))
-		     ((action:isMouseUp)
-		      (WARN "mouse released at "
-			    (position:toString)))))
+		     (ex java.lang.Throwable
+			 (WARN (ex:toString)))))
+		   (,MouseButton:Right
+		    (WARN "right mouse at "
+			  (position:toString)))
+		   (_
+		    (WARN (action:toString)
+			  " mouse at "
+			  (position:toString)))))
+		((action:isMouseDrag)
+		 (WARN "mouse move to "
+		       (position:toString)))
+		((action:isMouseUp)
+		 (WARN "mouse released at "
+		       (position:toString)))))
 	     (continue))
 	    
 	    (_

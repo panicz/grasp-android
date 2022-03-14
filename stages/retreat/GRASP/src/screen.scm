@@ -10,7 +10,7 @@
   
   (clear!)::void
   (translate! x::real y::real)::void
-  (draw-string! s::string left::real top::real)::void
+  (draw-string! s::string l::real t::real)::void
   (draw-text! s::string left::real top::real)::void
   (draw-atom! text::string)::void
   
@@ -18,8 +18,8 @@
 
   (draw-horizontal-bar! width::real)::void
   (draw-vertical-bar! height::real)::void
-  (open-paren! height::real left::real top::real)::void
-  (close-paren! height::real left::real top::real)::void
+  (open-paren! height::real l::real t::real)::void
+  (close-paren! height::real l::real t::real)::void
 
   (remember-offset! +left::real +top::real)::void
   (remembered-left)::real
@@ -44,10 +44,16 @@
   (define (translate! x::real y::real)::void
     (values))
   
-  (define (draw-string! s::string left::real top::real)::void
+  (define (draw-string! s::string
+			left::real
+			top::real)
+    ::void
     (values))
   
-  (define (draw-text! s::string left::real top::real)::real
+  (define (draw-text! s::string
+		      left::real
+		      top::real)
+    ::real
     (string-length s))
   
   (define (draw-atom! text::string)::void
@@ -62,13 +68,21 @@
   (define (draw-vertical-bar! height::real)::void
    (values))
   
-  (define (open-paren! height::real left::real top::real)::void
+  (define (open-paren! height::real
+		       left::real
+		       top::real)
+    ::void
     (values))
   
-  (define (close-paren! height::real left::real top::real)::void
+  (define (close-paren! height::real
+			left::real
+			top::real)
+    ::void
    (values))
 
-  (define (remember-offset! +left::real +top::real)::void
+  (define (remember-offset! +left::real
+			    +top::real)
+    ::void
     (values))
   
   (define (remembered-left)::real
