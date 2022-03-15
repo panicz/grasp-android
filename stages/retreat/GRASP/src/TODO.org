@@ -1,3 +1,96 @@
+* 14.03.2022
+
+teraz zaczynamy prace nad selekcja.
+Od strony implementacji dojdzie nam 
+dodatkowy parametr do funkcji
+draw!, mianowicie "selection", oraz 
+grupa funkcji do operowania na selekcji:
+- sprawdzanie, czy dany kursor znajduje
+sie pomiedzy kursorami
+- powiekszanie selekcji
+
+Od strony interfejsu, chcielibysmy
+miec takie oto dodatkowe funkcjonalnosci:
+- shift + strzalka (w lewo albo prawo) - powiekszanie
+selekcji
+- ctrl+strzalka: jezeli nie ma selekcji, to przesuwamy
+kursor w lewo albo w prawo, ale na tym samym poziomie.
+jezeli natomiast jest selekcja, to przesuwamy selekcje
+w lewo albo w prawo na tym samym poziomie
+
+- [ - jezeli nie ma selekcji, tworzymy nowe puste pudelko.
+Jezeli jest selekcja, to tworzymy nowe pudelko w ktorym
+umieszczamy owa selekcje
+
+- ] - przesuwamy kursor pietro nizej
+
+- ctrl+[ - jezeli mamy selekcje, to wydobywamy zaznaczone
+wyrazenie przed zawierajace je pudelko. w przeciwnym razie
+przesuwamy tylko kursor przed zawierajace pudelko
+
+- ctrl+] - jezeli mamy selekcje, to wydobywamy zaznaczone
+wyrazenie za zawierajace pudelko. w przeciwnym razie
+tak jak ]
+
+Natomiast alt+strzalki powinny dzialac tak, ze przesuwamy
+sie po podzielonych oknach (zgodnie z "normalna" geometria),
+zas ctrl+alt+strzalki pozwalaja na przenoszenie wyrazen
+pomiedzy oknami
+
+shift+alt+strzalki teoretycznie mogloby zaznaczac okna
+(o ile znajdziemy sens dla takiej funkcjonalnosci)
+
+No dobrze, fajnie, ale chyba warto by bylo sobie
+wyobrazic przyklady opisujace zaznaczanie kursora
+
+Wezmy takie cos:
+
+#+BEGIN_SRC
+       (4 1 3 1)(5 1 3 1)
+      (3 1 3 1)||(6 1 3 1)
+     (2 1 3 1)||||(7 1 3 1)
+    (1 1 3 1)||||||(8 1 3 1)
+   (0 1 3 1)||||||||(9 1 3 1)/(0-1 2 3 1)
+    (0 3 1)||||||||||
+   ([ 3 1) ||||||||||  (] 3 1)
+         V ||||||||||  V  (0-1 3 3 1)
+/        / VVVVVVVVVV  \  |           \
+| define | factorial n |  |           |
+|        \           ^ /  |           |
+|   /    /        \  |    |         \ |
+|   | if | <= n 0 |  +----+         | |
+|   |    \        /                 | |
+|   |                               | |
+|   |       1                       | |
+|   |                               | |
+|   |       /     /   /       \ \ \ | |
+|   |       | * n | ! | - n 1 | | | | |
+\   \       \     \   \       / / / / /
+#+END_SRC
+
+Jak mamy kursor w pozycji, dajmy na to,
+(1 1 3 1), i wciskamy shift+prawo,
+to (1 1 3 1) staje sie naszym "zakotwiczeniem"
+selekcji, natomiast kursor przesuwa sie na
+(2 1 3 1). Ten sam ruch jest kontynuowany
+do czasu, az dojdziemy do (9 1 3 1).
+
+Kiedy jednak w tej pozycji ponownie wcisniemy
+shift+prawo, wjezdzajac na kursor (0 2 3 1),
+to nasze zakotwiczenie powinno sie zmienic
+- zamiast (1 1 3 1) albo (0 1 3 1) albo
+czegokolwiek, powinnismy sie zaktowiczyc
+w (0 3 1) - czyli otrzymujemy selekcje
+(0 3 1)-(2 3 1). W taki wlasnie sposob
+powinnismy moc od tej pory powiekszac
+nasza selekcje: nie o pojedyncze znaki, a
+o cale wyrazenia.
+
+Co wiecej, jezeli przekroczymy kursor (4 3 1)
+i wjedziemy na (] 3 1), to od zakotwiczenie
+powinno awansowac na ([ 3 1).
+
+
 * 13.03.2022
 
 kursor juz jako tako obsluzony, teraz jeszcze
