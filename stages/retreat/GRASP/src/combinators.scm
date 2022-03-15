@@ -25,8 +25,6 @@
 	     height: (max front-extent:height
 			  back-extent:height))))
 
-  ((has-children?)::boolean #t)
-  
   ((part-at index::Index)::Tile
    (match index
      ('back back)
@@ -65,8 +63,6 @@
 			 bottom-extent:width)
 	     height: (+ top-extent:height
 			bottom-extent:height))))
-
-  ((has-children?)::boolean #t)
 
   ((part-at index::Index)::Tile
    (match index
@@ -107,8 +103,6 @@
 		       right-extent:width screen)
 	     height: (max left-extent:height
 			  right-extent:height))))
-  
-  ((has-children?)::boolean #t)
   
   ((part-at index::Index)::Tile
    (match index

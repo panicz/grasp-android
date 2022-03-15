@@ -266,8 +266,6 @@ of an index
          initial)))
 
 (define-interface Indexable ()
-  (has-children?)::boolean
-  
   (part-at index::Index)::Indexable*
   
   (first-index)::Index
@@ -281,9 +279,8 @@ of an index
 
 (define (has-children? object)
   (cond ((Indexable? object)
-	 (invoke (as Indexable object)
-		 'has-children?))
-
+	 #t)
+	
 	((pair? object)
 	 #t)
 

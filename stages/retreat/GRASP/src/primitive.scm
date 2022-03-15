@@ -107,8 +107,6 @@
 			(* 2 (screen:paren-width)))
 	      height: extent:height)))
     
-  (define (has-children?)::boolean #t)
-  
   (define (part-at index::Index)::Indexable*
     (if (or (eq? index #\[) (eq? index #\]))
 	(this)
@@ -360,8 +358,6 @@
   (define (extent screen::Screen)::Extent
     (Extent width: (screen:atom-width name)
 	    height: (screen:min-line-height)))
-  
-  (define (has-children?)::boolean #t)
   
   (define (part-at index::Index)::Indexable*
     (this))
