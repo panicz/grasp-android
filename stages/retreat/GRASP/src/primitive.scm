@@ -110,30 +110,30 @@
   (define (has-children?)::boolean #t)
   
   (define (part-at index::Index)::Indexable*
-    (if (or (eq? index #\() (eq? index #\)))
+    (if (or (eq? index #\[) (eq? index #\]))
 	(this)
 	(cell-index (this) (as int index))))
   
   (define (first-index)::Index
-    #\()
+    #\[)
    
   (define (last-index)::Index
-    #\))
+    #\])
   
   (define (next-index index::Index)::Index
     (match index
-      (#\( 0)
-      (#\) #\))
+      (#\[ 0)
+      (#\] #\])
       (,@(is _ < (last-cell-index (this)))
        (+ index 1))
       (_
-       #\))))
+       #\])))
   
   (define (previous-index index::Index)::Index
     (match index
-      (0 #\()
-      (#\) (last-cell-index (this)))
-      (#\( #\()
+      (0 #\[)
+      (#\] (last-cell-index (this)))
+      (#\[ #\[)
       (_ (- index 1))))
 
   (pair a d))

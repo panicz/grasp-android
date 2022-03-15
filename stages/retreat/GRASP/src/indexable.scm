@@ -55,8 +55,8 @@ the odd index refers to the tail itself, as if
 it was an element, and the next odd index refers 
 to the tail of the list.
 
-Also, if the index is #\(, then it refers to the 
-opening parentehsis of a box, and if it is #\), 
+Also, if the index is #\[, then it refers to the 
+opening parentehsis of a box, and if it is #\], 
 it refers to its closing parenthesis.
 
 Every kind of tile manages its own cursor values,
@@ -299,7 +299,7 @@ of an index
 		 'part-at index))
 
 	((pair? object)
-	 (if (or (eq? index #\() (eq? index #\)))
+	 (if (or (eq? index #\[) (eq? index #\]))
 	     object
 	     (cell-index object (as int index))))
 	 
@@ -333,7 +333,7 @@ of an index
 	 0)
 
 	((pair? object)
-	 #\()
+	 #\[)
 	
 	(else
 	 (error "Don't know how to obtain first index from "object))))
@@ -346,7 +346,7 @@ of an index
 	 (string-length (as string object)))
 
 	((pair? object)
-	 #\))
+	 #\])
 	
 	(else
 	 (error "Don't know how to obtain last index from "object))))
@@ -361,12 +361,12 @@ of an index
 
 	((pair? object)
 	 (match index
-	   (#\( 0)
-	   (#\) #\))
+	   (#\[ 0)
+	   (#\] #\])
 	   (,@(is _ < (last-cell-index object))
 	    (+ index 1))
 	   (_
-	    #\))))
+	    #\])))
 	
 	(else
 	 (error "Don't know how to obtain next index to "index
@@ -382,9 +382,9 @@ of an index
 
 	((pair? object)
 	 (match index
-	   (0 #\()
-	   (#\) (last-cell-index object))
-	   (#\( #\()
+	   (0 #\[)
+	   (#\] (last-cell-index object))
+	   (#\[ #\[)
 	   (_ (- index 1))))
 	
 	(else
@@ -504,11 +504,11 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 (e.g.
  (let ((context (head (parse-string
                        "  (   (   a   b   )   )"
-                       ;; ^(#\()               ;
+                       ;; ^(#\[)               ;
                        ;;  ^(0 0)              ;
                        ;;   ^(1 0)             ;
                        ;;    ^(2 0)            ;
-                       ;;     ^(#\( 1)         ;
+                       ;;     ^(#\[ 1)         ;
                        ;;      ^(0 0 1)        ;
                        ;;       ^(1 0 1)       ;
                        ;;        ^(2 0 1)      ;
@@ -520,11 +520,11 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
                        ;;              ^(0 4 1);
                        ;;        (1 4 1)^      ;
                        ;;         (2 4 1)^     ;
-                       ;;          (#\) 1)^    ;
+                       ;;          (#\] 1)^    ;
                        ;;             (0 2)^   ;
                        ;;              (1 2)^  ;
                        ;;               (2 2)^ ;
-                       ;;                (#\))^;
+                       ;;                (#\])^;
                        ))))
    (and)))
 |#
