@@ -274,6 +274,7 @@ of an index
   (next-index index::Index)::Index
   (previous-index index::Index)::Index
 
+  (index< a::Index b::Index)::boolean  
   ;;(take-part-at! cursor::Cursor)::Indexable*
 )
 

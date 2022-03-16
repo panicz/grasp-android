@@ -21,7 +21,8 @@
 (define-interface Tile (Indexable)
   (draw! screen::Screen
 	 cursor::Cursor
-	 context::Cursor)::void
+	 context::Cursor
+	 anchor::Cursor)::void
 	 
   (extent screen::Screen)::Extent
   )
@@ -29,11 +30,12 @@
 (define (draw! object #!key
                (screen::Screen (current-screen))
                (cursor::Cursor '())
-               (context::Cursor '()))
+	       (context::Cursor '())
+	       (anchor::Cursor '()))
   ::void
   (cond ((instance? object Tile)
 	 (invoke (as Tile object)
-		 'draw! screen cursor context))
+		 'draw! screen cursor context anchor))
 
 	(else
 	 (error "Don't know how to draw "object))))
@@ -76,7 +78,8 @@
 
   (define (draw! screen::Screen
 		 cursor::Cursor
-		 context::Cursor)
+		 context::Cursor
+		 anchor::Cursor)
     ::void
     (let ((inner (sequence-extent (this) screen))
 	  (paren-width (screen:paren-width)))
@@ -108,7 +111,7 @@
 	      height: extent:height)))
     
   (define (part-at index::Index)::Indexable*
-    (if (or (eq? index #\[) (eq? index #\]))
+    (if (or (eq? index (first-index)) (eq? index (last-index)))
 	(this)
 	(cell-index (this) (as int index))))
   
@@ -120,20 +123,28 @@
   
   (define (next-index index::Index)::Index
     (match index
-      (#\[ 0)
-      (#\] #\])
+      (,(first-index) 0)
+      (,(last-index) (last-index))
       (,@(is _ < (last-cell-index (this)))
        (+ index 1))
       (_
-       #\])))
+       (last-index))))
   
   (define (previous-index index::Index)::Index
     (match index
-      (0 #\[)
-      (#\] (last-cell-index (this)))
-      (#\[ #\[)
+      (0 (first-index))
+      (,(last-index) (last-cell-index (this)))
+      (,(first-index) (first-index))
       (_ (- index 1))))
 
+  (define (index< a::Index b::Index)::boolean
+    (or (and (is a eqv? (first-index))
+	     (isnt b eqv? (first-index)))
+	(and (number? a) (number? b)
+	     (is a < b))
+	(and (is b eqv? (last-index))
+	     (isnt a eqv? (last-index)))))
+  
   (pair a d))
 
 (define-cache (heads tail)
@@ -347,7 +358,8 @@
   
   (define (draw! screen::Screen
 		 cursor::Cursor
-		 context::Cursor)
+		 context::Cursor
+		 anchor::Cursor)
     ::void
     (screen:draw-atom! name)
     (when (and (pair? cursor)
@@ -374,6 +386,10 @@
   (define (previous-index index::Index)::Index
     (max 0 (- index 1)))
 
+  (define (index< a::Index b::Index)::boolean
+    (and (number? a) (number? b)
+	 (is a < b)))
+  
   (gnu.mapping.SimpleSymbol
    ((source:toString):intern))
   (set! name source))
@@ -423,7 +439,8 @@ def") ===> "def")
                         (screen :: Screen
 				(current-screen))
                         (cursor::Cursor '())
-                        (context::Cursor '()))
+                        (context::Cursor '())
+			(anchor::Cursor))
   ::void
   (let ((max-width 0)
         (max-line-height (screen:min-line-height))
@@ -480,7 +497,8 @@ def") ===> "def")
                      screen: screen
                      cursor: (subcursor cursor
 					context)
-                     context: context)))))
+                     context: context
+		     anchor: anchor)))))
 
     (define (draw-dotted-tail! pair::cons)::void
       (cond ((should-the-bar-be-horizontal? pair)
@@ -500,7 +518,8 @@ def") ===> "def")
 			    cursor: (subcursor
 				     cursor
 				     context)
-			    context: context))))
+			    context: context
+			    anchor: anchor))))
              (advance! (tail-extent pair screen))
              (skip-spaces! (post-tail-space pair)))
             (else
@@ -522,7 +541,8 @@ def") ===> "def")
 			    cursor: (subcursor
 				     cursor
 				     context)
-			    context: context))))
+			    context: context
+			    anchor: anchor))))
              (advance! (tail-extent pair screen))
              (skip-spaces! (post-tail-space pair))
              )))

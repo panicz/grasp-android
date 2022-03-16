@@ -3,19 +3,27 @@
 (import (indexable))
 (import (screen))
 (import (extent))
+(import (match))
+(import (infix))
 
 (define-type (Over back: Tile front: Tile)
   implementing Tile
   with
-  ((draw! screen::Screen cursor::Cursor context::Cursor)::void
+  ((draw! screen::Screen
+	  cursor::Cursor
+	  context::Cursor
+	  anchor::Cursor)
+   ::void
    (let* ((back-context (recons 'back context))
           (front-context (recons 'front context)))
      (back:draw! screen
                  (subcursor cursor back-context)
-                 back-context)
+                 back-context
+		 anchor)
      (front:draw! screen
                   (subcursor cursor front-context)
-                  front-context)))
+                  front-context
+		  anchor)))
 
   ((extent screen::Screen)::Extent
    (let ((front-extent (front:extent screen))
@@ -27,8 +35,8 @@
 
   ((part-at index::Index)::Tile
    (match index
-     ('back back)
-     ('front front)))
+     (,(first-index) back)
+     (,(last-index) front)))
 
   ((first-index)::Index
    'back)
@@ -37,24 +45,36 @@
    'front)
   
   ((next-index index::Index)::Index
-   'front)
+   (last-index))
    
   ((previous-index index::Index)::Index
-   'back)
+   (first-index))
+
+  ((index< a::Index b::Index)::boolean
+   (and (is a eq? (first-index))
+	(isnt b eq? (first-index))))
   )
 
 (define-type (Below top: Tile bottom: Tile)
   implementing Tile
   with  
-  ((draw! screen::Screen cursor::Cursor context::Cursor)::void
+  ((draw! screen::Screen
+	  cursor::Cursor
+	  context::Cursor
+	  anchor::Cursor)
+   ::void
    (let ((top-context (recons 'top context))
          (bottom-context (recons 'bottom context))
 	 (top-extent (top:extent screen)))
-     (top:draw! screen (subcursor cursor top-context)
-                top-context)
+     (top:draw! screen
+		(subcursor cursor top-context)
+                top-context
+		anchor)
      (with-translation screen (0 top-extent:height)
-       (bottom:draw! screen (subcursor cursor bottom-context)
-                     bottom-context))))
+       (bottom:draw! screen
+		     (subcursor cursor bottom-context)
+                     bottom-context
+		     anchor))))
 
   ((extent screen::Screen)::Extent
    (let ((top-extent (top:extent screen))
@@ -66,8 +86,8 @@
 
   ((part-at index::Index)::Tile
    (match index
-     ('top top)
-     ('bottom bottom)))
+     (,(first-index) top)
+     (,(last-index) bottom)))
 
   ((first-index)::Index
    'top)
@@ -76,25 +96,38 @@
    'bottom)
   
   ((next-index index::Index)::Index
-   'bottom)
+   (last-index))
    
   ((previous-index index::Index)::Index
-   'top)  
+   (first-index))
+
+  ((index< a::Index b::Index)::boolean
+   (and (is a eq? (first-index))
+	(isnt b eq? (first-index))))
+  
   )
 
 
 (define-type (Beside left: Tile right: Tile)
   implementing Tile
   with
-  ((draw! screen::Screen cursor::Cursor context::Cursor)::void
+  ((draw! screen::Screen
+	  cursor::Cursor
+	  context::Cursor
+	  anchor::Cursor)
+   ::void
    (let ((left-context (recons 'left context))
          (right-context (recons 'right context))
 	 (left-extent (left:extent screen)))
-     (left:draw! screen (subcursor cursor left-context)
-                 left-context)
+     (left:draw! screen
+		 (subcursor cursor left-context)
+                 left-context
+		 anchor)
      (with-translation screen (left-extent:width 0)
-       (right:draw! screen (subcursor cursor right-context)
-                    right-context))))
+       (right:draw! screen
+		    (subcursor cursor right-context)
+                    right-context
+		    anchor))))
 
   ((extent screen::Screen)::Extent
    (let ((left-extent (left:extent screen))
@@ -106,8 +139,8 @@
   
   ((part-at index::Index)::Tile
    (match index
-     ('left left)
-     ('right right)))
+     (,(first-index) left)
+     (,(last-index) right)))
 
   ((first-index)::Index
    'left)
@@ -116,9 +149,13 @@
    'right)
   
   ((next-index index::Index)::Index
-   'right)
+   (last-index))
    
   ((previous-index index::Index)::Index
-   'left)
-  
+   (first-index))
+
+  ((index< a::Index b::Index)::boolean
+   (and (is a eq? (first-index))
+	(isnt b eq? (first-index))))
+    
   )
