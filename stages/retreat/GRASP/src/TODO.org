@@ -1,3 +1,80 @@
+* 15.03.2022
+
+Podsumujmy wczorajsze ustalenia:
+
+( define ( factorial n ) ...)
+           ^
+           ^
+(expand-selection-right '(0 1 3 1) '(0 1 3 1) #:on document)
+===> (0 1 3 1) (1 1 3 1)
+
+( define ( factorial n ) ...)
+           ^^
+          
+(expand-selection-right '(0 1 3 1) '(1 1 3 1) #:on document)
+===> (0 1 3 1) (2 1 3 1)
+
+( define ( factorial n ) ...)
+           ^ ^
+
+(expand-selection-right '(0 1 3 1) '(2 1 3 1) #:on document)
+===> (0 1 3 1) (3 1 3 1)
+
+( define ( factorial n ) ...)
+           ^  ^
+...
+
+(expand-selection-right '(0 1 3 1) '(9 1 3 1) #:on document)
+===> (1 3 1) (2 3 1)
+
+( define ( factorial n ) ...)
+           ^        ^
+
+(expand-selection-right '(1 3 1) '(2 3 1) #:on document)
+===> (1 3 1) (3 3 1)
+
+( define ( factorial n ) ...)
+           \___ ___/#
+	       V    V
+
+(expand-selection-right '(1 3 1) '(2 3 1) #:on document)
+===> (1 3 1) (3 3 1)
+
+( define ( factorial n ) ...)
+           \___ ___/ #
+	       V     V
+
+(expand-selection-right '(1 3 1) '(3 3 1) #:on document)
+===> (1 3 1) (4 3 1)
+
+( define ( factorial n ) ...)
+           \___ ___/  #
+	       V      V
+
+(expand-selection-right '(0 3 1) '(4 3 1) #:on document)
+===> ([ 3 1) (] 3 1)
+
+( define ( factorial n ) ... )
+         ^             ^
+
+(expand-selection-right '([ 3 1) '(] 3 1) #:on document)
+===> (3 1) (4 1)
+
+( define ( factorial n ) ... )
+         \______ ______/#
+                V       V
+
+Czyli mowiac w skrocie: zakotwiczony kursor rozrasta sie
+tylko na tyle, na ile pozwala na to wspolny trzon kursora.
+
+Jedyne odstepstwo od tej reguly to przypadek, gdy czubek
+kursora staje sie ] - wowczas zakotwiczeniem musi byc [.
+
+(Trzeba sie zastanowic jak to powinno dzialac od strony
+interfejsu Indexable, i czy w nim nie trzeba bedzie czegos
+zmieniac)
+
+
 * 14.03.2022
 
 teraz zaczynamy prace nad selekcja.
