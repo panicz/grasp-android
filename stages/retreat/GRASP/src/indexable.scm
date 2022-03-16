@@ -306,20 +306,19 @@ of an index
 		" from "object))))
 
 (define (cursor-ref tile cursor::Cursor)
-  (cond ((null? cursor)
-         tile)
-        ((pair? cursor)
-         (let ((parent (cursor-ref tile (tail
-					 cursor))))
+  (match cursor
+    ('()
+     tile)
+    (`(,head . ,tail)
+     (let ((parent (cursor-ref tile tail)))
            (if parent
 	       (parameterize ((final-part?
-			       (null? (tail
-				       cursor))))
-		 (part-at (head cursor) parent))
+			       (null? tail)))
+		 (part-at head parent))
                parent)))
-        (else
-         (error "Unable to refer to cursor "cursor
-		" in "tile))))
+    (_
+     (error "Unable to refer to cursor "cursor
+	    " in "tile))))
 
 (define (first-index object)
   (cond ((Indexable? object)
