@@ -398,23 +398,26 @@
 			    screen::Screen)
   ::Extent
   (let ((inner (string-extent spaces)))
-    (Extent width: (+ inner:width
-		      (* 2 (screen:paren-width)))
-	    height: inner:height)))
+    (Extent width: inner:width
+	    height: (max (screen:min-line-height)
+			 inner:height))))
 
 (define (head-extent pair::cons screen::Screen)
   ::Extent
   (if (null? (head pair))
-      (empty-space-extent (null-head-space pair)
-			  screen)
+      (let ((inner (empty-space-extent (null-head-space pair)
+				       screen)))
+	(Extent width: (+ inner:width (* 2 (screen:paren-width)))
+		height: inner:height))
       (extent (head pair) screen)))
-
 
 (define (tail-extent pair::cons screen::Screen)
   ::Extent
   (if (null? (tail pair))
-      (empty-space-extent (null-tail-space pair)
-			  screen)
+      (let ((inner (empty-space-extent (null-head-space pair)
+				       screen)))
+	(Extent width: (+ inner:width (* 2 (screen:paren-width)))
+		height: inner:height))
       (extent (tail pair) screen)))
 
 (define (skip-first-line s::string)::string
@@ -479,8 +482,7 @@ def") ===> "def")
       (set! index (+ index 1)))
 
     (define (draw-empty-list! spaces::string)::void
-      (let ((inner (empty-space-extent spaces
-				       screen))
+      (let ((inner (empty-space-extent spaces screen))
 	    (paren-width (screen:paren-width)))
 	(screen:open-paren! inner:height 0 0)
 	(screen:close-paren! inner:height
@@ -495,8 +497,7 @@ def") ===> "def")
 				 pair))
               (draw! (head pair)
                      screen: screen
-                     cursor: (subcursor cursor
-					context)
+                     cursor: cursor
                      context: context
 		     anchor: anchor)))))
 
@@ -515,9 +516,7 @@ def") ===> "def")
 		       pair))
 		     (draw! (tail pair)
 			    screen: screen
-			    cursor: (subcursor
-				     cursor
-				     context)
+			    cursor: cursor
 			    context: context
 			    anchor: anchor))))
              (advance! (tail-extent pair screen))
@@ -538,9 +537,7 @@ def") ===> "def")
 		      (null-tail-space pair))
 		     (draw! (tail pair)
 			    screen: screen
-			    cursor: (subcursor
-				     cursor
-				     context)
+			    cursor: cursor
 			    context: context
 			    anchor: anchor))))
              (advance! (tail-extent pair screen))
