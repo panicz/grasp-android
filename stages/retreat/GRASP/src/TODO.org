@@ -1,3 +1,68 @@
+* 22.03.2022
+
+Poniewaz selekcja nie idzie jeszcze jakos bardzo,
+to postanawiamy na razie zastanowic sie nad edycja.
+Pomysl jest taki, zeby obiekt Indexable
+przyjmowal zdarzenia KeyUp oraz KeyDown,
+i zwracal co?
+
+Na pewno trzeba tez bedzie zrobic tak, zeby symbole
+byly mutowalne.
+
+Dodatkowo trzeba wziac pod rozwage dodawanie do pustej
+listy.
+
+Czyli zasadniczo rzecz wyglada tak, ze chcemy miec:
+1. spacje jako osobny rodzaj obiektu (ktory moze otrzymywac
+wcisniecia klawiszy)
+2. symbole mogace otrzymywac wcisniecia klawiszy
+3. listy mogace otrzymywac wcisniecia klawiszy
+
+Ogolniej, to by musialo dzialac tak, ze najpierw pobieramy
+rodzica albo dziadka i sobie z nim gadamy, a jak oni nam
+powiedza, ze mozemy gadac z lisciem, to mowimy do liscia
+
+* 17.03.2022
+
+Wydaje sie, ze teraz glownym problemem, z ktorym musimy
+sie zmagac, jest ustalenie, czego tak naprawde chcemy.
+
+A chcemy nastepujacych rzeczy:
+1. wyrozniania selekcji podczas rysowania
+2. powiekszania/zmniejszania selekcji w lewo i w prawo,
+   z zachowaniem "jednorodnosci" zakotwiczenia
+
+Jak ma dzialac to rysowanie? Wydaje sie, ze mozliwosci
+sa dwie:
+1. albo dla kazdego rysowanego elementu odpytujemy,
+czy jego kontekst znajduje sie pomiedzy kursorem
+i zakotwiczeniem, i jesli tak, to rysujemy go
+w szczegolny sposob
+2. albo w trakcie rysowania przelaczamy sie
+pomiedzy "trybem normalnym" a "trybem selekcji"
+
+Roznica jest taka, ze w tym ostatnim przypadku bedziemy
+dodawac nowe funkcje do interfejsu Screen
+(set-selection-mode!, set-normal-mode!). W tym pierwszym
+przypadku mamy juz wszystko, co potrzebne.
+
+set-selection-mode! wydaje sie o tyle spoko, ze jest
+naturalnie dostosowany do biblioteki "ncurses", a i wydaje sie
+przy tym, ze rowniez Android Graphics API nie powinien
+robic problemow z takim sposobem uzywania (bo i tak
+trzeba sie piescic z ta farba)
+
+* 16.03.2022
+
+Podczas renderowania musimy miec mozliwosc sprawdzania,
+czy biezacy kontekst znajduje sie pomiedzy kursorem
+a zakotwiczeniem; jezeli tak jest, to wlaczamy tryb
+selekcji.
+
+(a docelowo chcielibysmy chyba, zeby anchor i cursor
+byly czescia obiektu Screen)
+
+
 * 15.03.2022
 
 Podsumujmy wczorajsze ustalenia:
