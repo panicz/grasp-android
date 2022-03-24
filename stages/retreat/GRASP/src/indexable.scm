@@ -488,7 +488,40 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 	cursor))
     
   (climb-back cursor
-	      (cursor-ref expression cursor)))
+	      (cursor-ref expression cursor)))  
+
+
+;; We stipulate that, for any N >= 1, () < (x1 ... xN)
+;; (as a consequence, whenever one cursor is a suffix
+;; of another, it is considered to be "earlier" than
+;; the longer one)
+
+(define (cursor< a::Cursor b::Cursor document::Indexable)::boolean
+
+  (define (k< k::int a*::Cursor b*::Cursor parent::Indexable)::boolean
+    (if (is k < 0)
+	#f
+	(let* ((a/k (a* k))
+	       (b/k (b* k)))
+	  (if (eqv? a/k b/k)
+	      (k< (- k 1) a* b* (parent:part-at a/k))
+	      (parent:index< a/k b/k)))))
+  
+  (let* ((length/a (length a))
+	 (length/b (length b)))
+    (cond ((is length/a < length/b)
+	   (let ((stem/b (drop (- length/b length/a) b)))
+	     (k< (- length/a 1) a stem/b document)))
+	     
+	  ((is length/a = length/b)
+	   (k< (- length/a 1) a b document))
+    
+	  ((is length/a > length/b)
+	   (not (cursor< b a document))))))
+
+;; Note: because the code in this module operates on abstract
+;; interfaces that have no instances yet, see some test file
+;; for examples
 
 ;;   
 ;; (   (   a   b   )   )

@@ -57,11 +57,20 @@
 		'-)
 	(equal? (cursor-ref document '(3 3 5 7 5 1))
 		'n)
+	(cursor< '(1 1) '(1 3 1) document)
+	(not (cursor< '(1 3 1) '(1 1) document))
+	(cursor< '(1 3 1) '(3 3 1) document)
+	(not (cursor< '(3 3 1) '(1 3 1) document))
+	(cursor< '(3 3 1) '(1 5 1) document)
+	(not (cursor< '(1 5 1) '(3 3 1) document))
+	
+	
 	#|
 	(equal? (cursor-ref document '(5 3 5 7 5 1))
 		1)
 |#
 	)))
+
 
 
 ;; this is what we're aiming for:
@@ -145,6 +154,18 @@ tail)" parse))
 ((current-screen):clear!)
 
 (draw! (head vertical-dotted))
+
+(display ((current-screen):toString))
+
+(define empties (call-with-input-string "\
+((() . ())
+    (   )
+.
+     ( ))" parse))
+
+((current-screen):clear!)
+
+(draw! (head empties))
 
 (display ((current-screen):toString))
 
