@@ -268,15 +268,15 @@
 
 (e.g.
  (let* ((document `((,1 . ,5)))
-	(taken (take-cell-at! '(1 1) document)))
-   (and (equal? document '((5)))
-	(equal? taken '(1)))))
-
-(e.g.
- (let* ((document `((,1 . ,5)))
 	(taken (take-cell-at! '(3 1) document)))
    (and (equal? document '((1 5)))
 	(head/tail-separator? taken))))
+
+(e.g.
+ (let* ((document `((,1 . ,5)))
+	(taken (take-cell-at! '(1 1) document)))
+   (and (equal? document '((5)))
+	(equal? taken '(1)))))
 
 (e.g.
  (let* ((document `((,1 . ,5)))
@@ -354,21 +354,21 @@
 ;; z owijek
 
 (define-object (Symbol source::string)::Tile
-  (define name :: string)
+  (define base :: string)
   
   (define (draw! screen::Screen
 		 cursor::Cursor
 		 context::Cursor
 		 anchor::Cursor)
     ::void
-    (screen:draw-atom! name)
+    (screen:draw-atom! base)
     (when (and (pair? cursor)
 	       (equal? (tail cursor) context))
       (let ((index (head cursor)))
 	(screen:remember-offset! index 2))))
 
   (define (extent screen::Screen)::Extent
-    (Extent width: (screen:atom-width name)
+    (Extent width: (screen:atom-width base)
 	    height: (screen:min-line-height)))
   
   (define (part-at index::Index)::Indexable*
@@ -378,7 +378,7 @@
     0)
   
   (define (last-index)::Index
-    (string-length name))
+    (string-length base))
   
   (define (next-index index::Index)::Index
     (min (last-index) (+ index 1)))
@@ -390,9 +390,8 @@
     (and (number? a) (number? b)
 	 (is a < b)))
   
-  (gnu.mapping.SimpleSymbol
-   ((source:toString):intern))
-  (set! name source))
+  (gnu.mapping.SimpleSymbol ((source:toString):intern))
+  (set! base (string-copy source)))
 
 (define (empty-space-extent spaces::string
 			    screen::Screen)
