@@ -1,3 +1,19 @@
+* 24.03.2022
+
+Plan mamy teraz taki, zeby zajmowac sie edycja jeszcze przed
+selekcja. Zadne z tych zagadnien nie jest jakies super-latwe,
+ale do edycji juz co nieco mamy napisane (tzn. funkcje
+take-cell-at! i put-into-cell-at!)
+
+Na razie moze zrobmy sobie taka mala probe: jezeli kursor
+wskazuje na symbol i wcisniemy "drukowalny" klawisz, to
+wstawimy do tego symbola nowa litere.
+
+Zagadnienie to zmusi nas do zastanowienia sie nad kwestia,
+w jaki sposob reprezentowac symbole w naszym systemie
+(i czy bedzie to wymagalo edycji reprezentacji symbolu w
+Kawie)
+
 * 22.03.2022
 
 Poniewaz selekcja nie idzie jeszcze jakos bardzo,
