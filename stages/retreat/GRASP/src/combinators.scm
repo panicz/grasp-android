@@ -17,11 +17,11 @@
    (let* ((back-context (recons 'back context))
           (front-context (recons 'front context)))
      (back:draw! screen
-                 (subcursor cursor back-context)
+                 cursor
                  back-context
 		 anchor)
      (front:draw! screen
-                  (subcursor cursor front-context)
+		  cursor
                   front-context
 		  anchor)))
 
@@ -67,12 +67,12 @@
          (bottom-context (recons 'bottom context))
 	 (top-extent (top:extent screen)))
      (top:draw! screen
-		(subcursor cursor top-context)
+		cursor
                 top-context
 		anchor)
      (with-translation screen (0 top-extent:height)
        (bottom:draw! screen
-		     (subcursor cursor bottom-context)
+		     cursor
                      bottom-context
 		     anchor))))
 
@@ -120,12 +120,12 @@
          (right-context (recons 'right context))
 	 (left-extent (left:extent screen)))
      (left:draw! screen
-		 (subcursor cursor left-context)
+		 cursor
                  left-context
 		 anchor)
      (with-translation screen (left-extent:width 0)
        (right:draw! screen
-		    (subcursor cursor right-context)
+		    cursor
                     right-context
 		    anchor))))
 
