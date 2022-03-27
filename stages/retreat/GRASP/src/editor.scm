@@ -25,6 +25,11 @@
   (if (<= n 0)
       1
       (* n (! (- n 1)))))
+
+(define (map f l)
+  (match l
+    (() ())
+    ((h . t) (cons (f h) (map f t)))))
 ")
 
 (define document ::list (parse-string input))
@@ -116,10 +121,11 @@
 	  (match type	
 	    (,KeyType:ArrowLeft
 	     (try-catch
-	      (set! cursor (cursor-climb-back
-			    (cursor-back cursor
-					 document)
-			    document))
+	      (begin
+		(set! cursor (cursor-climb-back
+			      (cursor-back cursor
+					   document)
+			      document)))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
@@ -130,7 +136,12 @@
 		(set! cursor (cursor-climb-front
 			      (cursor-next cursor
 					   document)
-			      document)))
+			      document))
+		(cond ((key:shift-down?)
+		       "powiekszamy selekcje")
+		      
+		      ((key:ctrl-down?)
+		       "przeskakujemy atomy")))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
@@ -165,12 +176,24 @@
 	     (values))
 
 	    (,KeyType:Character
-	     (let ((c::Character(key:getCharacter)))
-	       (when (eq? (#\space:charValue)
-			  (c:charValue))
-		 (invoke (current-message-handler)
-			 'clear-messages!))
-	       (continue)))
+	     
+	     (let ((c::Character (key:getCharacter)))
+	       ;; no dobra, to tutaj bedziemy mieli kilka
+	       ;; zagwozdek. zasadniczo to chyba bysmy
+	       ;; probowali wysylac wcisniety klawisz
+	       ;; do naszego obiektu. Ale w jaki sposob
+	       ;; mozemy to zrobic?
+	       ;; Wydaje sie, ze sensowny bylby taki interfejs:
+	       ;; (send-character! jakis-znak kursor poziom)
+	       (if (and (key:ctrl-down?)
+			(eq? (#\space:charValue) (c:charValue)))
+		   (invoke (current-message-handler)
+			   'clear-messages!)
+		   (set! cursor
+			 (send-char-to! document (c:charValue)
+					cursor))
+		   )
+		(continue)))
 
 	    (,KeyType:MouseEvent
 	     (let* ((action ::MouseAction
@@ -220,6 +243,7 @@
 	     (continue))
 	    
 	    (_
+	     (WARN "key: "key)
 	     (continue))
 	    )
 	  )))
