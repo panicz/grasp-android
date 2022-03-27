@@ -1,3 +1,30 @@
+* 26.03.2022
+
+Wyobrazmy sobie na razie, ze wzbogacamy interfejs Indexable
+o metode
+
+(send-char! c::char cursor::Cursor level::int)::Cursor
+
+i on moglby byc zaimplementowany tak:
+
+- w klasie cons i w kombinatorach: jezeli (is level > 0)
+to do (part-at (cursor level)) wysylamy wiadomosc
+(send-char! c cursor (- level 1))
+
+- w klasie Symbol: spodziewamy sie, ze level bedzie
+albo 0, albo 1. Zakladajac, ze jest 1, dopisujemy
+znak na pozycji (head cursor). Zwracamy kursor o glowce
+zwiekszonej o 1
+
+No, chyba ze ten klawisz to #\backspace albo #\delete.
+- wtedy to trzeba 
+
+
+- w klasie Space (ktora oczywiscie powstanie) robimy tak,
+ze tworzymy nowy symbol, albo (jezeli klawisz to #\(
+albo #\[ albo #\{) liste
+
+
 * 24.03.2022
 
 Plan mamy teraz taki, zeby zajmowac sie edycja jeszcze przed
