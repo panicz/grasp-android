@@ -144,8 +144,16 @@
 	     (is a < b))
 	(and (is b eqv? (last-index))
 	     (isnt a eqv? (last-index)))))
+
+  (define (send-char! c::char cursor::Cursor level::int)::Cursor
+    (if (is level < 0)
+	cursor
+	(let* ((index (cursor level))
+	       (part (part-at index)))
+	  (send-char-to! part c cursor (- level 1)))))
   
   (pair a d))
+
 
 (define-cache (heads tail)
   (cache (head)
@@ -389,6 +397,20 @@
   (define (index< a::Index b::Index)::boolean
     (and (number? a) (number? b)
 	 (is a < b)))
+
+  (define (send-char! c::char cursor::Cursor level::int)::Cursor
+    (cond ((= level 0)
+	   (let ((index (head cursor)))
+	     (WARN "dopisujemy "c" na pozycji "index)
+	     (recons (+ index 1) (tail cursor))))
+
+	  #;((= level 1)
+	   ...)
+
+	  (else
+	   (WARN "The symbol "name" cannot support char "
+		 c" at level "level)
+	   cursor)))
   
   (gnu.mapping.SimpleSymbol ((source:toString):intern))
   (set! base (string-copy source)))

@@ -274,9 +274,20 @@ of an index
   (next-index index::Index)::Index
   (previous-index index::Index)::Index
 
-  (index< a::Index b::Index)::boolean  
+  (index< a::Index b::Index)::boolean
+
+  (send-char! c::char cursor::Cursor level::int)::Cursor
   ;;(take-part-at! cursor::Cursor)::Indexable*
 )
+
+(define (send-char-to! object c::char cursor::Cursor
+		       #!optional (level::int (- (length cursor) 1)))
+  ::Cursor
+  (cond ((instance? object Indexable)
+	 (invoke (as Indexable object) 'send-char! c cursor level))
+	(else
+	 (WARN "Unable to send char "c" to "object)
+	 cursor)))
 
 (define (has-children? object)
   (cond ((Indexable? object)
