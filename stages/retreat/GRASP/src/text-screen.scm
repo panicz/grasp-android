@@ -115,7 +115,7 @@
          (put! #\| (+ i top) (+ left 1)))
     (put! #\/ (+ top (- height 1)) (+ left 1)))
 
-  (define (draw-string! s::string left::real top::real)::void
+  (define (draw-string! s::CharSequence left::real top::real)::void
     (put! #\" top left) 
     (let ((row top)
           (col (+ left 1))
@@ -132,14 +132,14 @@
       (Extent width: (+ width 2)
               height: (- (+ row 1) top))))
 
-  (define (draw-text! text::string left::real top::real)::void
+  (define (draw-text! text::CharSequence left::real top::real)::void
     (for i from 0 below (string-length text)
-         (put! (string-ref text i) top (+ left i))))
+         (put! (text i) top (+ left i))))
 
-  (define (draw-atom! text::string)::void
+  (define (draw-atom! text::CharSequence)::void
     (draw-text! text 0 1))
 
-  (define (atom-width text::string)::real
+  (define (atom-width text::CharSequence)::real
     (string-length text))
   
   )

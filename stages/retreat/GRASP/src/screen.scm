@@ -1,6 +1,8 @@
 (import (define-interface))
 (import (define-object))
 
+(define-alias CharSequence java.lang.CharSequence)
+
 (define-interface Screen ()
   (paren-width)::real
   (min-line-height)::real
@@ -10,11 +12,11 @@
   
   (clear!)::void
   (translate! x::real y::real)::void
-  (draw-string! s::string l::real t::real)::void
-  (draw-text! s::string left::real top::real)::void
-  (draw-atom! text::string)::void
+  (draw-string! s::CharSequence l::real t::real)::void
+  (draw-text! s::CharSequence left::real top::real)::void
+  (draw-atom! text::CharSequence)::void
   
-  (atom-width text::string)::real
+  (atom-width text::CharSequence)::real
 
   (draw-horizontal-bar! width::real)::void
   (draw-vertical-bar! height::real)::void
@@ -44,22 +46,22 @@
   (define (translate! x::real y::real)::void
     (values))
   
-  (define (draw-string! s::string
+  (define (draw-string! s::CharSequence
 			left::real
 			top::real)
     ::void
     (values))
   
-  (define (draw-text! s::string
+  (define (draw-text! s::CharSequence
 		      left::real
 		      top::real)
     ::real
-    (string-length s))
+    (length s))
   
-  (define (draw-atom! text::string)::void
+  (define (draw-atom! text::CharSequence)::void
     (values))
 
-  (define (atom-width text::string)::real
+  (define (atom-width text::CharSequence)::real
     0)
   
   (define (draw-horizontal-bar! width::real)::void
