@@ -1,3 +1,37 @@
+* 28.03.2022
+
+Plan na reprezentacje symboli: kazdy symbol (albo nawet
+szerzej: atom) bedzie mial swoj obiekt StringBuilder.
+Otrzymanie klawisza bedzie powodowalo ustawienie
+aktualnego stringa jako name.
+
+Mozna ewentualnie rozwazyc wyrugowanie pola "base"
+z obiektu Symbol, co pociagneloby za soba koniecznosc
+zmian w interfejsie Screen
+
+Mozemy tak zrobic, choc to nie jest najwazniejsze.
+Na razie najistotniejsze jest dodanie pelnych mozliwosci
+edycyjnych do naszego edytora.
+
+* 27.03.2022
+
+Trzeba sie zdecydowac odnosnie tego, w jaki sposob bedziemy
+reprezentowac symbole (oraz inne atomy?)
+
+Na razie mamy taki problem, ze rzeczy, ktore RnRS uznaje
+za liczby, sa u nas wyrazane zawsze jako symbole.
+
+Zasadniczo chyba powinnismy sobie reprezentowac
+atomy w taki sposob, ze:
+- jezeli mamy symbol, ale zmienimy go w liczbe,
+to zastepujemy go liczba
+- jezeli mamy liczbe, ale zmienimy ja w symbol,
+to zastepujemy go symbolem
+
+Na razie to nie jest bardzo istotne, bo na razie
+zakladamy, ze bedziemy operowac tylko na symbolach,
+ale dobrze miec opcje zmiany.
+
 * 26.03.2022
 
 Wyobrazmy sobie na razie, ze wzbogacamy interfejs Indexable
@@ -19,10 +53,13 @@ zwiekszonej o 1
 No, chyba ze ten klawisz to #\backspace albo #\delete.
 - wtedy to trzeba 
 
-
 - w klasie Space (ktora oczywiscie powstanie) robimy tak,
 ze tworzymy nowy symbol, albo (jezeli klawisz to #\(
 albo #\[ albo #\{) liste
+
+No i chyba trzeba bedzie jeszcze zrobic tak, zeby nawigacja
+odbywala sie za posrednictwem send-char!, ale to moze
+pozniej
 
 
 * 24.03.2022
