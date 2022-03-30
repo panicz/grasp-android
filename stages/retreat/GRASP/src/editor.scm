@@ -25,11 +25,6 @@
   (if (<= n 0)
       1
       (* n (! (- n 1)))))
-
-(define (map f l)
-  (match l
-    (() ())
-    ((h . t) (cons (f h) (map f t)))))
 ")
 
 (define document ::list (parse-string input))
@@ -87,6 +82,7 @@
       (let ((output-extent ::Extent
 			   (extent (head document)))
 	    (top-cursor (recons 1 '())))
+	((current-screen):clear!)
 	(draw! (head document)
 	       cursor: cursor
 	       context: top-cursor)
@@ -195,6 +191,24 @@
 		   )
 		(continue)))
 
+	    (,KeyType:Delete
+	     (set! cursor
+		   (send-char-to! document #\delete
+				  cursor))
+	     (continue))
+
+	    (,KeyType:Backspace
+	     (set! cursor
+		   (send-char-to! document #\backspace
+				  cursor))
+	     (continue))
+
+	    (,KeyType:Enter
+	     (set! cursor
+		   (send-char-to! document #\newline
+				  cursor))
+	     (continue))
+	    
 	    (,KeyType:MouseEvent
 	     (let* ((action ::MouseAction
 			    (as MouseAction key))
