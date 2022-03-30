@@ -361,6 +361,7 @@
 ;; bezposrednio w edytorze, a zamiast tego korzystac sobie
 ;; z owijek
 
+
 (define-object (Symbol source::string)::Tile
   (define builder :: java.lang.StringBuilder)
   
@@ -401,12 +402,24 @@
   (define (send-char! c::char cursor::Cursor level::int)::Cursor
     (cond ((= level 0)
 	   (let ((index ::int (head cursor)))
-	     (builder:insert index c)
-	     (set! name ((builder:toString):intern))
-	     (recons (+ index 1) (tail cursor))))
+	     (match c
+	       (#\backspace
+		(cond ((is index > 0)
+		       (builder:deleteCharAt (- index 1))
+		       (set! name ((builder:toString):intern))
+		       (recons (- index 1) (tail cursor)))
+		      (else
+		       cursor)))
+	       (#\delete
+		(when (is index < (string-length name))
+		  (builder:deleteCharAt index)
+		  (set! name ((builder:toString):intern)))
+		cursor)
 
-	  #;((= level 1)
-	   ...)
+	       (_
+		(builder:insert index c)
+		(set! name ((builder:toString):intern))
+		(recons (+ index 1) (tail cursor))))))
 
 	  (else
 	   (WARN "The symbol "name" cannot support char "
