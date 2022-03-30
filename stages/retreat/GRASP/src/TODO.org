@@ -1,3 +1,18 @@
+* 29.03.2022
+
+Pole "base" wyrugowane :D
+Dalszy plan dzialania:
+- klawisz #\backspace
+- klawisz #\delete
+- w tym: kasowanie calego symbolu (w kontekscie
+zawierajacego symbol rodzica)
+- tworzenie nowych symboli kiedy jestesmy
+na spacji (ale to pewnie bedzie wymagalo stworzenia
+Indexable Space? A moze nie? Jezeli spojrzymy na problem
+z perspektywy rodzica)
+
+
+
 * 28.03.2022
 
 Plan na reprezentacje symboli: kazdy symbol (albo nawet
