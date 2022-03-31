@@ -111,7 +111,8 @@
 	      height: extent:height)))
     
   (define (part-at index::Index)::Indexable*
-    (if (or (eq? index (first-index)) (eq? index (last-index)))
+    (if (or (eq? index (first-index))
+	    (eq? index (last-index)))
 	(this)
 	(cell-index (this) (as int index))))
   
@@ -145,13 +146,46 @@
 	(and (is b eqv? (last-index))
 	     (isnt a eqv? (last-index)))))
 
-  (define (send-char! c::char cursor::Cursor level::int)::Cursor
+  (define (send-char! c::char cursor::Cursor level::int)
+    ::Cursor
+    (define (deleting-last-char? symbol)
+      (is (string-length
+	   (symbol:toString)) = 1)
+      (or (and (eq? c #\backspace)
+	       (eqv? (head cursor) 1))
+	  (and (eq? c #\delete)
+	       (eqv? (head cursor) 0))))
+    
     (if (is level < 0)
 	cursor
 	(let* ((index (cursor level))
+	       (cell-index (quotient index 2))
 	       (part (part-at index)))
-	  (send-char-to! part c cursor (- level 1)))))
-  
+	  (cond #|
+		 ((and-let* (((is level = 2))
+			    (subindex (cursor 1))
+			    (subpart (part-at subindex 
+					      part))
+			    (tip (part-at (head cursor)
+					  subpart))
+			    ((symbol? tip))
+			    ((deleting-last-char? tip)))
+		   ...))
+|#
+		 ((and (is level = 1)
+		      (is cell-index > 0)
+		      (symbol? part)
+		      (deleting-last-char? part))
+		 (let ((previous-cell (drop (- cell-index 1)
+					    (this))))
+		   (set! (tail previous-cell)
+		     (tail (tail previous-cell)))
+		   (recons (- index 1)
+			   (tail (tail cursor)))))
+		(else
+		 (send-char-to! part c cursor
+				(- level 1)))))))
+
   (pair a d))
 
 
@@ -399,14 +433,16 @@
     (and (number? a) (number? b)
 	 (is a < b)))
 
-  (define (send-char! c::char cursor::Cursor level::int)::Cursor
+  (define (send-char! c::char cursor::Cursor level::int)
+    ::Cursor
     (cond ((= level 0)
 	   (let ((index ::int (head cursor)))
 	     (match c
 	       (#\backspace
 		(cond ((is index > 0)
 		       (builder:deleteCharAt (- index 1))
-		       (set! name ((builder:toString):intern))
+		       (set! name
+			 ((builder:toString):intern))
 		       (recons (- index 1) (tail cursor)))
 		      (else
 		       cursor)))
@@ -440,18 +476,22 @@
 (define (head-extent pair::cons screen::Screen)
   ::Extent
   (if (null? (head pair))
-      (let ((inner (empty-space-extent (null-head-space pair)
-				       screen)))
-	(Extent width: (+ inner:width (* 2 (screen:paren-width)))
+      (let ((inner (empty-space-extent
+		    (null-head-space pair)
+		    screen)))
+	(Extent width: (+ inner:width
+			  (* 2 (screen:paren-width)))
 		height: inner:height))
       (extent (head pair) screen)))
 
 (define (tail-extent pair::cons screen::Screen)
   ::Extent
   (if (null? (tail pair))
-      (let ((inner (empty-space-extent (null-head-space pair)
-				       screen)))
-	(Extent width: (+ inner:width (* 2 (screen:paren-width)))
+      (let ((inner (empty-space-extent
+		    (null-head-space pair)
+		    screen)))
+	(Extent width: (+ inner:width
+			  (* 2 (screen:paren-width)))
 		height: inner:height))
       (extent (tail pair) screen)))
 
@@ -503,7 +543,6 @@ def") ===> "def")
 					 context))
 	     (screen:remember-offset! (- left 1)
 				      (+ top 2)))
-
 	   )
       (set! index (+ index 1)))
 
