@@ -203,7 +203,7 @@
 				  cursor))
 	     (continue))
 
-	    (,KeyType:Enter
+	    #;(,KeyType:Enter
 	     (set! cursor
 		   (send-char-to! document #\newline
 				  cursor))
