@@ -1,3 +1,25 @@
+* 30.03.2022
+
+Kasowanie znakow w symbolu dziala, ale efekt jest taki,
+ze dostajemy puste symbole.
+
+Stad dwie rzeczy, ktore chcemy zrobic w najblizszym
+czasie:
+1. jezeli wciskamy #\backspace nad symbolem ktorego
+   dlugosc wynosi 1 i kursor jest na pozycji 1,
+   albo #\delete nad symbolem, ktorego dlugosc
+   wynosi 1 i kursor jest na pozycji 0, to
+   usuwamy cala komorke z symbolem
+
+2. jezeli wciskamy klawisz reprezentujacy znak mogacy
+   byc czescia symbolu gdy kursor jest na spacji,
+   to powinnismy stworzyc nowa komorke z nowym
+   jednoliterowym symbolem
+
+oczywiscie, trzeba rozwiazac pewne niuanse zwiazane z:
+- pustymi listami
+- listami kropkowanymi
+
 * 29.03.2022
 
 Pole "base" wyrugowane :D
@@ -10,8 +32,6 @@ zawierajacego symbol rodzica)
 na spacji (ale to pewnie bedzie wymagalo stworzenia
 Indexable Space? A moze nie? Jezeli spojrzymy na problem
 z perspektywy rodzica)
-
-
 
 * 28.03.2022
 
