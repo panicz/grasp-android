@@ -1,3 +1,28 @@
+* 31.03.2022
+
+Mamy juz kasowanie jednoliterowych symboli oprocz
+pozycji 0. Teraz zajmiemy sie wlasmie owa pozycja 0.
+
+Ok, to wydaje sie zrobione.
+
+Kolejne czynnosci do zrobienia:
+- wsparcie dla list kropkowanych
+- dodawanie nowych symboli na spacjach
+- dodawanie list pustych na spacjach
+- dodawanie symboli do list pustych
+- obsluga 'strzalki w dol' (i w gore!)
+- zmiana struktury dokumentu tak, zeby
+  pusty dokument to bylo (()) (bo to
+  najprostszy sposob zeby zapewnic mozliwosc
+  dodawania nowych wyrazen
+- wyswietlanie calego dokumentu (ale bez nawiasow)
+- scrollowanie
+- wczytywanie i zapisywanie plikow
+- selekcje
+- historia edycji
+- cofanie operacji
+- ewaluacja wyrazen
+  
 * 30.03.2022
 
 Kasowanie znakow w symbolu dziala, ale efekt jest taki,
