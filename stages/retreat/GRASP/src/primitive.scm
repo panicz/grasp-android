@@ -159,32 +159,37 @@
     (if (is level < 0)
 	cursor
 	(let* ((index (cursor level))
-	       (cell-index (quotient index 2))
+	       (owner-index (quotient index 2))
 	       (part (part-at index)))
-	  (cond #|
-		 ((and-let* (((is level = 2))
-			    (subindex (cursor 1))
-			    (subpart (part-at subindex 
-					      part))
-			    (tip (part-at (head cursor)
-					  subpart))
-			    ((symbol? tip))
-			    ((deleting-last-char? tip)))
-		   ...))
-|#
-		 ((and (is level = 1)
-		      (is cell-index > 0)
-		      (symbol? part)
-		      (deleting-last-char? part))
-		 (let ((previous-cell (drop (- cell-index 1)
-					    (this))))
-		   (set! (tail previous-cell)
-		     (tail (tail previous-cell)))
-		   (recons (- index 1)
-			   (tail (tail cursor)))))
-		(else
-		 (send-char-to! part c cursor
-				(- level 1)))))))
+	  (cond
+	   ((and-let* (((is level eqv? 2))
+		       (subindex (cursor 1))
+		       ((is subindex eqv? 1))
+		       (subpart (cell-index part
+					    subindex))
+		       ((symbol? subpart))
+		       ((deleting-last-char? subpart))
+		       (parent-cell (drop owner-index
+					  (this))))
+	      (set! (head parent-cell)
+		(tail (head parent-cell)))
+	      (recons (- subindex 1)
+		      (tail (tail cursor)))))
+
+	   ((and (is level eqv? 1)
+		 (is owner-index > 0)
+		 (symbol? part)
+		 (deleting-last-char? part))
+	    (let ((previous-cell (drop (- owner-index 1)
+				       (this))))
+	      (set! (tail previous-cell)
+		(tail (tail previous-cell)))
+	      (recons (- index 1)
+		      (tail (tail cursor)))))
+	   
+	   (else
+	    (send-char-to! part c cursor
+			   (- level 1)))))))
 
   (pair a d))
 
