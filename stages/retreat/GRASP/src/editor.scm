@@ -20,14 +20,16 @@
  (screen)
  (for))
 
-(define input ::string "
+(define input ::string "\
 (define (factorial n)
   (if (<= n 0)
       1
       (* n (! (- n 1)))))
+
+(e.g. (factorial 5) ===> 120)
 ")
 
-(define document ::list (parse-string input))
+(define document ::list (cons (parse-string input) '()))
 
 (define input-extent ::Extent (string-extent input))
 
@@ -78,14 +80,22 @@
 		       (lambda ()
 			 (display
 			  message)))))))
+    (define (send-char! c)
+      (try-catch
+       (set! cursor
+	 (send-char-to! document c cursor))
+       (ex java.lang.Throwable
+	   (WARN (ex:toString))))
+      )
+          
     (let continue ()
       (let ((output-extent ::Extent
 			   (extent (head document)))
 	    (top-cursor (recons 1 '())))
 	((current-screen):clear!)
-	(draw! (head document)
-	       cursor: cursor
-	       context: top-cursor)
+	(draw-sequence! (head document)
+			cursor: cursor
+			context: top-cursor)
 	(io:setCursorVisible #f)
 	(io:clearScreen)
 	(io:setCursorPosition 0 0)
@@ -174,39 +184,20 @@
 	    (,KeyType:Character
 	     
 	     (let ((c::Character (key:getCharacter)))
-	       ;; no dobra, to tutaj bedziemy mieli kilka
-	       ;; zagwozdek. zasadniczo to chyba bysmy
-	       ;; probowali wysylac wcisniety klawisz
-	       ;; do naszego obiektu. Ale w jaki sposob
-	       ;; mozemy to zrobic?
-	       ;; Wydaje sie, ze sensowny bylby taki interfejs:
-	       ;; (send-character! jakis-znak kursor poziom)
 	       (if (and (key:ctrl-down?)
-			(eq? (#\space:charValue) (c:charValue)))
+			(eq? (#\space:charValue)
+			     (c:charValue)))
 		   (invoke (current-message-handler)
 			   'clear-messages!)
-		   (set! cursor
-			 (send-char-to! document (c:charValue)
-					cursor))
-		   )
+		   (send-char! (c:charValue)))
 		(continue)))
 
 	    (,KeyType:Delete
-	     (set! cursor
-		   (send-char-to! document #\delete
-				  cursor))
+	     (send-char! #\delete)
 	     (continue))
 
 	    (,KeyType:Backspace
-	     (set! cursor
-		   (send-char-to! document #\backspace
-				  cursor))
-	     (continue))
-
-	    #;(,KeyType:Enter
-	     (set! cursor
-		   (send-char-to! document #\newline
-				  cursor))
+	     (send-char! #\backspace)
 	     (continue))
 	    
 	    (,KeyType:MouseEvent
