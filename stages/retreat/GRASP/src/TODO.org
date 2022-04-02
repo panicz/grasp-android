@@ -1,3 +1,18 @@
+* 01.03.2022
+
+Dobra, skoro usuwanie symboli wydaje sie dzialac,
+to teraz moze warto zajac sie dodawaniem:
+- symboli w pozycji 'glowy'
+- symboli w pozostalych pozycjach
+- list
+
+oraz usuwaniem list (gdy kursor jest #\[ i wcisniemy
+#\delete, albo gdy jest #\] i wcisniemy #\backspace)
+
+...
+
+usuwanie list zaimplementowane!
+
 * 31.03.2022
 
 Mamy juz kasowanie jednoliterowych symboli oprocz
