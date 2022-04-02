@@ -15,9 +15,6 @@
 (import (functions))
 (import (print))
 
-
-;;(import (rename (keyword-arguments) (define/kw define*)))
-
 (define-interface Tile (Indexable)
   (draw! screen::Screen
 	 cursor::Cursor
@@ -145,30 +142,35 @@
 	     (is a < b))
 	(and (is b eqv? (last-index))
 	     (isnt a eqv? (last-index)))))
-
+  
   (define (send-char! c::char cursor::Cursor level::int)
     ::Cursor
-    (define (deleting-last-char? symbol)
-      (is (string-length
-	   (symbol:toString)) = 1)
-      (or (and (eq? c #\backspace)
-	       (eqv? (head cursor) 1))
-	  (and (eq? c #\delete)
-	       (eqv? (head cursor) 0))))
+    (define (deleting? target::Indexable)
+      (and (or (and (symbol? target)
+		    (is (string-length
+			 (target:toString)) = 1))
+	       (pair? target))
+	   (or (and (eq? c #\backspace)
+		    (eqv? (head cursor)
+			  (target:last-index)))
+	       (and (eq? c #\delete)
+		    (eqv? (head cursor)
+			  (target:first-index))))))
     
     (if (is level < 0)
 	cursor
 	(let* ((index (cursor level))
-	       (owner-index (quotient index 2))
 	       (part (part-at index)))
 	  (cond
-	   ((and-let* (((is level eqv? 2))
+	   
+	   ((and-let* (((eqv? level 2))
+		       ((number? index))
+		       (owner-index (quotient index 2))
 		       (subindex (cursor 1))
-		       ((is subindex eqv? 1))
+		       ((eqv? subindex 1))
 		       (subpart (cell-index part
 					    subindex))
-		       ((symbol? subpart))
-		       ((deleting-last-char? subpart))
+		       ((deleting? subpart))
 		       (parent-cell (drop owner-index
 					  (this))))
 	      (set! (head parent-cell)
@@ -176,11 +178,12 @@
 	      (recons (- subindex 1)
 		      (tail (tail cursor)))))
 
-	   ((and (is level eqv? 1)
-		 (is owner-index > 0)
-		 (symbol? part)
-		 (deleting-last-char? part))
-	    (let ((previous-cell (drop (- owner-index 1)
+	   ((and (eqv? level 1)
+		 (number? index)
+		 (is index > 1)
+		 (deleting? part))
+	    (let ((previous-cell (drop (- (quotient index 2)
+					  1)
 				       (this))))
 	      (set! (tail previous-cell)
 		(tail (tail previous-cell)))
@@ -192,7 +195,6 @@
 			   (- level 1)))))))
 
   (pair a d))
-
 
 (define-cache (heads tail)
   (cache (head)
@@ -208,198 +210,6 @@
     
     ((_ a b c ...)
      (recons a (recons* b c ...)))))
-
-#|
- 0 2 4 6
-( a . b )
-  1 3 5
-|#
-
-
-;; take-cell-at! returns either a cons-cell whose
-;; car is the desired object, or a head/tail-separator
-;; (consider: what to do when cursor points to a space?
-;; we can safely return #!null, because it's different
-;; than returning (#!null))
-(define (take-cell-at! cursor::Cursor
-		       expression::pair)
-  (match cursor
-    (`(,,@(isnt _ integer?) . ,root)
-     (take-cell-at! root expression))
-    
-    (`(,,@(is _ <= 1) ,parent-index . ,root)
-     (let* ((grandparent ::pair
-			 (cursor-ref expression
-				     root))
-	    (cell (drop (quotient parent-index 2)
-			grandparent))
-	    (removed (head cell)))
-       (if (dotted? removed)
-	   (let ((new (cons (tail removed) '())))
-	     (tail-space-to-head removed new)
-	     (set! (head cell) new)
-	     (unset! (dotted? removed)))
-	   (set! (head cell) (tail removed)))
-       (set! (tail removed) '())
-       removed))
-    
-    (`(,index . ,root)
-     (let* ((parent ::pair (cursor-ref expression
-				       root))
-	    (index (quotient index 2))
-	    (irrelevant (- index 1)))
-       (define (remove-tail! preceding)
-	 (let ((removed (tail preceding)))
-	   (set! (tail preceding) (tail removed))
-	   (set! (tail removed) '())
-	   removed))
-	 
-       (if (is irrelevant > 0)
-	   (let* ((irrelevant (- irrelevant 1))
-		  (preceding (drop irrelevant
-				   parent)))
-	     (if (dotted? preceding)
-		 (let* ((removed (tail-space-to-head
-				  preceding
-				  (cons (tail
-					 preceding)
-					'()))))
-		   (set! (tail preceding) '())
-		   (unset! (dotted? preceding))
-		   removed)
-		 (remove-tail! (tail preceding))))
-	   (let ((preceding (drop irrelevant
-				  parent)))
-	     (if (dotted? preceding)
-		 (let* ((added (cons (tail
-				      preceding)
-				     '())))
-		   (tail-space-to-head preceding
-				       added)
-		   (set! (tail preceding) added)
-		   (unset! (dotted? preceding))
-		   head/tail-separator)
-		 (remove-tail! preceding))))))
-    (_
-     expression)))
-
-(define (take-part-at! cursor::Cursor object)
-  (cond #;((Indexable? object)
-	 (invoke (as Indexable object) 
-'take-part-at! cursor))
-
-   ((pair? object)
-    (take-cell-at! cursor object))
-
-   (else
-    (error "Don't know how to take "cursor
-	   " from "object))))
-
-(e.g.
- (let* ((document `(,1 ,3 ,5))
-	(taken (take-cell-at! '(3) document)))
-   (and (equal? document '(1 5))
-	(equal? taken '(3)))))
-
-(e.g.
- (let* ((document `(,1 ,3 ,5))
-	(taken (take-cell-at! '(5) document)))
-   (and (equal? document '(1 3))
-	(equal? taken '(5)))))
-
-(e.g.
- (let* ((document `((,1 ,3 ,5)))
-	(taken (take-cell-at! '(1 1) document)))
-   (and (equal? document '((3 5)))
-	(equal? taken '(1)))))
-
-(e.g.
- (let* ((document `((,1 . ,5)))
-	(taken (take-cell-at! '(3 1) document)))
-   (and (equal? document '((1 5)))
-	(head/tail-separator? taken))))
-
-(e.g.
- (let* ((document `((,1 . ,5)))
-	(taken (take-cell-at! '(1 1) document)))
-   (and (equal? document '((5)))
-	(equal? taken '(1)))))
-
-(e.g.
- (let* ((document `((,1 . ,5)))
-	(taken (take-cell-at! '(5 1) document)))
-   (and (equal? document '((1)))
-	(equal? taken '(5)))))
-
-(define (put-into-cell-at! cursor::Cursor element
-			   #;in document)
-  ::boolean
-  (assert (or (and (pair? element)
-		   (null? (tail element)))
-	      (head/tail-separator? element)))
-  (match cursor
-    (`(,,@(isnt _ integer?) . ,root)
-     (put-into-cell-at! root element document))
-
-    (`(,,@(is _ <= 1) ,parent-index . ,root)
-     (assert (pair? element))
-     (let* ((grandparent ::pair (cursor-ref
-				 document root))
-	    (parent (drop (quotient parent-index 2)
-			  grandparent)))
-       (set! (tail element) (head parent))
-       (set! (head parent) element)
-       #t))
-
-    (`(,index . ,root)
-     (let* ((parent (cursor-ref document root))
-	    (irrelevant (- (quotient index 2) 1))
-	    (preceding (drop irrelevant parent)))
-       (cond ((pair? element)
-	      (set! (tail element) (tail preceding))
-	      (set! (tail preceding) element)
-	      #t)
-	     
-	     ((null? (tail (tail preceding)))
-	      (assert (head/tail-separator?
-		       element))
-	      (set! (tail preceding)
-		(head (tail preceding)))
-	      (update! (dotted? preceding) #t)
-	      #t)
-
-	     (else
-	      #f))))
-    (_
-     #f)
-  ))
-
-(e.g.
- (let ((document `((,1 ,5))))
-   (put-into-cell-at! '(2 1) `(,3) document)
-   document) ===> ((1 3 5)))
-
-(e.g.
- (let ((document `((,1 ,5))))
-   (put-into-cell-at! '(2 1)
-		      head/tail-separator
-		      document)
-   document) ===> ((1 . 5)))
-
-(e.g.
- (let ((document `((,3 ,5))))
-   (put-into-cell-at! '(0 1) `(,1) document)
-   document) ===> ((1 3 5)))
-
-
-;; Docelowo bedziemy musieli patchowac Kawe, chociazby po to,
-;; zeby takie obiekty, jak Symbol czy FString (IString? MString?)
-;; implementowaly Tile.
-;;
-;; Na razie jednak zrobmy tak, zeby nie uzywac tych typow
-;; bezposrednio w edytorze, a zamiast tego korzystac sobie
-;; z owijek
-
 
 (define-object (Symbol source::string)::Tile
   (define builder :: java.lang.StringBuilder)
@@ -637,12 +447,6 @@ def") ===> "def")
     (draw-next! elems)
     ))
 
-(define-syntax-rule (truly actions ...)
-  (begin actions ... #t))
-
-(define-syntax-rule (falsely actions ...)
-  (begin actions ... #f))
-
 (define (cursor-under left::real top::real
 		      elems
 		      #!key
@@ -831,15 +635,4 @@ def") ===> "def")
 
 
 ;; RZM37UHSPY5Z
-
-;; no dobra, jak powinien dzialac cursor-next?
-;; 1. bierzemy element spod kursora i pytamy go o pierwszy
-;; pod-indeks
-;; 2. jezeli nie ma takowego, to pytamy rodzica o kolejmy 
-;; pod-indeks wzgledem naszego
-;; 3. i teraz uwaga: jezeli rodzic nie ma kolejnego
-;; indeksu, to powinien zapytac dziadka itd. (az dojdziemy
-;; do Adama/Ewy)
-
-
 
