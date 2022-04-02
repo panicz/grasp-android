@@ -43,3 +43,9 @@
 
 (define (WARN . args)
   (invoke (current-message-handler) 'add-message args))
+
+(define-syntax-rule (truly actions ...)
+  (begin actions ... #t))
+
+(define-syntax-rule (falsely actions ...)
+  (begin actions ... #f))
