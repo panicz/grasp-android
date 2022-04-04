@@ -173,6 +173,11 @@
 		       ((to-be-deleted? subpart))
 		       (parent-cell (drop owner-index
 					  (this))))
+	      (set! (pre-head-space
+		     (tail (head parent-cell)))
+		(string-append
+		 (pre-head-space (head parent-cell))
+		 (post-head-space (head parent-cell))))
 	      (set! (head parent-cell)
 		(tail (head parent-cell)))
 	      (recons (- subindex 1)
