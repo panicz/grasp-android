@@ -145,7 +145,7 @@
   
   (define (send-char! c::char cursor::Cursor level::int)
     ::Cursor
-    (define (deleting? target::Indexable)
+    (define (to-be-deleted? target::Indexable)
       (and (or (and (symbol? target)
 		    (is (string-length
 			 (target:toString)) = 1))
@@ -170,7 +170,7 @@
 		       ((eqv? subindex 1))
 		       (subpart (cell-index part
 					    subindex))
-		       ((deleting? subpart))
+		       ((to-be-deleted? subpart))
 		       (parent-cell (drop owner-index
 					  (this))))
 	      (set! (head parent-cell)
@@ -181,10 +181,14 @@
 	   ((and (eqv? level 1)
 		 (number? index)
 		 (is index > 1)
-		 (deleting? part))
+		 (to-be-deleted? part))
 	    (let ((previous-cell (drop (- (quotient index 2)
 					  1)
 				       (this))))
+	      (set! (post-head-space previous-cell)
+		(string-append
+		 (post-head-space previous-cell)
+		 (post-head-space (tail previous-cell))))
 	      (set! (tail previous-cell)
 		(tail (tail previous-cell)))
 	      (recons (- index 1)
