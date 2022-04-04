@@ -1,4 +1,16 @@
-* 01.03.2022
+
+* 04.04.2022
+
+na pewno trzeba tez zaimplementowac laczenie
+spacji w usuwanych symbolach
+  
+* 02.04.2022
+
+skoro zaimplementowalismy usuwanie, to mamy jeszcze:
+-dodawanie symboli i list
+-poprawki
+
+* 01.04.2022
 
 Dobra, skoro usuwanie symboli wydaje sie dzialac,
 to teraz moze warto zajac sie dodawaniem:
