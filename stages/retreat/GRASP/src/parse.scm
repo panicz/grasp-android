@@ -17,16 +17,23 @@
       (set! (tail last-tail) (cons (read-char) '()))
       (read-atom-chars-into (tail last-tail)))))
 
-
 (define (read-spaces)
-  (define (read-spaces-into result)
-    (let ((c (peek-char)))
-      (if (or (eof-object? c)
-	      (isnt c char-whitespace?))
-	  result
-	  (read-spaces-into (cons (read-char) result)))))
-  (list->string (reverse (read-spaces-into '()))))
-
+  (let ((result (Space fragments: (cons 0 '()))))
+    (define (read-spaces-into pair)
+      (let ((c (peek-char)))
+	(if (or (eof-object? c)
+		(isnt c char-whitespace?))
+	    result	    
+	    (match (read-char)
+	      (#\newline
+	       (set! (tail pair)
+		 (cons 0 (tail pair)))
+	       (read-spaces-into (tail pair)))
+	      (_
+	       (set! (head pair)
+		 (+ (head pair) 1))
+	       (read-spaces-into pair))))))
+    (read-spaces-into result:fragments)))
 
 (define (read-list)
   (let ((result '())
@@ -69,7 +76,8 @@
                 (set! (tail growth-cone)
                       (Symbol (list->string output))))))
             (update! (dotted? growth-cone) #t)
-            (update! (pre-tail-space growth-cone) post-dot-spaces)
+            (update! (pre-tail-space growth-cone)
+		     post-dot-spaces)
             (update! (post-tail-space growth-cone)
                      (read-spaces))
             (read-next)))
@@ -129,7 +137,7 @@
   (cond
    ((pair? p)
     (write-char #\()
-    (display (pre-head-space p))  
+    (display (pre-head-space p))
     (show-pair p)
     (write-char #\)))
    (else

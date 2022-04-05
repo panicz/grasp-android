@@ -94,14 +94,32 @@ of an index
   ((buildString out::StringBuilder)::StringBuilder
    (let process ((input fragments))
      (match input
-       (`(,first . ,rest)
-	(for n from 0 below first
+       (`(,,@integer? ,,@integer? . ,_)
+	(for n from 0 below (head input)
 	     (out:append #\space))
-	(match rest
-	  ('()
-	   out)
-	  (`(,_ . ,_)
-	   (process rest)))))))
+	(out:append #\newline)
+	(process (tail input)))
+       (`(,,@integer?)
+	(for n from 0 below (head input)
+	     (out:append #\space))
+	out)
+       (_
+	out))))
+  implementing gnu.kawa.format.Printable
+  with
+  ((print out::gnu.lists.Consumer)::void
+   (let process ((input fragments))
+     (match input
+       (`(,,@integer? ,,@integer? . ,_)
+	(for n from 0 below (head input)
+	     (out:append #\space))
+	(out:append #\newline)
+	(process (tail input)))
+       (`(,,@integer?)
+	(for n from 0 below (head input)
+	     (out:append #\space)))
+       (_
+	(values)))))
   ((toString)::String
    (invoke (buildString (StringBuilder)) 'toString))
   )
@@ -132,7 +150,8 @@ of an index
 ;; of a list, after the opening paren (therefore
 ;; it should be considered sparse).
 
-(define-property+ (pre-head-space cell) "")
+(define-property+ (pre-head-space cell)
+  (Space fragments: (cons 0 '())))
 
 ;; `post-head-space` appears after each element
 ;; in a list (and should therefore be considered
@@ -142,16 +161,18 @@ of an index
 (define-property+ (post-head-space cell)
   (if (and (not (dotted? cell))
 	   (null? (tail cell)))
-      ""
-      " "))
+      (Space fragments: (cons 0 '()))
+      (Space fragments: (cons 1 '()))))
 
 ;; `pre-` and `post-tail-space` only appear
 ;; in the pairs that are `dotted?` (so they
 ;; can both be considered sparse)
 
-(define-property+ (pre-tail-space cell) " ")
+(define-property+ (pre-tail-space cell)
+  (Space fragments: (cons 1 '())))
 
-(define-property+ (post-tail-space cell) "")
+(define-property+ (post-tail-space cell)
+  (Space fragments: (cons 0 '())))
 
 ;; `null-tail-head` only concerns a situation
 ;; where the head of a list is `null?`.
@@ -159,13 +180,15 @@ of an index
 ;; in Lisp, the only way to set the size
 ;; of a particular 
 
-(define-property+ (null-head-space cell) "")
+(define-property+ (null-head-space cell)
+  (Space fragments: (cons 0 '())))
 
 ;; the `null-tail-space` property only concerns
 ;; a situation when a cell is stipulated to be
 ;; `dotted?` and its tail is `null?`.
 
-(define-property+ (null-tail-space cell) "")
+(define-property+ (null-tail-space cell)
+  (Space fragments: (cons 0 '())))
 
 (define-simple-class HeadTailSeparator ()
   ((toString)::String "."))
