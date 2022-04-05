@@ -1,9 +1,42 @@
 
+
 * 04.04.2022
 
 na pewno trzeba tez zaimplementowac laczenie
 spacji w usuwanych symbolach
-  
+
+no, to juz jest jako tako zrobione, ale okazuje
+sie, ze sa bledy przy wyliczaniu rozmiarow wyrazen
+
+byc moze tez wlasnie teraz jest najlepszy moment
+na zaimplementowanie spacji-jako-typu Indexable,
+oraz na przemyslenia zwiazane z tym, jak realizowac
+dodawanie i usuwanie elementow.
+
+Mamy bowiem dwie strategie: albo robimy jawna
+rekurencje, tak jak w przypadku take-cell-at!
+i put-cell-into!, albo opieramy sie na niejawnej
+rekurencji tak jak zrobilismy teraz ("send-char!").
+
+Zaleta tej drugiej strategii jest rozszerzalnosc,
+natomiast wada jest to, ze implementacja musi
+dodatkowo pamietac o zarejestrowaniu operacji,
+zeby mozna je bylo odwracac
+
+Z kolei wydaje sie, ze problemem z ta pierwsza
+opcja jest brak rozszerzalnosci, choc pewnie to by
+sie dalo jakos rozwiazac
+
+W kazdym razie na te chwile chyba nie bedziemy
+nic robic z tym 'problemem', i zajmiemy sie nim
+dopiero wtedy, kiedy bedziemy robic rozszerzenia.
+
+Czyli do zrobienia na teraz mamy:
+- poprawke bledu z wymiarowaniem nawiasow?
+- poprawke bledu z iterowaniem po pustych listach
+- dodawanie symboli i list
+
+
 * 02.04.2022
 
 skoro zaimplementowalismy usuwanie, to mamy jeszcze:
