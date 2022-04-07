@@ -29,9 +29,11 @@
 	       (set! (tail pair)
 		 (cons 0 (tail pair)))
 	       (read-spaces-into (tail pair)))
-	      (_
+	      (#\space
 	       (set! (head pair)
 		 (+ (head pair) 1))
+	       (read-spaces-into pair))
+	      (_
 	       (read-spaces-into pair))))))
     (read-spaces-into result:fragments)))
 
@@ -107,9 +109,15 @@
 (define (parse-string s::string)::list
   (call-with-input-string s parse))
 
+(define (print-space space::Space
+		     #!optional (port (current-output-port)))
+  #;(write space:fragments port)
+  (invoke (as gnu.kawa.format.Printable space)
+	  'print port))
+
 (define (show-empty-list space)::void
   (write-char #\()
-  (display space)
+  (print-space space)
   (write-char #\)))
 
 (define (show-head p::pair)::void
@@ -119,15 +127,15 @@
 
 (define (show-dotted-tail p::pair)::void
   (write-char #\.)
-  (display (pre-tail-space p))
+  (print-space (pre-tail-space p))
   (if (null? (tail p))
       (show-empty-list (null-tail-space p))
       (show (tail p)))
-  (display (post-tail-space p)))
+  (print-space (post-tail-space p)))
 
 (define (show-pair p::pair)::void
   (show-head p)
-  (display (post-head-space p))
+  (print-space (post-head-space p))
   (cond ((dotted? p)
 	 (show-dotted-tail p))
 	((pair? (tail p))
@@ -137,7 +145,7 @@
   (cond
    ((pair? p)
     (write-char #\()
-    (display (pre-head-space p))
+    (print-space (pre-head-space p))
     (show-pair p)
     (write-char #\)))
    (else
