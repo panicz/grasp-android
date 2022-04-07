@@ -1,4 +1,23 @@
+* 06.04.2022
 
+w wiekszosci spacje udalo sie zrefaktorowac.
+nie dziala jeszcze obsluga dotykania, ale
+to juz wczesniej nie za bardzo dzialalo i
+bylo do poprawki, wiec nie ma czego zalowac.
+
+* 05.04.2022
+
+to co dzisiaj robimy?
+moze te spacje?
+to tutaj idea jest taka, ze mamy obiekt
+(Space fragments: list)
+gdzie lista zawiera albo liczby (oznaczajace
+ilosc spacji przed kolejnym obiektem), albo
+"pudelka" (oznaczajace wykomentowane wyrazenia).
+
+Jezeli mamy nastepujace po sobie dwie liczby,
+to interpretujemy je tak, ze pomiedzy nimi jest
+nowa linia
 
 * 04.04.2022
 
