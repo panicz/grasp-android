@@ -167,3 +167,12 @@
 
 (define (pass x . functions)
   (fold-left (lambda (x f) (f x)) x functions))
+
+(define (last list::pair)
+  (if (pair? (cdr list))
+      (last (cdr list))
+      (car list)))
+
+(e.g.
+ (last '(1 2 3)) ===> 3)
+

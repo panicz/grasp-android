@@ -289,13 +289,12 @@
   (gnu.mapping.SimpleSymbol ((source:toString):intern))
   (set! builder (java.lang.StringBuilder name)))
 
-(define (empty-space-extent spaces::string
+(define (empty-space-extent space::Space
 			    screen::Screen)
   ::Extent
-  (let ((inner (string-extent spaces)))
-    (Extent width: inner:width
-	    height: (max (screen:min-line-height)
-			 inner:height))))
+  (Extent width: (apply max space:fragments)
+	  height: (* (screen:min-line-height)
+		     (length space:fragments))))
 
 (define (head-extent pair::cons screen::Screen)
   ::Extent
@@ -319,23 +318,20 @@
 		height: inner:height))
       (extent (tail pair) screen)))
 
-(define (skip-first-line s::string)::string
-  (let ((n (string-index s (is _ eq? #\newline))))
-    (if n
-	(string-drop s (+ n 1))
-	"")))
-
-(e.g.
- (skip-first-line "abc
-def") ===> "def")
+(define (skip-first-line s::Space)::Space
+  (match s:fragments
+    (`(,_ ,_ . ,_)
+     (Space fragments: (tail s:fragments)))
+    (_
+     (Space fragments: '(0)))))
 
 (define (should-the-bar-be-horizontal? dotted-pair)
   ::boolean
   (assert (dotted? dotted-pair))
-  (and (string-any (is _ eq? #\newline)
-		   (post-head-space dotted-pair))
-       (string-any (is _ eq? #\newline)
-		   (pre-tail-space dotted-pair))))
+  (and-let* (((Space fragments: `(,_ ,_ . ,_))
+	      (post-head-space dotted-pair))
+	     ((Space fragments: `(,_ ,_ . ,_))
+	      (pre-tail-space dotted-pair)))))
 
 (define (draw-sequence! elems::cons #!key
                         (screen :: Screen
@@ -350,24 +346,32 @@ def") ===> "def")
         (left 0)
         (index 0))
 
-    (define (skip-spaces! spaces::string)::void
-      (for i from 0 below (string-length spaces)
-	   (let ((char (spaces i)))
-             (cond ((eq? char #\newline)
-                    (set! top
-		      (+ top max-line-height))
-                    (set! left 0)
-                    (set! max-line-height
-		      (screen:min-line-height)))
-                   (else
-                    (set! left (+ left 1))
-                    (set! max-width (max max-width
-					 left)))))
-	   (when (equal? cursor (recons* i index
-					 context))
-	     (screen:remember-offset! (- left 1)
-				      (+ top 2)))
-	   )
+    (define (skip-spaces! space::Space)::void
+      (let skip ((input space:fragments)
+		 (total 0))
+	(define (advance-with-cursor! width::real)
+	  (when (and-let* ((`(,tip ,next . ,sub) cursor)
+			   ((integer? tip))
+			   ((equal? sub context))
+			   ((eqv? next index))
+			   ((is total <= tip < (+ total
+						  width)))))
+	    (screen:remember-offset! (+ left (- tip total)
+					-1)
+				     (+ top 2)))
+	  (set! left (+ left width))
+	  (set! max-width (max max-width left)))
+	
+	(match input
+	  (`(,,@integer? ,,@integer? . ,_)
+	   (advance-with-cursor! (head input))
+	   (set! top (+ top max-line-height))
+           (set! left 0)
+           (set! max-line-height
+	     (screen:min-line-height))
+	   (skip (tail input) (+ total (head input))))
+	  (`(,,@integer)
+	   (advance-with-cursor! (head input)))))
       (set! index (+ index 1)))
 
     (define (advance! extent::Extent)::void
@@ -379,8 +383,8 @@ def") ===> "def")
       (set! max-width (max left max-width))
       (set! index (+ index 1)))
 
-    (define (draw-empty-list! spaces::string)::void
-      (let ((inner (empty-space-extent spaces screen))
+    (define (draw-empty-list! space::Space)::void
+      (let ((inner (empty-space-extent space screen))
 	    (paren-width (screen:paren-width)))
 	(screen:open-paren! inner:height 0 0)
 	(screen:close-paren! inner:height
@@ -470,9 +474,10 @@ def") ===> "def")
 	(ceiling 0)
 	(index (first-index elems)))
 
-    (define (check-spaces! spaces::string)::Cursor
+    (define (check-spaces! space::Space)::Cursor
       (set! index (next-index index elems))
-      (let loop ((i 0))
+      #!null
+      #;(let loop ((i 0))
 	(cond ((is i >= (string-length spaces))
 	       (set! index (next-index index elems))
 	       #!null)
@@ -589,17 +594,29 @@ def") ===> "def")
         (top 0)
         (left 0))
 
-    (define (skip-spaces! spaces::string)::void
-      (for char in spaces
-        (cond ((eq? char #\newline)
-               (set! top (+ top max-line-height))
-               (set! left 0)
-               (set! max-line-height
-		     (screen:min-line-height)))
-              (else
-               (set! left (+ left 1))
-               (set! max-width
-		 (max max-width left))))))
+    (define (skip-spaces! space::Space)::void
+      (match space:fragments
+	(`(,first ,second . ,rest)
+	 (set! max-width
+	   (fold-left max (max max-width
+			       (+ left first)
+			       second)
+		      rest))
+	 (set! left
+	   (if (null? rest)
+	       second
+	       (last rest)))
+	 (set! top
+	   (+ top
+	      max-line-height
+	      (* (screen:min-line-height)
+		 (length rest))))
+	 (set! max-line-height
+	   (screen:min-line-height)))
+	(`(,single)
+	 (set! left (+ left single))
+	 (set! max-width
+	   (max max-width left)))))
 
     (define (advance! extent::Extent)::void
       (set! left (+ left extent:width))

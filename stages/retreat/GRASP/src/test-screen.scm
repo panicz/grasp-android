@@ -22,6 +22,8 @@
       1
       (* n (! (- n 1)))))"))
 
+(show (head parsed))
+
 (e.g.
  (let ((document ::Tile (as Tile (parse-string "
 (define (! n)

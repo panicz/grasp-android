@@ -1,5 +1,6 @@
 (import (define-interface))
 (import (define-type))
+(import (define-object))
 (import (define-property))
 (import (match))
 (import (infix))
@@ -105,6 +106,7 @@ of an index
 	out)
        (_
 	out))))
+  
   implementing gnu.kawa.format.Printable
   with
   ((print out::gnu.lists.Consumer)::void
@@ -120,6 +122,7 @@ of an index
 	     (out:append #\space)))
        (_
 	(values)))))
+
   ((toString)::String
    (invoke (buildString (StringBuilder)) 'toString))
   )
