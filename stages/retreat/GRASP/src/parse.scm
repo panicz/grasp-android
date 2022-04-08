@@ -112,8 +112,7 @@
 (define (print-space space::Space
 		     #!optional (port (current-output-port)))
   #;(write space:fragments port)
-  (invoke (as gnu.kawa.format.Printable space)
-	  'print port))
+  (space:print port))
 
 (define (show-empty-list space)::void
   (write-char #\()
