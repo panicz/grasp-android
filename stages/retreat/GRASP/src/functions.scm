@@ -176,3 +176,10 @@
 (e.g.
  (last '(1 2 3)) ===> 3)
 
+(define (last-pair list::pair)::pair
+  (if (pair? (cdr list))
+      (last-pair (cdr list))
+      list))
+
+(e.g.
+ (last-pair '(1 2 3)) ===> (3 . ()))

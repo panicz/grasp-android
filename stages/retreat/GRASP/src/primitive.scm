@@ -175,7 +175,7 @@
 					  (this))))
 	      (set! (pre-head-space
 		     (tail (head parent-cell)))
-		(string-append
+		(join-spaces!
 		 (pre-head-space (head parent-cell))
 		 (post-head-space (head parent-cell))))
 	      (set! (head parent-cell)
@@ -191,7 +191,7 @@
 					  1)
 				       (this))))
 	      (set! (post-head-space previous-cell)
-		(string-append
+		(join-spaces!
 		 (post-head-space previous-cell)
 		 (post-head-space (tail previous-cell))))
 	      (set! (tail previous-cell)
@@ -356,7 +356,9 @@
 			   ((eqv? next index))
 			   ((is total <= tip < (+ total
 						  width)))))
-	    (screen:remember-offset! (+ left (- tip total)
+	    (screen:remember-offset! (+ left
+					(- (head cursor)
+					   total)
 					-1)
 				     (+ top 2)))
 	  (set! left (+ left width))

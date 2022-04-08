@@ -89,48 +89,10 @@ of an index
 ;; only member #!null
 (define-alias Null java.lang.Object)
 
-(define-type (Space fragments: pair)
-  implementing StringBuilding
-  with
-  ((buildString out::StringBuilder)::StringBuilder
-   (let process ((input fragments))
-     (match input
-       (`(,,@integer? ,,@integer? . ,_)
-	(for n from 0 below (head input)
-	     (out:append #\space))
-	(out:append #\newline)
-	(process (tail input)))
-       (`(,,@integer?)
-	(for n from 0 below (head input)
-	     (out:append #\space))
-	out)
-       (_
-	out))))
   
-  implementing gnu.kawa.format.Printable
-  with
-  ((print out::gnu.lists.Consumer)::void
-   (let process ((input fragments))
-     (match input
-       (`(,,@integer? ,,@integer? . ,_)
-	(for n from 0 below (head input)
-	     (out:append #\space))
-	(out:append #\newline)
-	(process (tail input)))
-       (`(,,@integer?)
-	(for n from 0 below (head input)
-	     (out:append #\space)))
-       (_
-	(values)))))
-
-  ((toString)::String
-   (invoke (buildString (StringBuilder)) 'toString))
-  )
-
 (define head car)
 
 (define tail cdr)
-
 
 ;; a cell is "dotted?" naturally when it is
 ;; a pair whose "tail" isn't a list (so for example,
@@ -424,6 +386,51 @@ of an index
 	(else
 	 (error "Don't know how to obtain previous index to "index
 		" in "object))))
+
+
+(define-type (Space fragments: pair)
+  #|implementing gnu.kawa.format.Printable with|#
+  implementing Indexable
+  with
+  ((part-at index::Index)::Indexable* (this))
+  
+  ((first-index)::Index 0)
+  ((last-index)::Index (fold-left + 0 fragments))
+  
+  ((next-index index::Index)::Index
+   (min (+ index 1) (last-index)))
+  
+  ((previous-index index::Index)::Index
+   (max (first-index) (- index 1)))
+   
+  ((index< a::Index b::Index)::boolean
+   (is (as int a) < (as int b)))
+   
+  ((send-char! c::char cursor::Cursor level::int)::Cursor
+   cursor)
+  
+  ((print out::gnu.lists.Consumer)::void
+   (let process ((input fragments))
+     (match input
+       (`(,,@integer? ,,@integer? . ,_)
+	(for n from 0 below (head input)
+	     (out:append #\space))
+	(out:append #\newline)
+	(process (tail input)))
+       (`(,,@integer?)
+	(for n from 0 below (head input)
+	     (out:append #\space)))
+       (_
+	(values)))))
+  )
+
+(define (join-spaces! a::Space b::Space)::Space
+  (let ((suffix (last-pair a:fragments)))
+    (set! (head suffix)
+      (+ (head suffix) (head b:fragments)))
+    (set! (tail suffix) (tail b:fragments))
+    (set! b:fragments (cons 0 '()))
+    a))
 
 (define (base-cursor cursor object)
   (match cursor
