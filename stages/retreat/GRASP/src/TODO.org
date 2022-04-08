@@ -1,3 +1,9 @@
+* 07.04.2022
+
+tym, co idealnie chcielibysmy zrobic w najblizszym
+czasie, jest dodawanie nowych symboli i wyrazen,
+ale konieczna jeszcze bedzie indeksacja spacji
+
 * 06.04.2022
 
 w wiekszosci spacje udalo sie zrefaktorowac.
