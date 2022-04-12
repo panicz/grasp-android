@@ -1,3 +1,31 @@
+* 11.04.2022
+
+no dobra, rozwazmy, w jaki sposob iterowac po spacjach.
+Jak mamy (0), to dopuszczamy tylko jeden indeks, 0
+Jak mamy (1), to dopuszczamy dwa indeksy: 0 i 1
+Jak mamy (0 0) to dopuszczamy dwa indeksy: 0 i 1
+
+itd.
+
+teraz rozwazmy jeszcze scenariusze kasowania:
+
+( define ... )
+ ^
+
+jak wcisniemy backspace, to nic sie dziac nie powinno,
+ale jak wcisniemy delete, to powinnismy skasowac
+nastepne wyrazenie
+
+a moze jakos inaczej?
+
+
+* 08.04.2022
+
+iterowanie po spacjach wprawdzie dziala, ale mocno
+jako tako. trzeba sie teraz zajac jeszcze taka kwestia:
+co sie ma dziac, gdy wciskamy #\backspace albo #\delete
+na spacji?
+
 * 07.04.2022
 
 tym, co idealnie chcielibysmy zrobic w najblizszym
