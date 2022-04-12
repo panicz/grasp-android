@@ -1,3 +1,4 @@
+(import (srfi :11))
 (import (define-interface))
 (import (define-type))
 (import (define-object))
@@ -265,14 +266,17 @@ of an index
   (index< a::Index b::Index)::boolean
 
   (send-char! c::char cursor::Cursor level::int)::Cursor
+  (deletable?)::boolean
   ;;(take-part-at! cursor::Cursor)::Indexable*
 )
 
 (define (send-char-to! object c::char cursor::Cursor
-		       #!optional (level::int (- (length cursor) 1)))
+		       #!optional
+		       (level::int (- (length cursor) 1)))
   ::Cursor
   (cond ((instance? object Indexable)
-	 (invoke (as Indexable object) 'send-char! c cursor level))
+	 (invoke (as Indexable object) 'send-char!
+		 c cursor level))
 	(else
 	 (WARN "Unable to send char "c" to "object)
 	 cursor)))
@@ -332,7 +336,8 @@ of an index
 	 #\[)
 	
 	(else
-	 (error "Don't know how to obtain first index from "object))))
+	 (error "Don't know how to obtain first index from "
+		object))))
 
 (define (last-index object)
   (cond ((Indexable? object)
@@ -345,7 +350,8 @@ of an index
 	 #\])
 	
 	(else
-	 (error "Don't know how to obtain last index from "object))))
+	 (error "Don't know how to obtain last index from "
+		object))))
 
 (define (next-index index::Index object)::Index
   (cond ((Indexable? object)
@@ -365,8 +371,8 @@ of an index
 	    #\])))
 	
 	(else
-	 (error "Don't know how to obtain next index to "index
-		" in "object))))
+	 (error "Don't know how to obtain next index to "
+		index" in "object))))
 
 (define (previous-index index::Index object)::Index
   (cond ((Indexable? object)
@@ -384,9 +390,25 @@ of an index
 	   (_ (- index 1))))
 	
 	(else
-	 (error "Don't know how to obtain previous index to "index
-		" in "object))))
+	 (error "Don't know how to obtain previous index to "
+		index " in "object))))
 
+(define (space-fragment-index fragments index::int)
+  (if (or (isnt fragments pair?)
+	  (is (head fragments) >= index))
+      (values fragments index)
+      (space-fragment-index (tail fragments)
+			    (- index
+			       (head fragments)
+			       1))))
+
+(e.g.
+ (space-fragment-index '(0 0) 0)
+ ===> (0 0) 0)
+
+(e.g.
+ (space-fragment-index '(0 0) 1)
+ ===> (0) 0)
 
 (define-type (Space fragments: pair)
   #|implementing gnu.kawa.format.Printable with|#
@@ -395,7 +417,10 @@ of an index
   ((part-at index::Index)::Indexable* (this))
   
   ((first-index)::Index 0)
-  ((last-index)::Index (fold-left + 0 fragments))
+  
+  ((last-index)::Index
+   (fold-left + (length (tail fragments))
+	      fragments))
   
   ((next-index index::Index)::Index
    (min (+ index 1) (last-index)))
@@ -407,7 +432,31 @@ of an index
    (is (as int a) < (as int b)))
    
   ((send-char! c::char cursor::Cursor level::int)::Cursor
-   cursor)
+   (define (delete-space! position)
+     (let-values (((cell index) (space-fragment-index
+				 fragments
+				 (cursor level))))
+       (cond ((is (head cell) > 0)
+	      (set! (head cell) (- (head cell) 1)))
+	     ((pair? (tail cell))
+	      (set! (head cell) (head (tail cell)))
+	      (set! (tail cell) (tail (tail cell)))))
+       (hash-cons position (tail cursor))))
+   
+   (match c
+     (#\backspace
+      (if (is (cursor level) > 0)
+	  (delete-space! (- (cursor level) 1))
+	  cursor))
+
+     (#\delete
+      (delete-space! (cursor level)))
+     (_
+      cursor)))
+
+  ((deletable?)::boolean
+   (and (null? (tail fragments))
+	 (is (head fragments) <= 0)))
   
   ((print out::gnu.lists.Consumer)::void
    (let process ((input fragments))
@@ -540,9 +589,10 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 ;; of another, it is considered to be "earlier" than
 ;; the longer one)
 
-(define (cursor< a::Cursor b::Cursor document::Indexable)::boolean
-
-  (define (k< k::int a*::Cursor b*::Cursor parent::Indexable)::boolean
+(define (cursor< a::Cursor b::Cursor document::Indexable)
+  ::boolean
+  (define (k< k::int a*::Cursor b*::Cursor parent::Indexable)
+    ::boolean
     (if (is k < 0)
 	#f
 	(let* ((a/k (a* k))

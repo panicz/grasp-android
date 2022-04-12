@@ -146,10 +146,7 @@
   (define (send-char! c::char cursor::Cursor level::int)
     ::Cursor
     (define (to-be-deleted? target::Indexable)
-      (and (or (and (symbol? target)
-		    (is (string-length
-			 (target:toString)) = 1))
-	       (pair? target))
+      (and (target:deletable?)
 	   (or (and (eq? c #\backspace)
 		    (eqv? (head cursor)
 			  (target:last-index)))
@@ -187,7 +184,8 @@
 		 (number? index)
 		 (is index > 1)
 		 (to-be-deleted? part))
-	    (let ((previous-cell (drop (- (quotient index 2)
+	    (let ((previous-cell (drop (- (quotient index
+						    2)
 					  1)
 				       (this))))
 	      (set! (post-head-space previous-cell)
@@ -202,6 +200,8 @@
 	   (else
 	    (send-char-to! part c cursor
 			   (- level 1)))))))
+  (define (deletable?)::boolean
+    #true)
 
   (pair a d))
 
@@ -286,6 +286,9 @@
 		 c" at level "level)
 	   cursor)))
   
+  (define (deletable?)::boolean
+    (is (string-length name) <= 1))
+  
   (gnu.mapping.SimpleSymbol ((source:toString):intern))
   (set! builder (java.lang.StringBuilder name)))
 
@@ -358,8 +361,7 @@
 						  width)))))
 	    (screen:remember-offset! (+ left
 					(- (head cursor)
-					   total)
-					-1)
+					   total))
 				     (+ top 2)))
 	  (set! left (+ left width))
 	  (set! max-width (max max-width left)))

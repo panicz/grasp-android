@@ -60,6 +60,7 @@
        (let* ((index (cursor level))
 	      (part (part-at index)))
 	 (send-char-to! part c cursor (- level 1)))))
+  ((deletable?)::boolean #t)
   )
 
 (define-type (Below top: Tile bottom: Tile)
@@ -118,6 +119,7 @@
        (let* ((index (cursor level))
 	      (part (part-at index)))
 	 (send-char-to! part c cursor (- level 1)))))
+  ((deletable?)::boolean #t)
   )
 
 
@@ -177,4 +179,5 @@
        (let* ((index (cursor level))
 	      (part (part-at index)))
 	 (send-char-to! part c cursor (- level 1)))))
+  ((deletable?)::boolean #t)
   )
