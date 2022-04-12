@@ -12,9 +12,6 @@
   ...
   ((current-display-procedure) #\newline))
 
-(define-syntax-rule (dump expr)
-  (print 'expr ": "expr))
-
 (define-interface MessageHandler ()
   (clear-messages!)::void
   (add-message message::list)::void
@@ -43,6 +40,10 @@
 
 (define (WARN . args)
   (invoke (current-message-handler) 'add-message args))
+
+(define-syntax-rule (DUMP expr ...)
+  (WARN 'expr ": "expr)
+  ...)
 
 (define-syntax-rule (truly actions ...)
   (begin actions ... #t))
