@@ -435,12 +435,15 @@ of an index
    (define (delete-space! position)
      (let-values (((cell index) (space-fragment-index
 				 fragments
-				 (cursor level))))
+				 position)))
        (cond ((is (head cell) > 0)
 	      (set! (head cell) (- (head cell) 1)))
 	     ((pair? (tail cell))
+	      (WARN "deleting pair" (tail cell))
 	      (set! (head cell) (head (tail cell)))
-	      (set! (tail cell) (tail (tail cell)))))
+	      (set! (tail cell) (tail (tail cell))))
+	     (else
+	      (WARN "no action, cell="cell)))
        (hash-cons position (tail cursor))))
    
    (match c
@@ -451,6 +454,22 @@ of an index
 
      (#\delete
       (delete-space! (cursor level)))
+     
+     (#\space
+      (let-values (((cell index) (space-fragment-index
+				  fragments
+				  (cursor level))))
+	(set! (head cell) (+ (head cell) 1))
+	(hash-cons (+ (cursor level) 1) (tail cursor))))
+
+     (#\newline
+      (let-values (((cell index) (space-fragment-index
+				  fragments
+				  (cursor level))))
+	(set! (tail cell) (cons (head cell) (tail cell)))
+	(set! (head cell) 0)
+	(hash-cons (+ (cursor level) 1) (tail cursor))))
+      
      (_
       cursor)))
 

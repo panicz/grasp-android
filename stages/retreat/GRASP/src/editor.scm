@@ -196,6 +196,10 @@
 	     (send-char! #\delete)
 	     (continue))
 
+	    (,KeyType:Enter
+	     (send-char! #\newline)
+	     (continue))
+	    
 	    (,KeyType:Backspace
 	     (send-char! #\backspace)
 	     (continue))
