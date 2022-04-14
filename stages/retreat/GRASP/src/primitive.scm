@@ -659,8 +659,7 @@
              (Extent width: max-width
                      height: (+ top
 				max-line-height)))))
-
-    (skip-spaces! (pre-head-space pair))
+    (skip-spaces! (pre-head-space elems))
     (grow-ahead! elems)
     ))
 
