@@ -3,23 +3,33 @@
 upierdliwe wydaja sie nastepujace bugi:
 1. cos jest nie tak z mierzeniem wysokosci 
 w sytuacji kiedy mamy wiecej niz jedna linie
+- ok, zrobione
 
 2. umieszczanie kursora w spacjach (zwlaszcza
 wielo-liniowych) wydaje sie skefione
+(no i pytanie o obsluge listy pustej)
 
 3. backspace za pierwszym elementem dziala
 wadliwie (kasuje drugi element), a delete
 przed pierwszym elementem w ogole nie dziala
+- OK, to juz dziala!
+
+(ale jeszcze backspace nie dziala w sposob
+ciagly)
+
+4. cos jest nie tak z pozycjami kursorow
+po operacjach edycji i trzeba to przemyslec
+i poprawic
 
 ponadto brakuje nastepujacych ficzerow:
 
-4. mozliwosc dodawania nowych symboli
+5. mozliwosc dodawania nowych symboli
 
-5. obsluga spacji i entera w symbolu
+6. obsluga spacji i entera w symbolu
 
-6. obsluga strzalek do gory i w dol
+7. obsluga strzalek do gory i w dol
 
-7. obsluga myszy
+8. obsluga myszy
 
 * 12.04.2022
 
