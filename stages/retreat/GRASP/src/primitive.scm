@@ -164,7 +164,8 @@
 		       ((number? index))
 		       (owner-index (quotient index 2))
 		       (subindex (cursor 1))
-		       ((eqv? subindex 1))
+		       ((real? subindex))
+		       ((is subindex <= 2))
 		       (subpart (cell-index part
 					    subindex))
 		       ((to-be-deleted? subpart))
@@ -176,8 +177,8 @@
 		 (pre-head-space (head parent-cell))
 		 (post-head-space (head parent-cell))))
 	      (set! (head parent-cell)
-		(tail (head parent-cell)))
-	      (recons (- subindex 1)
+		    (tail (head parent-cell)))
+	      (recons (max 0 (- subindex 1))
 		      (tail (tail cursor)))))
 
 	   ((and (eqv? level 1)
