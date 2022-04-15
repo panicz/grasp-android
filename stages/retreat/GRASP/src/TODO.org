@@ -1,3 +1,15 @@
+* 15.04.2022
+
+Trzeba poprawic iterowanie po listach pustych,
+tak zeby miec cos w rodzaju:
+
+( ( ) )
+^^^^^^^ 
+[01112]
+vv[0]vv
+  vvv
+
+
 * 14.04.2022
 
 chyba w pierwszej kolejnosci trzeba sie zajac
