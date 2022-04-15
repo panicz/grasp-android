@@ -1,3 +1,22 @@
+* 14.04.2022
+
+chyba w pierwszej kolejnosci trzeba sie zajac
+tymi pozycjami kursora (tzn. markowac kursor
+w trakcie renderowania pustych list oraz
+poprawic nawigowanie kursorem na pustych
+listach)
+
+jest tez taki pomysl - poniewaz na razie
+edycja zachowuje sie troche dziwacznie
+- zeby zmienic sposob iterowania kursora,
+tzn. chcielibysmy, zeby koniec symbolu
+i poczatek spacji byly miedzy soba
+nierozroznialne, i zeby wcisniecie spacji
+na koncu symbola powodowalo przyrost spacji,
+zas wcisniecie klawisza "symbolicznego"
+powodowalo dopisanie fragmentu 
+
+
 * 13.04.2022
 
 upierdliwe wydaja sie nastepujace bugi:
