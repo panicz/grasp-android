@@ -13,7 +13,7 @@
 
 (define (drop-after! k::integer #;elements-in s::list)::list
   (define (lastmost-tail n::integer l::list)
-    (if (or (<= n 1) (isnt l pair?))
+    (if (or (is n <= 1) (isnt l pair?))
 	l
 	(lastmost-tail (- n 1) (cdr l))))
   (let ((trail (lastmost-tail k s)))

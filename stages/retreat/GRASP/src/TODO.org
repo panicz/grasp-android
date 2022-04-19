@@ -1,3 +1,21 @@
+* 18.04.2022
+
+rekapitulujac, chcemy, zeby
+(cursor-climb-front '(1) '(())) ===> ([ 1))
+
+Wydaje sie jednak, ze ta zmiana napotka na pewne
+problemy, z ktorymi nie wiemy, jak sobie poradzic.
+
+Mowiac konkretnie, chodzi o reprezentacje.
+Gdybysmy mogli miec dowolnie wiele obiektow '(),
+ktore bylyby sobie "eq", sprawa radykalnie by sie
+uproscila, bo nie potrzebowalibysmy wlasciwosci
+(null-head-space) i (null-tail-space), zas obiekt
+'() sam by sie mogl zajmowac swoimi indeksami.
+
+Alternatywa jest taka, zeby przemodelowac interfejs
+part-at tak, zeby zamiast indeksu bral kursor i poziom.
+
 * 15.04.2022
 
 Trzeba poprawic iterowanie po listach pustych,
