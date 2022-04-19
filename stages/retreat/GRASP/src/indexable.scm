@@ -140,7 +140,7 @@ of an index
 (define-property+ (post-tail-space cell)
   (Space fragments: (cons 0 '())))
 
-;; `null-tail-head` only concerns a situation
+;; `null-head-space` only concerns a situation
 ;; where the head of a list is `null?`.
 ;; Since all empty lists are considered the same
 ;; in Lisp, the only way to set the size
@@ -211,48 +211,41 @@ of an index
 	(tree-map/preserve properties f (tail l))))
       (f l)))
 
-(define-constant final-part?::parameter[boolean]
-  (make-parameter #f))
-
-(define (cell-index cell::pair index::int)
+(define (cell-index cell::pair index::int)::Indexable*
   (assert (is index >= 0))
   (cond ((= index 0)
-         (pre-head-space cell)) ;; trzeba jakos rzutowac do Indexable
+         (pre-head-space cell))
         ((= index 1)
-         (let ((target (car cell)))
-           (if (and (null? target)
-		    (not (final-part?)))
-               (null-head-space cell)
-               target)))
+	 (car cell))
         ((= index 2)
-         (post-head-space cell)) ;; jak wyzej
+         (post-head-space cell))
         ((dotted? cell)
          (cond ((= index 3)
                 (head-tail-separator cell))
                ((= index 4)
-                (pre-tail-space cell)) ;; jakos rzutowac do Indexable
+                (pre-tail-space cell))
                ((= index 5)
-                (let ((target (cdr cell)))
-                  (if (and (null? target)
-			   (not (final-part?)))
-                      (null-tail-space cell)
-                      target)))
+		(cdr cell))
                ((= index 6)
                 (post-tail-space cell))))
         (else
          (cell-index (cdr cell) (- index 2)))))
 
-(define (last-cell-index cell::pair
+(define (last-cell-index cell::list
 			 #!optional
 			 (initial::int 2))
   ::int
-  (cond ((dotted? cell)
-         (+ initial 4))
-        ((pair? (tail cell))
-         (last-cell-index (tail cell)
-			  (+ initial 2)))
-        (else
-         initial)))
+  (cond
+   ((null? cell) 0)
+   
+   ((dotted? cell)
+    (+ initial 4))
+   ((pair? (tail cell))
+    (last-cell-index (tail cell)
+		     (+ initial 2)))
+   
+   (else
+    initial)))
 
 (define-interface Indexable ()
   (part-at index::Index)::Indexable*
@@ -281,19 +274,6 @@ of an index
 	 (WARN "Unable to send char "c" to "object)
 	 cursor)))
 
-(define (has-children? object)
-  (cond ((Indexable? object)
-	 #t)
-	
-	((pair? object)
-	 #t)
-
-	((string? object)
-	 #t)
-	
-	(else
-	 #f)))
-
 (define (part-at index::Index object)::Indexable*
   (cond ((Indexable? object)
 	 (invoke (as Indexable object)
@@ -309,17 +289,42 @@ of an index
 	 #;(error "Don't know how to extract "index
 		" from "object))))
 
+(define (null-space-ref grandparent::pair
+			parent-index::int)
+  (print "null-space-ref "grandparent" "parent-index)
+  (match parent-index
+    (0 (pre-head-space grandparent))
+    (1 (null-head-space grandparent))
+    (2 (post-head-space grandparent))
+    (_
+     (if (dotted? grandparent)
+	 (match parent-index
+	   (3 (head-tail-separator grandparent))
+	   (4 (pre-tail-space grandparent))
+	   (5 (null-tail-space grandparent))
+	   (6 (post-tail-space grandparent)))
+	 (null-space-ref (cdr grandparent)
+			 (- parent-index 2))))))
+
 (define (cursor-ref tile cursor::Cursor)
   (match cursor
     ('()
      tile)
+    (`(,head ,neck . ,tail)
+     (let* ((grandparent (cursor-ref tile tail))
+	    (parent (part-at neck grandparent)))
+       (cond ((isnt parent null?)
+	      (part-at head parent))
+	     ((isnt head number?)
+	      parent)
+	     ((null? grandparent)
+	      parent)
+	     (else
+	      (null-space-ref grandparent neck)))))
+  
     (`(,head . ,tail)
      (let ((parent (cursor-ref tile tail)))
-           (if parent
-	       (parameterize ((final-part?
-			       (null? tail)))
-		 (part-at head parent))
-               parent)))
+       (part-at head parent)))
     (_
      (error "Unable to refer to cursor "cursor
 	    " in "tile))))
@@ -332,9 +337,9 @@ of an index
 	((string? object)
 	 0)
 
-	((pair? object)
+	((or (pair? object) (null? object))
 	 #\[)
-	
+
 	(else
 	 (error "Don't know how to obtain first index from "
 		object))))
@@ -346,7 +351,7 @@ of an index
 	((string? object)
 	 (string-length (as string object)))
 
-	((pair? object)
+	((or (pair? object) (null? object))
 	 #\])
 	
 	(else
@@ -361,7 +366,7 @@ of an index
 	((string? object)
 	 (min (last-index object) (+ index 1)))
 
-	((pair? object)
+	((or (pair? object) (null? object))
 	 (match index
 	   (#\[ 0)
 	   (#\] #\])
@@ -381,13 +386,14 @@ of an index
 
 	((string? object)
 	 (max 0 (- index 1)))
-
-	((pair? object)
+	
+	((or (pair? object) (null? object))
 	 (match index
 	   (0 #\[)
 	   (#\] (last-cell-index object))
 	   (#\[ #\[)
 	   (_ (- index 1))))
+
 	
 	(else
 	 (error "Don't know how to obtain previous index to "
@@ -439,15 +445,13 @@ of an index
        (cond ((is (head cell) > 0)
 	      (set! (head cell) (- (head cell) 1)))
 	     ((pair? (tail cell))
-	      (WARN "deleting pair" (tail cell))
 	      (set! (head cell) (head (tail cell)))
-	      (set! (tail cell) (tail (tail cell))))
-	     (else
-	      (WARN "no action, cell="cell)))
+	      (set! (tail cell) (tail (tail cell)))))
        (hash-cons position (tail cursor))))
    
    (match c
      (#\backspace
+      (WARN "deletion in space")
       (if (is (cursor level) > 0)
 	  (delete-space! (- (cursor level) 1))
 	  cursor))
@@ -547,23 +551,20 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 (define (cursor-climb-front cursor::Cursor
 			    expression)
   ::Cursor
-
   (define (climb-front cursor::Cursor target)
     ::Cursor
-    (if (has-children? target)
-	(let* ((index (first-index target))
-	       (child (part-at index target)))
-	  (if (eq? child target)
-	      (if (and (pair? cursor)
-		       (eq? (cursor-ref expression
-					(tail
-					 cursor))
-			    target))
-		  cursor
-		  (hash-cons index cursor))
-	      (climb-front (hash-cons index cursor)
-			   child)))
-	cursor))
+    (let* ((index (first-index target))
+	   (child (part-at index target)))
+      (if (eq? child target)
+	  (if (and (pair? cursor)
+		   (eq? (cursor-ref expression
+				    (tail
+				     cursor))
+			target))
+	      cursor
+	      (hash-cons index cursor))
+	  (climb-front (hash-cons index cursor)
+		       child))))
     
   (climb-front cursor
 	       (cursor-ref expression cursor)))
@@ -584,21 +585,18 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 			   expression)
   ::Cursor
   (define (climb-back cursor::Cursor target)::Cursor
-    (if (has-children? target)
-	(let* ((index (last-index target))
-	       (child (part-at index target)))
-	  (if (eq? child target)
-	      (if (and (pair? cursor)
-		       (eq? (cursor-ref expression
-					(tail
-					 cursor))
-			    target))
-		  cursor
-		  (hash-cons index cursor))
-	      (climb-back (hash-cons index cursor)
-			  child)))
-	cursor))
-    
+    (let* ((index (last-index target))
+	   (child (part-at index target)))
+      (if (eq? child target)
+	  (if (and (pair? cursor)
+		   (eq? (cursor-ref expression
+				    (tail
+				     cursor))
+			target))
+	      cursor
+	      (hash-cons index cursor))
+	  (climb-back (hash-cons index cursor)
+		      child))))
   (climb-back cursor
 	      (cursor-ref expression cursor)))  
 
