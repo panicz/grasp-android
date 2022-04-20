@@ -291,7 +291,6 @@ of an index
 
 (define (null-space-ref grandparent::pair
 			parent-index::int)
-  (print "null-space-ref "grandparent" "parent-index)
   (match parent-index
     (0 (pre-head-space grandparent))
     (1 (null-head-space grandparent))
@@ -310,21 +309,15 @@ of an index
   (match cursor
     ('()
      tile)
-    (`(,head ,neck . ,tail)
-     (let* ((grandparent (cursor-ref tile tail))
-	    (parent (part-at neck grandparent)))
-       (cond ((isnt parent null?)
-	      (part-at head parent))
-	     ((isnt head number?)
-	      parent)
-	     ((null? grandparent)
-	      parent)
-	     (else
-	      (null-space-ref grandparent neck)))))
-  
     (`(,head . ,tail)
      (let ((parent (cursor-ref tile tail)))
-       (part-at head parent)))
+       (if (and (null? parent)
+		(number? head)
+		(pair? tail))
+	   (let* ((grand (cursor-ref tile (cdr tail)))
+		  (space (null-space-ref grand (car tail))))
+	     space)
+	   (part-at head parent))))
     (_
      (error "Unable to refer to cursor "cursor
 	    " in "tile))))
