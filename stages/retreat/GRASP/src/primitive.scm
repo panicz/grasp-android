@@ -388,20 +388,33 @@
       (set! max-width (max left max-width))
       (set! index (+ index 1)))
 
-    (define (draw-empty-list! space::Space)::void
+    (define (draw-empty-list! space::Space context)::void
       (let ((inner (empty-space-extent space screen))
 	    (paren-width (screen:paren-width)))
 	(screen:open-paren! inner:height 0 0)
 	(screen:close-paren! inner:height
 			     (+ paren-width
-				inner:width) 0)))
+				inner:width) 0)
+	(match cursor
+	  (`(#\[ . ,,context)
+	   (screen:remember-offset! 0 2))
+	  (`(#\] . ,,context)
+	   (screen:remember-offset! (+ paren-width 1
+					     inner:width)
+					  (- inner:height
+					     1)))
+	  (`(,,@number? 0 . ,,context)
+	   (screen:remember-offset! (+ 1 (head cursor))
+				    2))
+	  (_ (values)))))
     
     (define (draw-head! pair::cons)::void
       (let ((context (recons index context)))
         (with-translation screen (left top)
           (if (null? (head pair))
               (draw-empty-list! (null-head-space
-				 pair))
+				 pair)
+				context)
               (draw! (head pair)
                      screen: screen
                      cursor: cursor
@@ -420,7 +433,8 @@
 		 (if (null? (tail pair))
 		     (draw-empty-list!
 		      (null-tail-space
-		       pair))
+		       pair)
+		      context)
 		     (draw! (tail pair)
 			    screen: screen
 			    cursor: cursor
@@ -441,7 +455,8 @@
 	       (with-translation screen (left top)
 		 (if (null? (tail pair))
 		     (draw-empty-list!
-		      (null-tail-space pair))
+		      (null-tail-space pair)
+		      context)
 		     (draw! (tail pair)
 			    screen: screen
 			    cursor: cursor
