@@ -1,3 +1,27 @@
+* 19.04.2022
+
+Na razie moze tego az tak nie cyzelujmy. Szanse,
+zeby miec wiele obiektow '(), sa raczej marne, wiec
+te droge takze omijamy.
+
+
+Na razie z istotnych rzeczy
+- chcemy uwspolnic ostatni indeks spacji
+  z pierwszym indeksem symbolu
+- chcemy uwspolnic ostatni indeks symbolu
+  z pierwszym indeksem spacji
+- zaimplementowac dodawanie symboli
+- zaimplementowac dodawanie list
+- spacje i nowe linie wewnatrz symboli
+  rozbijaja symbole na dwie czesci
+- strzalki w gore i w dol
+- strzalki w lewo i w prawo powinny
+  dzialac przestrzennie
+
+
+No, ale pobieranie nullowych spacji
+tez bedzie trzeba poprawic
+
 * 18.04.2022
 
 rekapitulujac, chcemy, zeby
