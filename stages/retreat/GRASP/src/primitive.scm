@@ -159,7 +159,21 @@
 	(let* ((index (cursor level))
 	       (part (part-at index)))
 	  (cond
-	   
+
+	   ((null? part)
+	    (let* ((space (null-space-ref (this) index)))
+
+	      (if (or (char-whitespace? c)
+		      (eq? char #\backspace)
+		      (eq? char #\delete))
+		  (send-char-to! space c cursor
+				 (- level 2))
+		  (let* ((new-symbol (Symbol (list->string
+					     (list c))))
+			 (new-cell (cons new-symbol '())))
+		    (set! (cell-index (this) index) new-cell)
+		    (recons* 1 1 (drop 2 cursor))))))
+		    
 	   ((and-let* (((eqv? level 2))
 		       ((number? index))
 		       (owner-index (quotient index 2))
