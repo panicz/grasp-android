@@ -1,4 +1,5 @@
 (import (srfi :11))
+(import (srfi :17))
 (import (define-interface))
 (import (define-type))
 (import (define-object))
@@ -230,6 +231,28 @@ of an index
                 (post-tail-space cell))))
         (else
          (cell-index (cdr cell) (- index 2)))))
+
+(define (set-cell-index! cell::pair index::int value)
+  (assert (is index >= 0))
+  (cond ((= index 0)
+         (set! (pre-head-space cell) value))
+        ((= index 1)
+	 (set! (car cell) value))
+        ((= index 2)
+         (set! (post-head-space cell) value))
+        ((dotted? cell)
+         (cond ((= index 3)
+                (set! (head-tail-separator cell) value))
+               ((= index 4)
+                (set! (pre-tail-space cell) value))
+               ((= index 5)
+		(set! (cdr cell) value))
+               ((= index 6)
+                (set! (post-tail-space cell) value))))
+        (else
+         (set-cell-index! (cdr cell) (- index 2) value))))
+
+(set! (setter cell-index) set-cell-index!)
 
 (define (last-cell-index cell::list
 			 #!optional
