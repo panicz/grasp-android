@@ -183,3 +183,15 @@
 
 (e.g.
  (last-pair '(1 2 3)) ===> (3 . ()))
+
+(define (set-last-tail! p::pair value)
+  (if (pair? (cdr p))
+      (set-last-tail! (cdr p) value)
+      (set! (cdr p) value)))
+
+(define (last-tail p::pair)
+  (if (pair? (cdr p))
+      (last-tail (cdr p))
+      (cdr p)))
+
+(set! (setter last-tail) set-last-tail!)

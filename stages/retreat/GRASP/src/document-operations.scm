@@ -1,8 +1,13 @@
 (import (srfi :11))
 (import (define-interface))
 (import (define-type))
+(import (define-property))
 (import (indexable))
+(import (assert))
 (import (match))
+(import (examples))
+(import (infix))
+(import (functions))
 
 ;; take-cell-at! returns either a cons-cell whose
 ;; car is the desired object, or a head/tail-separator
@@ -135,7 +140,7 @@
 				 document root))
 	    (parent (drop (quotient parent-index 2)
 			  grandparent)))
-       (set! (tail element) (head parent))
+       (set! (last-tail element) (head parent))
        (set! (head parent) element)
        #t))
 
@@ -144,7 +149,7 @@
 	    (irrelevant (- (quotient index 2) 1))
 	    (preceding (drop irrelevant parent)))
        (cond ((pair? element)
-	      (set! (tail element) (tail preceding))
+	      (set! (last-tail element) (tail preceding))
 	      (set! (tail preceding) element)
 	      #t)
 	     
@@ -168,11 +173,17 @@
    document) ===> ((1 3 5)))
 
 (e.g.
+ (let ((document `((,1 ,7))))
+   (put-into-cell-at! '(2 1) `(,3 ,5) document)
+   document) ===> ((1 3 5 7)))
+
+(e.g.
  (let ((document `((,1 ,5))))
    (put-into-cell-at! '(2 1)
 		      head/tail-separator
 		      document)
    document) ===> ((1 . 5)))
+
 
 (e.g.
  (let ((document `((,3 ,5))))
