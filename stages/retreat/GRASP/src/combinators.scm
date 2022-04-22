@@ -53,14 +53,6 @@
   ((index< a::Index b::Index)::boolean
    (and (is a eq? (first-index))
 	(isnt b eq? (first-index))))
-
-  ((send-char! c::char cursor::Cursor level::int)::Cursor
-   (if (is level < 0)
-       cursor
-       (let* ((index (cursor level))
-	      (part (part-at index)))
-	 (send-char-to! part c cursor (- level 1)))))
-  ((deletable?)::boolean #t)
   )
 
 (define-type (Below top: Tile bottom: Tile)
@@ -113,13 +105,6 @@
    (and (is a eq? (first-index))
 	(isnt b eq? (first-index))))
   
-  ((send-char! c::char cursor::Cursor level::int)::Cursor
-   (if (is level < 0)
-       cursor
-       (let* ((index (cursor level))
-	      (part (part-at index)))
-	 (send-char-to! part c cursor (- level 1)))))
-  ((deletable?)::boolean #t)
   )
 
 
@@ -173,11 +158,4 @@
    (and (is a eq? (first-index))
 	(isnt b eq? (first-index))))
 
-  ((send-char! c::char cursor::Cursor level::int)::Cursor
-   (if (is level < 0)
-       cursor
-       (let* ((index (cursor level))
-	      (part (part-at index)))
-	 (send-char-to! part c cursor (- level 1)))))
-  ((deletable?)::boolean #t)
   )

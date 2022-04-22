@@ -128,7 +128,7 @@
 			   #;in document)
   ::boolean
   (assert (or (and (pair? element)
-		   (null? (tail element)))
+		   (list? (tail element)))
 	      (head/tail-separator? element)))
   (match cursor
     (`(,,@(isnt _ integer?) . ,root)
@@ -149,7 +149,8 @@
 	    (irrelevant (- (quotient index 2) 1))
 	    (preceding (drop irrelevant parent)))
        (cond ((pair? element)
-	      (set! (last-tail element) (tail preceding))
+	      (set! (last-tail element)
+		(tail preceding))
 	      (set! (tail preceding) element)
 	      #t)
 	     
@@ -184,8 +185,12 @@
 		      document)
    document) ===> ((1 . 5)))
 
-
 (e.g.
  (let ((document `((,3 ,5))))
    (put-into-cell-at! '(0 1) `(,1) document)
    document) ===> ((1 3 5)))
+
+(e.g.
+ (let ((document `((,5 ,7))))
+   (put-into-cell-at! '(0 1) `(,1 ,3) document)
+   document) ===> ((1 3 5 7)))

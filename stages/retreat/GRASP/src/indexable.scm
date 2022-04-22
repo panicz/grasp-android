@@ -281,21 +281,7 @@ of an index
 
   (index< a::Index b::Index)::boolean
 
-  (send-char! c::char cursor::Cursor level::int)::Cursor
-  (deletable?)::boolean
-  ;;(take-part-at! cursor::Cursor)::Indexable*
 )
-
-(define (send-char-to! object c::char cursor::Cursor
-		       #!optional
-		       (level::int (- (length cursor) 1)))
-  ::Cursor
-  (cond ((instance? object Indexable)
-	 (invoke (as Indexable object) 'send-char!
-		 c cursor level))
-	(else
-	 (WARN "Unable to send char "c" to "object)
-	 cursor)))
 
 (define (part-at index::Index object)::Indexable*
   (cond ((Indexable? object)
@@ -497,51 +483,31 @@ of an index
   ((index< a::Index b::Index)::boolean
    (is (as int a) < (as int b)))
 
-  ((delete-space! position)::void
+  ((delete-space! position::int)::void
     (let-values (((cell index) (space-fragment-index
 				 fragments
 				 position)))
        (cond ((is (head cell) > 0)
 	      (set! (head cell) (- (head cell) 1)))
 	     ((pair? (tail cell))
-	      (set! (head cell) (head (tail cell)))
-	      (set! (tail cell) (tail (tail cell)))))))
-  
-  ((send-char! c::char cursor::Cursor level::int)::Cursor
-   
-   (match c
-     (#\backspace
-      (WARN "deletion in space")
-      (if (is (cursor level) > 0)
-	  (delete-space! (- (cursor level) 1))
-	  cursor))
+	      (set! (head cell)
+		(head (tail cell)))
+	      (set! (tail cell)
+		(tail (tail cell)))))) )
 
-     (#\delete
-      (delete-space! (cursor level))
-      (hash-cons (cursor level) (tail cursor)))
-     
-     (#\space
-      (let-values (((cell index) (space-fragment-index
-				  fragments
-				  (cursor level))))
-	(set! (head cell) (+ (head cell) 1))
-	(hash-cons (+ (cursor level) 1) (tail cursor))))
+  ((insert-space! position::int)::void
+   (let-values (((cell index) (space-fragment-index
+			       fragments
+			       position)))
+     (set! (head cell) (+ (head cell) 1))))
 
-     (#\newline
-      (let-values (((cell index) (space-fragment-index
-				  fragments
-				  (cursor level))))
-	(set! (tail cell) (cons (head cell) (tail cell)))
-	(set! (head cell) 0)
-	(hash-cons (+ (cursor level) 1) (tail cursor))))
-      
-     (_
-      cursor)))
-
-  ((deletable?)::boolean
-   (and (null? (tail fragments))
-	 (is (head fragments) <= 0)))
-  
+  ((insert-break! position::int)::void
+   (let-values (((cell index) (space-fragment-index
+			       fragments
+			       position)))
+     (set! (tail cell) (cons (head cell) (tail cell)))
+     (set! (head cell) 0)))
+    
   ((print out::gnu.lists.Consumer)::void
    (let process ((input fragments))
      (match input
@@ -567,7 +533,9 @@ of an index
 
 (define (split-space! space::Space index::int)::Space
   "Truncates space and returns the rest in the result"
-  (define (split-fragments! fragments::pair index::int)::Space
+  (define (split-fragments! fragments::pair
+			    index::int)
+    ::Space
     (cond
      ((is index <= (car fragments))
       (let ((reminent (cons (- (car fragments) index)
@@ -576,8 +544,9 @@ of an index
 	(set! (cdr fragments) '())
 	(Space fragments: reminent)))
      (else
-      (split-fragments! (cdr fragments)
-			(- index (car fragments) 1)))))
+      (split-fragments!
+       (cdr fragments)
+       (- index (car fragments) 1)))))
   (split-fragments! space:fragments index))
 
 (e.g.

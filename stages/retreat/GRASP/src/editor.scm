@@ -26,7 +26,8 @@
 (define (factorial n)
   (if (<= n 0)
       1
-      (* n (! (- n 1))))) (e.g. (factorial 5) ===> 120)
+      (* n (! (- n 1))))) 
+(e.g. (factorial 5) ===> 120)
 ")
 
 (define document ::list (cons (parse-string input) '()))
@@ -80,13 +81,6 @@
 		       (lambda ()
 			 (display
 			  message)))))))
-    (define (send-char! c)
-      (try-catch
-       (set! cursor
-	 (send-char-to! document c cursor))
-       (ex java.lang.Throwable
-	   (WARN (ex:toString))))
-      )
           
     (let continue ()
       (let ((output-extent ::Extent
@@ -183,78 +177,91 @@
 
 	    (,KeyType:Character
 	     
-	     (let* ((code::char ((key:getCharacter):charValue))
-		    (c::gnu.text.Char (gnu.text.Char code)))
+	     (let* ((code::char
+		     ((key:getCharacter):charValue))
+		    (c::gnu.text.Char (gnu.text.Char
+				       code)))
 	       (if (and (key:ctrl-down?)
 			(eq? c #\space))
 		   (invoke (current-message-handler)
 			   'clear-messages!)
-		   (let* ((target (cursor-ref document cursor)))
-		     (cond ((is target instance? Symbol)
-			    (cond
-			     ((eq? c #\space)
-			      (WARN"split the symbol into two parts")
-			      )
-			     
-			     (else
-			      (invoke (as Symbol target)
-				      'insert-char! c (head cursor))
-			      (set! cursor (recons (+ (head cursor) 1)
-						   (tail cursor))))))
-			   ((is target instance? Space)
+		   (let* ((target (cursor-ref
+				   document
+				   cursor)))
+		     (cond
+		      ((is target instance?
+			   Symbol)
+		       (cond
+			((eq? c #\space)
+			 (WARN"split the symbol "
+			      "into two parts")
+			 )
+			
+			(else
+			 (invoke (as Symbol target)
+				 'insert-char! c
+				 (head cursor))
+			 (set! cursor
+			   (recons (+ (head cursor) 1)
+				   (tail cursor))))))
+		      ((is target instance? Space)
 
-			    (cond
-			     ((eq? c #\space)
-			      (WARN"increase the space size")
-			      )
-			     
-			     ((or (eq? c #\[)
-				  (eq? c #\()
-				  (eq? c #\{))
-			      (put-into-cell-at! (tail cursor)
-						 (cons '() '())
-						 document)
-			      (set! cursor (recons* 1 (+ (head
-							  (tail
-							   cursor))
-							 1)
-						    (tail
-						     (tail
-						      cursor)))))
-			     
-			     (else
-			      (let* ((space-after (split-space!
-						   target
-						   (head cursor))))
-				(put-into-cell-at!
-				 (tail cursor)
-				 (cons (Symbol (list->string (list c)))
-				       '())
-				 document)
-				(set! cursor
-				      (recons* 1 (+ (head
-						     (tail cursor))
-						    1)
-					       (tail
-						(tail
-						 cursor))))))))
-			   )))
-		(continue)))
+		       (cond
+			((eq? c #\space)
+			 (WARN"increase the "
+			      "space size")
+			 )
+			
+			((or (eq? c #\[)
+			     (eq? c #\()
+			     (eq? c #\{))
+			 (put-into-cell-at!
+			  (tail cursor)
+			  (cons '() '())
+			  document)
+			 (set! cursor
+			   (recons* 1 (+ (head
+					  (tail
+					   cursor))
+					 1)
+				    (tail
+				     (tail
+				      cursor)))))
+			
+			(else
+			 (let* ((space-after
+				 (split-space!
+				  target
+				  (head cursor))))
+			   (put-into-cell-at!
+			    (tail cursor)
+			    (cons (Symbol
+				   (list->string
+				    (list c)))
+				  '())
+			    document)
+			   (set! cursor
+			     (recons*
+			      1
+			      (+ (head
+				  (tail cursor))
+				 1)
+			      (tail
+			       (tail
+				cursor))))))))
+		      )))
+	       (continue)))
 
 	    (,KeyType:Delete
 	     (WARN "delete")
-	     (send-char! #\delete)
 	     (continue))
 
 	    (,KeyType:Enter
 	     (WARN "newline")
-	     (send-char! #\newline)
 	     (continue))
 	    
 	    (,KeyType:Backspace
 	     (WARN "backspace")
-	     
-	     (send-char! #\backspace)
 	     (continue))
 	    
 	    (,KeyType:MouseEvent

@@ -143,81 +143,6 @@
 	(and (is b eqv? (last-index))
 	     (isnt a eqv? (last-index)))))
   
-  (define (send-char! c::char cursor::Cursor level::int)
-    ::Cursor
-    (define (to-be-deleted? target::Indexable)
-      (and (target:deletable?)
-	   (or (and (eq? c #\backspace)
-		    (eqv? (head cursor)
-			  (target:last-index)))
-	       (and (eq? c #\delete)
-		    (eqv? (head cursor)
-			  (target:first-index))))))
-    
-    (if (is level < 0)
-	cursor
-	(let* ((index (cursor level))
-	       (part (part-at index)))
-	  (cond
-
-	   ((null? part)
-	    (let* ((space (null-space-ref (this) index)))
-
-	      (if (or (char-whitespace? c)
-		      (eq? char #\backspace)
-		      (eq? char #\delete))
-		  (send-char-to! space c cursor
-				 (- level 2))
-		  (let* ((new-symbol (Symbol (list->string
-					     (list c))))
-			 (new-cell (cons new-symbol '())))
-		    (set! (cell-index (this) index) new-cell)
-		    (recons* 1 1 (drop 2 cursor))))))
-		    
-	   ((and-let* (((eqv? level 2))
-		       ((number? index))
-		       (owner-index (quotient index 2))
-		       (subindex (cursor 1))
-		       ((real? subindex))
-		       ((is subindex <= 2))
-		       (subpart (cell-index part
-					    subindex))
-		       ((to-be-deleted? subpart))
-		       (parent-cell (drop owner-index
-					  (this))))
-	      (set! (pre-head-space
-		     (tail (head parent-cell)))
-		(join-spaces!
-		 (pre-head-space (head parent-cell))
-		 (post-head-space (head parent-cell))))
-	      (set! (head parent-cell)
-		    (tail (head parent-cell)))
-	      (recons (max 0 (- subindex 1))
-		      (tail (tail cursor)))))
-
-	   ((and (eqv? level 1)
-		 (number? index)
-		 (is index > 1)
-		 (to-be-deleted? part))
-	    (let ((previous-cell (drop (- (quotient index
-						    2)
-					  1)
-				       (this))))
-	      (set! (post-head-space previous-cell)
-		(join-spaces!
-		 (post-head-space previous-cell)
-		 (post-head-space (tail previous-cell))))
-	      (set! (tail previous-cell)
-		(tail (tail previous-cell)))
-	      (recons (- index 1)
-		      (tail (tail cursor)))))
-	   
-	   (else
-	    (send-char-to! part c cursor
-			   (- level 1)))))))
-  (define (deletable?)::boolean
-    #true)
-
   (pair a d))
 
 (define-cache (heads tail)
@@ -279,40 +204,9 @@
   (define (delete-char! index)
     (builder:deleteCharAt index)
     (set! name ((builder:toString):intern)))
-  
-  (define (send-char! c::char cursor::Cursor level::int)
-    ::Cursor
-    (cond ((= level 0)
-	   (let ((index ::int (head cursor)))
-	     (match c
-	       (#\backspace
-		(cond ((is index > 0)
-		       (builder:deleteCharAt (- index 1))
-		       (set! name
-			 ((builder:toString):intern))
-		       (recons (- index 1) (tail cursor)))
-		      (else
-		       cursor)))
-	       (#\delete
-		(when (is index < (string-length name))
-		  (builder:deleteCharAt index)
-		  (set! name ((builder:toString):intern)))
-		cursor)
-
-	       (_
-		(builder:insert index c)
-		(set! name ((builder:toString):intern))
-		(recons (+ index 1) (tail cursor))))))
-
-	  (else
-	   (WARN "The symbol "name" cannot support char "
-		 c" at level "level)
-	   cursor)))
-  
-  (define (deletable?)::boolean
-    (is (string-length name) <= 1))
-  
-  (gnu.mapping.SimpleSymbol ((source:toString):intern))
+    
+  (gnu.mapping.SimpleSymbol
+   ((source:toString):intern))
   (set! builder (java.lang.StringBuilder name)))
 
 (define (empty-space-extent space::Space
