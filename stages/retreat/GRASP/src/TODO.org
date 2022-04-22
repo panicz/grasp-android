@@ -1,3 +1,17 @@
+* 22.04.2022
+
+1. wywalic operacje 'send-char-to!' z interfejsu;
+2. zaimplementowac dzielenie spacji
+3. utozsamic ze soba kursory
+
+* 21.04.2022
+
+poniewaz dotychczasowa implementacja operacji edycji
+jest beznadziejna, trzeba to zrobic od nowa, korzystajac
+z funkcji zawartych w "document-operations", ale do tego
+bedzie trzeba jeszcze dodac operacje insert-char! do
+symbolu
+
 * 20.04.2022
 
 dzis bysmy przynajmniej zrobili obsluge spacji
