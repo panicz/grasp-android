@@ -272,6 +272,14 @@
     (and (number? a) (number? b)
 	 (is a < b)))
 
+  (define (insert-char! c::char index::int)
+    (builder:insert index c)
+    (set! name ((builder:toString):intern)))
+
+  (define (delete-char! index)
+    (builder:deleteCharAt index)
+    (set! name ((builder:toString):intern)))
+  
   (define (send-char! c::char cursor::Cursor level::int)
     ::Cursor
     (cond ((= level 0)

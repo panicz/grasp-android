@@ -432,6 +432,50 @@ of an index
  (space-fragment-index '(0 0) 1)
  ===> (0) 0)
 
+(e.g.
+ (space-fragment-index '(3 5) 0)
+ ===> (3 5) 0)
+
+(e.g.
+ (space-fragment-index '(3 5) 1)
+ ===> (3 5) 1)
+
+(e.g.
+ (space-fragment-index '(3 5) 2)
+ ===> (3 5) 2)
+
+(e.g.
+ (space-fragment-index '(3 5) 3)
+ ===> (3 5) 3)
+
+(e.g.
+ (space-fragment-index '(3 5) 4)
+ ===> (5) 0)
+
+(e.g.
+ (space-fragment-index '(3 5) 5)
+ ===> (5) 1)
+
+(e.g.
+ (space-fragment-index '(3 5) 6)
+ ===> (5) 2)
+
+(e.g.
+ (space-fragment-index '(3 5) 7)
+ ===> (5) 3)
+
+(e.g.
+ (space-fragment-index '(3 5) 8)
+ ===> (5) 4)
+
+(e.g.
+ (space-fragment-index '(3 5) 9)
+ ===> (5) 5)
+
+(e.g.
+ (space-fragment-index '(3 5) 10)
+ ===> () 0)
+
 (define-type (Space fragments: pair)
   #|implementing gnu.kawa.format.Printable with|#
   implementing Indexable
@@ -452,18 +496,18 @@ of an index
    
   ((index< a::Index b::Index)::boolean
    (is (as int a) < (as int b)))
-   
-  ((send-char! c::char cursor::Cursor level::int)::Cursor
-   (define (delete-space! position)
-     (let-values (((cell index) (space-fragment-index
+
+  ((delete-space! position)::void
+    (let-values (((cell index) (space-fragment-index
 				 fragments
 				 position)))
        (cond ((is (head cell) > 0)
 	      (set! (head cell) (- (head cell) 1)))
 	     ((pair? (tail cell))
 	      (set! (head cell) (head (tail cell)))
-	      (set! (tail cell) (tail (tail cell)))))
-       (hash-cons position (tail cursor))))
+	      (set! (tail cell) (tail (tail cell)))))))
+  
+  ((send-char! c::char cursor::Cursor level::int)::Cursor
    
    (match c
      (#\backspace
@@ -473,7 +517,8 @@ of an index
 	  cursor))
 
      (#\delete
-      (delete-space! (cursor level)))
+      (delete-space! (cursor level))
+      (hash-cons (cursor level) (tail cursor)))
      
      (#\space
       (let-values (((cell index) (space-fragment-index
@@ -519,6 +564,65 @@ of an index
     (set! (tail suffix) (tail b:fragments))
     (set! b:fragments (cons 0 '()))
     a))
+
+(define (split-space! space::Space index::int)::Space
+  "Truncates space and returns the rest in the result"
+  (define (split-fragments! fragments::pair index::int)::Space
+    (cond
+     ((is index <= (car fragments))
+      (let ((reminent (cons (- (car fragments) index)
+			    (cdr fragments))))
+	(set! (car fragments) index)
+	(set! (cdr fragments) '())
+	(Space fragments: reminent)))
+     (else
+      (split-fragments! (cdr fragments)
+			(- index (car fragments) 1)))))
+  (split-fragments! space:fragments index))
+
+(e.g.
+ (let* ((fragments (list 3 6 9))
+	(space (Space fragments: fragments))
+	(rest (split-space! space 0)))
+   (and (equal? space (Space fragments: '(0)))
+	(equal? rest (Space fragments: '(3 6 9))))))
+
+(e.g.
+ (let* ((space (Space fragments: (list 3 6 9)))
+	(rest (split-space! space 1)))
+   (and (equal? space (Space fragments: '(1)))
+	(equal? rest (Space fragments: '(2 6 9))))))
+
+(e.g.
+ (let* ((space (Space fragments: (list 3 6 9)))
+	(rest (split-space! space 3)))
+   (and (equal? space (Space fragments: '(3)))
+	(equal? rest (Space fragments: '(0 6 9))))))
+
+(e.g.
+ (let* ((space (Space fragments: (list 3 6 9)))
+	(rest (split-space! space 4)))
+   (and (equal? space (Space fragments: '(3 0)))
+	(equal? rest (Space fragments: '(6 9))))))
+
+(e.g.
+ (let* ((space (Space fragments: (list 3 6 9)))
+	(rest (split-space! space 5)))
+   (and (equal? space (Space fragments: '(3 1)))
+	(equal? rest (Space fragments: '(5 9))))))
+
+(e.g.
+ (let* ((space (Space fragments: (list 3 6 9)))
+	(rest (split-space! space 10)))
+   (and (equal? space (Space fragments: '(3 6)))
+	(equal? rest (Space fragments: '(0 9))))))
+
+(e.g.
+ (let* ((space (Space fragments: (list 3 6 9)))
+	(rest (split-space! space 11)))
+   (and (equal? space (Space fragments: '(3 6 0)))
+	(equal? rest (Space fragments: '(9))))))
+
 
 (define (base-cursor cursor object)
   (match cursor
