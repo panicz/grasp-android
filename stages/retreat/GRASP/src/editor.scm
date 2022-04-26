@@ -62,6 +62,84 @@
 
   (set! history-length size))
 
+(define (delete! position::int)::void
+  (let* ((target (cursor-ref document cursor)))
+    (cond
+     ((is target instance? Symbol)
+      (cond ((is 0
+		 <=
+		 position
+		 <
+		 (symbol-length target))
+	     (delete-char! target position)
+	     (when (= (symbol-length target) 0)
+	       (take-cell-at! (tail cursor) document)
+	       (set! cursor (cursor-climb-back
+			     (recons (- (head (tail cursor))
+					1)
+				     (tail (tail cursor)))
+			     document))))))
+     ((is target instance? Space)
+      (if (is position >= 0)
+	  (delete-space! target position))))))
+
+
+(define (type-character! c::char)::void
+  (let* ((target (cursor-ref document cursor)))
+    (cond
+     ((or (eq? c #\[)
+	  (eq? c #\()
+	  (eq? c #\{))
+      (put-into-cell-at! (tail cursor)
+			 (cons '() '())
+			 document)
+      (set! cursor
+	(recons* 0 0 (+ (head (tail cursor)) 1)
+		 (tail (tail cursor)))))
+
+     ((or (eq? c #\])
+	  (eq? c #\))
+	  (eq? c #\}))
+      (WARN "closing paren"))
+     
+     ((is target instance? Symbol)
+      (cond
+       ((or (eq? c #\space)
+	    (eq? c #\newline))
+	(WARN"split the symbol "
+	     "into two parts")
+	)
+       
+       (else
+	(insert-char! c target (head cursor))
+	(set! cursor
+	  (recons (+ (head cursor) 1)
+		  (tail cursor))))))
+     ((is target instance? Space)
+
+      (cond
+       ((eq? c #\space)
+	(insert-space! target (head cursor))
+	(set! cursor (recons (+ (head cursor) 1)
+			     (tail cursor)))
+	)
+
+       ((eq? c #\newline)
+	(insert-break! target (head cursor)))
+              
+       (else
+	(let* ((space-after (split-space!
+			     target
+			     (head cursor))))
+	  (put-into-cell-at!
+	   (tail cursor)
+	   (cons (Symbol (list->string (list c)))
+		 '())
+	   document)
+	  (set! cursor
+	    (recons* 1 (+ (head (tail cursor)) 1)
+		     (tail (tail cursor))))))))
+     )))
 (define (run-editor #!optional
 		    (io ::Terminal (make-terminal)))
   ::void
@@ -185,83 +263,27 @@
 			(eq? c #\space))
 		   (invoke (current-message-handler)
 			   'clear-messages!)
-		   (let* ((target (cursor-ref
-				   document
-				   cursor)))
-		     (cond
-		      ((is target instance?
-			   Symbol)
-		       (cond
-			((eq? c #\space)
-			 (WARN"split the symbol "
-			      "into two parts")
-			 )
-			
-			(else
-			 (invoke (as Symbol target)
-				 'insert-char! c
-				 (head cursor))
-			 (set! cursor
-			   (recons (+ (head cursor) 1)
-				   (tail cursor))))))
-		      ((is target instance? Space)
-
-		       (cond
-			((eq? c #\space)
-			 (WARN"increase the "
-			      "space size")
-			 )
-			
-			((or (eq? c #\[)
-			     (eq? c #\()
-			     (eq? c #\{))
-			 (put-into-cell-at!
-			  (tail cursor)
-			  (cons '() '())
-			  document)
-			 (set! cursor
-			   (recons* 1 (+ (head
-					  (tail
-					   cursor))
-					 1)
-				    (tail
-				     (tail
-				      cursor)))))
-			
-			(else
-			 (let* ((space-after
-				 (split-space!
-				  target
-				  (head cursor))))
-			   (put-into-cell-at!
-			    (tail cursor)
-			    (cons (Symbol
-				   (list->string
-				    (list c)))
-				  '())
-			    document)
-			   (set! cursor
-			     (recons*
-			      1
-			      (+ (head
-				  (tail cursor))
-				 1)
-			      (tail
-			       (tail
-				cursor))))))))
-		      )))
+		   (type-character! c)
+		   )
 	       (continue)))
 
 	    (,KeyType:Delete
-	     (WARN "delete")
+	     (delete! (head cursor))
 	     (continue))
 
 	    (,KeyType:Enter
-	     (WARN "newline")
+	     (type-character! #\newline)
 	     (continue))
 	    
 	    (,KeyType:Backspace
-	     (WARN "backspace")
+	     (set! cursor
+	       (recons (max 0 (- (head cursor) 1))
+		       (tail cursor)))
+	     (try-catch
+	      (delete! (head cursor))
+	      (ex java.lang.Throwable
+		  (WARN (ex:toString))))
+
 	     (continue))
 	    
 	    (,KeyType:MouseEvent
