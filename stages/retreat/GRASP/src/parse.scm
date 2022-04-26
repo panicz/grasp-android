@@ -1,10 +1,15 @@
 (import (define-property))
 (import (srfi :11) (srfi :17))
 (import (conversions))
+(import (functions))
 (import (primitive))
 (import (infix))
 (import (examples))
 (import (indexable))
+(import (space))
+(import (tile))
+(import (symbol))
+
 
 (define (separator? c)::boolean
   (or (eof-object? c)

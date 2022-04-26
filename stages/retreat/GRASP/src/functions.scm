@@ -2,6 +2,10 @@
 (import (examples))
 (import (infix))
 
+(define head car)
+
+(define tail cdr)
+
 (define (drop k::integer #;elements-from s::list)::list
   (if (is k <= 0)
       s

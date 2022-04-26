@@ -1,10 +1,13 @@
 (import (define-type))
 (import (primitive))
 (import (indexable))
+(import (space))
+(import (cursor))
 (import (screen))
 (import (extent))
 (import (match))
 (import (infix))
+(import (tile))
 
 (define-type (Over back: Tile front: Tile)
   implementing Tile

@@ -3,6 +3,8 @@
 (import (define-type))
 (import (define-property))
 (import (indexable))
+(import (space))
+(import (cursor))
 (import (assert))
 (import (match))
 (import (examples))

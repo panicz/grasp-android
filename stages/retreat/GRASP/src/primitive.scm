@@ -10,41 +10,14 @@
 (import (infix))
 (import (extent))
 (import (indexable))
+(import (space))
+(import (cursor))
+(import (tile))
 (import (for))
 (import (screen))
 (import (functions))
 (import (print))
 
-(define-interface Tile (Indexable)
-  (draw! screen::Screen
-	 cursor::Cursor
-	 context::Cursor
-	 anchor::Cursor)::void
-	 
-  (extent screen::Screen)::Extent
-  )
-
-(define (draw! object #!key
-               (screen::Screen (current-screen))
-               (cursor::Cursor '())
-	       (context::Cursor '())
-	       (anchor::Cursor '()))
-  ::void
-  (cond ((instance? object Tile)
-	 (invoke (as Tile object)
-		 'draw! screen cursor context anchor))
-
-	(else
-	 (error "Don't know how to draw "object))))
-
-(define (extent object #!optional
-		(screen::Screen (current-screen)))
-  ::Extent
-  (cond ((instance? object Tile)
-	 (invoke (as Tile object) 'extent screen))
-
-	(else
-	 (error "Don't know how to draw "object))))
 
 (define-syntax-rule (with-translation screen (x y)
 				      . actions)
@@ -159,55 +132,6 @@
     
     ((_ a b c ...)
      (recons a (recons* b c ...)))))
-
-(define-object (Symbol source::string)::Tile
-  (define builder :: java.lang.StringBuilder)
-  
-  (define (draw! screen::Screen
-		 cursor::Cursor
-		 context::Cursor
-		 anchor::Cursor)
-    ::void
-    (screen:draw-atom! name)
-    (when (and (pair? cursor)
-	       (equal? (tail cursor) context))
-      (let ((index (head cursor)))
-	(screen:remember-offset! index 2))))
-
-  (define (extent screen::Screen)::Extent
-    (Extent width: (screen:atom-width name)
-	    height: (screen:min-line-height)))
-  
-  (define (part-at index::Index)::Indexable*
-    (this))
-
-  (define (first-index)::Index
-    0)
-  
-  (define (last-index)::Index
-    (string-length name))
-  
-  (define (next-index index::Index)::Index
-    (min (last-index) (+ index 1)))
-  
-  (define (previous-index index::Index)::Index
-    (max 0 (- index 1)))
-
-  (define (index< a::Index b::Index)::boolean
-    (and (number? a) (number? b)
-	 (is a < b)))
-
-  (define (insert-char! c::char index::int)
-    (builder:insert index c)
-    (set! name ((builder:toString):intern)))
-
-  (define (delete-char! index)
-    (builder:deleteCharAt index)
-    (set! name ((builder:toString):intern)))
-    
-  (gnu.mapping.SimpleSymbol
-   ((source:toString):intern))
-  (set! builder (java.lang.StringBuilder name)))
 
 (define (empty-space-extent space::Space
 			    screen::Screen)

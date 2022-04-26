@@ -6,13 +6,18 @@
   (extent)
   (indexable)
   (screen)
+  (space)
+  (cursor)
+  (tile)
   (primitive)
+  (symbol)
   (combinators)
   (text-screen)
   (parse)
   (examples)
   (assert)
   (infix)
+  (functions)
   )
 
 
