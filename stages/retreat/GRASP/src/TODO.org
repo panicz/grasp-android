@@ -1,3 +1,31 @@
+* 25.04.2022
+
+sprobujmy sie uporac z tymi spacjami, a pozniej
+ewentualnie dodamy obsluge stringow i komentarzy
+do parsera
+
+cursor-advance!
+cursor-retreat!
+
+* 24.04.2022
+
+- utozsamienie ostatniego kursora spacji z pierwszym
+  kursorem symbolu, oraz ostatniego kursora symbolu
+  z pierwszym kursorem spacji (podczas 'trawersoeania')
+  
+- obsluga liczb (oprocz symboli)
+
+- obsluga stringow
+
+- obsluga komentarzy:
+  - blokowych #| |#
+  - wyrazeniowych #;
+  - liniowych ;
+
+* 23.04.2022
+
+- kasowanie pustych symboli
+
 * 22.04.2022
 
 1. wywalic operacje 'send-char-to!' z interfejsu;
