@@ -1,3 +1,28 @@
+* 26.04.2022
+
+zamiast tego porozbijalem moduly na mniejsze.
+ale to tez fajnie.
+a dzis bysmy zrobili ten 'cursor-advance'
+i 'cursor-retreat'
+
+
+funkcje zostaly juz wyekstrahowane, ale trzeba
+wprowadzic do nich zmiany:
+
+1. jezeli znalezlismy sie na ostatniej pozycji
+   spacji, idac do przodu, to chcemy przeskoczyc
+   naprzod o jeszcze jedno pole
+2. analogicznie jezeli cofnelismy sie na pierwsza
+   pozycje symbolu, to chcemy zrobic jeszcze
+   jeden krok do tylu
+3. i podobnie, jezeli doszlismy do ostatniej
+   pozycji symbolu, to chcemy jeszcze zrobic
+   krok do przodu
+4. jak rowniez, ze jezeli chcemy cofnac sie
+   na pierwsza pozycje spacji, to wykonamy jeszcze
+   jeden krok do tylu
+
+
 * 25.04.2022
 
 sprobujmy sie uporac z tymi spacjami, a pozniej
