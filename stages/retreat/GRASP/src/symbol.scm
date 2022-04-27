@@ -44,23 +44,36 @@
     (and (number? a) (number? b)
 	 (is a < b)))
 
-  (define (insert-char! c::char index::int)
+  (define (insert-char! c::char index::int)::void
     (builder:insert index c)
     (set! name ((builder:toString):intern)))
 
-  (define (delete-char! index::int)
+  (define (delete-char! index::int)::void
     (builder:deleteCharAt index)
     (set! name ((builder:toString):intern)))
-    
+
+  (define (truncate! length::int)::void
+    (builder:setLength length)
+    (set! name ((builder:toString):intern)))
+
+  (define (subpart start::int)::Symbol
+    (Symbol (invoke name 'substring start)))
+  
   (gnu.mapping.SimpleSymbol
    ((source:toString):intern))
   (set! builder (java.lang.StringBuilder name)))
 
-(define (symbol-length s::Symbol)
+(define (symbol-length s::Symbol)::int
   (invoke (slot-ref s 'builder) 'length))
 
-(define (insert-char! c::char s::Symbol index::int)
+(define (insert-char! c::char s::Symbol index::int)::void
   (invoke s 'insert-char! c index))
 
-(define (delete-char! s::Symbol index::int)
+(define (delete-char! s::Symbol index::int)::void
   (invoke s 'delete-char! index))
+
+(define (truncate-symbol! s::Symbol length::int)::void
+  (invoke s 'truncate! length))
+
+(define (symbol-subpart s::Symbol start::int)::Symbol
+  (invoke s 'subpart start))

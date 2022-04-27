@@ -90,36 +90,63 @@
 
 
 (define (type-character! c::char)::void
-  (let* ((target (cursor-ref document cursor)))
+  (and-let* ((`(,tip . ,stem) cursor)
+	     (`(,top . ,root) stem)
+	     (parent (cursor-ref document root))
+	     (owner (drop (quotient top 2) parent))
+	     (target (part-at top parent)))
     (cond
-     ((or (eq? c #\[)
-	  (eq? c #\()
-	  (eq? c #\{))
-      (put-into-cell-at! (tail cursor)
-			 (cons '() '())
+     ((is c memq '(#\[ #\( #\{))
+      (put-into-cell-at! (tail cursor) (cons '() '())
 			 document)
       (set! cursor
 	(recons* 0 0 (+ (head (tail cursor)) 1)
 		 (tail (tail cursor)))))
 
-     ((or (eq? c #\])
-	  (eq? c #\))
-	  (eq? c #\}))
+     ((is c memq '(#\] #\) #\}))
       (WARN "closing paren"))
      
      ((is target instance? Symbol)
       (cond
-       ((or (eq? c #\space)
-	    (eq? c #\newline))
-	(WARN"split the symbol "
-	     "into two parts")
-	)
+       ((or (eq? c #\space) (eq? c #\newline))
+	(cond ((eqv? (head cursor) (first-index target))
+	       (let ((preceding-space (part-at
+				       (previous-index
+					top parent)
+				       parent)))
+		 (insert-whitespace! c preceding-space
+				     (last-index
+				      preceding-space))))
+	      ((eqv? (head cursor) (last-index target))
+	       (let ((following-space (part-at
+				       (next-index
+					top parent)
+				       parent)))
+		 (insert-whitespace! c following-space
+				     (first-index
+				      following-space))
+		 (set! cursor
+		   (cursor-advance cursor document))))
+	      (else
+	       (let* ((suffix (symbol-subpart target tip))
+		      (cell (cons suffix (tail owner))))
+		 (truncate-symbol! target tip)
+		 (set! (tail owner) cell)
+		 (set! (post-head-space cell)
+		   (post-head-space owner))
+		 (set! (post-head-space owner)
+		   (Space fragments: (if (eq? c #\newline)
+					 (cons 0
+					       (cons 0 '()))
+					 (cons 1 '()))))
+		 (set! cursor
+		   (cursor-advance cursor document))))))
        
-       (else
-	(insert-char! c target (head cursor))
-	(set! cursor
-	  (recons (+ (head cursor) 1)
-		  (tail cursor))))))
+	 (else
+	  (insert-char! c target (head cursor))
+	  (set! cursor
+	    (recons (+ (head cursor) 1)
+		    (tail cursor))))))
      ((is target instance? Space)
 
       (cond
@@ -145,6 +172,7 @@
 	    (recons* 1 (+ (head (tail cursor)) 1)
 		     (tail (tail cursor))))))))
      )))
+
 (define (run-editor #!optional
 		    (io ::Terminal (make-terminal)))
   ::void

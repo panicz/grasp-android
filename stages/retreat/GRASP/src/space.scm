@@ -7,6 +7,7 @@
 (import (match))
 (import (for))
 (import (functions))
+(import (assert))
 
 (define (space-fragment-index fragments index::int)
   (if (or (isnt fragments pair?)
@@ -129,12 +130,20 @@
        (_
 	(values)))))
   )
-  
+
+
 (define (insert-space! space::Space position::int)
   (invoke space 'insert-space! position))
 
 (define (insert-break! space::Space position::int)
   (invoke space 'insert-break! position))
+
+(define (insert-whitespace! c::char space::Space
+			    position::int)
+  (assert (char-whitespace? c))
+  (if (eq? c #\newline)
+      (insert-break! space position)
+      (insert-space! space position)))
 
 (define (delete-space! space::Space position::int)
   (invoke space 'delete-space! position))
