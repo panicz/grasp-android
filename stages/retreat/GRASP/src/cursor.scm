@@ -7,6 +7,7 @@
 (import (space))
 (import (assert))
 (import (functions))
+(import (print))
 
 #|
 
@@ -333,6 +334,42 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
   (climb-back cursor
 	      (cursor-ref expression cursor)))  
 
+
+
+(define (cursor-advance cursor document)
+  (define (next cursor)
+    (cursor-climb-front
+     (cursor-next cursor
+		  document)
+     document))
+  (let* ((updated (next cursor))
+	 (target (cursor-ref document updated))
+	 (limit (last-index target)))
+    (cond
+     ((and (isnt target pair?)
+	   (eqv? (head updated) limit))
+      (next updated))
+     (else
+      updated))))
+  
+
+(define (cursor-retreat cursor document)
+  (define (next cursor)
+    (cursor-climb-back
+     (cursor-back cursor
+		  document)
+     document))
+  (let* ((updated (next cursor))
+	 (target (cursor-ref document updated))
+	 (limit (first-index target)))
+    (cond
+     ((and (isnt target pair?)
+	   (eqv? (head updated) limit))
+      (next updated))
+     (else
+      updated))))
+
+  
 
 ;; We stipulate that, for any N >= 1, () < (x1 ... xN)
 ;; (as a consequence, whenever one cursor is a proper

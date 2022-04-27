@@ -205,10 +205,8 @@
 	    (,KeyType:ArrowLeft
 	     (try-catch
 	      (begin
-		(set! cursor (cursor-climb-back
-			      (cursor-back cursor
-					   document)
-			      document)))
+		(set! cursor
+		  (cursor-retreat cursor document)))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
@@ -216,10 +214,8 @@
 	    (,KeyType:ArrowRight
 	     (try-catch
 	      (begin
-		(set! cursor (cursor-climb-front
-			      (cursor-next cursor
-					   document)
-			      document))
+		(set! cursor
+		  (cursor-advance cursor document))
 		(cond ((key:shift-down?)
 		       "powiekszamy selekcje")
 		      
