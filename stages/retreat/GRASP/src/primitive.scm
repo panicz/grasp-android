@@ -194,15 +194,14 @@
       (let skip ((input space:fragments)
 		 (total 0))
 	(define (advance-with-cursor! width::real)
-	  (when (and-let* ((`(,tip ,next . ,sub) cursor)
-			   ((integer? tip))
-			   ((equal? sub context))
-			   ((eqv? next index))
-			   ((is total <= tip < (+ total
-						  width)))))
-	    (screen:remember-offset! (+ left
-					(- (head cursor)
-					   total))
+	  (and-let* ((`(,tip ,next . ,sub) cursor)
+		     ((integer? tip))
+		     ((equal? sub context))
+		     ((eqv? next index))
+		     ((is total <= tip <= (+ total
+					     width))))
+	    (WARN"left: " left" tip: "tip" total: "total" context: "context" cursor: "cursor)
+	    (screen:remember-offset! (+ left (- tip total))
 				     (+ top 2)))
 	  (set! left (+ left width))
 	  (set! max-width (max max-width left)))
@@ -214,7 +213,7 @@
            (set! left 0)
            (set! max-line-height
 	     (screen:min-line-height))
-	   (skip (tail input) (+ total (head input))))
+	   (skip (tail input) (+ total (head input) 1)))
 	  (`(,,@integer)
 	   (advance-with-cursor! (head input)))))
       (set! index (+ index 1)))
