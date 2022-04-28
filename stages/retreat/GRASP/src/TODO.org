@@ -1,3 +1,32 @@
+* 27.04.2022
+
+Sie udalo zrobic jakis zalazek sensownej
+edycji (choc na razie nie jestem pewien,
+czy udalo sie to w sensowny sposob).
+
+Na pewno do poprawy jest:
+- iterowanie po kursorze (w celu ustalenia
+ekranowej pozycji kursora)
+- obsluga backspace'a na pierwszej pozycji
+(bo teraz dziala jak delete)
+
+Ogolnie chcielibysmy zrobic tak, zeby ciagle
+trzymanie klawisza "backspace" w takiej sytuacji:
+(funkcja argument1 argument2 |)
+
+powodowalo:
+1. najpierw usuniecie spacji za argument2
+2. nastepnie skasowanie wszystkich znakow
+w symbolu argument2, co finalnie mialoby
+doprowadzic do skasowania samego symbolu
+(gdy stanie sie pusty)ni polaczenia spacji
+za argument1 ze spacja za argument2,
+co dawaloby nam taka sytuacje:
+(funkcja argument1 |)
+
+
+
+
 * 26.04.2022
 
 zamiast tego porozbijalem moduly na mniejsze.
