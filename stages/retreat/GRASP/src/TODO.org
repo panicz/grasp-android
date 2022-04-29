@@ -1,3 +1,63 @@
+* 29.04.2022
+
+teraz idea jest taka, zeby - w ramach uporzadkowania
+kodu - wprowadzic nowe definicje:
+
+- delete-backward!
+- delete-forward!
+
+To sie nawet udalo zrobic. Ale jest jeszcze taki problem,
+ze wstawianie symboli w nawiasy nie dziala, i dobrze by bylo
+rowniez to poprawic (a poza tym zrobic laczenie symboli
+przy kasowaniu spacji pomiedzy dwoma symbolami)
+
+Rowniez niezbyt dobrze dziala kasowanie list pustych.
+
+
+* 28.04.2022
+
+poprawilismy juz nieco zachowanie kursora;
+teraz moze mozna sie bedzie wreszcie zajac
+kasowaniem symboli (tak jak to opisywalem wczoraj)
+
+byc moze tez warto sie zastanowic nad refaktoryzacja
+funkcji "type-character!" w taki sposob, zeby
+- zamiast operowac bezposrednio na reprezentacji - stosowac
+"document operations"?
+
+
+NA PEWNO chcemy, zeby:
+1. jezeli jestesmy na poczatku spacji za symbolem
+albo zamykajacym nawiasem, to backspace powinien
+przeniesc kursor o dwa elementy do tylu, zamiast
+jednego
+
+2. jezeli spacja znajduje sie na nawiasie zamykajacym
+i robimy backspace, albo jezeli spacja znajduje sie
+na nawiasie otwierajacym i robimy delete, to chcemy
+skasowac cala liste
+
+3. chcemy poprawic iterowanie kursora po listach
+pustych (OK)
+
+4. aaa no i trzeba zrobic scalanie symboli
+(i to bedzie wymagalo doprecyzowania warunkow,
+ale tym sie chyba dopiero jutro zajmiemy)
+
+A tak na "bardziej grubych klockach", to chcielibysmy
+jeszcze obsluzyc:
+- myszke oraz strzalke gora/dol
+- stringi
+- komentarze (3 rodzaje)
+- liczby
+- listy kropkowane (w edycji)
+
+a po nich:
+- ladowanie plikow
+- dzielenie ekranu
+- scrollowanie widokow
+- historie operacji
+
 * 27.04.2022
 
 Sie udalo zrobic jakis zalazek sensownej
