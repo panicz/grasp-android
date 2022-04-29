@@ -200,7 +200,8 @@
 		     ((eqv? next index))
 		     ((is total <= tip <= (+ total
 					     width))))
-	    (WARN"left: " left" tip: "tip" total: "total" context: "context" cursor: "cursor)
+	    #;(WARN"left: " left" tip: "tip" total: "total
+		 " context: "context" cursor: "cursor)
 	    (screen:remember-offset! (+ left (- tip total))
 				     (+ top 2)))
 	  (set! left (+ left width))

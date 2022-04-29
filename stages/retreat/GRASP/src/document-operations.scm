@@ -45,6 +45,8 @@
 	    (irrelevant (- index 1)))
        (define (remove-tail! preceding)
 	 (let ((removed (tail preceding)))
+	   (join-spaces! (post-head-space preceding)
+			 (post-head-space removed))
 	   (set! (tail preceding) (tail removed))
 	   (set! (tail removed) '())
 	   removed))

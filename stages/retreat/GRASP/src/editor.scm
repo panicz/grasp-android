@@ -67,15 +67,11 @@
 
   (set! history-length size))
 
-(define (delete! position::int)::void
+(define (delete! position::Index)::void
   (let* ((target (cursor-ref document cursor)))
     (cond
      ((is target instance? Symbol)
-      (cond ((is 0
-		 <=
-		 position
-		 <
-		 (symbol-length target))
+      (cond ((is 0 <= position < (symbol-length target))
 	     (delete-char! target position)
 	     (when (= (symbol-length target) 0)
 	       (take-cell-at! (tail cursor) document)
@@ -85,11 +81,38 @@
 				     (tail (tail cursor)))
 			     document))))))
      ((is target instance? Space)
-      (if (is position >= 0)
+      (if (is position > (first-index target))
 	  (delete-space! target position))))))
 
+(define (delete-forward!)::void
+  (let ((target (cursor-ref document cursor)))
+    (cond ((and (pair? target)
+		(pair? cursor)
+		(eqv? (head cursor) (first-index target)))
+	   (let ((new-cursor (cursor-retreat cursor document)))
+	     (take-cell-at! cursor document)
+	     (set! cursor new-cursor)))
+	  (else
+	   (delete! (head cursor))))))
 
-(define (type-character! c::char)::void
+(define (delete-backward!)::void
+  (let ((target (cursor-ref document cursor)))
+    (cond ((and (pair? target)
+		(eqv? (head cursor) (last-index target)))
+	   (let ((new-cursor (cursor-climb-back
+			      (cursor-back (tail cursor)
+					   document)
+			      document)))
+	     (take-cell-at! cursor document)
+	     (set! cursor new-cursor)))
+	  (else
+	   (set! cursor (cursor-climb-back
+			 (cursor-back cursor
+				      document)
+			 document))
+	   (delete! (head cursor))))))
+
+(define (insert-character! c::char)::void
   (and-let* ((`(,tip . ,stem) cursor)
 	     (`(,top . ,root) stem)
 	     (parent (cursor-ref document root))
@@ -292,24 +315,25 @@
 			(eq? c #\space))
 		   (invoke (current-message-handler)
 			   'clear-messages!)
-		   (type-character! c)
+		   (insert-character! c)
 		   )
 	       (continue)))
 
 	    (,KeyType:Delete
-	     (delete! (head cursor))
+	     (try-catch
+	      (delete-forward!)
+	      (ex java.lang.Throwable
+		  (WARN (ex:toString))))
 	     (continue))
 
 	    (,KeyType:Enter
-	     (type-character! #\newline)
+	     (insert-character! #\newline)
+	     (set! cursor (cursor-advance cursor document))
 	     (continue))
 	    
 	    (,KeyType:Backspace
-	     (set! cursor
-	       (recons (max 0 (- (head cursor) 1))
-		       (tail cursor)))
 	     (try-catch
-	      (delete! (head cursor))
+	      (delete-backward!)
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 
