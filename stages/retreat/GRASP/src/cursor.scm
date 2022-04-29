@@ -342,16 +342,16 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
      (cursor-next cursor
 		  document)
      document))
-  (let* ((updated (next cursor))
-	 (target (cursor-ref document updated))
-	 (limit (last-index target)))
-    (cond
-     ((and (isnt target pair?)
-	   (eqv? (head updated) limit))
-      (next updated))
-     (else
-      updated))))
-  
+  (let ((updated (next cursor)))
+    (or (and-let* ((`(,_ ,_ . ,root) updated)
+		   (parent (cursor-ref document root))
+		   (target (cursor-ref document updated))
+		   (limit (last-index target))
+		   ((isnt target pair?))
+		   ((isnt parent null?))
+		   ((eqv? (head updated) limit)))
+	  (next updated))
+	updated)))
 
 (define (cursor-retreat cursor document)
   (define (next cursor)
@@ -359,16 +359,17 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
      (cursor-back cursor
 		  document)
      document))
-  (let* ((updated (next cursor))
-	 (target (cursor-ref document updated))
-	 (limit (first-index target)))
-    (cond
-     ((and (isnt target pair?)
-	   (eqv? (head updated) limit))
-      (next updated))
-     (else
-      updated))))
-
+  (let ((updated (next cursor)))
+    (or (and-let* ((`(,_ ,_ . ,root) updated)
+		   (parent (cursor-ref document root))
+		   (target (cursor-ref document updated))
+		   (limit (first-index target))
+		   ((isnt target pair?))
+		   ((isnt parent null?))
+		   ((eqv? (head updated) limit)))
+	  (next updated))
+	updated)))
+  
   
 
 ;; We stipulate that, for any N >= 1, () < (x1 ... xN)
