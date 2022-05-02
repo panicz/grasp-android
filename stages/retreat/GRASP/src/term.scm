@@ -13,15 +13,23 @@
 (define-alias ExtendedTerminal
   com.googlecode.lanterna.terminal.ExtendedTerminal)
 
-(define-alias TextColor com.googlecode.lanterna.TextColor)
+(define-alias TextColor
+  com.googlecode.lanterna.TextColor)
 
-(define-alias Terminal com.googlecode.lanterna.terminal.Terminal)
+(define-alias Terminal
+  com.googlecode.lanterna.terminal.Terminal)
 
-(define-alias KeyStroke com.googlecode.lanterna.input.KeyStroke)
+(define-alias TerminalScreen
+  com.googlecode.lanterna.screen.TerminalScreen)
 
-(define-alias KeyType com.googlecode.lanterna.input.KeyType)
+(define-alias KeyStroke
+  com.googlecode.lanterna.input.KeyStroke)
 
-(define-alias MouseAction com.googlecode.lanterna.input.MouseAction)
+(define-alias KeyType
+  com.googlecode.lanterna.input.KeyType)
+
+(define-alias MouseAction
+  com.googlecode.lanterna.input.MouseAction)
 
 (define-alias Character java.lang.Character)
 
