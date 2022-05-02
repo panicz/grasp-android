@@ -98,22 +98,22 @@
            (put! #\_ -1 i))))
    
   (define (draw-vertical-bar! height::real)::void
-    (put! #\: 0 0)
+    (put! #\╷ 0 0)
     (for i from 1 below (- height 1)
-         (put! #\| i 0))
-    (put! #\: (- height 1) 0))
-  
+         (put! #\│ i 0))
+    (put! #\╵ (- height 1) 0))
+
   (define (open-paren! height::real left::real top::real)::void
-    (put! #\/ top left)
+    (put! #\╭ #;#\┌  top left)
     (for i from 1 to (- height 2)
-         (put! #\| (+ i top) left))
-    (put! #\\ (+ top (- height 1)) left))
+         (put! #\│ (+ i top) left))
+    (put! #\╰ #;#\└ (+ top (- height 1)) left))
   
   (define (close-paren! height::real left::real top::real)::void
-    (put! #\\ top (+ left 1))
+    (put! #\╮ #;#\┐ top (+ left 1))
     (for i from 1 to (- height 2)
-         (put! #\| (+ i top) (+ left 1)))
-    (put! #\/ (+ top (- height 1)) (+ left 1)))
+         (put! #\│ (+ i top) (+ left 1)))
+    (put!  #\╯ #;#\┘ (+ top (- height 1)) (+ left 1)))
 
   (define (draw-string! s::CharSequence left::real top::real)::void
     (put! #\" top left) 
