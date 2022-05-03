@@ -142,6 +142,9 @@ Jezeli zas jestesmy na symbolu bez selekcji, to ctrl+c/ctrl+x
 spowoduje skopiowanie/wyciecie tego symbolu. Podobnie zreszta
 rzecz sie ma oczywiscie z napisami
 
+To teraz plan dzialania jest taki, zeby z jednej strony przekuc
+powyzsze przypadki na testy, a z drugiej - na implementacje.
+
 
 * 30.04.2022
 

@@ -177,7 +177,7 @@
 	     ((Space fragments: `(,_ ,_ . ,_))
 	      (pre-tail-space dotted-pair)))))
 
-(define (draw-sequence! elems::cons #!key
+(define (draw-sequence! elems::list #!key
                         (screen :: Screen
 				(current-screen))
                         (cursor::Cursor '())
@@ -316,9 +316,27 @@
             ((pair? (tail pair))
              (draw-next! (tail pair)))))
 
-    (skip-spaces! (pre-head-space elems))
-    (draw-next! elems)
+    (unless (null? elems)
+      (skip-spaces! (pre-head-space elems))
+      (draw-next! elems))
     ))
+
+(define (draw! object #!key
+               (screen::Screen (current-screen))
+               (cursor::Cursor '())
+	       (context::Cursor '())
+	       (anchor::Cursor '()))
+  ::void
+  (cond ((instance? object Tile)
+	 (invoke (as Tile object)
+		 'draw! screen cursor context anchor))
+
+	((null? object)
+	 (values))
+	
+	(else
+	 (error "Don't know how to draw "object
+		(object:getClass)))))
 
 (define (cursor-under left::real top::real
 		      elems
