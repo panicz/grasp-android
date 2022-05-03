@@ -1,3 +1,88 @@
+* 02-03.05.2022
+
+Trzeba nieco usystematyzowac podejscie do edycji.
+
+Mamy dwa zasadnicze rodzaje operacji z klawiatury:
+1. wpisywanie znaku (insert-character! char cursor document)
+2. kasowanie znaku (delete-forward! i delete-backward!)
+
+Trzeba teraz sobie dookreslic, jak to sie ma zachowywac
+w roznych kontekstach:
+
+1. WPISYWANIE ZNAKU
+
+a. jezeli kursor znajduje sie ponad napisem (Caption),
+   to po prostu dopisujemy znak zgodnie z normalnymi
+   regulami pracy z napisami
+
+b. jezeli znakiem jest spacja albo nowa linia, to
+   - jezeli kursor znajduje sie na spacji, to powiekszamy
+     te nasza spacje zgodnie z regulami
+   - jezeli kursor znajduje sie na poczatku symbolu
+     albo na nawiasie otwierajacym, to powiekszamy
+     spacje poprzedzajaca ("na jej koncu")
+   - jezeli kursor znajduje sie na koncu symbolu
+     albo na nawiasie zamykajacym, to powiekszamy
+     spacje nastepujaca ("na jej poczatku")
+   - jezeli kursor znajduje sie w srodku symbolu,
+     to rozbijamy ten symbol na dwie czesci
+
+c. jezeli znakiem jest kropka albo | i jestesmy
+   na spacji pomiedzy przedostatnim a ostatnim
+   elementem listy, to konwertujemy te liste
+   do postaci listy kropkowanej
+   (chyba ze jest wcisniety klawisz ctrl:
+   wtedy -- o ile jestesmy pomiedzy dwoma
+   elementami albo za ostatnim elementem
+   -- po prostu ustawiamy wlasciwosc 
+   (dotted? <ostatnia-para>) na #true)
+
+d. jezeli znakiem jest #\[, #\( albo #\{, to
+   - jezeli jestesmy na spacji, to rozdzielamy 
+     te spacje nowa lista pusta
+   - jezeli jestesmy na symbolu, to rozdzielamy
+     ten symbol nowa lista pusta
+
+e. jezeli znakiem jest #], #\) albo #}, a nasz
+   kursor jest odpowiednio gleboki, to nawigujemy do
+   najblizszego nawiasu zamykajacego
+
+f. w przeciwnym przypadku (domyslnie)
+  - jezeli kursor znajduje sie na spacji,
+    to dodajemy nowy (jednoliterowy) symbol,
+    rozdzielajac spacje w pozycji kursora
+
+  - jezeli kursor jest na symbolu, to
+    dodajemy znak do symbolu w odpowiednim
+    miejscu
+
+  - jezeli jestesmy na nawiasie otwierajacym,
+    to dodajemy symbol na poczatku listy
+    (natomiast pierwsza spacja wyrazenia
+    - czyli pre-head-space albo null-head-space,
+    w zaleznosci od tego, czy lista jest pusta
+    - staje sie spacja za pierwszym elementem)
+
+  - jezeli jestesmy na nawiasie zamykajacym,
+    to dodajemy symbol na koncu listy
+    (natomiast ostatnia spacja wyrazenia
+    - czyli post-head-space albo null-head-space
+    - staje sie spacja za nowym elementem)
+
+2. KASOWANIE ELEMENTU WSTECZ
+
+a. jezeli jestesmy w srodku lub na koncu symbolu,
+   to kasujemy w odpowiedniej pozycji symbolu
+
+b. jezeli jestesmy na poczatku symbolu, to kasujemy
+   poprzedzajaca spacje, natomiast gdyby spacja miala
+   zostac usunieta, to - jezeli przed spacja jest
+   jakis element, scalamy ze soba dwa symbole
+
+c. jezeli jestesmy na poczatku spacji przed ktora
+   jest jakis symbol
+
+
 * 30.04.2022
 
 plan w szerszej perspektywie:
