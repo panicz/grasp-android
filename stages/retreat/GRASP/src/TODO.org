@@ -4,7 +4,8 @@ Trzeba nieco usystematyzowac podejscie do edycji.
 
 Mamy dwa zasadnicze rodzaje operacji z klawiatury:
 1. wpisywanie znaku (insert-character! char cursor document)
-2. kasowanie znaku (delete-forward! i delete-backward!)
+2. kasowanie znaku wstecz (delete-forward!)
+3. kasowanie znaku wprzod (delete-backward!)
 
 Trzeba teraz sobie dookreslic, jak to sie ma zachowywac
 w roznych kontekstach:
@@ -73,14 +74,73 @@ f. w przeciwnym przypadku (domyslnie)
 
 a. jezeli jestesmy w srodku lub na koncu symbolu,
    to kasujemy w odpowiedniej pozycji symbolu
+   (byc moze kasujac caly symbol, jezeli to byl
+   ostatni znak)
 
 b. jezeli jestesmy na poczatku symbolu, to kasujemy
    poprzedzajaca spacje, natomiast gdyby spacja miala
-   zostac usunieta, to - jezeli przed spacja jest
+   zostac wyrugowana (tzn. (0)), to - jezeli przed spacja jest
    jakis element, scalamy ze soba dwa symbole
 
 c. jezeli jestesmy na poczatku spacji przed ktora
-   jest jakis symbol
+   jest jakis symbol, to kasujemy ostatni znak tego
+   symbolu (a gdyby to byl ostatni znak w tym symbolu,
+   kasujemy caly symbol i laczymy biezaca spacje
+   ze spacja poprzedzajaca symbol)
+
+d. jezeli jestesmy na poczatku spacji w liscie pustej,
+   tzn. zaraz za nawiasem otwierajacym, to kasujemy te liste.
+
+   Dzieki temu jezeli zrobimy:
+   |
+   (|)
+   (symbol| )
+   to wciskanie "backspace" powinno
+   (symbol| )
+   (|)
+   |
+
+e. jezeli jestesmy na nawiasie zamykajacym albo na poczatku
+   spacji nastepujacej po nawiasie zamykajacym, to kasujemy
+   cala liste poprzedzajaca
+
+Kazdemu skasowaniu elementu bedzie takze towarzyszyc
+przemieszczenie kursora.
+
+3. Kasowanie elementu wprzod
+
+a. jezeli jestesmy na poczatku albo w srodku symbolu,
+   to kasujemy nastepujacy znak, a jezeli to byl juz
+   ostatni znak, to kasujemy caly symbol
+
+b. jezeli jestesmy na koncu symbolu, to kasujemy
+   nastepujaca spacje, natomiast gdyby spacja miala
+   zostac wyrugowana, to - jezeli przed spacja jest jakis
+   element, to scalamy ze soba dwa symbole
+
+c. jezeli jestesmy na koncu spacji, za ktora jest jakis symbol,
+   to kasujemy pierwszy znak tego symbolu (a gdyby to byl ostatni
+   znak w tym symbolu, to kazujemy caly symbol i laczymy
+   biezaca spacje ze spacja znajdujaca sie za tym symbolem)
+
+d. jezeli jestesmy na koncu spacji w liscie pustej (tzn. zaraz
+   przed nawiasem zamykajacym), to kasujemy te liste, zeby
+   uzyskac zachowanie analogiczne do opisanego w p. 2d
+
+e. jezeli jestesmy na nawiasie otwierajacym albo na koncu spacji
+   poprzedzajace nawias otwierajacy, to kasujemy cala liste.
+
+
+Jeszcze kilka dodatkowych pomyslow:
+ctrl+x i ctrl+c beda oczywiscie dzialac na selekcjach.
+Ale w sytuacji, gdy selekcja jest pusta i jestesmy albo
+na spacji, albo na nawiasie (otwierajacym albo zamykajacym),
+to jako selekcje traktujemy wyrazenie zawierajace te spacje,
+albo zaczynajace sie/konczace na tym nawiasie.
+
+Jezeli zas jestesmy na symbolu bez selekcji, to ctrl+c/ctrl+x
+spowoduje skopiowanie/wyciecie tego symbolu. Podobnie zreszta
+rzecz sie ma oczywiscie z napisami
 
 
 * 30.04.2022
