@@ -16,8 +16,9 @@
 ;; (consider: what to do when cursor points to a space?
 ;; we can safely return #!null, because it's different
 ;; than returning (#!null))
-(define (take-cell-at! cursor::Cursor
-		       expression::pair)
+(define (take-cell-at! #!optional
+		       (cursor::Cursor (current-cursor))
+		       (expression::pair (current-document)))
   (match cursor
     (`(,,@(isnt _ integer?) . ,root)
      (take-cell-at! root expression))
@@ -80,7 +81,9 @@
     (_
      expression)))
 
-(define (take-part-at! cursor::Cursor object)
+(define (take-part-at! #!optional
+		       (cursor::Cursor (current-cursor))
+		       (object (current-document)))
   (cond #;((Indexable? object)
 	 (invoke (as Indexable object) 
 'take-part-at! cursor))
@@ -128,8 +131,11 @@
    (and (equal? document '((1)))
 	(equal? taken '(5)))))
 
-(define (put-into-cell-at! cursor::Cursor element
-			   #;in document)
+(define (put-into-cell-at! cursor::Cursor
+			   element
+			   #;in
+			   #!optional
+			   (document (current-document)))
   ::boolean
   (assert (or (and (pair? element)
 		   (list? (tail element)))

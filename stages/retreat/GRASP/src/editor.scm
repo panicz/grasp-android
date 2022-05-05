@@ -25,6 +25,7 @@
  (screen)
  (for)
  (document-operations)
+ (editor-operations)
  )
 
 (define input ::string "\
@@ -35,11 +36,10 @@
 (e.g. (factorial 5) ===> 120)
 ")
 
-(define document ::list (cons (parse-string input) '()))
+(set! (current-document)
+      (cons (parse-string input) '()))
 
 (define input-extent ::Extent (string-extent input))
-
-(define cursor ::Cursor '())
 
 (define-object (editor-message-handler size::int)
   ::MessageHandler
@@ -67,134 +67,6 @@
 
   (set! history-length size))
 
-(define (delete! position::Index)::void
-  (let* ((target (cursor-ref document cursor)))
-    (cond
-     ((is target instance? Symbol)
-      (cond ((is 0 <= position < (symbol-length target))
-	     (delete-char! target position)
-	     (when (= (symbol-length target) 0)
-	       (take-cell-at! (tail cursor) document)
-	       (set! cursor (cursor-climb-back
-			     (recons (- (head (tail cursor))
-					1)
-				     (tail (tail cursor)))
-			     document))))))
-     ((is target instance? Space)
-      (if (is position > (first-index target))
-	  (delete-space! target position))))))
-
-(define (delete-forward!)::void
-  (let ((target (cursor-ref document cursor)))
-    (cond ((and (pair? target)
-		(pair? cursor)
-		(eqv? (head cursor) (first-index target)))
-	   (let ((new-cursor (cursor-retreat cursor document)))
-	     (take-cell-at! cursor document)
-	     (set! cursor new-cursor)))
-	  (else
-	   (delete! (head cursor))))))
-
-(define (delete-backward!)::void
-  (let ((target (cursor-ref document cursor)))
-    (cond ((and (pair? target)
-		(eqv? (head cursor) (last-index target)))
-	   (let ((new-cursor (cursor-climb-back
-			      (cursor-back (tail cursor)
-					   document)
-			      document)))
-	     (take-cell-at! cursor document)
-	     (set! cursor new-cursor)))
-	  (else
-	   (set! cursor (cursor-climb-back
-			 (cursor-back cursor
-				      document)
-			 document))
-	   (delete! (head cursor))))))
-
-(define (insert-character! c::char)::void
-  (and-let* ((`(,tip . ,stem) cursor)
-	     (`(,top . ,root) stem)
-	     (parent (cursor-ref document root))
-	     (owner (drop (quotient top 2) parent))
-	     (target (part-at top parent)))
-    (cond
-     ((is c memq '(#\[ #\( #\{))
-      (put-into-cell-at! (tail cursor) (cons '() '())
-			 document)
-      (set! cursor
-	(recons* 0 0 (+ (head (tail cursor)) 1)
-		 (tail (tail cursor)))))
-
-     ((is c memq '(#\] #\) #\}))
-      (WARN "closing paren"))
-     
-     ((is target instance? Symbol)
-      (cond
-       ((or (eq? c #\space) (eq? c #\newline))
-	(cond ((eqv? (head cursor) (first-index target))
-	       (let ((preceding-space (part-at
-				       (previous-index
-					top parent)
-				       parent)))
-		 (insert-whitespace! c preceding-space
-				     (last-index
-				      preceding-space))))
-	      ((eqv? (head cursor) (last-index target))
-	       (let ((following-space (part-at
-				       (next-index
-					top parent)
-				       parent)))
-		 (insert-whitespace! c following-space
-				     (first-index
-				      following-space))
-		 (set! cursor
-		   (cursor-advance cursor document))))
-	      (else
-	       (let* ((suffix (symbol-subpart target tip))
-		      (cell (cons suffix (tail owner))))
-		 (truncate-symbol! target tip)
-		 (set! (tail owner) cell)
-		 (set! (post-head-space cell)
-		   (post-head-space owner))
-		 (set! (post-head-space owner)
-		   (Space fragments: (if (eq? c #\newline)
-					 (cons 0
-					       (cons 0 '()))
-					 (cons 1 '()))))
-		 (set! cursor
-		   (cursor-advance cursor document))))))
-       
-	 (else
-	  (insert-char! c target (head cursor))
-	  (set! cursor
-	    (recons (+ (head cursor) 1)
-		    (tail cursor))))))
-     ((is target instance? Space)
-
-      (cond
-       ((eq? c #\space)
-	(insert-space! target (head cursor))
-	(set! cursor (recons (+ (head cursor) 1)
-			     (tail cursor)))
-	)
-
-       ((eq? c #\newline)
-	(insert-break! target (head cursor)))
-              
-       (else
-	(let* ((space-after (split-space!
-			     target
-			     (head cursor))))
-	  (put-into-cell-at!
-	   (tail cursor)
-	   (cons (Symbol (list->string (list c)))
-		 '())
-	   document)
-	  (set! cursor
-	    (recons* 1 (+ (head (tail cursor)) 1)
-		     (tail (tail cursor))))))))
-     )))
 
 (define (run-editor #!optional
 		    (io ::Terminal (make-terminal)))
@@ -218,12 +90,9 @@
           
     (let continue ()
       (let ((output-extent ::Extent
-			   (extent (head document)))
-	    (top-cursor (recons 1 '())))
+			   (extent (head (current-document)))))
 	((current-screen):clear!)
-	(draw-sequence! (head document)
-			cursor: cursor
-			context: top-cursor)
+	(draw-sequence! (head (current-document)))
 	(io:setCursorVisible #f)
 	(io:clearScreen)
 	(io:setCursorPosition 0 0)
@@ -232,13 +101,11 @@
 	 0
 	 (+ 2 output-extent:height))
 	(io:putString (with-output-to-string
-			(lambda () (write cursor))))
+			(lambda () (write (current-cursor)))))
 	(try-catch
 	 (io:putString (with-output-to-string
 			 (lambda ()
-			   (write (cursor-ref
-				   document
-				   cursor)))))
+			   (write (cursor-ref)))))
 	 (ex java.lang.Throwable
 	     (WARN (ex:toString))))
 	(invoke (current-message-handler)
@@ -256,8 +123,7 @@
 	    (,KeyType:ArrowLeft
 	     (try-catch
 	      (begin
-		(set! cursor
-		  (cursor-retreat cursor document)))
+		(set! (current-cursor) (cursor-retreat)))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
@@ -265,8 +131,7 @@
 	    (,KeyType:ArrowRight
 	     (try-catch
 	      (begin
-		(set! cursor
-		  (cursor-advance cursor document))
+		(set! (current-cursor) (cursor-advance))
 		(cond ((key:shift-down?)
 		       "powiekszamy selekcje")
 		      
@@ -328,7 +193,7 @@
 
 	    (,KeyType:Enter
 	     (insert-character! #\newline)
-	     (set! cursor (cursor-advance cursor document))
+	     (set! (current-cursor) (cursor-advance))
 	     (continue))
 	    
 	    (,KeyType:Backspace
@@ -359,15 +224,11 @@
 		    (try-catch
 		     (let ((cursor+
 			    (cursor-under
-			     left
-			     top
-			     (head document)
-			     context:
-			     top-cursor
-			     )))
-		       (set! cursor cursor+)
+			     left top
+			     (head (current-document)))))
+		       (set! (current-cursor) cursor+)
 		       (WARN "cursor: "
-			     cursor))
+			     (current-cursor)))
 
 		     (ex java.lang.Throwable
 			 (WARN (ex:toString)))))

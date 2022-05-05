@@ -78,6 +78,26 @@ The special value #!null means the absence
 of an index
 |#
 
+
+#|
+`current-cursor` and `current-document` are parameters
+that provide the default values to some functions that
+operate on cursors.
+|#
+(define-constant current-cursor::parameter[Cursor]
+  (make-parameter '()))
+
+
+(define-constant current-document::parameter[pair]
+  (make-parameter (cons (cons '() '()) '())))
+
+
+(define (cursor-head)
+  (head (current-cursor)))
+
+(define (cursor-tail)
+  (tail (current-cursor)))
+
 (define (cell-index cell::pair index::int)::Indexable*
   (assert (is index >= 0))
   (cond ((= index 0)
@@ -152,7 +172,9 @@ of an index
 		" from "object))))
 
 
-(define (cursor-ref tile cursor::Cursor)
+(define (cursor-ref #!optional
+		    (tile (current-document))
+		    (cursor::Cursor (current-cursor)))
   (match cursor
     ('()
      tile)
@@ -168,6 +190,11 @@ of an index
     (_
      (error "Unable to refer to cursor "cursor
 	    " in "tile))))
+
+(define (expression-at #!optional
+		       (cursor::Cursor (current-cursor))
+		       (document (current-document)))
+  (cursor-ref document cursor))
 
 (define (first-index object)
   (cond ((Indexable? object)
@@ -238,23 +265,6 @@ of an index
 	 (error "Don't know how to obtain previous index to "
 		index " in "object))))
 
-(define (base-cursor cursor object)
-  (match cursor
-    (`(,index . ,context)
-     (let* ((parent (cursor-ref object cursor))
-	    (target (part-at index parent)))
-       (if (eq? parent target)
-	   context
-	   cursor)))
-    (_
-     cursor)))
-
-
-(define (subcursor cursor::Cursor context::Cursor)
-  ::Cursor
-  (and cursor
-       (is context suffix? cursor)
-       cursor))
 
 #|
 inny pomysl na kursor jest taki, ze to ciag 
@@ -270,7 +280,9 @@ Wowczas tez sens moze miec to, zeby indeks lewego
 nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 |#
 
-(define (cursor-next cursor::Cursor expression)
+(define (cursor-next #!optional
+		     (cursor::Cursor (current-cursor))
+		     (expression (current-document)))
   ::Cursor
   (match cursor
     (`(,head . ,tail)
@@ -282,8 +294,9 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
     (_
      cursor)))
 
-(define (cursor-climb-front cursor::Cursor
-			    expression)
+(define (cursor-climb-front #!optional
+			    (cursor::Cursor (current-cursor))
+			    (expression (current-document)))
   ::Cursor
   (define (climb-front cursor::Cursor target)
     ::Cursor
@@ -303,7 +316,9 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
   (climb-front cursor
 	       (cursor-ref expression cursor)))
 
-(define (cursor-back cursor::Cursor expression)
+(define (cursor-back #!optional
+		     (cursor::Cursor (current-cursor))
+		     (expression (current-document)))
   ::Cursor
   (match cursor
     (`(,head . ,tail)
@@ -315,8 +330,9 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
     (_
      cursor)))
 
-(define (cursor-climb-back cursor::Cursor
-			   expression)
+(define (cursor-climb-back #!optional
+			   (cursor::Cursor (current-cursor))
+			   (expression (current-document)))
   ::Cursor
   (define (climb-back cursor::Cursor target)::Cursor
     (let* ((index (last-index target))
@@ -335,8 +351,10 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 	      (cursor-ref expression cursor)))  
 
 
-
-(define (cursor-advance cursor document)
+(define (cursor-advance #!optional
+			(cursor::Cursor (current-cursor))
+			(document (current-document)))
+  ::Cursor
   (define (next cursor)
     (cursor-climb-front
      (cursor-next cursor
@@ -353,7 +371,10 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 	  (next updated))
 	updated)))
 
-(define (cursor-retreat cursor document)
+(define (cursor-retreat #!optional
+			(cursor::Cursor (current-cursor))
+			(document (current-document)))
+  ::Cursor
   (define (next cursor)
     (cursor-climb-back
      (cursor-back cursor

@@ -180,8 +180,8 @@
 (define (draw-sequence! elems::list #!key
                         (screen :: Screen
 				(current-screen))
-                        (cursor::Cursor '())
-                        (context::Cursor '())
+                        (cursor::Cursor (current-cursor))
+                        (context::Cursor (recons 1 '()))
 			(anchor::Cursor))
   ::void
   (let ((max-width 0)
@@ -341,9 +341,8 @@
 (define (cursor-under left::real top::real
 		      elems
 		      #!key
-		      (screen::Screen
-		       (current-screen))
-		      (context::Cursor '()))
+		      (screen::Screen (current-screen))
+		      (context::Cursor (recons 1 '())))
   ::Cursor
   (let ((box (extent elems screen))
 	(max-width 0)
@@ -535,6 +534,26 @@
     (skip-spaces! (pre-head-space elems))
     (grow-ahead! elems)
     ))
+
+
+(define (extent object #!optional
+		(screen::Screen (current-screen)))
+  ::Extent
+  (cond ((instance? object Tile)
+	 (invoke (as Tile object) 'extent screen))
+
+	((null? object)
+	 (Extent width: 0 height: (screen:min-line-height)))
+
+	((pair? object)
+	 (sequence-extent object screen))
+
+	((symbol? object)
+	 (Extent width: (screen:atom-width (symbol->string object))
+		 height: (screen:min-line-height)))
+	
+	(else
+	 (error "Don't know how to compute extent of "object))))
 
 
 ;; RZM37UHSPY5Z
