@@ -29,6 +29,22 @@
 
 (show (head parsed))
 
+(define cur '())
+
+(define (ccf)
+  (set! cur (cursor-climb-front cur parsed))
+  cur)
+
+(define (cn)
+  (set! cur (cursor-next cur parsed))
+  cur)
+
+(define (at)
+  (cursor-ref parsed cur))
+
+(set! (cadar parsed) '())
+
+
 (e.g.
  (let ((document ::Tile (as Tile (parse-string "
 (define (! n)
@@ -84,19 +100,19 @@
 
 
 &{
-/                       \
-|                 ___   |
-|   ___          /   \  |
-|  /   \   __-->|  B  | |
-| |  A  |--      \___/  |
-|  \___/\          /    |
-|        \        /     |
-|         \      /      |
-|          v ___v       |
-|           /   \       |
-|          |  C  |      |
-|           \___/       |
-\                       /
+╭                         ╮
+│               ╭───────╮ │
+│ ╭───────╮     │       │ │
+│ │       │     │   B   │ │
+│ │   A   │----⯈│       │ │
+│ │       │     ╰───────╯ │
+│ ╰───────╯       ╱       │
+│        ⯈       ╱        │
+│         ╲     ⯈         │
+│          ╭───╮          │
+│          │ C │          │
+│          ╰───╯          │
+╰                         ╯
 }
 
 ;|
@@ -127,18 +143,18 @@
 
 #;(assert
  (screen-displays? &{
-/        /             \              \
-| define | factorial n |              |
-|        \             /              |
-|   /    /        \                 \ |
-|   | if | <= n 0 |                 | |
-|   |    \        /                 | |
-|   |                               | |
-|   |       1                       | |
-|   |                               | |
-|   |       /     /   /       \ \ \ | |
-|   |       | * n | ! | - n 1 | | | | |
-\   \       \     \   \       / / / / /
+╭        ╭             ╮              ╮
+│ define │ factorial n │              │
+│        ╰             ╯              │
+│   ╭    ╭        ╮                 ╮ │
+│   │ if │ <= n 0 │                 │ │
+│   │    ╰        ╯                 │ │
+│   │                               │ │
+│   │       1                       │ │
+│   │                               │ │
+│   │       ╭     ╭   ╭       ╮ ╮ ╮ │ │
+│   │       │ * n │ ! │ - n 1 │ │ │ │ │
+╰   ╰       ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
 }))
 
 
