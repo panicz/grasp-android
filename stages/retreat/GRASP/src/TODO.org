@@ -1,3 +1,35 @@
+* 04.05.2022
+
+jeszcze mi tutaj wylazlo kilka watkow:
+1. chyba dobrze by bylo wprowadzic takie parametry,
+jak (current-document) czy (current-cursor), ktore
+beda zmieniane kiedy bedziemy sie przelaczac pomiedzy
+widokami. Beda one domyslnymi wartosciami parametrow
+do takich funkcji, jak cursor-next, cursor-back,
+cursor-ref itd.
+2. trzeba poprawic rysowanie kursora w przypadku
+pustych dokumentow (moze nie jest to jakies hiper-pilne,
+ale docelowo trzeba to bedzie zrobic)
+
+Czyli plan na dzis jest mniej wiecej taki:
+1. wypisac sobie przypadki testowe dla opracowanej
+wczoraj specyfikacji
+2. przymierzyc sie jakos do implementacji
+(moze nawet, jesli sie uda, to zaimplementowac
+dzis juz jakas czesc specyfikacji - a moze nawet
+calosc?)
+
+Na razie stworzylismy parametry "current-cursor"
+oraz "current-document" i dodalismy je jako wartosc
+domyslne do edytora.
+
+Dzieki temu mamy mozliwosc "mutowania" kursora
+bez wprowadzania zmiennych globalnych.
+
+Teraz, chcielibysmy stworzyc nowy modul, "editor-operations",
+w ktorym zdefiniujemy sobie funkcje "delete-forward!",
+"delete-backward!" oraz "insert-character!"
+
 * 02-03.05.2022
 
 Trzeba nieco usystematyzowac podejscie do edycji.
@@ -41,8 +73,13 @@ c. jezeli znakiem jest kropka albo | i jestesmy
 d. jezeli znakiem jest #\[, #\( albo #\{, to
    - jezeli jestesmy na spacji, to rozdzielamy 
      te spacje nowa lista pusta
-   - jezeli jestesmy na symbolu, to rozdzielamy
-     ten symbol nowa lista pusta
+   - jezeli jestesmy na symbolu, to owijamy
+     ten symbol w liste pusta
+   - jezeli jestesmy na nawiasie zamykajacym,
+     to idziemy do odpowiadajacego nawiasu
+     otwierajacego
+   - jezeli jestesmy na nawiasie otwierajacym,
+     to owijamy dane wyrazenie w liste
 
 e. jezeli znakiem jest #], #\) albo #}, a nasz
    kursor jest odpowiednio gleboki, to nawigujemy do
@@ -128,7 +165,8 @@ d. jezeli jestesmy na koncu spacji w liscie pustej (tzn. zaraz
    uzyskac zachowanie analogiczne do opisanego w p. 2d
 
 e. jezeli jestesmy na nawiasie otwierajacym albo na koncu spacji
-   poprzedzajace nawias otwierajacy, to kasujemy cala liste.
+   poprzedzajacej nawias otwierajacy, to wklejamy zawartosc listy
+   pietro nizej
 
 
 Jeszcze kilka dodatkowych pomyslow:
