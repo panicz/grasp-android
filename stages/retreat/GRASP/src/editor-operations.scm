@@ -87,7 +87,7 @@
 		 (insert-whitespace! c following-space
 				     (first-index
 				      following-space))
-		 (set! (current-cursor) (cursor-advance))))
+		 (cursor-advance!)))
 	      (else
 	       (let* ((suffix (symbol-subpart target tip))
 		      (cell (cons suffix (tail owner))))
@@ -100,8 +100,7 @@
 					 (cons 0
 					       (cons 0 '()))
 					 (cons 1 '()))))
-		 (set! (current-cursor)
-		       (cursor-advance))))))
+		 (cursor-advance!)))))
        
 	 (else
 	  (insert-char! c target (cursor-head))

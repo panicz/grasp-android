@@ -391,7 +391,12 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 	  (next updated))
 	updated)))
   
-  
+(define (cursor-advance!)
+  (set! (current-cursor) (cursor-advance)))
+
+(define (cursor-retreat!)
+  (set! (current-cursor) (cursor-retreat)))
+
 
 ;; We stipulate that, for any N >= 1, () < (x1 ... xN)
 ;; (as a consequence, whenever one cursor is a proper

@@ -123,7 +123,7 @@
 	    (,KeyType:ArrowLeft
 	     (try-catch
 	      (begin
-		(set! (current-cursor) (cursor-retreat)))
+		(cursor-retreat!))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
@@ -131,7 +131,7 @@
 	    (,KeyType:ArrowRight
 	     (try-catch
 	      (begin
-		(set! (current-cursor) (cursor-advance))
+		(cursor-advance!)
 		(cond ((key:shift-down?)
 		       "powiekszamy selekcje")
 		      
@@ -193,7 +193,7 @@
 
 	    (,KeyType:Enter
 	     (insert-character! #\newline)
-	     (set! (current-cursor) (cursor-advance))
+	     (cursor-advance!)
 	     (continue))
 	    
 	    (,KeyType:Backspace
