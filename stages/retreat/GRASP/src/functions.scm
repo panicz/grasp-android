@@ -2,6 +2,11 @@
 (import (examples))
 (import (infix))
 
+(define (times n::int action . args)
+  (when (is n > 0)
+    (apply action args)
+    (apply times (- n 1) action args)))
+
 (define head car)
 
 (define tail cdr)
