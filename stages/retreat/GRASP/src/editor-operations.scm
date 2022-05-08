@@ -24,7 +24,10 @@
 				 1)
 			      (tail (cursor-tail)))))))))
      ((is target instance? Space)
-      (if (is position > (first-index target))
+      (if (or (is position > (first-index target))
+	      (and (is position = (first-index target))
+		   (or (and-let* ((`(#\] . ,_) (cursor-advance))))
+		       (and-let* ((`(#\[ . ,_) (cursor-retreat)))))))
 	  (delete-space! target position))))))
 
 (define (delete-forward!)::void
@@ -110,15 +113,12 @@
      ((is target instance? Space)
 
       (cond
-       ((eq? c #\space)
-	(insert-space! target (cursor-head))
+       ((is c memq '(#\space #\newline))
+	(insert-whitespace! c target (cursor-head))
 	(set! (current-cursor)
 	      (recons (+ (cursor-head) 1)
 		      (cursor-tail)))
 	)
-
-       ((eq? c #\newline)
-	(insert-break! target (cursor-head)))
               
        (else
 	(let* ((space-after (split-space!

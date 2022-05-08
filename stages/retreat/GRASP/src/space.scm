@@ -8,6 +8,8 @@
 (import (for))
 (import (functions))
 (import (assert))
+(import (print))
+(import (srfi :11))
 
 (define (space-fragment-index fragments index::int)
   (if (or (isnt fragments pair?)
@@ -24,6 +26,18 @@
 
 (e.g.
  (space-fragment-index '(0 0) 1)
+ ===> (0) 0)
+
+(e.g.
+ (space-fragment-index '(1 0) 0)
+ ===> (1 0) 0)
+
+(e.g.
+ (space-fragment-index '(1 0) 1)
+ ===> (1 0) 1)
+
+(e.g.
+ (space-fragment-index '(1 0) 2)
  ===> (0) 0)
 
 (e.g.
@@ -70,6 +84,74 @@
  (space-fragment-index '(3 5) 10)
  ===> () 0)
 
+(define (delete-space-fragment! fragments::pair
+				position::int)
+  ::pair
+  (let-values (((cell index) (space-fragment-index
+			      fragments
+			      position)))
+    (match cell
+      (`(,,index ,next . ,rest)
+       (set! (head cell) (+ index next))
+       (set! (tail cell) rest)
+       fragments)
+      (`(,,@(is _ > 0) . ,_)
+       (set! (head cell) (- (head cell) 1))
+       fragments)
+      (_
+       fragments
+       ))))
+    
+
+(e.g.
+ (let* ((fragments (list 1 2 3))
+	(result (delete-space-fragment! fragments 0)))
+   (and (equal? result '(0 2 3))
+	(eq? result fragments))))
+
+(e.g.
+ (let* ((fragments (list 1 2 3))
+	(result (delete-space-fragment! fragments 1)))
+   (and (equal? result '(3 3))
+	(eq? result fragments))))
+
+(e.g.
+ (let* ((fragments (list 1 2 3))
+	(result (delete-space-fragment! fragments 2)))
+   (and (equal? result '(1 1 3))
+	(eq? result fragments))))
+
+(e.g.
+ (let* ((fragments (list 1 2 3))
+	(result (delete-space-fragment! fragments 3)))
+   (and (equal? result '(1 1 3))
+	(eq? result fragments))))
+
+(e.g.
+ (let* ((fragments (list 1 2 3))
+	(result (delete-space-fragment! fragments 4)))
+   (and (equal? result '(1 5))
+	(eq? result fragments))))
+
+(e.g.
+ (let* ((fragments (list 1 2 3))
+	(result (delete-space-fragment! fragments 5)))
+   (and (equal? result '(1 2 2))
+	(eq? result fragments))))
+
+(e.g.
+ (let* ((fragments (list 1 2 3))
+	(result (delete-space-fragment! fragments 6)))
+   (and (equal? result '(1 2 2))
+	(eq? result fragments))))
+
+(e.g.
+ (let* ((fragments (list 1 2 3))
+	(result (delete-space-fragment! fragments 7)))
+   (and (equal? result '(1 2 2))
+	(eq? result fragments))))
+
+
 (define-type (Space fragments: pair)
   #|implementing gnu.kawa.format.Printable with|#
   implementing Indexable
@@ -92,17 +174,8 @@
    (is (as int a) < (as int b)))
 
   ((delete-space! position::int)::void
-    (let-values (((cell index) (space-fragment-index
-				 fragments
-				 position)))
-       (cond ((is (head cell) > 0)
-	      (set! (head cell) (- (head cell) 1)))
-	     ((pair? (tail cell))
-	      (set! (head cell)
-		(head (tail cell)))
-	      (set! (tail cell)
-		(tail (tail cell)))))) )
-
+   (delete-space-fragment! fragments position))
+  
   ((insert-space! position::int)::void
    (let-values (((cell index) (space-fragment-index
 			       fragments
@@ -113,8 +186,7 @@
    (let-values (((cell index) (space-fragment-index
 			       fragments
 			       position)))
-     (set! (tail cell) (cons (head cell) (tail cell)))
-     (set! (head cell) 0)))
+     (set! (tail cell) (cons 0 (tail cell)))))
     
   ((print out::gnu.lists.Consumer)::void
    (let process ((input fragments))
@@ -162,16 +234,16 @@
 			    index::int)
     ::Space
     (cond
-     ((is index <= (car fragments))
-      (let ((reminent (cons (- (car fragments) index)
-			    (cdr fragments))))
-	(set! (car fragments) index)
-	(set! (cdr fragments) '())
+     ((is index <= (head fragments))
+      (let ((reminent (cons (- (head fragments) index)
+			    (tail fragments))))
+	(set! (head fragments) index)
+	(set! (tail fragments) '())
 	(Space fragments: reminent)))
      (else
       (split-fragments!
-       (cdr fragments)
-       (- index (car fragments) 1)))))
+       (tail fragments)
+       (- index (head fragments) 1)))))
   (split-fragments! space:fragments index))
 
 (e.g.
@@ -346,5 +418,5 @@
 	   (4 (pre-tail-space grandparent))
 	   (5 (null-tail-space grandparent))
 	   (6 (post-tail-space grandparent)))
-	 (null-space-ref (cdr grandparent)
+	 (null-space-ref (tail grandparent)
 			 (- parent-index 2))))))
