@@ -1,3 +1,63 @@
+* 07.05.2022
+
+wyglada na to, ze zagadnienie kasowania spacji jest dosc
+klopotliwe, i w zwiazku z tym wymaga nieco glebszych przemyslen.
+
+spacje reprezentujemy jako listy:
+
+(n1 n2 ... nk)
+
+gdzie nX symbolizuje ciag pojedynczych spacji w danym wierszu,
+natomiast pojawienie sie kolejnej wartosci w ciagu symbolizuje
+nowa linie (stad w ciagu o dlugosci k bedziemy mieli k-1 nowych
+linii)
+
+i teraz trzeba sobie nieco powiedziec o indeksowaniu spacji.
+
+rozwazmy taka spacje:
+
+(1 2 3)
+
+ktora jako string bylaby reprezentowana w taki sposob:
+
+s
+ss
+sss
+
+mozna to sobie rozpisac jako indeksy:
+01
+vv
+sn
+
+234
+vvv
+ssn
+
+567
+vvv
+sss
+
+
+i teraz tak:
+
+(delete-space-fragment! (list 1 2 3) 0)
+
+powinno nam dawac
+
+(0 2 3)
+
+(delete-space-fragment! (list 1 2 3) 1)
+
+powinno nam dawac
+
+(3 3)
+
+(delete-space-fragment! (list 1 2 3) 2)
+
+itd.
+
+(zob. space.scm)
+
 * 04.05.2022
 
 jeszcze mi tutaj wylazlo kilka watkow:
@@ -74,7 +134,7 @@ d. jezeli znakiem jest #\[, #\( albo #\{, to
    - jezeli jestesmy na spacji, to rozdzielamy 
      te spacje nowa lista pusta
    - jezeli jestesmy na symbolu, to owijamy
-     ten symbol w liste pusta
+     ten symbol w liste
    - jezeli jestesmy na nawiasie zamykajacym,
      to idziemy do odpowiadajacego nawiasu
      otwierajacego
