@@ -133,8 +133,11 @@
     ((_ a b c ...)
      (recons a (recons* b c ...)))))
 
-(define-syntax-rule (cursor indices ...)
-  (recons* indices ... '()))
+(define-syntax cursor
+  (syntax-rules ()
+    ((_) '())
+    ((_ indices ...)
+     (recons* indices ... '()))))
 
 (define (empty-space-extent space::Space
 			    screen::Screen)

@@ -28,11 +28,14 @@
  )
 
 (define (rendered-with-cursor #!optional
-			      (document (current-document)))
+			      (document (current-document))
+			      (cursor (current-cursor)))
   (parameterize ((current-screen (TextScreen)))
-    (let* ((target (cursor-ref))
+    (let* ((target (cursor-ref document cursor))
 	   (screen ::TextScreen (current-screen)))
-      (draw-sequence! (head document))
+      (draw-sequence! (head document)
+		      screen: screen
+		      cursor: cursor)
       	  
       (screen:put! (if (is target instance? Space)
 		       #\|
@@ -46,6 +49,11 @@
 ;; that the last value is a test (i.e. a boolean expression)
 (define-syntax-rule (after actions ... test)
   (begin actions ... test))
+
+
+(define-syntax-rule (wish something ...)
+  #;(something ...)
+  (begin))
 
 
 ;; yields? is essentially a synonym for equal?, but when
@@ -85,71 +93,387 @@
 ;;
 ;; For more information, see the `cursor.scm` file.
 
+
+
+;; This document consists of a number of test cases, which
+;; check for a different behaviors of the editor.
+
+;; We save the original parameter values and restore it
+;; after we're done.
+(define original-document (current-document))
+(define original-cursor (current-cursor))
+
+(set! (current-document)
+      ;; we're using (cons _ '()) rather than "list", because
+      ;; Kawa's cons cells provide equal?-like equals method
+      ;; which makes them work poorly with weak hash tables.
+      ;;
+      ;; We need to patch Kawa in order to resolve the problem,
+      ;; but for now we just stick with what's in the repo.
+      (cons (parse-string "(define (square x) (* x x))") '()))
+
+
+;; First, let's describe our intuitions about the cursor:
+
+(set! (current-cursor) (cursor #\[ 1 1))
+
 (e.g.
- (parameterize ((current-document (cons
-				   (parse-string
-				    "(define (square x) (* x x))")
-				   '()))
-		(current-cursor (cursor 1 1 3 1 1)))
-   (and
-    (string=? (rendered-with-cursor) "
+ (and (yields? (rendered-with-cursor) "
 ╭        ╭          ╮ ╭       ╮ ╮
 │ define │ square x │ │ * x x │ │
-╰        ╰  ^       ╯ ╰       ╯ ╯
+^        ╰          ╯ ╰       ╯ ╯
 ")
-    (after
-     (delete-forward!)
-     (yields? (rendered-with-cursor) "
-╭        ╭         ╮ ╭       ╮ ╮
-│ define │ suare x │ │ * x x │ │
-╰        ╰  ^      ╯ ╰       ╯ ╯
-"))
-    (after
-     (delete-backward!)
-     (yields? (rendered-with-cursor) "
-╭        ╭        ╮ ╭       ╮ ╮
-│ define │ uare x │ │ * x x │ │
-╰        ╰ ^      ╯ ╰       ╯ ╯
-"))
-    (after
-     (times 3 cursor-advance!)
-     (yields? (rendered-with-cursor) "
-╭        ╭        ╮ ╭       ╮ ╮
-│ define │ uare x │ │ * x x │ │
-╰        ╰    ^   ╯ ╰       ╯ ╯
-"))
-    (equal? (current-cursor) '(3 1 3 1 1))
-    (after
-     (insert-character! #\k)
-     (yields? (rendered-with-cursor) "
-╭        ╭         ╮ ╭       ╮ ╮
-│ define │ uarke x │ │ * x x │ │
-╰        ╰     ^   ╯ ╰       ╯ ╯
-"))
-    (yields? (cursor-ref) 'uarke)
-    (after
-     (cursor-advance!)
-     (yields? (rendered-with-cursor) "
-╭        ╭         ╮ ╭       ╮ ╮
-│ define │ uarke x │ │ * x x │ │
-╰        ╰      |  ╯ ╰       ╯ ╯
-"))
-    (yields? (cursor-ref) (Space fragments: '(1)))
-    
-    #;(after
-     (insert-character! #\z)
-     (yields? (rendered-with-cursor) "
+      (yields? (cursor-ref)
+	       '(define (square x) (* x x)))))
+
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
 ╭        ╭          ╮ ╭       ╮ ╮
-│ define │ uarkez x │ │ * x x │ │
+│ define │ square x │ │ * x x │ │
+╰ ^      ╰          ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 1 1 1))
+      (yields? (cursor-ref) 'define)))
+
+(times 5 cursor-advance!)
+
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰      ^ ╰          ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 5 1 1 1))
+      (yields? (cursor-ref) 'define)))
+
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰       |╰          ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 2 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1)))))
+
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ^          ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor #\[ 3 1 1))
+      (yields? (cursor-ref) '(square x))))
+
+
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰ ^        ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 1 3 1 1))
+      (yields? (cursor-ref) 'square)))
+
+(times 5 cursor-advance!)
+
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰      ^   ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 5 1 3 1 1))
+      (yields? (cursor-ref) 'square)))
+
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
 ╰        ╰       |  ╯ ╰       ╯ ╯
-"))
-    (after
-     (times 6 cursor-retreat!)
-     (yields? (rendered-with-cursor) "
+")
+      (yields? (current-cursor) (cursor 0 2 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1)))))
+
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰        ^ ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 3 3 1 1))
+      (yields? (cursor-ref) 'x)))
+
+
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰         |╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 4 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(0)))))
+
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰          ^ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor #\] 3 1 1))
+      (yields? (cursor-ref) '(square x))))
+
+;; mind that if we now retreat the cursor, we won't get
+;; to the previous position. 
+
+(cursor-retreat!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰         ^╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 1 3 3 1 1))
+      (yields? (cursor-ref) 'x)))
+
+
+;; Because of that, the editing operations
+;; need to treat both those situations identically
+
+(delete-backward!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
 ╭        ╭         ╮ ╭       ╮ ╮
-│ define │ uarke x │ │ * x x │ │
-╰        ╰ |       ╯ ╰       ╯ ╯
-"))
-    ;(yields? (cursor-ref) 'uarkez)
-    
-    )))
+│ define │ square  │ │ * x x │ │
+╰        ╰        |╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 1 2 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1)))))
+
+(insert-character! #\x)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰         ^╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 1 3 3 1 1))
+      (yields? (cursor-ref) 'x)))
+
+
+;; A to jest troche niefajne, i warto sie zastanowic, czy
+;; aby na pewno jest konieczne (tzn. czy by sie nie dalo
+;; tak zrobic, zeby cofanie dzialalo po prostu jako odwrotnosc
+;; ruchu do przodu)
+
+(cursor-retreat!)
+
+(e.g. ;; do zmiany
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰        | ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 1 2 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1)))))
+
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰        ^ ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 3 3 1 1))
+      (yields? (cursor-ref) 'x)))
+
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰         |╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 4 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(0)))))
+
+;; Super. Przejdzmy teraz do wyspecyfikowywania
+;; zachowania naszego edytora.
+
+;; 1. WPISYWANIE ZNAKU
+
+;; a. jezeli kursor znajduje sie ponad napisem (Caption),
+;;    to po prostu dopisujemy znak zgodnie z normalnymi
+;;    regulami pracy z napisami
+
+;; NA RAZIE IGNORUJEMY, BO NIE MA NAPISOW!
+
+;; b. jezeli znakiem jest spacja albo nowa linia, to
+;;    - jezeli kursor znajduje sie na spacji, to powiekszamy
+;;      te nasza spacje zgodnie z regulami
+
+(insert-character! #\space)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭           ╮ ╭       ╮ ╮
+│ define │ square x  │ │ * x x │ │
+╰        ╰          |╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 1 4 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1)))))
+
+(insert-character! #\newline)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭           ╮ ╭       ╮ ╮
+│ define │ square x  │ │ * x x │ │
+│        │           │ ╰       ╯ │
+│        │           │           │
+│        │           │           │
+╰        ╰ |         ╯           ╯
+")
+      (yields? (current-cursor) (cursor 2 4 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1 0)))))
+
+(delete-backward!)
+(delete-backward!)
+
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰         |╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 4 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(0)))))
+
+
+;;    - jezeli kursor znajduje sie na poczatku symbolu
+;;      albo na nawiasie otwierajacym, to powiekszamy
+;;      spacje poprzedzajaca ("na jej koncu")
+
+
+;; trzeba popracowac nad ruchem kursora
+(times 4 cursor-retreat!)
+(times 2 cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╮ ╭       ╮ ╮
+│ define │ square x │ │ * x x │ │
+╰        ╰        ^ ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 3 3 1 1))
+      (yields? (cursor-ref) 'x)))
+
+(insert-character! #\space)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭           ╮ ╭       ╮ ╮
+│ define │ square  x │ │ * x x │ │
+╰        ╰         ^ ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 3 3 1 1))
+      (yields? (cursor-ref) 'x)))
+
+;;    - jezeli kursor znajduje sie na koncu symbolu
+;;      albo na nawiasie zamykajacym, to powiekszamy
+;;      spacje nastepujaca ("na jej poczatku")
+
+
+(set! (current-cursor) (cursor-next))
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭           ╮ ╭       ╮ ╮
+│ define │ square  x │ │ * x x │ │
+╰        ╰          ^╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 1 3 3 1 1))
+      (yields? (cursor-ref) 'x)))
+
+(insert-character! #\space)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭            ╮ ╭       ╮ ╮
+│ define │ square  x  │ │ * x x │ │
+╰        ╰          | ╯ ╰       ╯ ╯
+")
+      ;; TODO tutaj chyba powinien byc raczej
+      ;; (cursor 1 4 3 1 1)
+      (yields? (current-cursor) (cursor 0 4 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1)))))
+
+;; TODO jeszcze nawias zamykajacy
+
+;;    - jezeli kursor znajduje sie w srodku symbolu,
+;;      to rozbijamy ten symbol na dwie czesci
+
+(times 7 cursor-retreat!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭            ╮ ╭       ╮ ╮
+│ define │ square  x  │ │ * x x │ │
+╰        ╰    ^       ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 3 1 3 1 1))
+      (yields? (cursor-ref) 'square)))
+
+(insert-character! #\space)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭             ╮ ╭       ╮ ╮
+│ define │ squ are  x  │ │ * x x │ │
+╰        ╰    |        ╯ ╰       ╯ ╯
+")
+      ;; TODO: tutaj tez raczej wolelibysmy
+      ;; (cursor 1 2 3 1 1), zeby backspace
+      ;; dzialal poprawnie
+      (yields? (current-cursor) (cursor 0 2 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1)))))
+
+#|
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) )
+      (yields? (current-cursor) )
+      (yields? (cursor-ref) )))
+
+;; kawa --no-warn-unreachable -f test-editor-operations.scm
+|#
+
+
+
+;; restore the original parameter values
+(set! (current-document) original-document)
+(set! (current-cursor) original-cursor)
