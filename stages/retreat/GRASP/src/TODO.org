@@ -1,3 +1,19 @@
+* 09.05.2022
+
+mamy teraz taki problem:
+
+jak mamy procedure insert-character!, to ona z pewnych
+wzgledow pobiera sobie obiekt "owner", zawierajacy komorke,
+ktorej glowka wskazuje na docelowy element (albo ktorej
+spacja moze byc dla nas interesujaca)
+
+I teraz: problem pojawia sie, gdy ownerem jest lista
+kropkowana.
+
+Ten owner jest uzywany wtedy, kiedy dokonujemy rozszczepienia
+symbolu.
+
+
 * 07.05.2022
 
 wyglada na to, ze zagadnienie kasowania spacji jest dosc
