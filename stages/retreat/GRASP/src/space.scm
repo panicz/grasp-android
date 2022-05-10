@@ -1,6 +1,7 @@
 (import (define-type))
 (import (define-interface))
 (import (define-property))
+(import (define-object))
 (import (indexable))
 (import (infix))
 (import (examples))
@@ -350,8 +351,15 @@
 (define-property+ (null-tail-space cell)
   (Space fragments: (cons 0 '())))
 
-(define-simple-class HeadTailSeparator ()
-  ((toString)::String "."))
+(define-object (HeadTailSeparator)::Indexable
+  (define (part-at index::Index)::Indexable* (this))
+  (define (first-index)::Index #\|)
+  (define (last-index)::Index #\|)
+  (define (next-index index::Index)::Index #\|)
+  (define (previous-index index::Index)::Index #\|)
+  (define (index< a::Index b::Index) #f)
+  
+  (define (toString)::String "|"))
 
 (define-constant head/tail-separator
   (HeadTailSeparator))
