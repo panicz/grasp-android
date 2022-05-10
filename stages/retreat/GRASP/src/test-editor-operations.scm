@@ -373,6 +373,7 @@
       (yields? (cursor-ref) (Space fragments: '(0)))))
 
 
+
 ;;    - jezeli kursor znajduje sie na poczatku symbolu
 ;;      albo na nawiasie otwierajacym, to powiekszamy
 ;;      spacje poprzedzajaca ("na jej koncu")
@@ -460,6 +461,119 @@
       ;; dzialal poprawnie
       (yields? (current-cursor) (cursor 0 2 3 1 1))
       (yields? (cursor-ref) (Space fragments: '(1)))))
+
+;; c. jezeli znakiem jest kropka albo | i jestesmy
+;;    na spacji pomiedzy przedostatnim a ostatnim
+;;    elementem listy, to konwertujemy te liste
+;;    do postaci listy kropkowanej
+;;    (chyba ze jest wcisniety klawisz ctrl:
+;;    wtedy -- o ile jestesmy pomiedzy dwoma
+;;    elementami albo za ostatnim elementem
+;;    -- po prostu ustawiamy wlasciwosc 
+;;    (dotted? <ostatnia-para>) na #true)
+
+
+(times 5 cursor-advance!)
+(insert-character! #\.)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭          ╷   ╮ ╭       ╮ ╮
+│ define │ squ are  │ x │ │ * x x │ │
+╰        ╰          ╵|  ╯ ╰       ╯ ╯
+")
+      (yields? (current-cursor) (cursor 0 6 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1)))))
+
+(insert-character! #\newline)
+(times 2 cursor-retreat!)
+(insert-character! #\newline)
+
+;; Tutaj tak naprawde bysmy woleli, zeby kursor
+;; sie wyswietlal jakos tak:
+
+;; ╭        ╭           ╮ ╭       ╮ ╮
+;; │ define │ squ are   │ │ * x x │ │
+;; │        │ |________ │ ╰       ╯ │
+;; │        │           │           │
+;; │        │ x         │           │
+;; ╰        ╰           ╯           ╯
+
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭           ╮ ╭       ╮ ╮
+│ define │ squ are   │ │ * x x │ │
+│        │ _________ │ ╰       ╯ │
+│        │           │           │
+│        │ x         │           │
+╰        ╰ |         ╯           ╯
+")
+      (yields? (current-cursor) (cursor 3 4 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(2 0)))))
+
+
+;; tutaj powinnismy byc w stanie zaznaczyc "paleczke"
+;; rozdzielajaca glowke od ogona. Ale nastepujaca zmiana
+;; przesuwa nam kursor z post-head-space na pre-tail-space:
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭           ╮ ╭       ╮ ╮
+│ define │ squ are   │ │ * x x │ │
+│        │ _________ │ ╰       ╯ │
+│        │           │           │
+│        │ x         │           │
+╰        ╰ |         ╯           ╯
+")
+      (yields? (current-cursor) (cursor 0 6 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1 0)))))
+
+;; d. jezeli znakiem jest #\[, #\( albo #\{, to
+;;    - jezeli jestesmy na spacji, to rozdzielamy 
+;;      te spacje nowa lista pusta
+
+(times 9 cursor-retreat!)
+(cursor-advance!)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭           ╮ ╭       ╮ ╮
+│ define │ squ are   │ │ * x x │ │
+│        │ ___|_____ │ ╰       ╯ │
+│        │           │           │
+│        │ x         │           │
+╰        ╰           ╯           ╯
+")
+      (yields? (current-cursor) (cursor 0 2 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(1)))))
+
+(insert-character! #\[)
+
+(e.g.
+ (and (yields? (rendered-with-cursor) "
+╭        ╭     ╭  ╮       ╮ ╭       ╮ ╮
+│ define │ squ │  │ are   │ │ * x x │ │
+│        │ ____╰|_╯______ │ ╰       ╯ │
+│        │                │           │
+│        │ x              │           │
+╰        ╰                ╯           ╯
+")
+      (yields? (current-cursor) (cursor 0 0 3 3 1 1))
+      (yields? (cursor-ref) (Space fragments: '(0)))))
+
+
+
+;;    - jezeli jestesmy na symbolu, to owijamy
+;;      ten symbol w liste
+;;    - jezeli jestesmy na nawiasie zamykajacym,
+;;      to idziemy do odpowiadajacego nawiasu
+;;      otwierajacego
+;;    - jezeli jestesmy na nawiasie otwierajacym,
+;;      to owijamy dane wyrazenie w liste
+
+
 
 #|
 (cursor-advance!)

@@ -58,7 +58,6 @@
   (and-let* ((`(,tip . ,stem) (current-cursor))
 	     (`(,top . ,root) stem)
 	     (parent (expression-at root))
-	     (owner (drop (quotient top 2) parent))
 	     (target (part-at top parent)))
     (cond
      ((is c memq '(#\[ #\( #\{))
@@ -93,6 +92,7 @@
 		 (cursor-advance!)))
 	      (else
 	       (let* ((suffix (symbol-subpart target tip))
+		      (owner (drop (quotient top 2) parent))
 		      (cell (cons suffix (tail owner))))
 		 (truncate-symbol! target tip)
 		 (set! (tail owner) cell)
@@ -119,7 +119,13 @@
 	      (recons (+ (cursor-head) 1)
 		      (cursor-tail)))
 	)
-              
+
+       ((is c memq '(#\. #\|))
+	(put-into-cell-at! (cursor-tail)
+			   head/tail-separator
+			   (current-document))
+	(times 2 cursor-advance!))
+       
        (else
 	(let* ((space-after (split-space!
 			     target
