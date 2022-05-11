@@ -549,31 +549,6 @@
       (yields? (current-cursor) (cursor 0 2 3 1 1))
       (yields? (cursor-ref) (Space fragments: '(1)))))
 
-(insert-character! #\[)
-
-(e.g.
- (and (yields? (rendered-with-cursor) "
-╭        ╭     ╭  ╮       ╮ ╭       ╮ ╮
-│ define │ squ │  │ are   │ │ * x x │ │
-│        │ ____╰|_╯______ │ ╰       ╯ │
-│        │                │           │
-│        │ x              │           │
-╰        ╰                ╯           ╯
-")
-      (yields? (current-cursor) (cursor 0 0 3 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(0)))))
-
-
-
-;;    - jezeli jestesmy na symbolu, to owijamy
-;;      ten symbol w liste
-;;    - jezeli jestesmy na nawiasie zamykajacym,
-;;      to idziemy do odpowiadajacego nawiasu
-;;      otwierajacego
-;;    - jezeli jestesmy na nawiasie otwierajacym,
-;;      to owijamy dane wyrazenie w liste
-
-
 
 #|
 (cursor-advance!)

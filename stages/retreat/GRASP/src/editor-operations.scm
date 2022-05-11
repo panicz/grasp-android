@@ -61,10 +61,21 @@
 	     (target (part-at top parent)))
     (cond
      ((is c memq '(#\[ #\( #\{))
-      (put-into-cell-at! (cursor-tail) (cons '() '()))
-      (set! (current-cursor)
-	(recons* 0 0 (+ (head (cursor-tail)) 1)
-		 (tail (cursor-tail)))))
+      (cond
+       ((is target instance? Space)
+	(put-into-cell-at! root #;(cursor-tail) (cons '() '()))
+	(set! (current-cursor)
+	      (recons* 0 0 (+ (head (cursor-tail)) 1)
+		       (tail (cursor-tail)))))
+       ((eqv? (cursor-head) #\])
+	(set! (current-cursor)
+	      (recons #\[ (cursor-tail))))
+
+       (else
+	(let ((target (take-cell-at! (cursor-tail))))
+	  (put-into-cell-at! (cursor-tail) (cons target '()))
+	  (set! (current-cursor)
+		(recons #\[ (cursor-tail)))))))
 
      ((is c memq '(#\] #\) #\}))
       (set! (current-cursor)
