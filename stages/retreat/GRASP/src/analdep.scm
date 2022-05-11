@@ -1,29 +1,20 @@
 (import (kawa regex))
+(import (define-syntax-rule))
 (import (io))
 (import (functions))
 (import (infix))
 (import (match))
 (import (hash-table))
 (import (mapping))
-(import (print))
 (import (for))
+
+(define-syntax-rule (print elements ...)
+  (display elements)
+  ...
+  (display #\newline))
 
 (define (matching string pattern)
   (regex-match pattern string))
-
-(define (read-all #!optional (port (current-input-port)))
-  (let ((first-expression (read port)))
-    (if (eof-object? first-expression)
-	'()
-	(let ((result `(,first-expression)))
-	  (define (read-into tail)
-	    (let ((next-expression (read port)))
-	      (cond ((eof-object? next-expression)
-		     result)
-		    (else
-		     (set-cdr! tail `(,next-expression))
-		     (read-into (cdr tail))))))
-	  (read-into result)))))
 
 (define (reach #;of graph #;from node)
   (define (walk #;from novel #;into visited)

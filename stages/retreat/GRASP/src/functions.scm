@@ -204,3 +204,17 @@
       (cdr p)))
 
 (set! (setter last-tail) set-last-tail!)
+
+(define (read-all #!optional (port (current-input-port)))
+  (let ((first-expression (read port)))
+    (if (eof-object? first-expression)
+	'()
+	(let ((result `(,first-expression)))
+	  (define (read-into tail)
+	    (let ((next-expression (read port)))
+	      (cond ((eof-object? next-expression)
+		     result)
+		    (else
+		     (set-cdr! tail `(,next-expression))
+		     (read-into (cdr tail))))))
+	  (read-into result)))))
