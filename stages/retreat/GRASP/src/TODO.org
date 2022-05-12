@@ -1,3 +1,103 @@
+* 11.05.2022
+
+udalo sie zrobic test definiujacy klasyczna lispowa
+funkcje "map", a przy okazji - troche rzutem na tasme
+- program do odtwarzania testow
+
+Teraz wyglada na to, ze bedzie trzeba zaprojektowac
+zestaw komend do edycji.
+
+Pewien problem na razie jest taki, ze nazwa "insert-character!"
+jest dosc mylaca, bo nie zawsze bedzie powodowala wstawienie
+znaku - dlatego w szczegolnosci wydaje sie, ze
+
+(insert-character! #\[)
+
+nie powinno dzialac tak, jak na razie opisuje to test;
+do klawiszy alfanumerycznych powinnismy podpisac insert-character!,
+ale do klawiszy [ i ] juz niekoniecznie.
+
+To jest jedna sprawa.
+
+Druga jest taka, ze byc moze chcielibysmy sobie wprowadzic
+funkcje pomocnicze do odnoszenia sie do roznego rodzaju obiektow.
+
+Czyli tak: jak mamy zwykle klawisze alfanumeryczne, to robimy
+"insert-character!".
+
+Jak mamy #\[, to bedziemy raczej miec cos w rodzaju
+
+(lambda ()
+  (if (is (expression-under-cursor) instance? Space)
+      (create-list!)
+      (cursor-to-enclosing-opening-paren!)))
+
+Jednakowoz wydaje sie, ze waznym komponentem naszego edytora
+powinien byc system "wiazan" przyporzadkowujacych klawiszom
+poszczegolne funkcje - na przyklad, dla klawiszy alfanumerycznych
+bedziemy mieli domyslnie
+
+insert-character!
+
+OK, moze wobec tego warto by bylo opracowac opis srodowiska
+i nazwy funkcji do edycji.
+
+Mamy juz:
+
+(current-cursor)
+(current-document)
+
+chcielibysmy sie pozbyc funkcji 
+(expression-under-cursor cursor: cursor := (current-cursor))
+    
+Moze warto by bylo w zamian zmienic 
+
+(current-cursor)
+na
+(the-cursor)
+
+i
+(current-document)
+na
+(the-document)
+
+i zamiast (expression-under-cursor) miec
+
+(the-expression at: cursor := (the-cursor)
+   in: document := (the-document))
+
+i chcielibysmy, zeby the-expression to byla funkcja
+z setterem, taka, ze
+
+(set! (the-expression) value)
+
+powodowaloby zmiane wartosci wyrazenia
+- ale dwa pytania:
+ 1. czy dla funkcji ze slowami kluczowymi jest to w ogole mozliwe?
+ 2. czy dla naszej struktury edycji ma to jakis sens?
+
+
+w takim sensie, ze jezeli (the-expression) to spacja, to
+jaka konsekwencje mialoby miec wywolanie (set! (the-expression) 'x)?
+
+Czy powinno rowniez zmieniac wartosc parametru "the-cursor"?
+I dodatkowo - czy powinno dokonywac rejestracji historii?
+
+I jezeli mamy set!, to przydaloby sie tez jakies "delete!"?
+
+Natomiast jezeli idzie o poruszanie kursora,
+to chcielibysmy miec takie cuda, jak:
+
+cursor-left!, cursor-right!,
+cursor-up!, cursor-down!,
+cursor-to-end-of-line!
+cursor-to-start-of-line!
+cursor-to-opening-parent!
+cursor-to-closing-parent!
+
+
+
+
 * 10.05.2022
 
 Patrzac na postepy w pisaniu testow, idzie raczej kiepsko.
