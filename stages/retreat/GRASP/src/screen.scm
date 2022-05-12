@@ -95,5 +95,5 @@
   
   )
 
-(define-constant current-screen::parameter[Screen]
+(define-constant the-screen::parameter[Screen]
   (make-parameter (NullScreen)))

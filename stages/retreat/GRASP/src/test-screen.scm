@@ -127,19 +127,19 @@
 ;; moc "opowiadac historie"
 
 (define (grasped expression::string)::Screen
-  (parameterize ((current-screen (TextScreen)))
+  (parameterize ((the-screen (TextScreen)))
     (let ((parsed (call-with-input-string expression parse)))
       (draw! (head parsed)))
-    (current-screen)))
+    (the-screen)))
 
-(set! (current-screen) (TextScreen))
+(set! (the-screen) (TextScreen))
 
 (define (screen-displays? s::string)::boolean
-  (string=? ((current-screen):toString) s))
+  (string=? ((the-screen):toString) s))
 
 (draw! (head parsed))
 
-(display ((current-screen):toString))
+(display ((the-screen):toString))
 
 #;(assert
  (screen-displays? &{
@@ -168,17 +168,17 @@ tail)" parse))
 (c d))  .  ((e f)
 (g h)))" parse))
 
-((current-screen):clear!)
+((the-screen):clear!)
 
 (draw! (head horizontal-dotted))
 
-(display ((current-screen):toString))
+(display ((the-screen):toString))
 
-((current-screen):clear!)
+((the-screen):clear!)
 
 (draw! (head vertical-dotted))
 
-(display ((current-screen):toString))
+(display ((the-screen):toString))
 
 (define empties (call-with-input-string "\
 ((() . ())
@@ -186,11 +186,11 @@ tail)" parse))
 .
      ( ))" parse))
 
-((current-screen):clear!)
+((the-screen):clear!)
 
 (draw! (head empties))
 
-(display ((current-screen):toString))
+(display ((the-screen):toString))
 
 
 #|

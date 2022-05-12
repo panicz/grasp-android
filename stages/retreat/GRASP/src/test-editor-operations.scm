@@ -28,11 +28,11 @@
  )
 
 (define (rendered-with-cursor #!optional
-			      (document (current-document))
-			      (cursor (current-cursor)))
-  (parameterize ((current-screen (TextScreen)))
+			      (document (the-document))
+			      (cursor (the-cursor)))
+  (parameterize ((the-screen (TextScreen)))
     (let* ((target (cursor-ref document cursor))
-	   (screen ::TextScreen (current-screen)))
+	   (screen ::TextScreen (the-screen)))
       (draw-sequence! (head document)
 		      screen: screen
 		      cursor: cursor)
@@ -100,10 +100,10 @@
 
 ;; We save the original parameter values and restore it
 ;; after we're done.
-(define original-document (current-document))
-(define original-cursor (current-cursor))
+(define original-document (the-document))
+(define original-cursor (the-cursor))
 
-(set! (current-document)
+(set! (the-document)
       ;; we're using (cons _ '()) rather than "list", because
       ;; Kawa's cons cells provide equal?-like equals method
       ;; which makes them work poorly with weak hash tables.
@@ -115,7 +115,7 @@
 
 ;; First, let's describe our intuitions about the cursor:
 
-(set! (current-cursor) (cursor #\[ 1 1))
+(set! (the-cursor) (cursor #\[ 1 1))
 
 (e.g.
  (and (yields? (rendered-with-cursor) "
@@ -123,7 +123,7 @@
 │ define │ square x │ │ * x x │ │
 ^        ╰          ╯ ╰       ╯ ╯
 ")
-      (yields? (cursor-ref)
+      (yields? (the-expression)
 	       '(define (square x) (* x x)))))
 
 (cursor-advance!)
@@ -134,8 +134,8 @@
 │ define │ square x │ │ * x x │ │
 ╰ ^      ╰          ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 1 1 1))
-      (yields? (cursor-ref) 'define)))
+      (yields? (the-cursor) (cursor 0 1 1 1))
+      (yields? (the-expression) 'define)))
 
 (times 5 cursor-advance!)
 
@@ -146,8 +146,8 @@
 │ define │ square x │ │ * x x │ │
 ╰      ^ ╰          ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 5 1 1 1))
-      (yields? (cursor-ref) 'define)))
+      (yields? (the-cursor) (cursor 5 1 1 1))
+      (yields? (the-expression) 'define)))
 
 (cursor-advance!)
 
@@ -157,8 +157,8 @@
 │ define │ square x │ │ * x x │ │
 ╰       |╰          ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 2 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1)))))
+      (yields? (the-cursor) (cursor 0 2 1 1))
+      (yields? (the-expression) (Space fragments: '(1)))))
 
 (cursor-advance!)
 
@@ -168,8 +168,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ^          ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor #\[ 3 1 1))
-      (yields? (cursor-ref) '(square x))))
+      (yields? (the-cursor) (cursor #\[ 3 1 1))
+      (yields? (the-expression) '(square x))))
 
 
 (cursor-advance!)
@@ -180,8 +180,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰ ^        ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 1 3 1 1))
-      (yields? (cursor-ref) 'square)))
+      (yields? (the-cursor) (cursor 0 1 3 1 1))
+      (yields? (the-expression) 'square)))
 
 (times 5 cursor-advance!)
 
@@ -192,8 +192,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰      ^   ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 5 1 3 1 1))
-      (yields? (cursor-ref) 'square)))
+      (yields? (the-cursor) (cursor 5 1 3 1 1))
+      (yields? (the-expression) 'square)))
 
 (cursor-advance!)
 
@@ -203,8 +203,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰       |  ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 2 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1)))))
+      (yields? (the-cursor) (cursor 0 2 3 1 1))
+      (yields? (the-expression) (Space fragments: '(1)))))
 
 (cursor-advance!)
 
@@ -214,8 +214,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰        ^ ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 3 3 1 1))
-      (yields? (cursor-ref) 'x)))
+      (yields? (the-cursor) (cursor 0 3 3 1 1))
+      (yields? (the-expression) 'x)))
 
 
 (cursor-advance!)
@@ -226,8 +226,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰         |╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 4 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(0)))))
+      (yields? (the-cursor) (cursor 0 4 3 1 1))
+      (yields? (the-expression) (Space fragments: '(0)))))
 
 (cursor-advance!)
 
@@ -237,8 +237,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰          ^ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor #\] 3 1 1))
-      (yields? (cursor-ref) '(square x))))
+      (yields? (the-cursor) (cursor #\] 3 1 1))
+      (yields? (the-expression) '(square x))))
 
 ;; mind that if we now retreat the cursor, we won't get
 ;; to the previous position. 
@@ -251,8 +251,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰         ^╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 1 3 3 1 1))
-      (yields? (cursor-ref) 'x)))
+      (yields? (the-cursor) (cursor 1 3 3 1 1))
+      (yields? (the-expression) 'x)))
 
 
 ;; Because of that, the editing operations
@@ -266,8 +266,8 @@
 │ define │ square  │ │ * x x │ │
 ╰        ╰        |╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 1 2 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1)))))
+      (yields? (the-cursor) (cursor 1 2 3 1 1))
+      (yields? (the-expression) (Space fragments: '(1)))))
 
 (insert-character! #\x)
 
@@ -277,8 +277,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰         ^╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 1 3 3 1 1))
-      (yields? (cursor-ref) 'x)))
+      (yields? (the-cursor) (cursor 1 3 3 1 1))
+      (yields? (the-expression) 'x)))
 
 
 ;; A to jest troche niefajne, i warto sie zastanowic, czy
@@ -294,8 +294,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰        | ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 1 2 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1)))))
+      (yields? (the-cursor) (cursor 1 2 3 1 1))
+      (yields? (the-expression) (Space fragments: '(1)))))
 
 (cursor-advance!)
 
@@ -305,8 +305,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰        ^ ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 3 3 1 1))
-      (yields? (cursor-ref) 'x)))
+      (yields? (the-cursor) (cursor 0 3 3 1 1))
+      (yields? (the-expression) 'x)))
 
 (cursor-advance!)
 
@@ -316,8 +316,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰         |╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 4 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(0)))))
+      (yields? (the-cursor) (cursor 0 4 3 1 1))
+      (yields? (the-expression) (Space fragments: '(0)))))
 
 ;; Super. Przejdzmy teraz do wyspecyfikowywania
 ;; zachowania naszego edytora.
@@ -342,8 +342,8 @@
 │ define │ square x  │ │ * x x │ │
 ╰        ╰          |╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 1 4 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1)))))
+      (yields? (the-cursor) (cursor 1 4 3 1 1))
+      (yields? (the-expression) (Space fragments: '(1)))))
 
 (insert-character! #\newline)
 
@@ -356,8 +356,8 @@
 │        │           │           │
 ╰        ╰ |         ╯           ╯
 ")
-      (yields? (current-cursor) (cursor 2 4 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1 0)))))
+      (yields? (the-cursor) (cursor 2 4 3 1 1))
+      (yields? (the-expression) (Space fragments: '(1 0)))))
 
 (delete-backward!)
 (delete-backward!)
@@ -369,8 +369,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰         |╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 4 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(0)))))
+      (yields? (the-cursor) (cursor 0 4 3 1 1))
+      (yields? (the-expression) (Space fragments: '(0)))))
 
 
 
@@ -389,8 +389,8 @@
 │ define │ square x │ │ * x x │ │
 ╰        ╰        ^ ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 3 3 1 1))
-      (yields? (cursor-ref) 'x)))
+      (yields? (the-cursor) (cursor 0 3 3 1 1))
+      (yields? (the-expression) 'x)))
 
 (insert-character! #\space)
 
@@ -400,15 +400,15 @@
 │ define │ square  x │ │ * x x │ │
 ╰        ╰         ^ ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 3 3 1 1))
-      (yields? (cursor-ref) 'x)))
+      (yields? (the-cursor) (cursor 0 3 3 1 1))
+      (yields? (the-expression) 'x)))
 
 ;;    - jezeli kursor znajduje sie na koncu symbolu
 ;;      albo na nawiasie zamykajacym, to powiekszamy
 ;;      spacje nastepujaca ("na jej poczatku")
 
 
-(set! (current-cursor) (cursor-next))
+(set! (the-cursor) (cursor-next))
 
 (e.g.
  (and (yields? (rendered-with-cursor) "
@@ -416,8 +416,8 @@
 │ define │ square  x │ │ * x x │ │
 ╰        ╰          ^╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 1 3 3 1 1))
-      (yields? (cursor-ref) 'x)))
+      (yields? (the-cursor) (cursor 1 3 3 1 1))
+      (yields? (the-expression) 'x)))
 
 (insert-character! #\space)
 
@@ -429,8 +429,8 @@
 ")
       ;; TODO tutaj chyba powinien byc raczej
       ;; (cursor 1 4 3 1 1)
-      (yields? (current-cursor) (cursor 0 4 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1)))))
+      (yields? (the-cursor) (cursor 0 4 3 1 1))
+      (yields? (the-expression) (Space fragments: '(1)))))
 
 ;; TODO jeszcze nawias zamykajacy
 
@@ -445,8 +445,8 @@
 │ define │ square  x  │ │ * x x │ │
 ╰        ╰    ^       ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 3 1 3 1 1))
-      (yields? (cursor-ref) 'square)))
+      (yields? (the-cursor) (cursor 3 1 3 1 1))
+      (yields? (the-expression) 'square)))
 
 (insert-character! #\space)
 
@@ -459,8 +459,8 @@
       ;; TODO: tutaj tez raczej wolelibysmy
       ;; (cursor 1 2 3 1 1), zeby backspace
       ;; dzialal poprawnie
-      (yields? (current-cursor) (cursor 0 2 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1)))))
+      (yields? (the-cursor) (cursor 0 2 3 1 1))
+      (yields? (the-expression) (Space fragments: '(1)))))
 
 ;; c. jezeli znakiem jest kropka albo | i jestesmy
 ;;    na spacji pomiedzy przedostatnim a ostatnim
@@ -482,8 +482,8 @@
 │ define │ squ are  │ x │ │ * x x │ │
 ╰        ╰          ╵|  ╯ ╰       ╯ ╯
 ")
-      (yields? (current-cursor) (cursor 0 6 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1)))))
+      (yields? (the-cursor) (cursor 0 6 3 1 1))
+      (yields? (the-expression) (Space fragments: '(1)))))
 
 (insert-character! #\newline)
 (times 2 cursor-retreat!)
@@ -509,8 +509,8 @@
 │        │ x         │           │
 ╰        ╰ |         ╯           ╯
 ")
-      (yields? (current-cursor) (cursor 3 4 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(2 0)))))
+      (yields? (the-cursor) (cursor 3 4 3 1 1))
+      (yields? (the-expression) (Space fragments: '(2 0)))))
 
 
 ;; tutaj powinnismy byc w stanie zaznaczyc "paleczke"
@@ -527,8 +527,8 @@
 │        │ x         │           │
 ╰        ╰ |         ╯           ╯
 ")
-      (yields? (current-cursor) (cursor 0 6 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1 0)))))
+      (yields? (the-cursor) (cursor 0 6 3 1 1))
+      (yields? (the-expression) (Space fragments: '(1 0)))))
 
 ;; d. jezeli znakiem jest #\[, #\( albo #\{, to
 ;;    - jezeli jestesmy na spacji, to rozdzielamy 
@@ -546,8 +546,8 @@
 │        │ x         │           │
 ╰        ╰           ╯           ╯
 ")
-      (yields? (current-cursor) (cursor 0 2 3 1 1))
-      (yields? (cursor-ref) (Space fragments: '(1)))))
+      (yields? (the-cursor) (cursor 0 2 3 1 1))
+      (yields? (the-expression) (Space fragments: '(1)))))
 
 
 #|
@@ -555,8 +555,8 @@
 
 (e.g.
  (and (yields? (rendered-with-cursor) )
-      (yields? (current-cursor) )
-      (yields? (cursor-ref) )))
+      (yields? (the-cursor) )
+      (yields? (the-expression) )))
 
 ;; kawa --no-warn-unreachable -f test-editor-operations.scm
 |#
@@ -564,5 +564,5 @@
 
 
 ;; restore the original parameter values
-(set! (current-document) original-document)
-(set! (current-cursor) original-cursor)
+(set! (the-document) original-document)
+(set! (the-cursor) original-cursor)

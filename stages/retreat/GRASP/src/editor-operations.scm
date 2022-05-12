@@ -11,14 +11,14 @@
 (import (print))
 
 (define (delete! position::Index)::void
-  (let* ((target (cursor-ref)))
+  (let* ((target (the-expression)))
     (cond
      ((is target instance? Symbol)
       (cond ((is 0 <= position < (symbol-length target))
 	     (delete-char! target position)
 	     (when (= (symbol-length target) 0)
 	       (take-cell-at! (cursor-tail))
-	       (set! (current-cursor)
+	       (set! (the-cursor)
 		     (cursor-climb-back
 		      (recons (- (head (cursor-tail))
 				 1)
@@ -31,54 +31,54 @@
 	  (delete-space! target position))))))
 
 (define (delete-forward!)::void
-  (let ((target (cursor-ref)))
+  (let ((target (the-expression)))
     (cond ((and (pair? target)
-		(pair? (current-cursor))
+		(pair? (the-cursor))
 		(eqv? (cursor-head) (first-index target)))
 	   (let ((new-cursor (cursor-retreat)))
 	     (take-cell-at!)
-	     (set! (current-cursor) new-cursor)))
+	     (set! (the-cursor) new-cursor)))
 	  (else
 	   (delete! (cursor-head))))))
 
 (define (delete-backward!)::void
-  (let ((target (cursor-ref)))
+  (let ((target (the-expression)))
     (cond ((and (pair? target)
 		(eqv? (cursor-head) (last-index target)))
 	   (let ((new-cursor (cursor-climb-back
 			      (cursor-back (cursor-tail)))))
 	     (take-cell-at!)
-	     (set! (current-cursor) new-cursor)))
+	     (set! (the-cursor) new-cursor)))
 	  (else
-	   (set! (current-cursor)
+	   (set! (the-cursor)
 		 (cursor-climb-back (cursor-back)))
 	   (delete! (cursor-head))))))
 
 (define (insert-character! c::char)::void
-  (and-let* ((`(,tip . ,stem) (current-cursor))
+  (and-let* ((`(,tip . ,stem) (the-cursor))
 	     (`(,top . ,root) stem)
-	     (parent (expression-at root))
+	     (parent (the-expression at: root))
 	     (target (part-at top parent)))
     (cond
      ((is c memq '(#\[ #\( #\{))
       (cond
        ((is target instance? Space)
 	(put-into-cell-at! root #;(cursor-tail) (cons '() '()))
-	(set! (current-cursor)
+	(set! (the-cursor)
 	      (recons* 0 0 (+ (head (cursor-tail)) 1)
 		       (tail (cursor-tail)))))
        ((eqv? (cursor-head) #\])
-	(set! (current-cursor)
+	(set! (the-cursor)
 	      (recons #\[ (cursor-tail))))
 
        (else
 	(let ((target (take-cell-at! (cursor-tail))))
 	  (put-into-cell-at! (cursor-tail) (cons target '()))
-	  (set! (current-cursor)
+	  (set! (the-cursor)
 		(recons #\[ (cursor-tail)))))))
 
      ((is c memq '(#\] #\) #\}))
-      (set! (current-cursor)
+      (set! (the-cursor)
 	    (recons #\] root)))
      
      ((is target instance? Symbol)
@@ -118,7 +118,7 @@
        
 	 (else
 	  (insert-char! c target (cursor-head))
-	  (set! (current-cursor)
+	  (set! (the-cursor)
 	    (recons (+ (cursor-head) 1)
 		    (cursor-tail))))))
      ((is target instance? Space)
@@ -126,7 +126,7 @@
       (cond
        ((is c memq '(#\space #\newline))
 	(insert-whitespace! c target (cursor-head))
-	(set! (current-cursor)
+	(set! (the-cursor)
 	      (recons (+ (cursor-head) 1)
 		      (cursor-tail)))
 	)
@@ -134,7 +134,7 @@
        ((is c memq '(#\. #\|))
 	(put-into-cell-at! (cursor-tail)
 			   head/tail-separator
-			   (current-document))
+			   (the-document))
 	(times 2 cursor-advance!))
        
        (else
@@ -145,7 +145,7 @@
 	   (cursor-tail)
 	   (cons (Symbol (list->string (list c)))
 		 '()))
-	  (set! (current-cursor)
+	  (set! (the-cursor)
 	    (recons* 1 (+ (head (cursor-tail)) 1)
 		     (tail (cursor-tail))))))))
      )))

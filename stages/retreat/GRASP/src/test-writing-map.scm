@@ -28,11 +28,11 @@
  )
 
 (define (rendered-with-cursor #!optional
-			      (document (current-document))
-			      (cursor (current-cursor)))
-  (parameterize ((current-screen (TextScreen)))
+			      (document (the-document))
+			      (cursor (the-cursor)))
+  (parameterize ((the-screen (TextScreen)))
     (let* ((target (cursor-ref document cursor))
-	   (screen ::TextScreen (current-screen)))
+	   (screen ::TextScreen (the-screen)))
       (draw-sequence! (head document)
 		      screen: screen
 		      cursor: cursor)
@@ -52,10 +52,10 @@
      (display (rendered-with-cursor)))))
 
 
-(define original-document (current-document))
-(define original-cursor (current-cursor))
+(define original-document (the-document))
+(define original-cursor (the-cursor))
 
-(set! (current-document)
+(set! (the-document)
       ;; we're using (cons _ '()) rather than "list", because
       ;; Kawa's cons cells provide equal?-like equals method
       ;; which makes them work poorly with weak hash tables.
@@ -64,7 +64,7 @@
       ;; but for now we just stick with what's in the repo.
       (cons (parse-string "") '()))
 
-(set! (current-cursor) (cursor 0 0 1))
+(set! (the-cursor) (cursor 0 0 1))
 
 (snapshot "
 |
@@ -978,7 +978,69 @@
 ╰ ╰ ╰ ╙      ╜|╙ ╰            ╯ ╜ ╯ ╯ ╯
 ")
 
+(move-cursor-up!)
+(times 5 cursor-retreat!)
+
+(snapshot "
+╭        ╭         ╮                  ╮
+│ define │ map f l │                  │
+│        ╰         ╯                  │
+│ ╭                                 ╮ │
+│ │ match l                         │ │
+│ │                                 │ │
+│ │ ╭ ┏  ┓ ┏  ┓ ╮                   │ │
+│ │ │ ┃  ┃ ┃  ┃ │                   │ │
+│ │ ╰ ┗| ┛ ┗  ┛ ╯                   │ │
+│ │ ╭ ╓      ╖ ╓ ╭        ╮     ╖ ╮ │ │
+│ │ │ ║ head ║ ║ │ f head │     ║ │ │ │
+│ │ │ ║______║ ║_╰_______ ╯_____║ │ │ │
+│ │ │ ║      ║ ║ ╭            ╮ ║ │ │ │
+│ │ │ ║ tail ║ ║ │ map f tail │ ║ │ │ │
+╰ ╰ ╰ ╙      ╜ ╙ ╰            ╯ ╜ ╯ ╯ ╯
+")
+
+
+(times 4 insert-character! #\space)
+
+(snapshot "
+╭        ╭         ╮                  ╮
+│ define │ map f l │                  │
+│        ╰         ╯                  │
+│ ╭                                 ╮ │
+│ │ match l                         │ │
+│ │                                 │ │
+│ │ ╭ ┏      ┓ ┏  ┓ ╮               │ │
+│ │ │ ┃      ┃ ┃  ┃ │               │ │
+│ │ ╰ ┗    | ┛ ┗  ┛ ╯               │ │
+│ │ ╭ ╓      ╖ ╓ ╭        ╮     ╖ ╮ │ │
+│ │ │ ║ head ║ ║ │ f head │     ║ │ │ │
+│ │ │ ║______║ ║_╰_______ ╯_____║ │ │ │
+│ │ │ ║      ║ ║ ╭            ╮ ║ │ │ │
+│ │ │ ║ tail ║ ║ │ map f tail │ ║ │ │ │
+╰ ╰ ╰ ╙      ╜ ╙ ╰            ╯ ╜ ╯ ╯ ╯
+")
+
+(times 4 cursor-advance!)
+
+(snapshot "
+╭        ╭         ╮                  ╮
+│ define │ map f l │                  │
+│        ╰         ╯                  │
+│ ╭                                 ╮ │
+│ │ match l                         │ │
+│ │                                 │ │
+│ │ ╭ ┏      ┓ ┏  ┓ ╮               │ │
+│ │ │ ┃      ┃ ┃  ┃ │               │ │
+│ │ ╰ ┗      ┛ ┗| ┛ ╯               │ │
+│ │ ╭ ╓      ╖ ╓ ╭        ╮     ╖ ╮ │ │
+│ │ │ ║ head ║ ║ │ f head │     ║ │ │ │
+│ │ │ ║______║ ║_╰_______ ╯_____║ │ │ │
+│ │ │ ║      ║ ║ ╭            ╮ ║ │ │ │
+│ │ │ ║ tail ║ ║ │ map f tail │ ║ │ │ │
+╰ ╰ ╰ ╙      ╜ ╙ ╰            ╯ ╜ ╯ ╯ ╯
+")
+
 
 ;; restore the original parameter values
-(set! (current-document) original-document)
-(set! (current-cursor) original-cursor)
+(set! (the-document) original-document)
+(set! (the-cursor) original-cursor)

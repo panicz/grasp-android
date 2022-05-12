@@ -36,7 +36,7 @@
 (e.g. (factorial 5) ===> 120)
 ")
 
-(set! (current-document)
+(set! (the-document)
       (cons (parse-string input) '()))
 
 (define input-extent ::Extent (string-extent input))
@@ -79,7 +79,7 @@
 
   (parameterize ((current-message-handler
 		  (editor-message-handler 6))
-		 (current-screen (TextScreen))
+		 (the-screen (TextScreen))
 		 (current-display-procedure
 		  (lambda (message)
 		    (io:putString
@@ -90,31 +90,31 @@
           
     (let continue ()
       (let ((output-extent ::Extent
-			   (extent (head (current-document)))))
-	((current-screen):clear!)
-	(draw-sequence! (head (current-document)))
+			   (extent (head (the-document)))))
+	((the-screen):clear!)
+	(draw-sequence! (head (the-document)))
 	(io:setCursorVisible #f)
 	(io:clearScreen)
 	(io:setCursorPosition 0 0)
-	(io:putString ((current-screen):toString))
+	(io:putString ((the-screen):toString))
 	(io:setCursorPosition
 	 0
 	 (+ 2 output-extent:height))
 	(io:putString (with-output-to-string
-			(lambda () (write (current-cursor)))))
+			(lambda () (write (the-cursor)))))
 	(try-catch
 	 (io:putString (with-output-to-string
 			 (lambda ()
-			   (write (cursor-ref)))))
+			   (write (the-expression)))))
 	 (ex java.lang.Throwable
 	     (WARN (ex:toString))))
 	(invoke (current-message-handler)
 		'display-messages io)
 	(io:flush)
 	(io:setCursorPosition
-	 (invoke (current-screen)
+	 (invoke (the-screen)
 		 'remembered-left)
-	 (invoke (current-screen)
+	 (invoke (the-screen)
 		 'remembered-top))
 	(io:setCursorVisible #t)
 	(let* ((key ::KeyStroke (io:readInput))
@@ -143,11 +143,11 @@
 	    
 	    (,KeyType:ArrowUp
 	     (try-catch
-	      (invoke (current-screen)
+	      (invoke (the-screen)
 		      'remember-offset!
-		      (invoke (current-screen)
+		      (invoke (the-screen)
 			      'remembered-left)
-		      (- (invoke (current-screen)
+		      (- (invoke (the-screen)
 				 'remembered-top)
 			 1))
 	      (ex java.lang.Throwable
@@ -156,11 +156,11 @@
 	    
 	    (,KeyType:ArrowDown
 	     (try-catch
-	      (invoke (current-screen)
+	      (invoke (the-screen)
 		      'remember-offset!
-		      (invoke (current-screen)
+		      (invoke (the-screen)
 			      'remembered-left)
-		      (+ (invoke (current-screen)
+		      (+ (invoke (the-screen)
 				 'remembered-top)
 			 1))
 	      (ex java.lang.Throwable
@@ -218,17 +218,17 @@
 		((action:isMouseDown)
 		 (match (action:getButton)
 		   (,MouseButton:Left
-		    (invoke (current-screen)
+		    (invoke (the-screen)
 			    'remember-offset!
 			    left top)
 		    (try-catch
 		     (let ((cursor+
 			    (cursor-under
 			     left top
-			     (head (current-document)))))
-		       (set! (current-cursor) cursor+)
+			     (head (the-document)))))
+		       (set! (the-cursor) cursor+)
 		       (WARN "cursor: "
-			     (current-cursor)))
+			     (the-cursor)))
 
 		     (ex java.lang.Throwable
 			 (WARN (ex:toString)))))

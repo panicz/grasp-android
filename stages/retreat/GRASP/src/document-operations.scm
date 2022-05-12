@@ -17,8 +17,8 @@
 ;; we can safely return #!null, because it's different
 ;; than returning (#!null))
 (define (take-cell-at! #!optional
-		       (cursor::Cursor (current-cursor))
-		       (expression::pair (current-document)))
+		       (cursor::Cursor (the-cursor))
+		       (expression::pair (the-document)))
   (match cursor
     (`(,,@(isnt _ integer?) . ,root)
      (take-cell-at! root expression))
@@ -82,8 +82,8 @@
      expression)))
 
 (define (take-part-at! #!optional
-		       (cursor::Cursor (current-cursor))
-		       (object (current-document)))
+		       (cursor::Cursor (the-cursor))
+		       (object (the-document)))
   (cond #;((Indexable? object)
 	 (invoke (as Indexable object) 
 'take-part-at! cursor))
@@ -135,7 +135,7 @@
 			   element
 			   #;in
 			   #!optional
-			   (document (current-document)))
+			   (document (the-document)))
   ::boolean
   (assert (or (and (pair? element)
 		   (list? (tail element)))

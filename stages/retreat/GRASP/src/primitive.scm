@@ -185,8 +185,8 @@
 
 (define (draw-sequence! elems::list #!key
                         (screen :: Screen
-				(current-screen))
-                        (cursor::Cursor (current-cursor))
+				(the-screen))
+                        (cursor::Cursor (the-cursor))
                         (context::Cursor (recons 1 '()))
 			(anchor::Cursor))
   ::void
@@ -328,7 +328,7 @@
     ))
 
 (define (draw! object #!key
-               (screen::Screen (current-screen))
+               (screen::Screen (the-screen))
                (cursor::Cursor '())
 	       (context::Cursor '())
 	       (anchor::Cursor '()))
@@ -347,7 +347,7 @@
 (define (cursor-under left::real top::real
 		      elems
 		      #!key
-		      (screen::Screen (current-screen))
+		      (screen::Screen (the-screen))
 		      (context::Cursor (recons 1 '())))
   ::Cursor
   (let ((box (extent elems screen))
@@ -543,7 +543,7 @@
 
 
 (define (extent object #!optional
-		(screen::Screen (current-screen)))
+		(screen::Screen (the-screen)))
   ::Extent
   (cond ((instance? object Tile)
 	 (invoke (as Tile object) 'extent screen))
