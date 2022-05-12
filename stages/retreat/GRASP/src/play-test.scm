@@ -28,7 +28,7 @@
      (set! files given-files))))
 
 (and-let* ((`(,_ ,time)
-	    (any (is _ matching "^--step-time=\([0-9]+\)$")
+	    (any (is _ matching "^--step-time=\([0-9]+[.]?[0-9]*\)$")
 		 options)))
   (set! step-time/seconds (string->number time)))
 
