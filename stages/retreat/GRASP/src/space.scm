@@ -197,9 +197,19 @@
 	     (out:append #\space))
 	(out:append #\newline)
 	(process (tail input)))
-       (`(,,@integer?)
+
+       (`(,,@integer? . ,rest)
 	(for n from 0 below (head input)
-	     (out:append #\space)))
+	     (out:append #\space))
+	(process rest))
+
+       (`((line-comment . ,line-comment) . ,rest)
+	(out:append #\;)
+	(for c in line-comment
+	  (out:append (as char c)))
+	(out:append #\newline)
+	(process rest))
+       
        (_
 	(values)))))
   )

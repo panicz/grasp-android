@@ -9,7 +9,8 @@
 (import (space))
 (import (tile))
 (import (symbol))
-
+(import (text))
+(import (match))
 
 (define (separator? c)::boolean
   (or (eof-object? c)
@@ -22,25 +23,86 @@
       (set! (tail last-tail) (cons (read-char) '()))
       (read-atom-chars-into (tail last-tail)))))
 
-(define (read-spaces)
-  (let ((result (Space fragments: (cons 0 '()))))
-    (define (read-spaces-into pair)
-      (let ((c (peek-char)))
-	(if (or (eof-object? c)
-		(isnt c char-whitespace?))
-	    result	    
-	    (match (read-char)
-	      (#\newline
+(define (read-line-comment)::Text
+  (define (read-until-newline result)
+    (let ((c ::char (read-char)))
+      (if (eq? c #\newline)
+	  result
+	  (read-until-newline (result:appendCharacter c)))))
+  (read-until-newline (Text)))
+
+(define (read-text)::Text
+  (let ((result (Text)))
+    (define (read-hex-sequence #!optional (code 0))
+      (let ((d ::char (peek-char)))
+	(cond ((or (eof-object? d)
+		   (isnt d char-hex-digit?))
+	       (result:appendCharacter code))
+	      (else
+	       (read-char)
+	       (read-hex-sequence (+ (* code 16)
+				     (char-hex-value d)))))))
+    (define (read-escaped)
+      (let ((c ::char (read-char)))
+	(cond
+	 ((eof-object? c) result)
+	 (else
+	  (match c
+	    (#\n (result:appendCharacter #\newline))
+	    (#\t (result:appendCharacter #\tab))
+	    (#\\ (result:appendCharacter #\\))
+	    (#\" (result:appendCharacter #\"))
+	    (#\r (result:appendCharacter #\return))
+	    (#\b (result:appendCharacter #\backspace))
+	    (#\f (result:appendCharacter #\page))
+	    (#\x (read-hex-sequence))
+	    (_
+	     ;;(WARN "Unrecognized escape character: "c)
+	     (result:appendCharacter c)))
+	  (read-normal)))))
+      
+    (define (read-normal)
+      (let ((c ::char (read-char)))
+	(cond
+	 ((or (eof-object? c)
+	      (eq? c #\"))
+	  result)
+	 ((eq? c #\\)
+	  (read-escaped))
+	 (else
+	  (result:appendCharacter c)
+	  (read-normal)))))
+    
+    (read-normal)))
+
+(define (read-spaces #!optional (result (Space fragments:
+					       (cons 0 '()))))
+  (define (read-spaces-into pair)
+    (let ((c (peek-char)))
+      (if (or (eof-object? c)
+	      (and (isnt c char-whitespace?)
+		   (isnt c eq? #\;)))
+	  result
+	  (match (read-char)
+	    (#\;
+	     (let ((line-comment (read-line-comment)))
 	       (set! (tail pair)
-		 (cons 0 (tail pair)))
-	       (read-spaces-into (tail pair)))
-	      (#\space
-	       (set! (head pair)
-		 (+ (head pair) 1))
-	       (read-spaces-into pair))
-	      (_
-	       (read-spaces-into pair))))))
-    (read-spaces-into result:fragments)))
+		     (cons (cons 'line-comment
+				 line-comment)
+			   (tail pair)))
+	       (read-spaces-into (tail pair))))
+	    (#\newline
+	     (set! (tail pair)
+		   (cons 0 (tail pair)))
+	     (read-spaces-into (tail pair)))
+	    (#\space
+	     (set! (head pair)
+		   (+ (head pair) 1))
+	     (read-spaces-into pair))
+	    (_
+	     (read-spaces-into pair))))))
+  
+  (read-spaces-into result:fragments))
 
 (define (read-list)
   (let ((result '())
@@ -77,7 +139,8 @@
                   (update! (null-tail-space growth-cone)
                            spaces*))
                 (set! (tail growth-cone) result*)))
-             (else ;;presumably a symbol
+
+             (else ;;a symbol or a number
               (let ((output (cons c '())))
                 (read-atom-chars-into output)
                 (set! (tail growth-cone)
@@ -96,8 +159,38 @@
               (update! (null-head-space growth-cone)
                        spaces*))
             (read-next)))
-         
-         (else
+
+	 ((eq? c #\")
+	  (let ((text (read-text)))
+	    (add-element! text (read-spaces)))
+	  (read-next))
+
+	 #|
+	 ((eq? c #\#)
+	  (let ((d (peek-char)))
+	    (cond ((eq? c #\;)
+		   ;; czytamy cale wyrazenie i dodajemy je
+		   ;; do poprzedniej spacji
+		   )
+
+		  ((eq? c #\|)
+		   ;; czytamy komentarz blokowy i dodajemy go
+		   ;; do poprzedniej spacji
+		   )
+		  ((eq? c #\\)
+		   ;; czytamy znak
+		   )
+
+		  ;; jeszcze #f i #t zasluguja na miano
+		  ;; osobnych obiektow
+		  
+		  (else
+		   ;; czy po prostu czytamy atom
+		   ;; z doklejonym na poczatku
+		   ;; znakiem #?
+		   ))))
+	 |#
+         (else ;; a symbol or a number
           (let ((output (cons c '())))
             (read-atom-chars-into output)
             (add-element! (Symbol (list->string output))

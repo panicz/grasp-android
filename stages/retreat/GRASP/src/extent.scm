@@ -5,7 +5,7 @@
 (define-type (Extent width: real
                      height: real))
 
-(define (string-extent s::string)::Extent
+(define (string-extent s::java.lang.CharSequence)::Extent
   (let ((line-length 0)
         (max-length 0)
         (total-lines 1))

@@ -1,3 +1,4 @@
+(import (assert))
 (import (match))
 (import (examples))
 (import (infix))
@@ -218,3 +219,31 @@
 		     (set-cdr! tail `(,next-expression))
 		     (read-into (cdr tail))))))
 	  (read-into result)))))
+
+(define (char-digit? c::char)::boolean
+  (<= (char->integer #\0)
+      (char->integer c)
+      (char->integer #\9)))
+
+
+(define (char-hex-digit? c::char)::boolean
+  (or (char-digit? c)
+      (<= (char->integer #\a)
+	  (char->integer c)
+	  (char->integer #\f))
+      (<= (char->integer #\A)
+	  (char->integer c)
+	  (char->integer #\F))))
+
+(define (char-hex-value c::char)::int
+  (let ((code (char->integer c)))
+    (cond ((char-digit? c)
+	   (- code (char->integer #\0)))
+	  ((<= (char->integer #\a) code (char->integer #\f))
+	   (+ 10 (- code (char->integer #\a))))
+	  (else
+	   (assert (<= (char->integer #\A) code (char->integer #\F)))
+	   (+ 10 (- code (char->integer #\A)))))))
+
+(e.g.
+ (char-hex-value #\f) ===> 15)
