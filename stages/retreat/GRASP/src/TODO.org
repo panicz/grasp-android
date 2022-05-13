@@ -1,3 +1,36 @@
+* 12.05.2022
+
+wazny komponent systemu to tablica z wiazaniami
+
+ale oprocz tego musimy jeszcze zrobic parsowanie
+stringow i komentarzy (no i oczywiscie wyswietlanie,
+nawigowanie kursorem itd.)
+
+Ale wydaje sie, ze kolejnosc prac powinna byc taka:
+
+Najpierw piszemy wszystkie funkcje edytujace
+(i byc moze mechanizm wiazan)
+
+Nastepnie zrealizowalibysmy stringi i komentarze
+oraz mechanizm selekcji i obsluge liczb
+
+W dalszej kolejnosci sprobowalibysmy opracowac mechanizm
+rozszerzen, tak zeby dalo sie interpretowac (quote x)
+i (quasiquote x) za pomoca innych nawiasow
+
+`(expression-comment . ,expression)
+`(box-comment . ,string)
+`(line-comment . ,string)
+
+(comment-expression!)
+(uncomment-expression!)
+
+i jak to bedziemy mieli, to jeszcze obsluga myszy, widokow,
+ladowania plikow, scrollowania i ewaluacji, i mozna wydac
+grasp-for-terminal w swiat i zaczac prace nad grasp-for-desktop
+oraz grasp-for-android
+
+
 * 11.05.2022
 
 udalo sie zrobic test definiujacy klasyczna lispowa
@@ -88,14 +121,14 @@ I jezeli mamy set!, to przydaloby sie tez jakies "delete!"?
 Natomiast jezeli idzie o poruszanie kursora,
 to chcielibysmy miec takie cuda, jak:
 
-cursor-left!, cursor-right!,
+cursor-next!, cursor-back!,
 cursor-up!, cursor-down!,
 cursor-to-end-of-line!
 cursor-to-start-of-line!
 cursor-to-opening-parent!
 cursor-to-closing-parent!
 
-
+delete-next!, delete-back!
 
 
 * 10.05.2022
