@@ -24,11 +24,11 @@
       (read-atom-chars-into (tail last-tail)))))
 
 (define (read-line-comment)::Text
-  (define (read-until-newline result)
+  (define (read-until-newline result::Text)
     (let ((c ::char (read-char)))
       (if (eq? c #\newline)
 	  result
-	  (read-until-newline (result:appendCharacter c)))))
+	  (read-until-newline (result:appendCharacter (c:intValue))))))
   (read-until-newline (Text)))
 
 (define (read-text)::Text
@@ -89,8 +89,8 @@
 	       (set! (tail pair)
 		     (cons (cons 'line-comment
 				 line-comment)
-			   (tail pair)))
-	       (read-spaces-into (tail pair))))
+			   (cons 0 (tail pair))))
+	       (read-spaces-into (tail (tail pair)))))
 	    (#\newline
 	     (set! (tail pair)
 		   (cons 0 (tail pair)))
