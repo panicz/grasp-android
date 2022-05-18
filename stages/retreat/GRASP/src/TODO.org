@@ -1,3 +1,97 @@
+* 17.05.2022
+
+troche teraz jestesmy w rozkroku. jedno z dwojga:
+- parsowanie komentarzy wyrazeniowych?
+- zmiana reprezentacji symboli
+
+parsowanie jest niedestruktywne, wiec moze
+od niego bysmy zaczeli
+
+no i przy okazji parsowanie komentarzy blokowych
+(trzeba zadbac o to, zeby dzialalo zagniezdzanie,
+i trzeba by bylo chyba tworzyc sekwencje ucieczki
+dla znakow # i |?)
+
+* 16.05.2022
+
+nowy plan, jaki powstaje: trzeba usunac zaleznosc od obiektu
+Symbol, zeby pracowac bezposrednio na (roznych) atomach.
+
+tzn. przy kazdej edycji kasujemy stary symbol i dodajemy
+nowy. A konkretniej: konwertujemy sobie obiekt z drzewa
+do stringa (->string), wklejamy to w StringBuildera,
+konwertujemy do stringa, i parsujemy jako nowy obiekt.
+
+
+
+
+* 15.05.2022
+
+┌───────────────────────────┐
+│ blokowe to jakos tak moze │
+│ (ewentualnie uzywajac     │
+│ "box─drawing characters") │
+└───────────────────────────┘
+
+┆ a liniowe po prostu tak?
+`
+
+#
+#
+#
+
+
+┌        ┌         ┐                  ┐
+┊ define ┊ map f l ┊                  ┊
+┊        └         ┘                  ┊
+┊ ┆ i w takim przypadku tez?          ┊ 
+┊ ┌                                 ┐ ┊
+┊ ┊ match l ┆ albo tutaj?           ┊ ┊
+┊ ┊                                 ┊ ┊
+┊ ┊ ┌ ┏  ┓ ┏  ┓ ┐                   ┊ ┊
+┊ ┊ ┊ ┋  ┋ ┋  ┋ ┊                   ┊ ┊
+┊ ┊ └ ┗| ┛ ┗  ┛ ┘                   ┊ ┊
+┊ ┊ ┌ ╓      ╖ ╓ ┌        ┐     ╖ ┐ ┊ ┊
+┊ ┊ ┊ ║ head ║ ║ ┊ f head ┊     ║ ┊ ┊ ┊
+┊ ┊ ┊ ║ ____ ║ ║ └_______ ┘____ ║ ┊ ┊ ┊
+┊ ┊ ┊ ║      ║ ║ ┌            ┐ ║ ┊ ┊ ┊
+┊ ┊ ┊ ║ tail ║ ║ ┊ map f tail ┊ ║ ┊ ┊ ┊
+└ └ └ ╙      ╜ ╙ └            ┘ ╜ ┘ ┘ ┘
+
+no dobra, to jest pomysl jak wyswietlic te komentarze,
+jest z grubsza idea, jak je reprezentowac - trzeba tylko
+miec na wzgledzie, ze komentarze blokowe moga zagniezdzac
+inne komentarze blokowe
+
+* 14.05.2022
+
+co sie udalo zrobic:
+- parsowanie stringow
+- parsowanie "liniowych" komentarzy
+
+co nam jeszcze pozostalo w parserze:
+- parsowanie komentarzy blokowych
+- parsowanie komentarzy wyrazeniowych
+
+a po stronie interfejsu:
+- iterowanie po komentarzach
+- wyswietlanie komentarzy
+
+
+musimy sobie wyobrazic w jaki sposob wyswietlac
+liniowe komentarze. Z wyrazeniowymi i blokowymi
+powinno byc raczej prosciej:
+
++---------------------------+
+| blokowe to jakos tak moze |
+| (ewentualnie uzywajac     |
+| "box-drawing characters") |
++---------------------------+
+
+a wyrazeniowe tak jak wyrazenia, ewentualnie
+robiac kropeczkowe paleczki
+
+
 * 12.05.2022
 
 wazny komponent systemu to tablica z wiazaniami
