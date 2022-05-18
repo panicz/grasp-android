@@ -54,3 +54,4 @@
 (show line-comments-with-empty-input)
 (newline)
 
+(display (with-input-from-string ";;aaa dupa" read-list))

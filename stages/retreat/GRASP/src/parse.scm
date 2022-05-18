@@ -25,19 +25,32 @@
 
 (define (read-line-comment)::Text
   (define (read-until-newline result::Text)
-    (let ((c ::char (read-char)))
-      (if (eq? c #\newline)
+    (let ((c (read-char)))
+      (if (or (eof-object? c)
+	      (eq? c #\newline))
 	  result
-	  (read-until-newline (result:appendCharacter (c:intValue))))))
+	  (read-until-newline (result:appendCharacter
+			       (invoke (as gnu.text.Char c)
+				       'intValue))))))
   (read-until-newline (Text)))
+
+(define (read-block-comment)
+  (error "not implemented!"))
 
 (define (read-text)::Text
   (let ((result (Text)))
+    (define (add! c)
+      (if (is c instance? gnu.text.Char)
+	  (result:appendCharacter (invoke
+				   (as gnu.text.Char c)
+				   'intValue))
+	  (result:appendCharacter c)))
+    
     (define (read-hex-sequence #!optional (code 0))
       (let ((d ::char (peek-char)))
 	(cond ((or (eof-object? d)
 		   (isnt d char-hex-digit?))
-	       (result:appendCharacter code))
+	       (add! code))
 	      (else
 	       (read-char)
 	       (read-hex-sequence (+ (* code 16)
@@ -48,17 +61,17 @@
 	 ((eof-object? c) result)
 	 (else
 	  (match c
-	    (#\n (result:appendCharacter #\newline))
-	    (#\t (result:appendCharacter #\tab))
-	    (#\\ (result:appendCharacter #\\))
-	    (#\" (result:appendCharacter #\"))
-	    (#\r (result:appendCharacter #\return))
-	    (#\b (result:appendCharacter #\backspace))
-	    (#\f (result:appendCharacter #\page))
+	    (#\n (add! #\newline))
+	    (#\t (add! #\tab))
+	    (#\\ (add! #\\))
+	    (#\" (add! #\"))
+	    (#\r (add! #\return))
+	    (#\b (add! #\backspace))
+	    (#\f (add! #\page))
 	    (#\x (read-hex-sequence))
 	    (_
 	     ;;(WARN "Unrecognized escape character: "c)
-	     (result:appendCharacter c)))
+	     (add! c)))
 	  (read-normal)))))
       
     (define (read-normal)
@@ -70,13 +83,15 @@
 	 ((eq? c #\\)
 	  (read-escaped))
 	 (else
-	  (result:appendCharacter c)
+	  (add! c)
 	  (read-normal)))))
     
     (read-normal)))
 
-(define (read-spaces #!optional (result (Space fragments:
-					       (cons 0 '()))))
+
+(define (read-spaces #!optional (result::Space
+				 (Space fragments:
+					(cons 0 '()))))
   (define (read-spaces-into pair)
     (let ((c (peek-char)))
       (if (or (eof-object? c)
@@ -104,10 +119,16 @@
   
   (read-spaces-into result:fragments))
 
-(define (read-list)
-  (let ((result '())
-	(growth-cone '())
-	(initial-space (read-spaces)))
+(define (read-list #!optional (max-items +inf.0))
+  (let* ((result '())
+	 (growth-cone '())
+	 (initial-space (read-spaces))
+	 (total-items 0)
+	 (last-space ::Space (read-spaces)))
+
+    (define (read-space)
+      (set! last-space (read-spaces))
+      last-space)
 
     (define (add-element! element following-space)
       (cond ((null? result)
@@ -117,85 +138,98 @@
 	     (set! (tail growth-cone) (cons element '()))
 	     (set! growth-cone (tail growth-cone))))
       (update! (post-head-space growth-cone)
-	       following-space))
+	       following-space)
+      (set! total-items (+ total-items 1)))
     
     (define (read-next)
-      (let ((c (read-char)))
-	
-	(cond
-         ((or (eof-object? c) (eq? c #\)))
-          (when (pair? result)                 
-            (update! (pre-head-space result)
-                     initial-space))
-          (values result initial-space))
+      (if (is total-items >= max-items)
+	  (values result initial-space)
+	  (let ((c (read-char)))
+	    (cond
+             ((or (eof-object? c) (eq? c #\)))
+              (when (pair? result)                 
+		(update! (pre-head-space result)
+			 initial-space))
+              (values result initial-space))
 
-         ((eq? c #\.)
-          (let* ((post-dot-spaces (read-spaces))
-                 (c (read-char)))
-            (cond
+             ((eq? c #\.)
+              (let* ((post-dot-spaces (read-space))
+                     (c (read-char)))
+		(cond
+		 ((eq? c #\()
+		  (let-values (((result* spaces*)
+				(read-list)))
+                    (when (null? result*)
+                      (update! (null-tail-space growth-cone)
+                               spaces*))
+                    (set! (tail growth-cone) result*)))
+
+		 (else ;;an atom
+		  (let ((output (cons c '())))
+                    (read-atom-chars-into output)
+                    (set! (tail growth-cone)
+                      (Symbol (list->string output))))))
+		(update! (dotted? growth-cone) #t)
+		(update! (pre-tail-space growth-cone)
+			 post-dot-spaces)
+		(update! (post-tail-space growth-cone)
+			 (read-space))
+		(read-next)))
+
              ((eq? c #\()
               (let-values (((result* spaces*) (read-list)))
-                (when (null? result*)
-                  (update! (null-tail-space growth-cone)
-                           spaces*))
-                (set! (tail growth-cone) result*)))
+		(add-element! result* (read-space))
+		(when (null? result*)
+		  (update! (null-head-space growth-cone)
+			   spaces*))
+		(read-next)))
 
-             (else ;;a symbol or a number
+	     ((eq? c #\")
+	      (let ((text (read-text)))
+		(add-element! text (read-space)))
+	      (read-next))
+
+	     ((eq? c #\#)
+	      (let ((d (read-char)))
+		(cond
+		 ((eq? d #\;)
+		  (let-values (((unexpr spaces)
+				(read-list 1)))
+		    (let ((coda (last-pair
+				 last-space:fragments))
+			  (next-space ::Space (read-spaces)))
+		      (set! (tail coda)
+			(cons
+			 (cons* 'expression-comment
+				spaces
+				unexpr)
+			 next-space:fragments))
+		      (read-next))))
+
+		 ((eq? d #\|)
+		  (let* ((comment (read-block-comment))
+			 (coda (last-pair
+				last-space:fragments))
+			 (next-space ::Space (read-spaces)))
+		    (set! (tail coda)
+		      (cons
+		       (cons 'block-comment comment)
+		       next-space:fragments))
+		    (read-next)))
+		 (else
+		  (let ((output (cons* c d '())))
+		    (read-atom-chars-into (tail output))
+		    (add-element! (Symbol (list->string
+					   output))
+				  (read-space))
+		    (read-next))))))
+
+             (else ;; an atom
               (let ((output (cons c '())))
-                (read-atom-chars-into output)
-                (set! (tail growth-cone)
-                      (Symbol (list->string output))))))
-            (update! (dotted? growth-cone) #t)
-            (update! (pre-tail-space growth-cone)
-		     post-dot-spaces)
-            (update! (post-tail-space growth-cone)
-                     (read-spaces))
-            (read-next)))
-
-         ((eq? c #\()
-          (let-values (((result* spaces*) (read-list)))
-            (add-element! result* (read-spaces))
-            (when (null? result*)
-              (update! (null-head-space growth-cone)
-                       spaces*))
-            (read-next)))
-
-	 ((eq? c #\")
-	  (let ((text (read-text)))
-	    (add-element! text (read-spaces)))
-	  (read-next))
-
-	 #|
-	 ((eq? c #\#)
-	  (let ((d (peek-char)))
-	    (cond ((eq? c #\;)
-		   ;; czytamy cale wyrazenie i dodajemy je
-		   ;; do poprzedniej spacji
-		   )
-
-		  ((eq? c #\|)
-		   ;; czytamy komentarz blokowy i dodajemy go
-		   ;; do poprzedniej spacji
-		   )
-		  ((eq? c #\\)
-		   ;; czytamy znak
-		   )
-
-		  ;; jeszcze #f i #t zasluguja na miano
-		  ;; osobnych obiektow
-		  
-		  (else
-		   ;; czy po prostu czytamy atom
-		   ;; z doklejonym na poczatku
-		   ;; znakiem #?
-		   ))))
-	 |#
-         (else ;; a symbol or a number
-          (let ((output (cons c '())))
-            (read-atom-chars-into output)
-            (add-element! (Symbol (list->string output))
-                          (read-spaces))
-            (read-next))))))
+		(read-atom-chars-into output)
+		(add-element! (Symbol (list->string output))
+                              (read-space))
+		(read-next)))))))
 
     (read-next)))
 
