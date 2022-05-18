@@ -125,6 +125,14 @@
 (define (recons head tail)::cons
   ((heads tail) head))
 
+(define-syntax cons*
+  (syntax-rules ()
+    ((_ a b)
+     (cons a b))
+
+    ((_ a b c ...)
+     (cons a (cons* b c ...)))))
+
 (define-syntax recons*
   (syntax-rules ()
     ((_ a b)
