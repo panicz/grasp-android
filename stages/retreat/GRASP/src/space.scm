@@ -10,6 +10,7 @@
 (import (functions))
 (import (assert))
 (import (print))
+(import (conversions))
 (import (srfi :11))
 
 (define (space-fragment-index fragments index::int)
@@ -210,6 +211,30 @@
 	(out:append #\newline)
 	(process rest))
        
+       (`((expression-comment
+	   ,spaces . ,expressions) . ,rest)
+	;; `expressions' will usually contain
+	;; one element - but for malformed code,
+	;; such as #;) - it might be an empty list
+	;; (we should never produce such cases,
+	;; but this is how we make our parser and
+	;; unparser more robust)
+	(out:append #\#)
+	(out:append #\;)
+	(invoke (as Space spaces) 'print out)
+	(for expression in expressions
+	     (show expression))
+	(process rest))
+
+       (`((block-comment . ,comment) . ,rest)
+	(out:append #\#)
+	(out:append #\|)
+	(for c::gnu.text.Char in comment
+	     (out:append c))
+	(out:append #\|)
+	(out:append #\#)
+	(process rest))
+
        (_
 	(values)))))
   )
@@ -438,3 +463,49 @@
 	   (6 (post-tail-space grandparent)))
 	 (null-space-ref (tail grandparent)
 			 (- parent-index 2))))))
+
+(define (print-space space::Space
+		     #!optional (port (current-output-port)))
+  #;(write space:fragments port)
+  (space:print port))
+
+(define (show-empty-list space)::void
+  (write-char #\()
+  (print-space space)
+  (write-char #\)))
+
+(define (show-head p::pair)::void
+  (if (null? (head p))
+      (show-empty-list (null-head-space p))
+      (show (head p))))
+
+(define (show-dotted-tail p::pair)::void
+  (write-char #\.)
+  (print-space (pre-tail-space p))
+  (if (null? (tail p))
+      (show-empty-list (null-tail-space p))
+      (show (tail p)))
+  (print-space (post-tail-space p)))
+
+(define (show-pair p::pair)::void
+  (show-head p)
+  (print-space (post-head-space p))
+  (cond ((dotted? p)
+	 (show-dotted-tail p))
+	((pair? (tail p))
+	 (show-pair (tail p)))))
+
+(define (show p)::void
+  (cond
+   ((pair? p)
+    (write-char #\()
+    (print-space (pre-head-space p))
+    (show-pair p)
+    (write-char #\)))
+   (else
+    (write p))))
+
+(define (show->string p)::string
+  (with-output-to-string
+    (lambda ()
+      (show p))))

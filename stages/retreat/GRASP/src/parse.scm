@@ -15,7 +15,7 @@
 (define (separator? c)::boolean
   (or (eof-object? c)
       (char-whitespace? c)
-      (memq c '(#\( #\)))))
+      (memq c '(#\( #\) #\[ #\]))))
 
 (define (read-atom-chars-into last-tail::pair)::void
   (let ((c (peek-char)))
@@ -34,8 +34,47 @@
 				       'intValue))))))
   (read-until-newline (Text)))
 
-(define (read-block-comment)
-  (error "not implemented!"))
+(define (read-block-comment #!optional
+			    (result ::Text (Text)))
+  ::Text
+  (define (add! c::gnu.text.Char)
+    (result:appendCharacter (c:intValue)))
+
+  (let ((c (read-char)))
+    (cond
+     ((eof-object? c) result)
+     ((eq? c #\|)
+       (let ((d (read-char)))
+	 (cond ((or (eof-object? d)
+		    (eq? d #\#))
+		result)
+	       (else
+		(add! c)
+		(add! d)
+		(read-block-comment result)))))
+     ((eq? c #\#)
+       (let ((d (read-char)))
+	 (cond ((eof-object? d)
+		(add! c)
+		result)
+	       ((eq? d #\|)
+		(add! c)
+		(add! d)
+		;; we make two revursive calls here:
+		;; one to read the nested block comment
+		(read-block-comment result)
+		(add! #\|)
+		(add! #\#)
+		;; and another one to read the rest
+		;; at the current level of nesting
+		(read-block-comment result))
+	       (else
+		(add! c)
+		(add! d)
+		(read-block-comment result)))))
+     (else
+      (add! c)
+      (read-block-comment result)))))
 
 (define (read-text)::Text
   (let ((result (Text)))
@@ -92,6 +131,7 @@
 (define (read-spaces #!optional (result::Space
 				 (Space fragments:
 					(cons 0 '()))))
+  ::Space
   (define (read-spaces-into pair)
     (let ((c (peek-char)))
       (if (or (eof-object? c)
@@ -126,7 +166,7 @@
 	 (total-items 0)
 	 (last-space ::Space (read-spaces)))
 
-    (define (read-space)
+    (define (read-space)::Space
       (set! last-space (read-spaces))
       last-space)
 
@@ -197,7 +237,9 @@
 				(read-list 1)))
 		    (let ((coda (last-pair
 				 last-space:fragments))
-			  (next-space ::Space (read-spaces)))
+			  (next-space ::Space
+				      (post-head-space
+				       unexpr)))
 		      (set! (tail coda)
 			(cons
 			 (cons* 'expression-comment
@@ -210,7 +252,7 @@
 		  (let* ((comment (read-block-comment))
 			 (coda (last-pair
 				last-space:fragments))
-			 (next-space ::Space (read-spaces)))
+			 (next-space (read-spaces)))
 		    (set! (tail coda)
 		      (cons
 		       (cons 'block-comment comment)
@@ -240,49 +282,3 @@
 
 (define (parse-string s::string)::list
   (call-with-input-string s parse))
-
-(define (print-space space::Space
-		     #!optional (port (current-output-port)))
-  #;(write space:fragments port)
-  (space:print port))
-
-(define (show-empty-list space)::void
-  (write-char #\()
-  (print-space space)
-  (write-char #\)))
-
-(define (show-head p::pair)::void
-  (if (null? (head p))
-      (show-empty-list (null-head-space p))
-      (show (head p))))
-
-(define (show-dotted-tail p::pair)::void
-  (write-char #\.)
-  (print-space (pre-tail-space p))
-  (if (null? (tail p))
-      (show-empty-list (null-tail-space p))
-      (show (tail p)))
-  (print-space (post-tail-space p)))
-
-(define (show-pair p::pair)::void
-  (show-head p)
-  (print-space (post-head-space p))
-  (cond ((dotted? p)
-	 (show-dotted-tail p))
-	((pair? (tail p))
-	 (show-pair (tail p)))))
-
-(define (show p)::void
-  (cond
-   ((pair? p)
-    (write-char #\()
-    (print-space (pre-head-space p))
-    (show-pair p)
-    (write-char #\)))
-   (else
-    (write p))))
-
-(define (show->string p)::string
-  (with-output-to-string
-    (lambda ()
-      (show p))))
