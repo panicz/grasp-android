@@ -164,7 +164,7 @@
 	 (growth-cone '())
 	 (initial-space (read-spaces))
 	 (total-items 0)
-	 (last-space ::Space (read-spaces)))
+	 (last-space ::Space initial-space))
 
     (define (read-space)::Space
       (set! last-space (read-spaces))
