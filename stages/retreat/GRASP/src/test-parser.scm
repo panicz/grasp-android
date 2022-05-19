@@ -1,6 +1,7 @@
 (import
  (indexable)
  (primitive)
+ (space)
  (parse)
  (examples)
  (conversions)
@@ -54,4 +55,26 @@
 (show line-comments-with-empty-input)
 (newline)
 
-(display (with-input-from-string ";;aaa dupa" read-list))
+(display (with-input-from-string "
+;;aaa dupa
+" read-list))
+(newline)
+
+(define nested-expression-comments (parse-string "\
+(begin
+#; (move 10 #;bytes #;from source #;to target)
+)
+"))
+
+(show nested-expression-comments)
+(newline)
+
+(define nested-block-comments (parse-string "\
+hey!
+#| what follows is an empty list
+#| and this comment is nested |#|#
+(#|this is the aforementioned empty list|#)
+"))
+
+(show nested-block-comments)
+(newline)
