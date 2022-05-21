@@ -282,3 +282,12 @@
 
 (define (parse-string s::string)::list
   (call-with-input-string s parse))
+
+(define (parse-document #!optional
+			(port (current-input-port)))
+  (parameterize ((current-input-port port))
+    (let-values (((result spaces) (read-list)))
+      (let ((document (cons result '())))
+	(when (null? result)
+	  (set! (null-head-space document) spaces))
+	document))))

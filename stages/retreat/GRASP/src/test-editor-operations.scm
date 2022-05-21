@@ -104,14 +104,9 @@
 (define original-cursor (the-cursor))
 
 (set! (the-document)
-      ;; we're using (cons _ '()) rather than "list", because
-      ;; Kawa's cons cells provide equal?-like equals method
-      ;; which makes them work poorly with weak hash tables.
-      ;;
-      ;; We need to patch Kawa in order to resolve the problem,
-      ;; but for now we just stick with what's in the repo.
-      (cons (parse-string "(define (square x) (* x x))") '()))
-
+  (with-input-from-string
+      "(define (square x) (* x x))"
+    parse-document))
 
 ;; First, let's describe our intuitions about the cursor:
 

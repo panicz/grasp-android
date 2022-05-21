@@ -29,7 +29,7 @@
  )
 
 (define input ::string "\
-(define (factorial n)
+(define (! n)
   (if (<= n 0)
       1
       (* n (! (- n 1))))) 
@@ -37,7 +37,7 @@
 ")
 
 (set! (the-document)
-      (cons (parse-string input) '()))
+  (with-input-from-string input parse-document))
 
 (define input-extent ::Extent (string-extent input))
 

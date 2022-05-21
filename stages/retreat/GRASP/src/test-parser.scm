@@ -46,23 +46,17 @@
 (newline)
 
 
-;; sadly, it doesn't work for empty input
-
-(define line-comments-with-empty-input (parse-string "\
+(define line-comments-with-empty-input
+  (with-input-from-string "\
 ; line comments with empty input
-"))
+" parse-document))
 
 (show line-comments-with-empty-input)
 (newline)
 
-(display (with-input-from-string "
-;;aaa dupa
-" read-list))
-(newline)
-
 (define nested-expression-comments (parse-string "\
 (begin
-#; (move 10 #;bytes #;from source #;to target)
+#; (move 10 #;bytes #;(from (beautiful)) source #;to target)
 )
 "))
 
@@ -73,8 +67,10 @@
 hey!
 #| what follows is an empty list
 #| and this comment is nested |#|#
-(#|this is the aforementioned empty list|#)
+( #|this is the aforementioned empty list|#
+#|and it seems to work|# )
 "))
 
 (show nested-block-comments)
 (newline)
+
