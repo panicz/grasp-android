@@ -1,3 +1,22 @@
+* 20.05.2022
+
+plan jest taki, zeby machnac taki prototyp,
+w ktorym iterujemy sobie po kursorze
+i wyswietlamy wybrane wyrazenie
+
+* 19.05.2022
+
+mamy juz parsowanie komentarzy. teraz pozostaje nam:
+- iterowanie kursorem po komentarzach
+- wyswietlanie komentarzy na ekranie
+  (i ich edycja!)
+
+ale oprocz tego mamy jeszcze:
+- wywalenie klasy Symbol i bezposrednia prace
+  na atomach
+- operacje edycji zgodne z test-writing-map
+  (przynajmniej do momentu pojawienia sie quote'a)
+
 * 17.05.2022
 
 troche teraz jestesmy w rozkroku. jedno z dwojga:
