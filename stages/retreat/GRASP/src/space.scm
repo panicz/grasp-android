@@ -13,13 +13,28 @@
 (import (conversions))
 (import (srfi :11))
 
-(define (space-fragment-index fragments index::int)
+(define (fragment-size fragment)
+  (match fragment
+    (`(line-comment . ,text)
+     0)
+    
+    (`(expression-comment ,space . ,expressions)
+     (length expressions))
+
+    (`(block-comment . ,text)
+     0)
+    
+    (,@integer?
+     fragment)))
+
+(define (space-fragment-index fragments index)
   (if (or (isnt fragments pair?)
-	  (is (head fragments) >= index))
+	  (is (fragment-size (head fragments)) >= index))
       (values fragments index)
       (space-fragment-index (tail fragments)
 			    (- index
-			       (head fragments)
+			       (fragment-size
+				(head fragments))
 			       1))))
 
 (e.g.
@@ -85,6 +100,7 @@
 (e.g.
  (space-fragment-index '(3 5) 10)
  ===> () 0)
+
 
 (define (delete-space-fragment! fragments::pair
 				position::int)
@@ -153,17 +169,48 @@
    (and (equal? result '(1 2 2))
 	(eq? result fragments))))
 
-
 (define-type (Space fragments: pair)
-  #|implementing gnu.kawa.format.Printable with|#
   implementing Indexable
   with
-  ((part-at index::Index)::Indexable* (this))
+  ((part-at index::Index)::Indexable*
+   (let-values (((fragments* index*) (space-fragment-index
+				      fragments index)))
+     (if (or (isnt fragments* pair?)
+	     (number? (head fragments*)))
+	 (this)
+	 (match (head fragments*)
+	   (`(line-comment . ,text)
+	    (assert (= index* 0))
+	    text)
+	   
+	   (`(expression-comment ,space . ,expressions)
+	    (if (= index* 0)
+		space
+		(list-ref expressions (- index* 1))))
+
+	   (`(block-comment . ,text)
+	    (assert (= index* 0))
+	    text)))))
+	   
   
   ((first-index)::Index 0)
   
   ((last-index)::Index
-   (fold-left + (length (tail fragments))
+   (fold-left (lambda (total next)
+		(if (number? next)
+		    (+ total next)
+		    (match next
+		      (`(line-comment . ,text)
+		       0)
+		      
+		      (`(expression-comment ,space
+					    . ,expressions)
+		       (length expressions))
+
+		      (`(block-comment . ,text)
+		       0))))
+
+		(length (tail fragments))
 	      fragments))
   
   ((next-index index::Index)::Index
@@ -213,12 +260,8 @@
        
        (`((expression-comment
 	   ,spaces . ,expressions) . ,rest)
-	;; `expressions' will usually contain
-	;; one element - but for malformed code,
-	;; such as #;) - it might be an empty list
-	;; (we should never produce such cases,
-	;; but this is how we make our parser and
-	;; unparser more robust)
+	;; `expressions' should always contain
+	;; exactly one element
 	(out:append #\#)
 	(out:append #\;)
 	(invoke (as Space spaces) 'print out)
