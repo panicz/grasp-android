@@ -548,6 +548,14 @@
    (else
     (write p))))
 
+(define (show-document d::pair)
+  (cond ((null? (head d))
+	 (print-space (null-head-space d)))
+	((pair? (head d))
+	 (print-space (pre-head-space (head d)))
+	 (show-pair (head d)))))
+      
+
 (define (show->string p)::string
   (with-output-to-string
     (lambda ()
