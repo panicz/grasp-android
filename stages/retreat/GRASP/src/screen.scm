@@ -1,5 +1,6 @@
 (import (define-interface))
 (import (define-object))
+(import (extent))
 
 (define-alias CharSequence java.lang.CharSequence)
 
@@ -14,6 +15,8 @@
   (translate! x::real y::real)::void
   (draw-string! s::CharSequence l::real t::real)::void
   (draw-text! s::CharSequence left::real top::real)::void
+  (text-extent text::CharSequence)::Extent
+  
   (draw-atom! text::CharSequence)::void
   
   (atom-width text::CharSequence)::real
@@ -55,8 +58,11 @@
   (define (draw-text! s::CharSequence
 		      left::real
 		      top::real)
-    ::real
-    (length s))
+    ::void
+    (values))
+
+  (define (text-extent text::CharSequence)::Extent
+    (Extent width: 0 height: 0))
   
   (define (draw-atom! text::CharSequence)::void
     (values))

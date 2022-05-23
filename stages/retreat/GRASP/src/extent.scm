@@ -11,7 +11,8 @@
         (total-lines 1))
     (for c in s
          (cond ((eq? c #\newline)
-                (set! max-length (max max-length line-length))
+                (set! max-length (max max-length
+				      line-length))
                 (set! total-lines (+ total-lines 1))
                 (set! line-length 0))
                (else

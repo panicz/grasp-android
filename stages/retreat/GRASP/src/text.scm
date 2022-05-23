@@ -18,7 +18,6 @@
 (import (functions))
 (import (print))
 
-
 (define-object (Text)::Tile
   (define (draw! screen::Screen
 		 cursor::Cursor
@@ -27,10 +26,7 @@
     (screen:draw-string! (this) 0 0))
 
   (define (extent screen::Screen)::Extent
-    (let ((inner ::Extent (string-extent (this))))
-      (Extent width: (+ inner:width 2)
-	      height: (max (screen:min-line-height)
-			   inner:height))))
+    (screen:text-extent (this)))
 
   (define (part-at index::Index)::Indexable*
     (this))

@@ -48,7 +48,8 @@
                  (new-height (if (is y >= height)
                                  (+ y 1)
                                  height))
-                 (new-data (char[] length: (* new-width new-height))))
+                 (new-data (char[] length: (* new-width
+					      new-height))))
             (for line from 0 below new-height
                  (for column from 0 below new-width
                       (set! (new-data (+ (* new-width line)
@@ -85,7 +86,8 @@
 	(write-char #\newline)
 	(for line from 0 below height
              (for column from 0 below width
-                  (write-char (data (+ (* line width) column))))
+                  (write-char (data (+ (* line width)
+				       column))))
              (write-char #\newline)))))
 
   (define (translate! x::real y::real)::void
@@ -103,20 +105,25 @@
          (put! #\│ i 0))
     (put! #\╵ (- height 1) 0))
 
-  (define (open-paren! height::real left::real top::real)::void
-    (put! #\╭ #;#\┌  top left)
+  (define (open-paren! height::real left::real top::real)
+    ::void
+    (put! #\╭ top left)
     (for i from 1 to (- height 2)
          (put! #\│ (+ i top) left))
-    (put! #\╰ #;#\└ (+ top (- height 1)) left))
+    (put! #\╰ (+ top (- height 1)) left))
   
-  (define (close-paren! height::real left::real top::real)::void
-    (put! #\╮ #;#\┐ top (+ left 1))
+  (define (close-paren! height::real left::real top::real)
+    ::void
+    (put! #\╮ top (+ left 1))
     (for i from 1 to (- height 2)
          (put! #\│ (+ i top) (+ left 1)))
-    (put!  #\╯ #;#\┘ (+ top (- height 1)) (+ left 1)))
+    (put!  #\╯ (+ top (- height 1)) (+ left 1)))
 
-  (define (draw-string! s::CharSequence left::real top::real)::void
-    (put! #\" top left) 
+  (define (draw-string! s::CharSequence
+			left::real
+			top::real)
+    ::void
+    (put! #\❝ top left) 
     (let ((row top)
           (col (+ left 1))
           (width 1))
@@ -125,17 +132,25 @@
                (set! row (+ row 1))
                (set! col (+ left 1)))
               (else
-               (put! c row col)
+               (put! c (+ row 1) (+ col 1))
                (set! col (+ col 1))
                (set! width (max width (- col left))))))
-      (put! #\" row (+ left width))
+      (put! #\❞ (+ row 2) (+ left width 2))
       (Extent width: (+ width 2)
               height: (- (+ row 1) top))))
 
-  (define (draw-text! text::CharSequence left::real top::real)::void
+  (define (draw-text! text::CharSequence
+		      left::real
+		      top::real)
+    ::void
     (for i from 0 below (string-length text)
          (put! (text i) top (+ left i))))
 
+  (define (text-extent text::CharSequence)::Extent
+    (let ((inner ::Extent (string-extent text)))
+      (Extent width: (+ inner:width 4)
+	      height: (+ (max inner:height 1) 2))))
+  
   (define (draw-atom! text::CharSequence)::void
     (draw-text! text 0 1))
 

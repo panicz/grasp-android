@@ -563,11 +563,13 @@
 	 (sequence-extent object screen))
 
 	((symbol? object)
-	 (Extent width: (screen:atom-width (symbol->string object))
+	 (Extent width: (screen:atom-width
+			 (symbol->string object))
 		 height: (screen:min-line-height)))
 	
 	(else
-	 (error "Don't know how to compute extent of "object))))
+	 (error "Don't know how to compute extent of "
+		object))))
 
 
 ;; RZM37UHSPY5Z

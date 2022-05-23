@@ -30,6 +30,9 @@
 
 (define input ::string "\
 (define (! n)
+\"Computes the product 1*...*n.
+It represents the number of per-
+mutations of an n-element set.\"
   (if (<= n 0)
       1
       (* n (! (- n 1))))) 
