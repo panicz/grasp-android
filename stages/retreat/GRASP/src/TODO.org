@@ -1,3 +1,32 @@
+* 22.05.2022
+
+renderowanie stringow akurat juz jest (choc
+raczej do dopracowania)
+
+teraz moze zajmiemy sie wyswietlaniem 3 rodzajow
+komentarzy.
+
+szczegolnie komentarze wyrazeniowe beda wymagaly
+jakiegos sposobu, zeby parametryzowac znaki, ktorych
+uzywamy do rysowania nawiasow (zeby te zakomentowane
+byly rysowane linia przerywana)
+
+to by moglo tak wygladac:
+
+screen:enter-comment-mode!
+screen:exit-comment-mode!
+
+(with-comment-mode actions ...)
+
+* 21.05.2022
+
+co na pewno trzeba, to:
+- dodac renderowanie komentarzy
+- dodac renderowanie stringow
+- poruszanie sie po stringach i komentarzach
+(w szczegolnosci wymyslic jakis ladny sposob
+na poruszanie sie w gore i w dol)
+
 * 20.05.2022
 
 plan jest taki, zeby machnac taki prototyp,
