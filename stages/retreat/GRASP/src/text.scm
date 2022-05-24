@@ -23,7 +23,11 @@
 		 cursor::Cursor
 		 context::Cursor
 		 anchor::Cursor)
-    (screen:draw-string! (this) 0 0))
+    (screen:draw-string! (this) 0 0
+			 (and (pair? cursor)
+			      (equal? context
+				      (tail cursor))
+			      (head cursor))))
 
   (define (extent screen::Screen)::Extent
     (screen:text-extent (this)))

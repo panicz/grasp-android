@@ -1,6 +1,7 @@
 (import (define-interface))
 (import (define-object))
 (import (extent))
+(import (indexable))
 
 (define-alias CharSequence java.lang.CharSequence)
 
@@ -13,7 +14,8 @@
   
   (clear!)::void
   (translate! x::real y::real)::void
-  (draw-string! s::CharSequence l::real t::real)::void
+  (draw-string! s::CharSequence l::real t::real
+		index::Index)::void
   (draw-text! s::CharSequence left::real top::real)::void
   (text-extent text::CharSequence)::Extent
   
@@ -51,7 +53,8 @@
   
   (define (draw-string! s::CharSequence
 			left::real
-			top::real)
+			top::real
+			index::Index)
     ::void
     (values))
   

@@ -5,6 +5,7 @@
 (import (extent))
 (import (screen))
 (import (define-object))
+(import (indexable))
 
 (define-object (TextScreen)::Screen
   (define shift-left ::real 0)
@@ -121,20 +122,25 @@
 
   (define (draw-string! s::CharSequence
 			left::real
-			top::real)
+			top::real
+			index::Index)
     ::void
     (put! #\❝ top left) 
     (let ((row top)
           (col (+ left 1))
-          (width 1))
+          (width 1)
+	  (n 0))
       (for c in s
-        (cond ((eq? c #\newline)
-               (set! row (+ row 1))
-               (set! col (+ left 1)))
-              (else
-               (put! c (+ row 1) (+ col 1))
-               (set! col (+ col 1))
-               (set! width (max width (- col left))))))
+	   (when (eqv? n index)
+	     (remember-offset! (+ col 1) (+ row 2)))
+           (cond ((eq? c #\newline)
+		  (set! row (+ row 1))
+		  (set! col (+ left 1)))
+		 (else
+		  (put! c (+ row 1) (+ col 1))
+		  (set! col (+ col 1))
+		  (set! width (max width (- col left)))))
+	   (set! n (+ n 1)))
       (put! #\❞ (+ row 2) (+ left width 2))
       (Extent width: (+ width 2)
               height: (- (+ row 1) top))))
