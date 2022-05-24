@@ -1,3 +1,23 @@
+* 23.05.2022
+
+bysmy moze dzis zaczeli od tego, zeby ustawiac
+pozycje kursora podczas renderowania stringa
+
+ok, to mniej wiecej mamy zrobione
+
+teraz warto by sie zajac tym, zeby renderowac
+i obliczac rozmiar 3 rodzajow komentarzy
+
+
+zmiany musimy zrobic w nastepujacych metodach:
+- draw-sequence!
+- sequence-extent
+oraz ewentualnie
+- cursor-under
+
+trzeba tez przemyslec
+
+
 * 22.05.2022
 
 renderowanie stringow akurat juz jest (choc
