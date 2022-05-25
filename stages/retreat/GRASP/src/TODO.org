@@ -1,3 +1,17 @@
+* 25.05.2022
+
+dzisiaj konczymy space invadera.
+nie ma sensu sie jakos spinac, bo wiekszosci
+kluczowych funkcjonalnosci i tak nie zaimplementujemy.
+
+z rzeczy uzytecznych, stworzylem modul 'run', ulatwiajacy
+testowanie wyrazen na telefonie [bo nie trzeba pisac
+nawiasow wokol wyrazen na najwyzszym poziomie]
+
+tymczasem reszte 'commita' bym dzis poswiecil
+na dodanie testow jednostkowych do SRFI-200
+i ewentualne zmiany w strukturze tekstu
+
 * 23.05.2022
 
 bysmy moze dzis zaczeli od tego, zeby ustawiac
@@ -15,7 +29,7 @@ zmiany musimy zrobic w nastepujacych metodach:
 oraz ewentualnie
 - cursor-under
 
-trzeba tez przemyslec
+trzeba tez przemyslec dzialanie kursora w kontekscie
 
 
 * 22.05.2022
