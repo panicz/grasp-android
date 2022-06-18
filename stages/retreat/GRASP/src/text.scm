@@ -19,18 +19,16 @@
 (import (print))
 
 (define-object (Text)::Tile
-  (define (draw! screen::Screen
-		 cursor::Cursor
-		 context::Cursor
-		 anchor::Cursor)
-    (screen:draw-string! (this) 0 0
-			 (and (pair? cursor)
-			      (equal? context
-				      (tail cursor))
-			      (head cursor))))
+  (define (draw! context::Cursor)
+    (invoke (the-screen) 'draw-string!
+	    (this) 0 0
+	    (and (pair? (the-cursor))
+		 (equal? context
+			 (cursor-tail))
+		 (cursor-head))))
 
-  (define (extent screen::Screen)::Extent
-    (screen:text-extent (this)))
+  (define (extent)::Extent
+    (invoke (the-screen) 'text-extent (this)))
 
   (define (part-at index::Index)::Indexable*
     (this))

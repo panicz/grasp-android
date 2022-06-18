@@ -5,11 +5,11 @@
 (import (extent))
 
 (define-interface Tile (Indexable)
-  (draw! screen::Screen
-	 cursor::Cursor
-	 context::Cursor
-	 anchor::Cursor)::void
+  ;; these methods are implicitly parameterized
+  ;; with (the-screen) and (the-cursor) parameters
+  (draw! context::Cursor)
+  ::void
 	 
-  (extent screen::Screen)::Extent
-  )
+  (extent)::Extent)
 
+(define Tile* java.lang.Object)

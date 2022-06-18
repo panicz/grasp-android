@@ -12,25 +12,16 @@
 (define-type (Over back: Tile front: Tile)
   implementing Tile
   with
-  ((draw! screen::Screen
-	  cursor::Cursor
-	  context::Cursor
-	  anchor::Cursor)
+  ((draw! context::Cursor)
    ::void
    (let* ((back-context (recons 'back context))
           (front-context (recons 'front context)))
-     (back:draw! screen
-                 cursor
-                 back-context
-		 anchor)
-     (front:draw! screen
-		  cursor
-                  front-context
-		  anchor)))
+     (back:draw! back-context)
+     (front:draw! front-context)))
 
-  ((extent screen::Screen)::Extent
-   (let ((front-extent (front:extent screen))
-	 (back-extent (back:extent screen)))
+  ((extent)::Extent
+   (let ((front-extent (front:extent))
+	 (back-extent (back:extent)))
      (Extent width: (max front-extent:width
 			 back-extent:width)
 	     height: (max front-extent:height
@@ -61,27 +52,18 @@
 (define-type (Below top: Tile bottom: Tile)
   implementing Tile
   with  
-  ((draw! screen::Screen
-	  cursor::Cursor
-	  context::Cursor
-	  anchor::Cursor)
+  ((draw! context::Cursor)
    ::void
    (let ((top-context (recons 'top context))
          (bottom-context (recons 'bottom context))
-	 (top-extent (top:extent screen)))
-     (top:draw! screen
-		cursor
-                top-context
-		anchor)
-     (with-translation screen (0 top-extent:height)
-       (bottom:draw! screen
-		     cursor
-                     bottom-context
-		     anchor))))
+	 (top-extent (top:extent)))
+     (top:draw! top-context)
+     (with-translation (0 top-extent:height)
+       (bottom:draw! bottom-context))))
 
-  ((extent screen::Screen)::Extent
-   (let ((top-extent (top:extent screen))
-	 (bottom-extent (bottom:extent screen)))
+  ((extent)::Extent
+   (let ((top-extent (top:extent))
+	 (bottom-extent (bottom:extent)))
      (Extent width: (max top-extent:width
 			 bottom-extent:width)
 	     height: (+ top-extent:height
@@ -114,29 +96,20 @@
 (define-type (Beside left: Tile right: Tile)
   implementing Tile
   with
-  ((draw! screen::Screen
-	  cursor::Cursor
-	  context::Cursor
-	  anchor::Cursor)
+  ((draw! context::Cursor)
    ::void
    (let ((left-context (recons 'left context))
          (right-context (recons 'right context))
-	 (left-extent (left:extent screen)))
-     (left:draw! screen
-		 cursor
-                 left-context
-		 anchor)
-     (with-translation screen (left-extent:width 0)
-       (right:draw! screen
-		    cursor
-                    right-context
-		    anchor))))
+	 (left-extent (left:extent)))
+     (left:draw! left-context)
+     (with-translation (left-extent:width 0)
+       (right:draw! right-context))))
 
-  ((extent screen::Screen)::Extent
-   (let ((left-extent (left:extent screen))
-	 (right-extent (right:extent screen)))
+  ((extent)::Extent
+   (let ((left-extent (left:extent))
+	 (right-extent (right:extent)))
      (Extent width: (+ left-extent:width
-		       right-extent:width screen)
+		       right-extent:width)
 	     height: (max left-extent:height
 			  right-extent:height))))
   

@@ -10,20 +10,17 @@
 (define-object (Symbol source::string)::Tile
   (define builder :: java.lang.StringBuilder)
   
-  (define (draw! screen::Screen
-		 cursor::Cursor
-		 context::Cursor
-		 anchor::Cursor)
+  (define (draw! context::Cursor)
     ::void
-    (screen:draw-atom! name)
-    (when (and (pair? cursor)
-	       (equal? (tail cursor) context))
-      (let ((index (head cursor)))
-	(screen:remember-offset! index 2))))
+    (invoke (the-screen) 'draw-atom! name)
+    (when (and (pair? (the-cursor))
+	       (equal? (cursor-tail) context))
+      (let ((index (cursor-head)))
+	(invoke (the-screen) 'remember-offset! index 2))))
 
-  (define (extent screen::Screen)::Extent
-    (Extent width: (screen:atom-width name)
-	    height: (screen:min-line-height)))
+  (define (extent)::Extent
+    (Extent width: (invoke (the-screen) 'atom-width name)
+	    height: (invoke (the-screen) 'min-line-height)))
   
   (define (part-at index::Index)::Indexable*
     (this))
