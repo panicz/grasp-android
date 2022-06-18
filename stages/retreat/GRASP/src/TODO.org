@@ -1,3 +1,710 @@
+* 18.06.2022
+
+wyglada na to, ze sie udalo zaimplementowac metode
+`replace-expression!` i przechodzi testy (tylko trzeba
+jej uzywac z pewna doza ostroznosci, i najpewniej
+bedzie w przszlosci wymagac refaktoryzacji
+
+Mamy tez napisany (choc jeszcze niepodpiety do systemu)
+kawalek systemu rozszerzen.
+
+Na poczatek bysmy moze sprawdzili czy sie ten modul
+w ogole kompiluje.
+
+* 16.06.2022
+
+No dobra, to juz by chyba wypadalo rozpoczac implementacje
+samego mechanizmu rozszerzen (czyli tego, co mniej wiecej
+opisalem wczoraj)
+
+
+* 15.06.2022
+
+Wydaje sie, ze kolejny krok coraz bardziej sie klaruje.
+
+Chcielibysmy zrobic jako rozszerzenie klase Button,
+ktora bedzie nam pozwalala podpinac rozne akcje.
+
+Klasa ta sama w sobie bedzie edytowalna tylko za pomoca
+menu dialogowych. Jedyna opcja interakcji z klawiatura
+to za pomoca przycisku "enter", ktory bedzie dzialal
+w taki sposob, ze bedzie odpalal "akcje" przycisku,
+natomiast ctrl+enter bedzie otwieral okno edycji
+
+
+No dobra, to taki ciut bardziej dalekosiezny plan
+jest taki:
+1. zaimplementowac mechanizm rozszerzen wraz z "buttonem"
+2. zaimplementowac cala edycje (tak zeby test-writing-map.scm
+dzialalo) - w tym selekcje i historie
+3. zaimplementowac dzialajacego klienta terminalowego
+(z kolorami i odcieniami) z obsluga myszy
+4. zaimplementowac rozszerzenie wyswietlajace grafy
+5. zaimplementowac kod ktory bedzie realizowal
+"podstawieniowy model obliczen" z tweeningiem
+6. no i jeszcze taki "pattern matcher", ktory bedzie
+w stanie operowac na rozszerzeniach
+7. algorytm A* i klient AWT
+
+8. klient Android
+
+Ale na razie skupmy sie na mechanizmie rozszerzen.
+Czyli tak:
+
+- wiadomo co zaimplementowac jako handler entera
+(przynajmniej mniej wiecej wiadomo)
+
+(Button label: "Press me!" 
+        action: (lambda ()
+	          (pop-up
+		   content: 
+		   (below
+		    (Caption "This is a pop-up!")
+		    (Button label: "close"
+		            action: remove-last-pop-up))))
+
+no dobra, mamy cos takiego napisane.
+A do tego wiemy, ze jest sobie rozszerzenie, ktore powinno sie
+aktywowac, gdy mamy cos, co sie zaczyna od slowa kluczowego Button.
+
+** W momencie, kiedy dokonujemy konwersji, musza sie wydarzyc rzeczy nastepujace:
+
+1. uzytkownik przytrzymuje wskaznik na wyrazeniu
+(Button label: ...)
+
+2. system sprawdza, czy wyrazenie jest komorka,
+i czy jej glowa to symbol. W tym przypadku tak jest
+- glowa to symbol Button
+
+3. sprawdzamy, czy symbol Button wystepuje w tablicy
+extension
+
+4. znalezlismy, ze wystepuje. W takim razie wydobywamy
+owo rozszerzenie, i wypytujemy, czy wyrazenie jest
+"suitable?"
+
+5. w naszym przypadku jest "suitable?". Na ekranie
+uzytkownika pojawia sie opcja "enchant"
+
+6. wywolujemy metode "create", przekazujac jej cale
+wyrazenie jako parametr. W rezultacie otrzymujemy
+nowy obiekt klasy "Extension"
+
+7. zastepujemy oryginalne wyrazenie nowym
+
+** Teraz trzeba nieco rozwinac punkty 5 i 6.
+*** Kiedy pytamy, czy wyrazenie moze zostac przekonwertowane
+
+funkcja musi sprawdzic:
+1. czy lista (Button ...) ma pola "label:" i "action:"
+na nieparzystych indeksach
+2. czy za kazdym z tych indeksow mozna znalezc jakies
+wyrazenie
+3. czy jezeli dokonamy ewaluacji wyrazenia "label:",
+to dostaniemy stringa
+4. czy jezeli dokonamy ewaluacji wyrazenia "action:",
+to dostaniemy procedure
+
+**** Drobna uwaga: ewaluacje powinnismy dokonac w taki sposob, zeby:
+
+- w wypadku wystapienia bledu dawalo sie ten blad
+przechwycic (i zwrocic wartosc #false)
+- byla uruchomiona w osobnym watku o ograniczonym czasie
+zycia (np. 1 sekunda), i gdyby ten czas mial zostac przekroczony
+powinien zostac zasygnalizowany blad
+
+*** Kiedy dokonujemy konwersji:
+
+1. mozemy chciec ponownie uzyc wczesniej ewaluowanych wartosci
+Moze do tego sluzyc klasa Extension, ale trudno zdefiniowac
+jednolity protokol, ktory by sie tym zajmowal
+(to moze byc niejawna zaleznosc pomiedzy metoda suitable?
+oraz create)
+
+2. stworzymy sobie nowy obiekt klasy Button, ktory w polu
+"action" bedzie mial wyewaluowana funkcje
+
+3. jezeli w trakcie wywolywania akcji dojdzie do jakiegos
+bledu, to tresc bledu zostanie wrzucona do loga i wyswietlona
+jako toast, zas caly guzik zostanie z powrotem przekonwertowana
+do postaci s-wyrazenia
+
+
+* 13.06.2022
+
+Wczoraj udalo sie dokonac zmiany w interfejsach kafelkow,
+co niesie ze soba pewna wartosc praktyczna.
+
+Teraz bysmy chcieli stworzyc:
+
+- TerminalScreen - implementacje interfejsu Screen
+bazujaca na bibliotece Lanterna
+
+- rozszerzenie Button i caly system rozszerzen
+(zwracajac szczegolna uwage na obsluge myszy/dotyku)
+
+- prototyp z dzialajacym mechanizmem rozszerzen
+
+- rozszerzenie obslugujace grafy
+
+- dzialajaca edycje
+
+* 12.06.2022
+
+decyzja podjela sie sama: opozniamy space invadera
+o kolejny tydzien.
+
+natomiast kolejna decyzja jest taka, zeby zaczac
+implementacje mechanizmu rozszerzen od guzika.
+
+Gwoli przypomnienia, bedziemy mieli w systemie
+nastepujace klasy i interfejsy:
+1. InteractiveIllustration (interfejs reprezentujacy
+instancje rozszerzenia, dziedziczacy po Tile)
+2. Extension (czyli interfejs tworzacy nowa instancje
+klas InteractiveIllustration)
+3. ButtonExtension - instancja klasy Extension
+tworzaca obiekt klasy Button
+4. Button - instancja klasy InteractiveIllustration,
+w ktorej wszystkie metody wywoluja odpowiednie pola
+(dostepne z poziomu Scheme'u)
+
+Pewien pomysl jest taki, zeby pousuwac w metodach
+Tile zaleznosc od parametru Screen, zeby funkcje
+raczej odnosily sie do parametru the-screen.
+
+I podobnie ma sie rzecz z kursorem.
+
+* 11.06.2022
+
+trzeba podjac decyzje: czy commitujemy cos juz dzisiaj,
+czy tez dajemy sobie jeszcze tydzien na rozpoczecie
+kolejnego space invadera.
+
+wydaje sie, ze mamy przed soba dwie drogi (tzn. pewnie
+jest ich wiecej, ale te dwie moj umysl zauwaza szczegolnie
+wyraziscie):
+
+1. dopracowac mechanizm rozszerzen
+2. zrealizowac sprawna edycje, i jako tako
+sprawny edytor terminalowy, zeby wypuscic
+cos, co bedzie uzyteczne, jeszcze zanim mechanizm
+rozszerzen bedzie gotowy
+
+rzecz w tym, ze mechanizm rozszerzen jest bardzo
+waznym komponentem edytora, i bez niego cale przedsiewziecie
+jakby traci sens (wydaje sie, ze wtedy lepiej po prostu
+uzywac emacsa)
+
+z drugiej strony, mozna wskazac na pewne mechanizmy,
+ktore wymagaja jeszcze troche dopracowania (takie jak
+selekcja), ktore moga miec wplyw na ksztalt mechanizmu
+rozszerzen (i na ktore mechanizm rozszerzen rowniez
+moze miec wplyw)
+
+natomiast opracowywanie mechanizmu rozszerzen
+nie moze sie dziac w prozni: mechanizm musi sie
+rozwijac wraz z konkretnymi rozszerzeniami.
+
+oczywiscie, do tej pory zajmowalismy sie przede wszystkim
+edytorem grafow, i w istocie wydaje sie to bardzo ambitne
+rozszerzenie
+
+drugie, zdecydowanie prostsze, ale nie mniej wazne
+rozszerzenie - to guziki (i ewentualnie suwaki)
+
+z jednej strony, chcialoby sie, zeby tworzenie rozszerzen
+bylo tak proste, jak to mozliwe. Z drugiej, chcielibysmy
+miec z automatu wszystkie podstawowe funkcjonalnosci,
+takie jak:
+- obsluga kursora
+- obsluga selekcji
+- synchronizacja wyswietlanego obrazu i pozycji ekranowej
+
+
+* 10.06.2022
+
+i co i co i co
+
+chcemy wyrysować te grafy c'nie?
+
+nie tylko wyrysować, ale też opisać interakcje
+
+i to w mniej więcej taki sposób:
+
+1. każdy węzeł renderujemy jako kółko
+2. strzałki renderujemy w taki sposób
+mniej więcej:
+
+
+(define (directed-graph neighbour-list)
+  (let* ((nodes (cached-map-preserving cell-display-properties
+                     (lambda (`(,label . ,neigbours))
+                       (graph-node label))
+                     neighbour-list)))
+    (fold-left (lambda (graph `(,label . ,neighbours))
+                 (fold-left (lambda (graph neighbour)
+                              (above graph (arrow from: (position label)
+                                                  to: (position neighbour))))
+                            graph
+                            neighbours))
+               ???
+               neighbour-list)))
+
+przy czym być może moglibyśmy jakoś rysować strzałki
+w taki sposób, żeby nie nachodziły na istniejące węzły
+
+
+No, ale w kazdym razie chodzi o to, zebysmy mieli taka strukture,
+oraz jej podglad:
+1. na samym dnie mamy wierzcholki
+2. dalej mamy krawedzie
+
+rysowanie odbywa sie tak, ze najpierw rysujemy
+wierzcholki, a pozniej krawedzie.
+
+a detekcja odbywa sie w druga strone: najpierw sprawdzamy
+czy nie ma kolizji z krawedziami, a nastepnie - czy sie udalo
+dotknac jakis wierzcholek
+
+Przyjmijmy sobie takie nazwy:
+- extension - cos, co posiada funkcje do tworzenia
+"interaktywnych ilustracji"
+- interactive-illustration - instancja stworzona
+przez rozszerzenie
+
+(define-extension (directed-graph . neighbour-list)
+;; moze sobie wymyslmy taki system:
+;; 1. definiujemy funkcje, ktora wczytuje nam dane wyrazenie
+;;    i zamienia je do postaci jakichs (mutowalnych) obiektow
+;; 2. definiujemy sobie funkcje, ktora bierze te mutowalne
+;;    obiekty, i serializuje je do postaci listy
+;; 3. minimalny warunek jest taki, ze jezeli skonstruujemy
+;;    obiekt, a nastepnie od razu go zserializujemy, to
+;;    efekt serializacji musi byc identyczny ze zrodlem
+;;    (z dokladnoscia do bialych znakow i komentarzy)
+;;    Rozszerzenia maja prawo zapisywac sobie rozne
+;;    rzeczy.
+;;    
+)
+
+
+(define-extension (directed-graph . neighbour-list)
+  ...)
+
+
+
+
+  
+* 09.06.2022
+
+No dobra, to teraz zajmujemy sie mechanizmem
+rozszerzen.
+
+Chcemy miec kilka nastepujacych "casusow":
+
+-guzik (ktoremu mozna przypisywac rozne
+funkcje)
+
+-edytor grafow
+
+-suwak?
+
+-edytor rysunkow
+
+Zacznijmy moze od tego, ze jak chcemy dodac
+do interfejsu Tile te wszystkie metody (ktore
+chcemy dodac), to musimy je zaimplementowac
+dla nastepujacych typow danych:
+- cons (primitive.scm)
+- Symbol (primitive.scm)
+- Text (text.scm)
+- Over (combinators.scm)
+- Below (combinators.scm)
+- Beside (combinators.scm)
+
+Wydaje sie jednak, ze rozsadniej byloby zrobic
+interfejs Interactive, ktory bedzie dodawal te wszystkie
+metody.
+
+* 08.06.2022
+
+Mamy jakies powijaki koncepcji animacji. Opieraja
+sie na tozsamosci komorek "cons" (i ich wzajemnej
+relacji), przy czym istotne zalozenie jest tutaj
+takie, ze zadne komorki nie sa wspoldzielone
+miedzy wyrazeniami.
+
+W takiej sytuacji, jezeli podczas renderowania
+zapisujemy sobie pozycje wzgledna glowy i ogona,
+to moga one wyznaczac pozycje poczatkowe i koncowe
+dla poszczegolnych elementow.
+
+Teoretycznie problem moze byc taki, ze jakas
+lista bedzie wspoldzielona pomiedzy elementami
+- ale wydaje sie, ze tutaj rozwiazanie moze byc
+takie, ze dla kazdego top-levelowego wyrazenia
+generujemy sobie odrebna mape (i na przyklad
+pozycje wszystkich elementow sa wyrazane globalnie)
+
+No to tak sobie zalozmy, ze kazde top-levelowe
+wyrazenie renderujemy jako
+
+(define-property+ (position-map expression)
+  (property+ (cell) (Position left: +NaN.0 top: +NaN.0)))
+
+(parameterize ((current-position-map (position-map element)))
+  ...
+  (let ((position (current-position-map child)))
+    (set! position:left xxx)
+    (set! position:top yyy))
+  ...)
+
+Wowczas bedzie nas interesowac 
+
+(position-map stare-wyrazenie)
+(position-map nowe-wyrazenie)
+
+itd.
+
+Wydaje sie, ze mozna tu bedzie dojsc do jakiejs ladnej
+ogolnosci (przynajmniej powinno sie dac)
+
+Ale na razie oczywiscie tego nie robimy. Wzamian wypadaloby
+sie zajac tym mechanizmem rozszerzen, oraz implementacja
+edycji i historii.
+
+
+
+* 07.06.2022
+
+wydaje sie, ze dosc istotnym aspektem wizualizacji
+jest mozliwosc animowania elementow.
+
+Mozliwosc ta bedzie raczej ograniczona w przypadku
+klienta tekstowego czy terminalowego, ale dla
+wariantow graficznych dobrze by bylo miec jakas
+ujednolicona reprezentacje animacji - o ile to
+w ogole mozliwe.
+
+Animacje (tweening) mozna scharakteryzowac poprzez
+podanie:
+- pozycji poczatkowej
+- pozycji koncowej
+- czasu trwania
+- funkcji przejscia
+- stopnia zaawansowania (wartosc miedzy 0 a 1 - czas
+od momentu uruchomienia animacji przez czas trwania
+animacji)
+
+Ale tez pytanie: jakiego rodzaju rzeczy chcielibysmy
+animowac?
+
+Pierwszym, co przychodzi do glowy, to podstawienia.
+
+Rozwazmy na przyklad takie cos:
+
+(define (factorial n)
+  (if (is n <= 1) ;>
+    1
+   (* n (factorial (- n 1)))))
+
+
+
+(factorial 5)
+
+;; symbol "factorial" sie rozszerza do lambda-wyrazenia
+;; i staje sie transparentny, natomiast lambda-wyrazenie
+;; staje sie widoczne
+
+((lambda (n)
+  (if (is n <= 1) ; >
+     1
+    (* n (factorial (- n 1))))) 5)
+
+;; w tym momencie lambda znika, natomiast
+;; liczba 5 "rozmnaza sie" do ilosci wystapien
+;; zmiennej "n" w wyrazeniu, i przesuwa sie tak,
+;; zeby zajac miejsce kazdego n-a
+
+(if (is 5 <= 1) ;>
+  1
+ (* 5 (factorial (- 5 1))))
+
+;; wyrazenie (is 5 <= 1) zostaje najpierw podswietlone,
+;; a nastepnie zamienia sie w wartosc #false (wyrazenie
+;; staje sie przezroczyste, zas wartosc #false robi
+;; sie nieprzezroczysta)
+
+(if #false
+   1
+  (* 5 (factorial (- 5 1))))
+
+;; alternarywa wyrazenia if przesuwa sie
+;; w miejsce tego wyrazenia. Pozostale jego
+;; fragmenty staja sie transparentne
+
+(* 5 (factorial (- 5 1)))
+
+;; wyrazenie (- 5 1) staje sie transparentne,
+;; i zostaje zastapione wartoscia 4.
+
+(* 5 (factorial 4))
+
+;; nastepnie z wyrazeniem (factorial 4) dzieje sie
+;; to, co wczesniej sie dzialo z wyrazeniem
+;; (factorial 5) (tylko w zagniezdzeniu (* 5 _)).
+
+I teraz pytanie: jak chcielibysmy cos takiego
+zaimplementowac?
+
+Pomysl moglby byc taki, ze dla kazdej komorki
+podczas tworzenia nowego wyrazenia, sledzimy sobie
+"origin" tej komorki.
+
+Renderowanie "wymieszanego wyrazenia" polegaloby
+wowczas na tym, ze docelowa pozycja bylaby osiagana
+jako mieszanina pozycji nowego wyrazenia oraz
+starego
+
+(define-type (Blend new-expression: object
+                    old-expression: object))
+
+(define (substitute variable
+             #;with value
+               #;in expression)
+  (match expression
+    ([head | tail]
+     (let ((result [(substitute variable 
+                         #;with value 
+                           #;in head)
+		    ______________________
+
+                    (substitute variable 
+                         #;with value 
+                           #;in tail)]))
+        (set! ((the-origin) result) expression)
+        result))
+    (,variable
+     value)
+    (_
+     expression)))
+
+the-space-before-head
+the-space-after-head
+the-space-before-tail
+the-space-after-tail
+the-space-of-null-head
+the-space-of-null-tail
+
+
+
+* 01.06.2022
+
+no i co tera
+
+mysli mi sie przegladarka systemu plikow (albo raczej
+modulow/projektu) 
+
+ale wydaje sie, ze trzeba tu przede wszystkim popracowac
+nad "swoim mysleniem" o tym, jak reprezentowac moduly
+
+bo zasadniczo nie chcemy miec w naszym systemie czegos
+takiego, jak "pliki".
+
+Chcemy miec "moduly" (modules) i "notesy" (notebooks)
+
+Moduly moga byc dwojakiego rodzaju: moga byc albo lokalne
+(czyli napisane przez uzytkownika), albo publiczne
+(czyli wrzucone do repozytorium)
+
+
+
+* 31.05.2022
+
+ok, wyglada na to, ze mamy pewien pomysl na to,
+zeby zbudowac w miare kompozycjonalny system widgetow.
+
+po prostu kazdy widget ma swoje callbacki.
+
+natomiast w przypadku widgetu "button" mogloby
+to wygladac tak:
+
+(define-syntax-rule (Procedure arg-types return-type) procedure)
+
+(define-type
+ (Button
+  content: Tile
+  tap: (Tile real real -> void) := start-drawing-gesture!
+  double-tap: (Tile real real -> void) := do-nothing
+  press: (Tile real real -> void) := do-nothing
+  second-press: (Tile real real -> void) := drag-copy!
+  release: (Tile real real -> void) := do-nothing
+  hold: (Tile real real -> void) := show-button-edit-dialog!
+  drag-over: (Tile real real Tile -> void) := do-nothing
+  drag-out: (Tile real real Tile -> void) := do-nothing
+  drop: (Tile real real Tile -> boolean) := (constantly #f))
+ implementing Tile
+ with
+ ((on-tap x::real y::real)::void
+  (tap (this) x y))
+
+ ((on-press x::real y::real)::void
+  (press (this) x y))
+
+ ((on-release x::real y::real)::void
+  (release (this) x y))
+  
+ ((on-drag-over x::real y::real item::Tile)::void
+  (drag-over (this) x y item))
+
+ ((on-drag-out x::real y::real item::Tile)::void
+  (drag-out (this) x y item))
+
+ ((on-drop x::real y::real item::Tile)::boolean
+  (drop (this) x y item))
+  
+ ((on-hold x::real y::real)::void
+  (hold (this) x y))
+ 
+ ((on-double-tap x::real y::real)::void
+  (double-tap (this) x y))
+
+ ((on-second-press x::real y::real)::void
+  (second-press (this) x y))
+ )
+
+Byc moze jawna zaleznosc od ekranu jest tutaj lekkim
+overkillem, ale chyba latwiej ja potem usunac, niz dodac.
+(EDIT: usunieto)
+
+Warto zauwazyc przy tej okazji, ze proba stworzenia
+systemu rozszerzen doprowadzila nas do sytuacji, w ktorej
+pododawalismy handlery do dotyku/myszki - co w tym prototypie
+bylo przez nas zaniedbywane.
+
+Rzuca to jednak pewne swiatlo na ewentualna architekture
+obslugi klawiszy.
+
+Zastanowmy sie nad czyms takim: z kazdym kafelkiem
+kojarzymy strukture "key-bindings" (bedaca hierarchiczna
+hasz-mapa czy czyms podobnym). Kazdy kafelek, kiedy otrzymuje
+zdarzenie, albo na nie reaguje, albo przesyla je dalej
+w glab hierarchi
+
+* 29.05.2022
+
+jednakowoz taka uwaga: nawet jezeli bedziemy
+stosowac porzadek tekstowy przy renderowaniu
+grafow, to nie rozwiaze to problemu z fantomowymi
+wezlami
+
+poza tym jeszcze kilka uwag, ktore moga nam troche
+rozszerzyc perspektywe:
+
+jednym z rozszerzen, ktore bysmy chcieli miec 
+zaimplementowane, sa guziki.
+
+guzik ma jakies swoje wnetrze (tresc), ktora
+zazwyczaj bedzie symbolem, choc moze oczywiscie
+tez byc obrazkiem itd.
+
+oraz ma funkcje:
+
+on-tap
+on-press
+on-release
+on-hold
+on-double-tap
+on-second-tap
+
+jezeli bedziemy mieli gest rysowania guzika,
+to domyslnie wiekszosc handlerow bedzie
+powodowala otwarcie dialoga edycyjnego
+dla tego guzika - poza 'on-drag', ktory bedzie
+dopuszczal rysowanie gestu, oraz 'on-second-tap',
+ktory bedzie powodowal zmiane lokalizacji
+przycisku
+
+czy cos takiego
+
+zas on-release moze akceptowac opcjonalnie
+jakis obiekt, i stosowac na nim jakas funkcje
+(przy czym mozemy zalozyc, ze funkcja zwroci
+#t gdy obiekt zostanie 'skonsumowany' oraz #f
+gdy zostanie odrzucony)
+
+natomiast w kwestii tych grafow, wydaje sie,
+ze wcale nie musimy dopuszczac wyciagania wezlow
+z grafu. tzn mozemy je przesuwac tylko w obrebie
+samego pudelka, i ewentualnie powiekszac to pudelko.
+
+* 28.05.2022
+
+kilka uwag dotyczacych designu systemu rozszerzen:
+
+1. wydaje sie, ze pierwotne podejscie (z RacketFest)
+bylo sluszne: rozszerzenie powinno po pierwsze mowic,
+jaki rozmiar obrazka dostaje, a po drugie, powinno
+moc sobie robic z tym obszarem co chce (w ramach
+udostepnionego API).
+
+Pomysl z tym, zeby uzywac porzadku tekstowego
+do renderowania grafow, wydaje sie chybiony.
+
+Z drugiej strony wydaje sie, ze byc moze obiecujacy
+kierunek bylby taki, zeby w jakis sposob zabronic
+tego (na poczatku moze w sposob nieformalny
+i w oparciu o wewnetrzna dyscypline) zeby
+kod rozszerzenia uzywal innej pamieci, niz
+listy "orign" (ktorej modyfikacje powinny
+sie odbywac za posrednictwem interfejsu,
+ktory bedzie nam zapewnial sledzenie historii).
+
+Warto by bylo tez wymyslic jakas abstrakcje,
+ktora by ujednolicala funkcje z modulu (primitive),
+mianowicie: cursor-under, sequence-extent i draw-sequence!
+
+To jest zagadnienie nad ktorym myslalem juz wczesniej,
+ale [pomimo zadania pytania na Twitterze] nie znalazlem
+satysfakcjonujacej odpowiedzi.
+
+Tym, co wydaje sie wymagac najwiecej uwagi, jest
+rozkminienie, jak mialoby wygladac API do formulowania
+rozszerzen.
+
+Zagadnienie grafu wydaje sie o tyle ciekawe, ze ma spora
+szanse stanowic paradygmat rozwiazywania tego rodzaju zagadnien.
+
+Ale wydaje sie tez, ze przed nami duuuuzo pracy...
+
+Chodzi o to, ze trzeba przemyslec sporo spraw. W szczegolnosci,
+trzeba rozwazyc, co bedzie sie dzialo (z perspektywy interakcji
+`z reszta systemu) kiedy zaczniemy przeciagac wezel w grafie:
+czy powinnismy "wydobyc go" na zewnatrz pudelka?
+jezeli tak, to co ma sie wtedy dziac ze wszystkimi
+strzalkami, ktore wczesniej prowadzily do tego wezla?
+czy jest szansa, zeby zbudowac graf za pomoca naszego
+frameworku "kombinatorow"?
+
+A moze nie odtracajmy tego "porzadku tekstowego" zbyt pochopnie?
+Moze zrobienie czegos w rodzaju
+
+(directed-graph
+        (A B C)
+   (B A D)    (C B D)
+         (D A)
+)
+
+mimo wszystko mialoby jakis sens?
+
+
+Do przemyslenia mamy jeszcze to, czy mozemy pozwolic na
+zrzucanie dowolnych wyrazen na nasz graf.
+
+
+I tak dalej.
+
 * 25.05.2022
 
 dzisiaj konczymy space invadera.
