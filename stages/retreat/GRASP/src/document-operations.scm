@@ -204,3 +204,71 @@
  (let ((document `((,5 ,7))))
    (put-into-cell-at! '(0 1) `(,1 ,3) document)
    document) ===> ((1 3 5 7)))
+
+(define (replace-expression! #!key
+			     (at::Cursor (the-cursor))
+			     (with)
+			     (in (the-document)))
+  (match at
+    (`(,,@(isnt _ integer?) . ,cursor)
+     (replace-expression! at: cursor with: with in: in))
+
+    (`(,,@(isnt _ odd?) . ,cursor)
+     (replace-expression! at: cursor with: with in: in))
+    
+    (`(,index . ,cursor)
+     (let* ((parent (cursor-ref in cursor))
+	    (previous-index (- (quotient index 2) 1)))
+       (cond ((head/tail-separator? with)
+	      (unless (or (head/tail-separator? (cell-index parent
+							    index))
+			  (is previous-index < 0))
+		(let ((cell (drop previous-index parent)))
+		  (assert (null? (cdddr cell)))
+		  (set! (cdr cell) (caddr cell))
+		  (update! (dotted? cell) #t)
+		  in)))
+	     ((head/tail-separator? (cell-index parent index))
+	      (unless (is previous-index < 0)
+		(let ((cell (drop previous-index parent)))
+		  (set! (cdr cell) (cons with (cons (cdr cell) '())))
+		  (update! (dotted? cell) #f)
+		  in)))
+	     (else 
+	      (set! (cell-index parent index) with)
+	      in))))))
+
+(e.g.
+ (let ((document `((,1 ,2 . ,3))))
+   (replace-expression! at: '(1 1)
+			with: 'x
+			in: document)
+   document) ===> ((x 2 . 3)))
+
+(e.g.
+ (let ((document `((,1 ,2 . ,3))))
+   (replace-expression! at: '(3 1)
+			with: 'x
+			in: document)
+   document) ===> ((1 x . 3)))
+
+(e.g.
+ (let ((document `((,1 ,2 . ,3))))
+   (replace-expression! at: '(5 1)
+			with: 'x
+			in: document)
+   document) ===> ((1 2 x 3)))
+
+(e.g.
+ (let ((document `((,1 ,2 . ,3))))
+   (replace-expression! at: '(7 1)
+			with: 'x
+			in: document)
+   document) ===> ((1 2 . x)))
+
+(e.g.
+ (let ((document `((,1 ,2 ,3))))
+   (replace-expression! at: '(3 1)
+			with: head/tail-separator
+			in: document)
+   document) ===> ((1 . 3)))
