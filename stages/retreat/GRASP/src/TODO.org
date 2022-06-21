@@ -1,3 +1,13 @@
+* 19.06.2022
+
+zróbmy może takie rozszerzenie, że jak wykryjemy
+[<= x y ... z]
+to sie to nam zamieni w
+[x <= y <= ... <= z]
+
+(define-extension (<= x y ... z)
+  ((draw! 
+
 * 18.06.2022
 
 wyglada na to, ze sie udalo zaimplementowac metode
@@ -10,6 +20,13 @@ kawalek systemu rozszerzen.
 
 Na poczatek bysmy moze sprawdzili czy sie ten modul
 w ogole kompiluje.
+
+Wyglada na to, ze tak.
+
+W takim razie trzeba teraz zrobic dwie rzeczy:
+1. mechanizm zaczarowywania wyrazenia
+(np. gdy sie wcisnie shift+tab)
+2. jakies rozszerzenie (albo zestaw rozszerzen)
 
 * 16.06.2022
 
