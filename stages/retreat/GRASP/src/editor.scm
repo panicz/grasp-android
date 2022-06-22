@@ -26,6 +26,7 @@
  (for)
  (document-operations)
  (editor-operations)
+ (extension)
  )
 
 (define input ::string "\
@@ -103,22 +104,21 @@ mutations of an n-element set.\"
 	(io:setCursorPosition
 	 0
 	 (+ 2 output-extent:height))
-	(io:putString (with-output-to-string
-			(lambda () (write (the-cursor)))))
 	(try-catch
-	 (io:putString (with-output-to-string
-			 (lambda ()
-			   (write (the-expression)))))
+	 (begin
+	   (io:putString (with-output-to-string
+			   (lambda () (write (the-cursor)))))
+	   (io:putString (with-output-to-string
+			   (lambda ()
+			     (write (the-expression))))))
 	 (ex java.lang.Throwable
 	     (WARN (ex:toString))))
 	(invoke (current-message-handler)
 		'display-messages io)
 	(io:flush)
 	(io:setCursorPosition
-	 (invoke (the-screen)
-		 'remembered-left)
-	 (invoke (the-screen)
-		 'remembered-top))
+	 (invoke (the-screen) 'remembered-left)
+	 (invoke (the-screen) 'remembered-top))
 	(io:setCursorVisible #t)
 	(let* ((key ::KeyStroke (io:readInput))
 	       (type ::KeyType (key:getKeyType)))
@@ -187,6 +187,13 @@ mutations of an n-element set.\"
 		   )
 	       (continue)))
 
+	    (,KeyType:Tab
+	     (try-catch
+	      (enchant-expression!)
+	      (ex java.lang.Throwable
+		  (WARN (ex:toString))))
+	     (continue))
+	    
 	    (,KeyType:Delete
 	     (try-catch
 	      (delete-forward!)

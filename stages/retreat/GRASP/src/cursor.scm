@@ -196,6 +196,37 @@ operate on cursors.
 			(in (the-document)))
   (cursor-ref in at))
 
+
+(define (innermost-composition #!key
+			       (at::Cursor (the-cursor))
+			       (in (the-document)))
+  (match at
+    (`(,head . ,tail)
+     (let ((parent (cursor-ref in tail)))
+       (if (pair? parent)
+	   (let ((this (part-at head parent)))
+	     (if (pair? this)
+		 this
+		 parent))
+	   (innermost-composition at: tail in: in))))
+    ('()
+     (assert (pair? in))
+     in)))
+
+(define (outermost-expression #!key
+			      (at::Cursor (the-cursor))
+			      (in (the-document)))
+  (match at
+    (`(,second ,first)
+     (cursor-ref in at))
+    (`()
+     in)
+    (`(,last)
+     (cursor-ref in at))
+    (`(,skip . ,rest)
+     (outermost-expression at: rest in: in))))
+
+
 (define (first-index object)
   (cond ((Indexable? object)
 	 (invoke (as Indexable object)
