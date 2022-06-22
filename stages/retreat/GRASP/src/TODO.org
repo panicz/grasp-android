@@ -1,3 +1,42 @@
+* 22.06.2022
+
+tak sobie pracuje nad integracja mechanizmu rozszerzen.
+
+i przy tej okazji nachodzi mnie kilka mysli.
+
+
+po pierwsze, fajnie by bylo miec funkcje, ktore daja nam:
+- najbardziej zagniezdzone wyrazenie pod kursorem
+- najmniej zagniezdzone wyrazenie pod kursorem
+
+po drugie - juz troche wczesniej nad tym myslalem
+- pytanie, czy bylby sens, zeby zrobic setter
+dla (the-expression), w takim sensie, ze jak np.
+masz
+
+(1 3 5)
+
+i (the-expression) to 3, to
+
+(set! (the-expression) '(3)) dawaloby
+
+(1 (3) 5)
+
+a
+
+(set! (the-expression) head/tail-separator)
+
+dawaloby
+
+(1 . 5)
+
+
+Oczywiscie problem jest wtedy taki, ze na parzystych
+indeksach list powinnismy moc tylko ustawiac spacje, zas
+na nieparzystych - wyrazenia (nie bedace spacjami)
+
+Wiec moze na razie lepiej sobie odpuscic?
+
 * 19.06.2022
 
 zróbmy może takie rozszerzenie, że jak wykryjemy
