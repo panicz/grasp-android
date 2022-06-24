@@ -1,3 +1,36 @@
+* 23.06.2022
+
+no dobra, czyli teraz bysmy chcieli sobie napisac
+jakies rozszerzenie.
+
+kilka pomyslow:
+1. albo robimy guzik
+2. albo rozszerzenie do pracy z formulami
+   matematycznymi
+3. albo wykres funkcji
+4. albo edytor grafow
+
+nie wiadomo :/
+
+wydaje sie, ze guzik bedzie jakos balansowal
+pomiedzy uzytecznoscia a prostota
+
+tylko jak zrobic guzik?
+
+ach, chcemy miec guzik, ale rowniez
+edytor grafow
+
+oraz wsparcie dla kursora myszy
+
+(Button label: "click me!"
+        action: (lambda () (WARN "dupa")))
+
+
+(define-class Button (Enchanted)
+  ((draw! context::Cursor)
+   ...)
+  
+	
 * 22.06.2022
 
 tak sobie pracuje nad integracja mechanizmu rozszerzen.
