@@ -1,4 +1,48 @@
+* 24.06.2022
+
+Jeszcze kilka pomyslow chodzi dzis po glowie:
+- po pierwsze, zeby zaczac pisac prawdziwego klienta
+dla Lanterny
+- po drugie, zeby zaczac pisac klienta dla AWT
+(i moze na telefonie klienta dla Androida, choc
+to sie wydaje nieco ciezszym tematem ze wzgledu
+na koniecznosc kompilowania nowej Kawy do Androida)
+
+Na pewno bedzie trzeba rozszerzyc interfejs Screen
+w taki sposob, zeby dawal pewne mozliwosci, ktore
+teraz daje klasa Screen ze starego prototypu.
+
+Z drugiej strony, wydaje sie, ze to, co nazywalismy
+Screen w starym prototypie, a to, co nazywamy w ten
+sposob w nowym, jest niewspolmierne:
+
+- nowy Screen to interfejs dostarczajacy abstrakcji
+do rysowania
+- stary Screen to cos, co wyswietlalo panel
+(i mialo jeszcze jakies dodatkowe czarodziejstwa)
+
+Pytanie, czy w nowej architekturze cos takiego jak
+stary Screen jest w ogole potrzebne (czy nie lepiej
+po prostu miec parametry?)
+
+Niebawem bedzie trzeba wystartowac z nowymi "plikami
+wykonywalnymi" vel "punktami wejscia do naszego
+programu" - jednym dla lanterny, jednym dla AWT
+oraz jednym dla Androida (w przypadku Androida
+bedzie trzeba "budowac klasy". W przypadku
+pozostalych dwoch bedzie mozna to zrobic, ale
+- jak sie zdazylismy do tej pory przekonac
+- wcale nie ma takiej koniecznosci)
+
+No dobra, to wszystko swietnie (i z pewnoscia
+warto nad tym pracowac), ale czy naszym priorytetem
+nie powinno byc chcociaz pobiezne przetestowanie
+mechanizmu rozszerzen?
+
+
 * 23.06.2022
+
+** dzień (telefon)
 
 no dobra, czyli teraz bysmy chcieli sobie napisac
 jakies rozszerzenie.
@@ -29,7 +73,91 @@ oraz wsparcie dla kursora myszy
 (define-class Button (Enchanted)
   ((draw! context::Cursor)
    ...)
+
+** wieczór (laptop)
   
+Kilka drobnych uwag zwiazanych z projektem:
+
+- bedziemy musieli rozszerzyc nieco interfejs Screen,
+tak zeby obslugiwal:
+1. warstwy obrazu ("overlays")
+2. podzial ekranu na panele
+
+Z kolei na warstwach bedziemy chcieli umieszczac:
+- okna dialogowe
+- chmurki takie albo siakie
+- przeciagane obiekty
+
+(pytanie, czy panele tez powinny miec swoje warstwy.
+Na razie wydaje sie, ze nie)
+
+Dodatkowo ekran bedzie rowniez obslugiwal
+przeciaganie (wydaje sie, ze sporo sie tutaj mozemy
+nauczyc ze starego prototypu)
+
+W szczegolnosci warto rozwazyc interfejs Pad, ktory
+rozszerza interfejs Tile o procedury interakcji.
+
+W szczegolnosci sa tam
+
+Drag onPress(...)
+Drag onSecondPress(...)
+Drag onHold(...)
+
+oraz
+
+void onClick(...)
+void onDoubleClick(...)
+void onDragOver(...)
+void onDragOut(...)
+void onRelease(...)
+void onRemove(...)
+
+i
+
+boolean onKeyUp(...)
+boolean onKeyDown(...)
+
+Oto znane implementacje interfejsu Pad (nie wiem, czy kompletne,
+ale na szybko sobie wygrepowalem):
+- Panel
+- TextInput
+- PopUp
+- Below
+- Button
+- Scroll
+
+Dodatkowo czesc z nich implementuje rowniez interfejs Drag,
+ktory zawiera metody
+
+void move(...)
+void drop(...)
+
+oraz
+
+Drag outwards(Transform)
+Drag inwards(Transform)
+
+gdzie Transform to dosc koslawy interfejs do przeksztalcania
+
+
+No i OK, i fajnie.
+
+Ale teraz moze warto opowiedziec sobie co nieco o tych chmurkach.
+
+Otoz plan jest taki, ze jak sie narysuje chmurke nad danym
+wyrazeniem, to chmurka zaczyna sie unosic nad ekranem (trafia
+na szczyt warstwy "overlay".)
+
+I teraz: jeden paluch pozwala przesuwac te chmurke.
+Dwa paluchy pozwalaja ja zoomowac i obracac.
+
+Jak sie ja dwa razy kliknie, to sie maksymalizuje
+(ale wtedy przycisk "cofnij" powoduje przywrocenie)
+
+Jak sie ja "wywali", to wtedy znika.
+
+Jak sie ja raz kliknie, to sie nic nie dzieje,
 	
 * 22.06.2022
 
