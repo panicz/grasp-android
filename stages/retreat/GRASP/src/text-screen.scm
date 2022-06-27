@@ -120,48 +120,58 @@
          (put! #\│ (+ i top) (+ left 1)))
     (put!  #\╯ (+ top (- height 1)) (+ left 1)))
 
-  (define (draw-string! s::CharSequence
-			left::real
-			top::real
-			index::Index)
+  (define (draw-rounded-rectangle! width::real
+				   height::real)
     ::void
-    (put! #\❝ top left) 
-    (let ((row top)
-          (col (+ left 1))
-          (width 1)
+    (put! #\╭ 0 0)
+    (for i from 1 to (- height 2)
+         (put! #\│ i 0))
+    (put! #\╰ (- height 1) 0)
+
+    (for i from 1 to (- width 2)
+         (put! #\─ 0 i)
+	 (put! #\─ (- height 1) i))
+    
+    (put! #\╮ 0 (- width 1))
+    (for i from 1 to (- height 2)
+         (put! #\│ i (- width 1)))
+    (put! #\╯ (- height 1) (- width 1))
+    
+    (values))
+  
+  (define (draw-quoted-text! s::CharSequence index::Index)
+    ::void
+    (let ((extent (string-extent s)))
+      (put! #\❝ 0 0)
+      (with-translation (2 1)
+	  (draw-string! s index))
+      (put! #\❞ (+ extent:height 1) (+ extent:width 2))))
+
+  (define (draw-string! text::CharSequence index::Index)::void
+    (let ((row 0)
+	  (col 0)
 	  (n 0))
-      (for c in s
-	   (when (eqv? n index)
-	     (remember-offset! (+ col 1) (+ row 2)))
-           (cond ((eq? c #\newline)
-		  (set! row (+ row 1))
-		  (set! col (+ left 1)))
-		 (else
-		  (put! c (+ row 1) (+ col 1))
-		  (set! col (+ col 1))
-		  (set! width (max width (- col left)))))
-	   (set! n (+ n 1)))
-      (put! #\❞ (+ row 2) (+ left width 2))
-      (Extent width: (+ width 2)
-              height: (- (+ row 1) top))))
-
-  (define (draw-text! text::CharSequence
-		      left::real
-		      top::real)
-    ::void
-    (for i from 0 below (string-length text)
-         (put! (text i) top (+ left i))))
-
-  (define (text-extent text::CharSequence)::Extent
+      (for c in text
+	(when (eqv? n index)
+	  (remember-offset! col (+ row 1)))
+        (cond ((eq? c #\newline)
+	       (set! row (+ row 1))
+	       (set! col 0))
+	      (else
+	       (put! c row col)	       (set! col (+ col 1))))
+	(set! n (+ n 1)))))
+  
+  (define (quoted-text-extent text::CharSequence)::Extent
     (let ((inner ::Extent (string-extent text)))
       (Extent width: (+ inner:width 4)
 	      height: (+ (max inner:height 1) 2))))
   
-  (define (draw-atom! text::CharSequence)::void
-    (draw-text! text 0 1))
+  (define (draw-atom! text::CharSequence index::Index)::void
+    (with-translation (0 1)
+	(draw-string! text index)))
 
-  (define (atom-width text::CharSequence)::real
-    (string-length text))
+  (define (atom-extent text::CharSequence)::Extent
+    (string-extent text))
   
   )
 

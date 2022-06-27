@@ -18,14 +18,6 @@
 (import (functions))
 (import (print))
 
-
-(define-syntax-rule (with-translation (x y) . actions)
-  (let ((x! x)
-        (y! y))
-    (invoke (the-screen) 'translate! x! y!)
-    (begin . actions)
-    (invoke (the-screen) 'translate! (- x!) (- y!))))
-
 ;; we override Pair with Object's default equality and hash functions
 ;; (TODO: patch the Kawa implementation of Cons)
 
@@ -526,14 +518,11 @@
 	 (sequence-extent object))
 
 	((symbol? object)
-	 (Extent width: (invoke (the-screen) 'atom-width
-			 (symbol->string object))
-		 height: (invoke (the-screen) 'min-line-height)))
+	 (invoke (the-screen) 'atom-extent
+		 (symbol->string object)))
 	
 	(else
 	 (error "Don't know how to compute extent of "
 		object))))
 
-
-;; RZM37UHSPY5Z
 

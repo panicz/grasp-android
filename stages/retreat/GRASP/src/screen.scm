@@ -1,5 +1,6 @@
 (import (define-interface))
 (import (define-object))
+(import (define-syntax-rule))
 (import (extent))
 (import (indexable))
 
@@ -14,20 +15,21 @@
   
   (clear!)::void
   (translate! x::real y::real)::void
-  (draw-string! s::CharSequence l::real t::real
-		index::Index)::void
-  (draw-text! s::CharSequence left::real top::real)::void
-  (text-extent text::CharSequence)::Extent
+  (draw-quoted-text! s::CharSequence index::Index)::void
+  (draw-string! s::CharSequence index::Index)::void
+  (quoted-text-extent text::CharSequence)::Extent
   
-  (draw-atom! text::CharSequence)::void
+  (draw-atom! text::CharSequence index::Index)::void
   
-  (atom-width text::CharSequence)::real
+  (atom-extent text::CharSequence)::Extent
 
   (draw-horizontal-bar! width::real)::void
   (draw-vertical-bar! height::real)::void
   (open-paren! height::real l::real t::real)::void
   (close-paren! height::real l::real t::real)::void
 
+  (draw-rounded-rectangle! width::real height::real)::void
+  
   (remember-offset! +left::real +top::real)::void
   (remembered-left)::real
   (remembered-top)::real
@@ -51,27 +53,23 @@
   (define (translate! x::real y::real)::void
     (values))
   
-  (define (draw-string! s::CharSequence
-			left::real
-			top::real
-			index::Index)
+  (define (draw-quoted-text! s::CharSequence
+			     index::Index)
     ::void
     (values))
   
-  (define (draw-text! s::CharSequence
-		      left::real
-		      top::real)
+  (define (draw-string! s::CharSequence index::Index)
     ::void
     (values))
 
-  (define (text-extent text::CharSequence)::Extent
+  (define (quoted-text-extent text::CharSequence)::Extent
     (Extent width: 0 height: 0))
   
-  (define (draw-atom! text::CharSequence)::void
+  (define (draw-atom! text::CharSequence index::Index)::void
     (values))
 
-  (define (atom-width text::CharSequence)::real
-    0)
+  (define (atom-extent text::CharSequence)::Extent
+    (Extent width: 0 height: 0))
   
   (define (draw-horizontal-bar! width::real)::void
    (values))
@@ -91,6 +89,12 @@
     ::void
    (values))
 
+  (define (draw-rounded-rectangle! width::real
+				   height::real)
+    ::void
+    (values))
+
+  
   (define (remember-offset! +left::real
 			    +top::real)
     ::void
@@ -106,3 +110,10 @@
 
 (define-constant the-screen::parameter[Screen]
   (make-parameter (NullScreen)))
+
+(define-syntax-rule (with-translation (x y) . actions)
+  (let ((x! x)
+        (y! y))
+    (invoke (the-screen) 'translate! x! y!)
+    (begin . actions)
+    (invoke (the-screen) 'translate! (- x!) (- y!))))

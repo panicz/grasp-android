@@ -12,15 +12,13 @@
   
   (define (draw! context::Cursor)
     ::void
-    (invoke (the-screen) 'draw-atom! name)
-    (when (and (pair? (the-cursor))
-	       (equal? (cursor-tail) context))
-      (let ((index (cursor-head)))
-	(invoke (the-screen) 'remember-offset! index 2))))
+    (invoke (the-screen) 'draw-atom! name
+	    (and (pair? (the-cursor))
+		 (equal? (cursor-tail) context)
+		 (cursor-head))))
 
   (define (extent)::Extent
-    (Extent width: (invoke (the-screen) 'atom-width name)
-	    height: (invoke (the-screen) 'min-line-height)))
+    (invoke (the-screen) 'atom-extent name))
   
   (define (part-at index::Index)::Indexable*
     (this))

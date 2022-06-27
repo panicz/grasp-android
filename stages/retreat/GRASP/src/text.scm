@@ -20,15 +20,15 @@
 
 (define-object (Text)::Tile
   (define (draw! context::Cursor)
-    (invoke (the-screen) 'draw-string!
-	    (this) 0 0
+    (invoke (the-screen) 'draw-quoted-text!
+	    (this)
 	    (and (pair? (the-cursor))
 		 (equal? context
 			 (cursor-tail))
 		 (cursor-head))))
 
   (define (extent)::Extent
-    (invoke (the-screen) 'text-extent (this)))
+    (invoke (the-screen) 'quoted-text-extent (this)))
 
   (define (part-at index::Index)::Indexable*
     (this))
