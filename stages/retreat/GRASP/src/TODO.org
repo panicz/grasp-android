@@ -1,3 +1,43 @@
+* 25.06.2022
+
+Wydaje sie, ze juz jestesmy dosc blisko stworzenia
+rozszerzenia "Button" - pozostaje nam (chyba?)
+zaimplementowanie funkcji draw! oraz extent
+
+Warto jednak przy tej okazji nieco zrefaktoryzowac
+interfejs Screen i jego implementacje TextScreen
+tak zeby korzystanie z niego bylo bardziej ergonomiczne.
+
+Przede wszystkim, teraz interfejs udostepnia takie metody:
+- draw-string!
+- draw-text!
+- draw-atom!
+- text-extent
+- atom-width
+
+
+O ile rola draw-atom! wydaje sie dosc zrozumiala,
+problemy sa takie, ze:
+- atom-width chyba raczej powinien byc atom-extentem
+- na podstawie samych nazw nie jest jasna roznica
+pomiedzy "draw-text!" i "draw-string!".
+Problem jest dodatkowo potegowany przez fakt, ze
+zdecydowalismy sie uzyc nazwy "text" na obiekt
+reprezentujacy Scheme'owy typ "string".
+- sposrod powyzszych funkcji, tylko draw-string! oraz
+text-extent! radza sobie ze znakiem nowej linii.
+
+Zatem plan jest taki, ze:
+- draw-string! otrzymuje nazwe draw-quoted-text!
+- text-extent otrzymuje nazwe quoted-text-extent
+- dodajemy metode string-extent, ktora bedzie dzialala
+ze znakiem nowej linii
+- atom-width zamieniamy na atom-extent, ktora bedzie
+po prostu wywolywac string-extent
+- draw-atom! bedzie wywolywac draw-string!
+- draw-quoted-string! tez bedzie tak wywolywac
+
+
 * 24.06.2022
 
 Jeszcze kilka pomyslow chodzi dzis po glowie:
