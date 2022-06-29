@@ -237,7 +237,7 @@
 
 (define-syntax and-let*
   (lambda (stx)
-    (syntax-case stx (values)
+    (syntax-case stx (values ::)
 
       ((_)
        #'#t)
@@ -255,6 +255,14 @@
                 (and-let* rest
                   . body))))
 
+      ((_ ((name :: type binding) . rest) . body)
+       (identifier? #'name)
+       #'(let ((name binding))
+           (and (instance? name type)
+		name
+                (and-let* rest
+                  . body))))
+      
       ((_ (((values . structure) binding) . rest) . body)
        #'(call-with-values (lambda () expression)
            (lambda args
