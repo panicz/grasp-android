@@ -1,3 +1,40 @@
+* 28.06.2022
+
+Idealny plan bylby taki, ze mamy klase "atom", i ze kawowa
+funkcja "eval" w jakis magiczny sposob, kedy widzi takiego atoma,
+zwraca wartosc bedaca efektem "czytania stringa" (byc moze
+zcache'owana)
+
+Ale czy to ma dzialac tylko dla eval?
+
+A moze zamiast tego bysmy zrobili parametr;
+
+(define-constant currently-editing?::parameter[boolean]
+  (make-parameter '()))
+
+i dalej w funkcji "cons" bysmy zrobili cos takiego:
+
+...
+(define (getCar)
+  (let ((element (invoke-special (parent) 'getCar)))
+    (if (and (currently-editing?)
+             (is element atom?))
+        (element:value)
+        element)))
+
+
+
+
+* 27.06.2022
+
+Rozszerzenie Button juz prawie dziala.
+"Jedyne", co trzeba jeszcze zrobic, to sprawic, zeby
+atomy, ktore koncza sie znakiem ":", zamiast gnu.mapping.Symbol
+(badz tez gnu.mapping.SimpleSymbol) byly gnu.expr.Keyword.
+
+Tak naprawde jednak najlepiej by bylo obsluzyc jednoczesnie
+wszystkie atomy na raz.
+
 * 25.06.2022
 
 Wydaje sie, ze juz jestesmy dosc blisko stworzenia
