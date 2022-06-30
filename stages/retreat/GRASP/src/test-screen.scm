@@ -27,7 +27,7 @@
       1
       (* n (! (- n 1)))))"))
 
-(show (head parsed))
+(show parsed)
 
 (define cur '())
 
@@ -168,17 +168,17 @@ tail)" parse))
 (c d))  .  ((e f)
 (g h)))" parse))
 
-((the-screen):clear!)
+(invoke (the-screen) 'clear!)
 
 (draw! (head horizontal-dotted))
 
-(display ((the-screen):toString))
+(display (invoke (the-screen) 'toString))
 
-((the-screen):clear!)
+(invoke (the-screen) 'clear!)
 
 (draw! (head vertical-dotted))
 
-(display ((the-screen):toString))
+(display (invoke (the-screen) 'toString))
 
 (define empties (call-with-input-string "\
 ((() . ())
@@ -190,7 +190,15 @@ tail)" parse))
 
 (draw! (head empties))
 
-(display ((the-screen):toString))
+(display (invoke (the-screen) 'toString))
+
+
+((the-screen):clear!)
+
+((the-screen):draw-rounded-rectangle! 15 4)
+
+(display (invoke (the-screen) 'toString))
+
 
 
 #|

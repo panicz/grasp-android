@@ -17,6 +17,7 @@
 (import (screen))
 (import (functions))
 (import (print))
+(import (conversions))
 
 ;; we override Pair with Object's default equality and hash functions
 ;; (TODO: patch the Kawa implementation of Cons)
@@ -30,6 +31,91 @@
 
 ;;  0 1 2
 ;; (  x  )
+
+
+;; The two modes of operation are "editing mode"
+;; and "evaluating mode". The difference is in the
+;; treatment of Atoms: when we are (evaluating?),
+;; Atoms behave as if they were transparent,
+;; so that we can only see their (value).
+;; But if we're not (evaluating?), then we can
+;; see (and operate on) Atoms themselves
+(define-constant evaluating?::parameter[boolean]
+  (make-parameter #f))
+
+;; The purpose of Atoms is to solve the problem that
+;; the actual atomic Scheme values have different
+;; types (e.g. the result of reading "1" is a number,
+;; but the result of reading "1+" is a symbol, and
+;; the result of reading "1+:" is a keyword).
+;; Atoms therefore provide an identity for the
+;; edited objects, even though the "value" of
+;; those atoms can be a different kind of object
+;; on every query.
+(define-object (Atom source-string::String)::Tile
+  (define builder :: java.lang.StringBuilder)
+  (define source :: String "")
+  
+  (define cache #!null)
+  
+  (define (value)
+    (or cache
+	(let ((result (call-with-input-string source read)))
+	  (set! cache result)
+	  result)))
+  
+  (define (draw! context::Cursor)
+    ::void
+    (invoke (the-screen) 'draw-atom! source
+	    (and (pair? (the-cursor))
+		 (equal? (cursor-tail) context)
+		 (cursor-head))))
+
+  (define (extent)::Extent
+    (invoke (the-screen) 'atom-extent source))
+  
+  (define (part-at index::Index)::Indexable*
+    (this))
+
+  (define (first-index)::Index
+    0)
+  
+  (define (last-index)::Index
+    (string-length source))
+  
+  (define (next-index index::Index)::Index
+    (min (last-index) (+ index 1)))
+  
+  (define (previous-index index::Index)::Index
+    (max 0 (- index 1)))
+
+  (define (index< a::Index b::Index)::boolean
+    (and (number? a) (number? b)
+	 (is a < b)))
+
+  (define (insert-char! c::char index::int)::void
+    (builder:insert index c)
+    (set! cache #!null)
+    (set! source ((builder:toString):intern)))
+
+  (define (delete-char! index::int)::void
+    (builder:deleteCharAt index)
+    (set! cache #!null)
+    (set! source ((builder:toString):intern)))
+
+  (define (truncate! length::int)::void
+    (builder:setLength length)
+    (set! cache #!null)
+    (set! source ((builder:toString):intern)))
+
+  (define (subpart start::int)::Atom
+    (Atom (invoke source 'substring start)))
+
+  (define (toString)::String
+    source)
+  
+  (set! builder (java.lang.StringBuilder source-string))
+  (set! source (builder:toString)))
 
 (define-object (cons a d)::Tile
   (define (equals object)::boolean
@@ -100,7 +186,21 @@
 	     (is a < b))
 	(and (is b eqv? (last-index))
 	     (isnt a eqv? (last-index)))))
-  
+
+  (define (getCar)
+    (let ((element (invoke-special pair (this) 'getCar)))
+      (if (and (evaluating?)
+	       (is element instance? Atom))
+	  (invoke (as Atom element) 'value)
+	  element)))
+
+  (define (getCdr)
+    (let ((element (invoke-special pair (this) 'getCdr)))
+      (if (and (evaluating?)
+	       (is element instance? Atom))
+	  (invoke (as Atom element) 'value)
+	  element)))
+
   (pair a d))
 
 (define-cache (heads tail)
@@ -311,10 +411,16 @@
 
 	((null? object)
 	 (values))
-	
+
 	(else
-	 (error "Don't know how to draw "object
-		(object:getClass)))))
+	 (with-translation (0 1)
+	     (invoke (the-screen)
+		     'draw-string!
+		     (with-output-to-string
+		       (lambda () (write object)))
+		     (and (pair? (the-cursor))
+			  (equal? (cursor-tail) context)
+			  (cursor-head)))))))
 
 (define (cursor-under left::real top::real
 		      elems
@@ -522,7 +628,10 @@
 		 (symbol->string object)))
 	
 	(else
-	 (error "Don't know how to compute extent of "
-		object))))
+	 (invoke (the-screen) 'atom-extent
+		 (with-output-to-string
+		   (lambda () (write object)))))
+	))
+
 
 

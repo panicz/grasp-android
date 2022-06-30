@@ -36,5 +36,17 @@
 
 )
 
+(define-object (Simple)::Indexable
+  (define (typename)::String "Simple")
+  (define (part-at index::Index)::Indexable* (this))
+  
+  (define (first-index)::Index 0)
+  (define (last-index)::Index 0)
+  
+  (define (next-index index::Index)::Index 0)
+  (define (previous-index index::Index)::Index 0)
 
+  (define (index< a::Index b::Index)::boolean #f)
 
+  (Base))
+  

@@ -1,4 +1,9 @@
+(import (define-syntax-rule))
+(import (assert))
+(import (define-interface))
+(import (define-object))
 (import (define-property))
+(import (define-type))
 (import (srfi :11) (srfi :17))
 (import (conversions))
 (import (functions))
@@ -208,7 +213,7 @@
 		  (let ((output (cons c '())))
                     (read-atom-chars-into output)
                     (set! (tail growth-cone)
-                      (Symbol (list->string output))))))
+			  (Atom (list->string output))))))
 		(update! (dotted? growth-cone) #t)
 		(update! (pre-tail-space growth-cone)
 			 post-dot-spaces)
@@ -261,15 +266,14 @@
 		 (else
 		  (let ((output (cons* c d '())))
 		    (read-atom-chars-into (tail output))
-		    (add-element! (Symbol (list->string
-					   output))
+		    (add-element! (Atom (list->string output))
 				  (read-space))
 		    (read-next))))))
 
              (else ;; an atom
               (let ((output (cons c '())))
 		(read-atom-chars-into output)
-		(add-element! (Symbol (list->string output))
+		(add-element! (Atom (list->string output))
                               (read-space))
 		(read-next)))))))
 

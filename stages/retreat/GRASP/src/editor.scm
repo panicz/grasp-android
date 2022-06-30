@@ -27,7 +27,10 @@
  (document-operations)
  (editor-operations)
  (extension)
+ (button)
  )
+
+;;(import (button))
 
 (define input ::string "\
 (define (! n)
@@ -38,6 +41,8 @@ mutations of an n-element set.\"
       1
       (* n (! (- n 1))))) 
 (e.g. (factorial 5) ===> 120)
+(Button action: (lambda () (WARN \"button pressed!\"))
+        label: \"Press me!\")
 ")
 
 (set! (the-document)
