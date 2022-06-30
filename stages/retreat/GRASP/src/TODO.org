@@ -1,3 +1,14 @@
+* 29.06.2022
+
+** wieczor (komputer)
+
+Mechanizm rozszerzen, choc jeszcze wymaga nieco doszlifowania,
+wydaje sie juz jako tako dzialac.
+
+Byc moze jakims pomyslem byloby ubranie calego edytora
+w emacs-owy  "org-mode".
+
+
 * 28.06.2022
 
 Idealny plan bylby taki, ze mamy klase "atom", i ze kawowa
