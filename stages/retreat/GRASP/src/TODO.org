@@ -1,3 +1,31 @@
+* 30.06.2022
+
+No i co teraz?
+
+Na razie mysl mamy taka:
+
+skoro Emacs uzywa czegos "jakby watek o niskim priorytecie"
+do renderowania, to moze my bysmy sobie tutaj uzyli 
+Prawdziwego Watku o niskim priorytecie.
+
+Plan bylby nastepujacy:
+
+- funkcja renderujaca czeka sobie, az flaga
+"synchronized" bedzie "false", i sama zaraz
+na poczatku renderowania ustawia ja na "true"
+
+- kazda operacja edycji ustawia flage "synchronized"
+na "false". Dzieki temu, jezeli w trakcie rysowania
+zostana wykonane jakies edycje, to zostanie wymuszone
+ponowne renderowanie (przy czym zmiane polozenia
+kursora rowniez traktujemy jako operacje edycji)
+
+Dodatkowo chcielibysmy skorzystac z podwojnego
+buforowania oferowanego przez biblioteke Lanterna,
+zeby zapobiec mruganiu ekranu (i ewentualnie
+nadmiernej wymianie danych po terminalu)
+
+
 * 29.06.2022
 
 ** wieczor (komputer)
