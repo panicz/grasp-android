@@ -19,6 +19,9 @@
 (define-alias Terminal
   com.googlecode.lanterna.terminal.Terminal)
 
+(define-alias LanternaScreen
+  com.googlecode.lanterna.screen.Screen)
+
 (define-alias TerminalScreen
   com.googlecode.lanterna.screen.TerminalScreen)
 
@@ -33,6 +36,9 @@
 
 (define-alias Character java.lang.Character)
 
+(define-alias TextCharacter
+  com.googlecode.lanterna.TextCharacter)
+
 (define MouseButton:None ::int 0)
 (define MouseButton:Left ::int 1)
 (define MouseButton:Middle ::int 2)
@@ -46,3 +52,5 @@
 (define (make-terminal)::Terminal
   (defaultTerminalFactory:createTerminal))
 
+(define (make-terminal-screen)::LanternaScreen
+  (TerminalScreen (make-terminal)))
