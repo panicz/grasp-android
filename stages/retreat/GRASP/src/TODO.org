@@ -1,3 +1,24 @@
+* 03.06.2022
+
+udalo sie jakos stworzyc prototyp z dwoma watkami.
+jednak zeby go rozwinac, trzeba bedzie stworzyc
+jakas warstwe abstrakcji pomiedzy klawiszami
+w Lanternie (oraz AWT/Java2D i Android API)
+a naszym systemem, przyjmujac w miare mozliwosci
+jakies proste zalozenia.
+
+Zasadniczo chodzi o to, ze chcemy - tak jak w emacsie
+i slayerze - moc w dosc dowolny sposob przypisywac funkcje
+poszczegolnym klawiszom i ich kombinacjom
+
+z drugiej strony, w przypadku naszej aplikacji mamy
+jeszcze takie cos, ze poszczegolne rozszerzenia moga
+miec swoje wlasne mapy klawiszy
+
+i teraz: autor rozszerzenia powinien dostarczyc wlasna
+mape domyslna, ale uzytkownik powinien moc ja dowolnie
+zmienic
+
 * 30.06.2022
 
 No i co teraz?
