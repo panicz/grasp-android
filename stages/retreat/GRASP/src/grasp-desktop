@@ -1,0 +1,4 @@
+#!/bin/sh
+# Docelowo bedziemy chcieli sobie zrobic sloik
+# z kawa.
+kawa --no-warn-unreachable -f grasp-desktop.scm
