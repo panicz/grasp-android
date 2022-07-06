@@ -1,4 +1,83 @@
-* 03.06.2022
+* 05.07.2022
+
+Pisanie klienta AWT zaczelo sie wydarzac, i umiemy juz
+odpalic z poziomu Kawy funkcje graficzne.
+
+Co prawda nie mamy jeszcze obslugi wejscia, ale
+jest kilka kwestii, ktore chyba warto by bylo
+dobrze przemyslec
+
+Przede wszystkim, obsluga renderowania odbywa sie
+za pomoca dziedziczenia po klasie JComponent/JPanel 
+i nadpisania metody paintComponent.
+
+Po drugie, punktem wejscia do funkcji rysujacej jest
+klasa JFrame.
+
+Po trzecie, jezeli chcemy przechwytywac wejscie
+(tzn. klawiature i myszke), musimy wywolac (albo w "ramce",
+albo w "panelu") addKeyListener, addMouseListener,
+addMouseMotionListener, addMouseWheelListener itd.
+
+Hierarchie dziedziczenia tych swingowych klas sa przepastne,
+ale przywolajmy je tutaj:
+
+java.lang.Object
+  java.awt.Component
+    java.awt.Container
+      java.awt.Window
+        java.awt.Frame
+          javax.swing.JFrame
+
+java.lang.Object
+  java.awt.Component
+    java.awt.Container
+      javax.swing.JComponent
+        javax.swing.JPanel
+
+Co wiecej, dokumentacja twierdzi, ze uzywanie watkow
+w polaczeniu z biblioteka Swing jest niebezpieczne.
+
+POPRAWKA:
+
+zamiast javax.swing.JFrame i javax.swing.JPanel bedziemy uzywac
+java.awt.Frame i java.awt.Canvas.
+
+Nie ma informacji o tym, zeby byly jakies problemy z AWT
+i wielowatkowoscia.
+
+Pomysl jest zatem taki, zeby zdarzenia byly przetwarzane
+w osobnym watku niz rysowanie.
+
+Ale wydaje sie, ze szanse na to sa dosc marne, poniewaz
+to jest cos, czym AWT samo sie zajmuje: wywolanie
+metody "repaint" powoduje w jakis sposob zakolejkowanie
+wywolania metod "paint" w widgecie.
+
+Byc moze taka strategia jest zadowalajaca.
+
+Teraz pozostaje nam jeszcze jedna, bardzo istotna kwestia:
+chcemy zaimplementowac interfejs Screen dla klientow AWT
+oraz Lanterna, ktory bedzie w nich stanowil instancje
+(the-screen).
+
+
+
+* 04.07.2022
+
+No dobra, czyli plan na teraz jest mniej wiecej taki:
+1. wymyslic jakas reprezentacje "mapy klawiatury"
+2. napisac cos, co nam transformuje mape klawiatury
+z Lanterny (i moze z AWT rowniez) do naszej reprezentacji
+3. dodac mapy klawiatury do rozszerzen (czyli bedzie trzeba
+stworzyc "abstrakcyjna klase bazowa" dla rozszerzen)
+
+Byc moze jednak lepszym pomyslem na poczatek byloby
+sprobowac napisac klienta AWT, bo w ten sposob mielibysmy
+baze do porownania ze soba API Lanterny, Javy i Androida
+(ktorego jakos tam juz liznelismy)
+
+* 03.07.2022
 
 udalo sie jakos stworzyc prototyp z dwoma watkami.
 jednak zeby go rozwinac, trzeba bedzie stworzyc
