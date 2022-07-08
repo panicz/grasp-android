@@ -1,5 +1,7 @@
 * 06.07.2022
 
+** komputer:
+
 Nowy dzien, nowa mysl.
 
 Zasadnicza trudnosc wydaje sie teraz byc w tym,
@@ -71,6 +73,22 @@ Wyglada zatem na to, ze musimy "wyciekac" obiekt Graphics,
 zeby moc go uzywac jako ekranu, za pomoca przypisania.
 
 Jest to troche przykre, ale co zrobisz - nic nie zrobisz.
+
+** telefon:
+
+No dopsz.
+
+Teraz jeden pomysl jest taki, zeby interfejs Panel
+byl taki jak Extension, tylko zeby nie byl 'indexable'.
+
+Rodzi sie tez pytanie, w jaki sposob powinnismy zarzadzac
+kursorem: czy powinnismy miec jeden kursor, ktory indeksuje
+takze panele, czy raczej podzialy powinny miec swoje 'focusy'.
+
+Na razie kolacze sie taki pomysl, zeby kazda instancja klasy
+Editor miala wlasny kursor (i selekcje itd.)
+
+Konkretniej, bedziemy mieli liste otwartych dokumentow,
 
 * 05.07.2022
 
@@ -174,6 +192,8 @@ zmienic
 
 * 30.06.2022
 
+** komputer:
+  
 No i co teraz?
 
 Na razie mysl mamy taka:
@@ -199,8 +219,55 @@ buforowania oferowanego przez biblioteke Lanterna,
 zeby zapobiec mruganiu ekranu (i ewentualnie
 nadmiernej wymianie danych po terminalu)
 
+** telefon:
+  
+  wyglada na to, ze mechanizm rozszerzen jest jakos
+  tam wszyty w architekture aplikacji, i choc niewatpliwie
+  bedzie wymagal jeszcze sporo milosci (no i przede
+  wszystkim implementowania rozszerzen!), to czuje
+  teraz nieco wieksza swobode w wyborze dalszych
+  dzialan
+
+  wydaje sie, ze tym, na czym warto sie skupic
+  teraz, jest stworzenie klienta z prawdziwego
+  zdarzenia
+
+  mysle zeby klientem androidowym zajac sie
+  dopiero po aktualnym invadersie.
+
+  klienta desktopowego bede mogl rozwijac
+  tylko na komputerze
+
+  dlatego na razie lepiej zajac sie po prostu
+  klientem terminalowym (rozwazajac przy tym
+  opcje np. rozszerzen dla KiTTY)
 
 * 29.06.2022
+
+** telefon
+
+Udalo sie jakos zintegrowac mechanizm rozszerzen,
+przy czym jeszcze nie dzialaja takie rzeczy,
+jak obsluga myszy/dotyku
+
+Dlatego priorytety na teraz:
+- usprawnienie edycji i nawigacji po drzewie
+- nawigacja pionowa (tzn. strzalki gora/dol)
+- oddzielenie procesu wyswietlania od edycji
+  (tak jak w Emacsie)
+
+  ten ostatni watek jest dosc ciekawy.
+
+  funkcja rysujaca powinna dzialac z mniejszym
+  priorytetem, niz obsluga wejscia/polecen edycyjnych
+
+  ale potencjalny problem jest taki, ze
+  to dopiero na podstawie funkcji rysujacej
+  wiemy (czy moze nie?) jaka jest przestrzenna
+  organizacja kodu?
+
+  w kazdym razie trzeba byc ostroznym.
+
 
 ** wieczor (komputer)
 
@@ -213,6 +280,27 @@ w emacs-owy  "org-mode".
 
 * 28.06.2022
 
+** telefon
+  
+teraz plan jest taki, zeby dodac do "cons"
+metody getCar i getCdr (i ewentualnie do ustawiania tez),
+ktore beda dodatkowo odwijaly atomy:
+
+(define-object (Atom)::Tile
+  (define source::string "")
+  (define cache #!null)
+  (define (value)
+    (or cache
+      (let ((result (parse-atom source)))
+        (set! cache result)
+	result))))
+
+ale potencjalny problem jest taki, ze sami utracimy
+dostep do atomu
+
+  
+** komputer
+  
 Idealny plan bylby taki, ze mamy klase "atom", i ze kawowa
 funkcja "eval" w jakis magiczny sposob, kedy widzi takiego atoma,
 zwraca wartosc bedaca efektem "czytania stringa" (byc moze
@@ -235,11 +323,10 @@ i dalej w funkcji "cons" bysmy zrobili cos takiego:
         (element:value)
         element)))
 
-
-
-
 * 27.06.2022
 
+** komputer
+  
 Rozszerzenie Button juz prawie dziala.
 "Jedyne", co trzeba jeszcze zrobic, to sprawic, zeby
 atomy, ktore koncza sie znakiem ":", zamiast gnu.mapping.Symbol
@@ -247,6 +334,26 @@ atomy, ktore koncza sie znakiem ":", zamiast gnu.mapping.Symbol
 
 Tak naprawde jednak najlepiej by bylo obsluzyc jednoczesnie
 wszystkie atomy na raz.
+
+** telefon
+  
+wydaje sie, ze te najwazniejsze refaktoryzacje
+poszly bez problemu, i ze mozna kontynuowac prace
+nad guzikiem
+
+- tym bardziej, ze mamy juz funkcje do rysowania
+  prostokata, jakze potrzebna przy rysowaniu guzika.
+
+czyli co:
+- napiszemy sobie funkcje rysujaca guzik
+  (na podstawie etykiety)
+- podepniemy ja sobie do systemu
+
+i wtedy dopiero sie zacznie:
+- trzeba bedzie naprawic 'detekcje kolizji'
+- i pewnie zaimplementowac od nowa klienta
+  dla lanterny
+- oraz dla awt
 
 * 25.06.2022
 
@@ -290,6 +397,8 @@ po prostu wywolywac string-extent
 
 * 24.06.2022
 
+** komputer
+  
 Jeszcze kilka pomyslow chodzi dzis po glowie:
 - po pierwsze, zeby zaczac pisac prawdziwego klienta
 dla Lanterny
@@ -328,6 +437,31 @@ No dobra, to wszystko swietnie (i z pewnoscia
 warto nad tym pracowac), ale czy naszym priorytetem
 nie powinno byc chcociaz pobiezne przetestowanie
 mechanizmu rozszerzen?
+
+** telefon
+
+rozkminke skmkowa zakonczylismy na wzmiance o roznicy
+pomiedzy interfejsem Screen a klasa Screen ze starego
+prototypu.
+
+Interfejs Screen jest abstrakcja nad poszczegolnymi
+systemami do wyswietlania.
+
+Natomiast klasa Screen jest uchwytem dla panelu,
+dodatkowo zawierajacym informacje o tym, ktore palce
+dotykaja ekranu - wydaje sie, ze to sa informacje,
+ktore lepiej bedzie przeniesc do 'parametrow' albo
+zmiennych globalnych.
+
+Stary prototyp opiera sie w duzej mierze (wszelako)
+na interakcji pomiedzy singletonem GRASP, a singletonem
+Screen (przy czym - szczerze powiedziawszy - podzial
+kompetencji miedzy nimi nie jest zbyt jasny)
+
+Wydaje sie zatem, ze bedziemy miec takie parametry, jak:
+- the-main-panel
+- the-overlays
+- current-panel
 
 
 * 23.06.2022
