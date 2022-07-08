@@ -1,3 +1,77 @@
+* 06.07.2022
+
+Nowy dzien, nowa mysl.
+
+Zasadnicza trudnosc wydaje sie teraz byc w tym,
+zeby z jednej strony zaimplementowac interfejs Screen
+w nowych klientach, a z drugiej dodac mozliwosc
+podzialu paneli.
+
+Sprobujmy moze podsumowac, co wiemy o strukturze
+naszego programu:
+
+- Posiadamy globalny parametr (the-screen), ktory
+  przechowuje implementacje niezbednych funkcji renderujacych
+
+- Posiadamy parametr (the-document), ktory zawiera aktualnie
+  edytowany/wyswietlany dokument
+
+- Przy okazji warto nadmienic, ze mamy parametr (the-cursor),
+  zawierajacy kursor dla aktualnie edytowanego dokumentu
+
+No to to jest to, co mamy. A teraz jeszcze kwestia tego,
+co chcielibysmy miec (i jak klienty maja uzywac powyzszego).
+
+Chcielibysmy posiadac jeszcze parametr (the-panel),
+ktory odpowiadalby panelom z anroidowego GRASPa. Mowiac
+konkretniej, mielibysmy takie rodzaje paneli:
+- split (horizontal i vertical, ale moze inne, bo czemu nie?)
+- editor
+
+Podzial dzialalby w taki sposob, ze jego funkcja rysujaca
+wywolywalaby funkcje rysujaca to jednego, to drugiego
+panelu, zas jego procedury obslugi klawiszy, mysz, dotyku
+i czego tam jeszcze po prostu oddelegowywalyby prace
+do jego jednej albo drugiej czesci.
+
+(wyjatkiem jest rzecz jasna belka przedzielajaca podzialy,
+ktora rowniez powinna dzialac tak, jak w androidowym
+prototypie, tzn. jej przeciaganie powodowaloby zmiane
+proporcji podzialu)
+
+Editor natomiast pokazywalby nam pewien wycinek dokumentu,
+tzn. tak jak w starym GRASPie mielibysmy jakas liniowa transformacje,
+ktora wplywalaby na to, w jaki sposob obraz dokumentu
+bylby wyswietlany.
+
+Natomiast jezeli idzie o kwestie samego renderowania,
+to w aktualnym kliencie jest tak, ze w kazdym obiegu petli
+robimy
+
+((the-screen):clear!)
+(draw-sequence! (head (the-document)))
+
+Wydaje sie, ze w przypadku klienta AWT nie bedziemy potrzebowac
+czyszczenia ekranu, i ze nasz obiekt "canvas" bedzie musial
+wywolac (draw-document! (the-document))
+
+Z tym że to nieprawda!
+
+Nie będziemy wywoływać draw-document! bezpośrednio.
+
+Zamiast niego raczej wywolamy (invoke (the-panel) 'draw!).
+
+Jednak jest jeszcze jeden niuans, mianowicie - obiekt Graphics
+jest dostepny tylko w metodzie "paint"
+
+A przy tym to wlasnie obiekt "Graphics" jest dokladnie tym,
+czego potrzebujmey do zaimplementowania interfejsu Screen.
+
+Wyglada zatem na to, ze musimy "wyciekac" obiekt Graphics,
+zeby moc go uzywac jako ekranu, za pomoca przypisania.
+
+Jest to troche przykre, ale co zrobisz - nic nie zrobisz.
+
 * 05.07.2022
 
 Pisanie klienta AWT zaczelo sie wydarzac, i umiemy juz
