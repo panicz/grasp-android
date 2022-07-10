@@ -1,6 +1,8 @@
 (import (define-interface))
 (import (define-object))
 (import (define-syntax-rule))
+(import (define-parameter))
+(import (default-value))
 (import (extent))
 (import (indexable))
 
@@ -108,8 +110,9 @@
   
   )
 
-(define-constant the-screen::parameter[Screen]
-  (make-parameter (NullScreen)))
+(set! (default-value Screen) (NullScreen))
+
+(define-parameter (the-screen) ::Screen)
 
 (define-syntax-rule (with-translation (x y) . actions)
   (let ((x! x)

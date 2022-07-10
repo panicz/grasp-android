@@ -1,6 +1,7 @@
 (import (define-interface))
 (import (define-type))
 (import (define-cache))
+(import (define-parameter))
 (import (infix))
 (import (indexable))
 (import (match))
@@ -84,13 +85,10 @@ of an index
 that provide the default values to some functions that
 operate on cursors.
 |#
-(define-constant the-cursor::parameter[Cursor]
-  (make-parameter '()))
+(define-parameter (the-cursor) :: Cursor '())
 
-
-(define-constant the-document::parameter[pair]
-  (make-parameter (cons (cons '() '()) '())))
-
+(define-parameter (the-document) :: pair
+  (cons (cons '() '()) '()))
 
 (define (cursor-head)
   (head (the-cursor)))
