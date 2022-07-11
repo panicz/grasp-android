@@ -1,4 +1,8 @@
+(import (define-syntax-rule))
 (import (define-property))
+
+;; "default-value" is meant to produce a default value
+;; for a given type
 
 (define-property (default-value type) #!null)
 
