@@ -1,4 +1,24 @@
+* 11.07.2022
+
+plan to jest taki, azeby zaimplementowac
+interfejs Screen dla AWT (oraz dla lanterny)
+
+rowniez dla lanterny mozemy zajac sie projektem
+systemu obslugi klawiatury
+
+bo plan tutaj jest taki, ze:
+- kazdy widget moze sobie w dowolny sposob
+  obslugiwac klawiature
+- uzytkownik moze dowolnie zmieniac wiazania
+  klawiszy
+- widgety na najplytszym poziomie podejmuja
+  decyzje o przechwytywaniu badz przekazywaniu
+  (albo wrecz generowaniu!) zdarzen z klawiatury
+  (i innych tez!)
+
 * 08.07.2022
+
+** komputer:
 
 Najnowszy madafaka master plan:
 
@@ -6,6 +26,16 @@ Najnowszy madafaka master plan:
 zbiera polecenia rysowania, i w momencie, gdy
 wywolamy metode "paint", bedzie odwolywal sie
 do obiektu Graphics
+
+** telefon:
+
+wydaje sie, ze taki plan powinien dzialac:
+- nasza implementacja interfejsu Screen bedzie
+  zakladac, ze podczas renderowania mamy
+  dostepny kontekst (the-graphics-output)
+- funkcje wymiarujace moga sobie uzywac czcionki
+  itd, ale output graficzny nie bedzie im
+  potrzebny
 
 * 06.07.2022
 
