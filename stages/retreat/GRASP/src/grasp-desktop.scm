@@ -106,16 +106,21 @@
 
    (addFocusListener (this))))
 
-(let* ((graphics-environment (invoke-static
-			      java.awt.GraphicsEnvironment
-			     'getLocalGraphicsEnvironment))
-       (font-file ::File (File "LobsterTwo-Regular.otf"))
-       (font ::Font (Font:createFont Font:TRUETYPE_FONT font-file)))
-  (graphics-environment:registerFont font)
-  (let ((fonts (invoke graphics-environment
-		       'getAvailableFontFamilyNames)))
-    (for font in fonts
-      (display font)
-      (newline))))
+(define-parameter (the-graphics-environment)
+  ::java.awt.GraphicsEnvironment
+  (invoke-static
+   java.awt.GraphicsEnvironment
+   'getLocalGraphicsEnvironment))
+
+(define (load-font path::String)
+  (let* ((font-file ::File (File path))
+	 (font ::Font (Font:createFont Font:TRUETYPE_FONT font-file)))
+    (invoke (the-graphics-environment) 'registerFont font)))
+
+(let ((fonts (invoke (the-graphics-environment)
+		     'getAvailableFontFamilyNames)))
+  (for font in fonts
+    (display font)
+    (newline)))
 
 (window-screen)
