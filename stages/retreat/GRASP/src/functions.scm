@@ -247,3 +247,5 @@
 
 (e.g.
  (char-hex-value #\f) ===> 15)
+
+(define-alias hypotenuse java.lang.Math:hypot)

@@ -1,3 +1,12 @@
+ZAGADNIENIA TRUDNE (ALBO SIE TAK WYDAJE):
+
+
+
+
+
+
+
+
 ogolnie mamy dwa rodzaje elementow:
 - kafelki
 - spacje

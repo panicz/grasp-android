@@ -17,8 +17,16 @@
   (examples)
   (assert)
   (infix)
+  (match)
   (functions)
   )
+
+(define parsed (with-input-from-string "\
+(#;(a (b c) d) #|efg|# ;hij
+ define (factorial n #|int|#) ; -> int
+  (if #;(<= n 1) (is n <= 1)
+      1 ; base case
+      (* n (! (- n 1)))))" parse-document))
 
 
 (define parsed (parse-string "\
@@ -35,14 +43,23 @@
   (set! cur (cursor-climb-front cur parsed))
   cur)
 
+(define (ccb)
+  (set! cur (cursor-climb-back cur parsed))
+  cur)
+
 (define (cn)
   (set! cur (cursor-next cur parsed))
+  cur)
+
+(define (cb)
+  (set! cur (cursor-back cur parsed))
   cur)
 
 (define (at)
   (cursor-ref parsed cur))
 
-(set! (cadar parsed) '())
+
+;;(set! (cadar parsed) '())
 
 
 (e.g.
@@ -101,11 +118,11 @@
 
 &{
 ╭                         ╮
-│               ╭───────╮ │
-│ ╭───────╮     │       │ │
+│                ╭─────╮  │
+│ ╭───────╮     ╭╯     ╰╮ │
 │ │       │     │   B   │ │
-│ │   A   │----⯈│       │ │
-│ │       │     ╰───────╯ │
+│ │   A   │----⯈╰╮     ╭╯ │
+│ │       │      ╰─────╯  │
 │ ╰───────╯       ╱       │
 │        ⯈       ╱        │
 │         ╲     ⯈         │
@@ -137,7 +154,7 @@
 (define (screen-displays? s::string)::boolean
   (string=? ((the-screen):toString) s))
 
-(draw! (head parsed))
+;(draw! (head parsed))
 
 (display ((the-screen):toString))
 
