@@ -115,7 +115,15 @@
 (define (load-font path::String)
   (let* ((font-file ::File (File path))
 	 (font ::Font (Font:createFont Font:TRUETYPE_FONT font-file)))
-    (invoke (the-graphics-environment) 'registerFont font)))
+    (invoke (the-graphics-environment) 'registerFont font)
+    font))
+
+
+(load-font "fonts/Basic-Regular.otf")
+(load-font "fonts/LobsterTwo-Regular.otf")
+(load-font "fonts/Oswald-Regular.ttf")
+(load-font "fonts/GloriaHallelujah.ttf")
+(load-font "fonts/NotoSerif-Regular.ttf")
 
 (let ((fonts (invoke (the-graphics-environment)
 		     'getAvailableFontFamilyNames)))
