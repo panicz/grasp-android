@@ -33,12 +33,41 @@
 
 (define-parameter (the-graphics-output) :: Graphics2D)
 
-(define-parameter (the-atom-font) ::Font)
+(define-parameter (the-graphics-environment)
+  ::java.awt.GraphicsEnvironment
+  (invoke-static
+   java.awt.GraphicsEnvironment
+   'getLocalGraphicsEnvironment))
 
-(define-parameter (the-string-font) :: Font)
 
 #;(define-object (AWT-screen)::Screen
   ...)
+
+(define (load-font path::String)
+  (let* ((font-file ::File (File path))
+	 (font ::Font (Font:createFont Font:TRUETYPE_FONT font-file)))
+    (invoke (the-graphics-environment) 'registerFont font)
+    (invoke font 'deriveFont (as float 24.0))))
+
+
+(define-constant Basic-Regular (load-font "fonts/Basic-Regular.otf"))
+(define-constant LobsterTwo-Regular (load-font "fonts/LobsterTwo-Regular.otf"))
+(define-constant Oswald-Regular (load-font "fonts/Oswald-Regular.ttf"))
+(define-constant GloriaHallelujah (load-font "fonts/GloriaHallelujah.ttf"))
+(define-constant NotoSerif-Regular (load-font "fonts/NotoSerif-Regular.ttf"))
+
+(define-parameter (the-atom-font) ::Font
+  LobsterTwo-Regular)
+
+(define-parameter (the-string-font) ::Font
+  Oswald-Regular)
+
+#;(let ((fonts (invoke (the-graphics-environment)
+		     'getAvailableFontFamilyNames)))
+  (for font in fonts
+    (display font)
+    (newline)))
+
 
 (define-object (window-state)
   (define x :: int 10)
@@ -52,6 +81,7 @@
     (invoke-special java.awt.Canvas (this) 'paint graphics)
     (parameterize ((the-graphics-output (as Graphics2D graphics)))
       #;(draw-panel! (the-main-panel))
+      (invoke (the-graphics-output) 'setFont (the-string-font))
       (invoke (the-graphics-output)
 	      'drawString "X" target:x target:y)))
 
@@ -67,7 +97,7 @@
    (values))
 
   ((keyReleased event::KeyEvent)::void
-   (values))
+`   (values))
 
   ((keyPressed event::KeyEvent)::void
    (match (event:getKeyCode)
@@ -105,30 +135,5 @@
    (addKeyListener (this))
 
    (addFocusListener (this))))
-
-(define-parameter (the-graphics-environment)
-  ::java.awt.GraphicsEnvironment
-  (invoke-static
-   java.awt.GraphicsEnvironment
-   'getLocalGraphicsEnvironment))
-
-(define (load-font path::String)
-  (let* ((font-file ::File (File path))
-	 (font ::Font (Font:createFont Font:TRUETYPE_FONT font-file)))
-    (invoke (the-graphics-environment) 'registerFont font)
-    font))
-
-
-(load-font "fonts/Basic-Regular.otf")
-(load-font "fonts/LobsterTwo-Regular.otf")
-(load-font "fonts/Oswald-Regular.ttf")
-(load-font "fonts/GloriaHallelujah.ttf")
-(load-font "fonts/NotoSerif-Regular.ttf")
-
-(let ((fonts (invoke (the-graphics-environment)
-		     'getAvailableFontFamilyNames)))
-  (for font in fonts
-    (display font)
-    (newline)))
 
 (window-screen)
