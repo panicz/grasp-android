@@ -30,6 +30,7 @@
 
 (define-alias Graphics java.awt.Graphics)
 (define-alias Graphics2D java.awt.Graphics2D)
+(define-alias RenderingHints java.awt.RenderingHints)
 
 (define-parameter (the-graphics-output) :: Graphics2D)
 
@@ -81,6 +82,10 @@
     (invoke-special java.awt.Canvas (this) 'paint graphics)
     (parameterize ((the-graphics-output (as Graphics2D graphics)))
       #;(draw-panel! (the-main-panel))
+      ;; cf. https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
+      (invoke (the-graphics-output) 'setRenderingHints
+	      (RenderingHints RenderingHints:KEY_TEXT_ANTIALIASING
+			      RenderingHints:VALUE_TEXT_ANTIALIAS_ON))
       (invoke (the-graphics-output) 'setFont (the-string-font))
       (invoke (the-graphics-output)
 	      'drawString "X" target:x target:y)))
