@@ -3,11 +3,11 @@
 (import (conversions))
 (import (infix))
 (import (extent))
-(import (screen))
+(import (painter))
 (import (define-object))
 (import (indexable))
 
-(define-object (TextScreen)::Screen
+(define-object (TextPainter)::Painter
   (define shift-left ::real 0)
   (define shift-top ::real 0)
   (define width ::int 0)

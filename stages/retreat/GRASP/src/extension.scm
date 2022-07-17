@@ -11,38 +11,17 @@
 (import (cursor))
 (import (document-operations))
 (import (print))
+(import (interactive))
 
-(define-interface Interactive (Tile)
-  ;; by convention, the return value of #true means
-  ;; that the event was handled by the object,
-  ;; and the value of #false means that it was ignored
-  ;;
-  ;; This is used by the event system to find out
-  ;; whether the event has been consumed or not.
-  (key-pressed key::char)::boolean
-  (key-released key::char)::boolean
-  
-  (tapped x::real y::real)::boolean
-  (pressed x::real y::real)::boolean
-  (released x::real y::real)::boolean
-  
-  (dragged-over x::real y::real item::Tile*)::boolean
-  (dragged-out x::real y::real item::Tile*)::boolean
-  (dropped x::real y::real item::Tile*)::boolean
-  
-  (held x::real y::real)::boolean
-  (double-tapped x::real y::real)::boolean
-  (second-pressed x::real y::real)::boolean
+(define-interface Enchanted (Interactive Tile))
 
-  )
-
-(define-object (Passive)::Interactive
-  (define (typename)::String "Passive")
+(define-object (Magic)::Enchanted
+  (define (typename)::String "Magic")
 
   (define (fields->string)::String "")
 
   (define (embedded-in? object)::boolean
-    (instance? object Passive))
+    (instance? object Magic))
 
   (define (assign source::Struct)::Struct
     (this))
@@ -61,14 +40,15 @@
   (define (held x::real y::real)::boolean #f)
   (define (double-tapped x::real y::real)::boolean #f)
   (define (second-pressed x::real y::real)::boolean #f)
-  
-  (define (draw! context::Cursor)::void #!abstract)
-  (define (extent)::Extent #!abstract)
 
-  (Simple))
+  (define (draw! context::Cursor)::void #!abstract)
+
+  (define (extent)::Extent #!abstract)
   
+  (Simple))
+
 (define-interface Extension ()
-  (create-from source::cons)::Interactive
+  (create-from source::cons)::Enchanted
   )
 
 (define-mapping (extension keyword)

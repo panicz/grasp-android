@@ -1,14 +1,10 @@
 (import (define-interface))
 (import (indexable))
 (import (cursor))
-(import (screen))
+(import (painter))
 (import (extent))
+(import (box))
 
-(define-interface Tile (Indexable)
-  ;; these methods are implicitly parameterized
-  ;; with (the-screen) and (the-cursor) parameters
-  (draw! context::Cursor)::void
-  (extent)::Extent
-  )
+(define-interface Tile (Indexable Box))
 
 (define Tile* java.lang.Object)

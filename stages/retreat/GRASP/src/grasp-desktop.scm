@@ -41,7 +41,7 @@
    'getLocalGraphicsEnvironment))
 
 
-#;(define-object (AWT-screen)::Screen
+#;(define-object (AWT-painter)::Painter
   ...)
 
 (define (load-font path::String)
@@ -80,15 +80,16 @@
   
   (define (paint graphics::Graphics)::void
     (invoke-special java.awt.Canvas (this) 'paint graphics)
-    (parameterize ((the-graphics-output (as Graphics2D graphics)))
-      #;(draw-panel! (the-main-panel))
-      ;; cf. https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
-      (invoke (the-graphics-output) 'setRenderingHints
-	      (RenderingHints RenderingHints:KEY_TEXT_ANTIALIASING
-			      RenderingHints:VALUE_TEXT_ANTIALIAS_ON))
-      (invoke (the-graphics-output) 'setFont (the-string-font))
-      (invoke (the-graphics-output)
-	      'drawString "X" target:x target:y)))
+    (let ((graphics-output ::Graphics2D (as Graphics2D graphics)))
+      (parameterize ((the-graphics-output graphics-output))
+	;; cf. https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
+	(invoke graphics-output 'setRenderingHints
+		(RenderingHints RenderingHints:KEY_TEXT_ANTIALIASING
+				RenderingHints:VALUE_TEXT_ANTIALIAS_ON))
+	(invoke graphics-output 'setFont (the-string-font))
+	#;(invoke (the-top-panel) 'draw! '())
+	(invoke (the-graphics-output)
+		'drawString "X" target:x target:y))))
 
   (java.awt.Canvas)
   (set! target screen))

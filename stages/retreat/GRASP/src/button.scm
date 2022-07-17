@@ -6,7 +6,7 @@
 (import (infix))
 (import (functions))
 (import (indexable))
-(import (screen))
+(import (painter))
 (import (cursor))
 (import (tile))
 (import (primitive))
@@ -16,16 +16,16 @@
 
 (define-type (Button action: procedure
 		     label: string)
-  extending Passive
+  extending Magic
   with
   ((draw! context::Cursor)::void
-   (let* ((screen ::Screen (the-screen))
+   (let* ((painter ::Painter (the-painter))
 	  (inner ::Extent (string-extent label)))
-     (invoke screen 'draw-rounded-rectangle!
+     (invoke painter 'draw-rounded-rectangle!
 	     (+ inner:width 4)
 	     (+ inner:height 2))
      (with-translation (2 1)
-	 (invoke screen 'draw-string! label
+	 (invoke painter 'draw-string! label
 		 (and (pair? (the-cursor))
 		      (equal? (cursor-tail) context)
 		      (cursor-head))))))
@@ -47,7 +47,7 @@
    #t))
 
 (define-object (ButtonExtension)::Extension
-  (define (create-from source::cons)::Interactive
+  (define (create-from source::cons)::Enchanted
     (try-catch
      (or (as Button (eval source)) #!null)
      (ex java.lang.Throwable

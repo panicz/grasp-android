@@ -1,7 +1,7 @@
 (import (define-object))
 (import (indexable))
 (import (cursor))
-(import (screen))
+(import (painter))
 (import (tile))
 (import (infix))
 (import (extent))
@@ -12,13 +12,13 @@
   
   (define (draw! context::Cursor)
     ::void
-    (invoke (the-screen) 'draw-atom! name
+    (invoke (the-painter) 'draw-atom! name
 	    (and (pair? (the-cursor))
 		 (equal? (cursor-tail) context)
 		 (cursor-head))))
 
   (define (extent)::Extent
-    (invoke (the-screen) 'atom-extent name))
+    (invoke (the-painter) 'atom-extent name))
   
   (define (part-at index::Index)::Indexable*
     (this))

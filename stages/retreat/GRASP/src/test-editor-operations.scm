@@ -11,7 +11,7 @@
  (tile)
  (primitive)
  (extent)
- (text-screen)
+ (text-painter)
  (combinators)
  (parse)
  (symbol)
@@ -21,7 +21,7 @@
  (match)
  (functions)
  (print)
- (screen)
+ (painter)
  (for)
  (document-operations)
  (editor-operations)
@@ -30,19 +30,17 @@
 (define (rendered-with-cursor #!optional
 			      (document (the-document))
 			      (cursor (the-cursor)))
-  (parameterize ((the-screen (TextScreen)))
+  (parameterize ((the-painter (TextPainter)))
     (let* ((target (cursor-ref document cursor))
-	   (screen ::TextScreen (the-screen)))
-      (draw-sequence! (head document)
-		      screen: screen
-		      cursor: cursor)
+	   (painter ::TextPainter (the-painter)))
+      (draw-sequence! (head document))
       	  
-      (screen:put! (if (is target instance? Space)
+      (painter:put! (if (is target instance? Space)
 		       #\|
 		       #\^)
-		   (screen:remembered-top)
-		   (screen:remembered-left))
-      (screen:toString))))
+		   (painter:remembered-top)
+		   (painter:remembered-left))
+      (painter:toString))))
 
 
 ;; "after" is a synonym for "begin" which assumes
@@ -58,7 +56,7 @@
 
 ;; yields? is essentially a synonym for equal?, but when
 ;; there's only one argument given, it prints the value
-;; to the screen and returns #t, which is useful for
+;; to the painter and returns #t, which is useful for
 ;; capturing the result (it's a code-write-time convenience)
 (define-syntax yields?
   (syntax-rules ()

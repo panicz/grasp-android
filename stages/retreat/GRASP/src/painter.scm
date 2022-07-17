@@ -8,7 +8,7 @@
 
 (define-alias CharSequence java.lang.CharSequence)
 
-(define-interface Screen ()
+(define-interface Painter ()
   (paren-width)::real
   (min-line-height)::real
 
@@ -40,7 +40,7 @@
   ;;(cursor-at left::real top::real)::Cursor
   )
 
-(define-object (NullScreen)::Screen
+(define-object (NullPainter)::Painter
   (define (paren-width)::real 0)
 
   (define (min-line-height)::real 0)
@@ -110,13 +110,13 @@
   
   )
 
-(set! (default-value Screen) (NullScreen))
+(set! (default-value Painter) (NullPainter))
 
-(define-parameter (the-screen) ::Screen)
+(define-parameter (the-painter) ::Painter)
 
 (define-syntax-rule (with-translation (x y) . actions)
   (let ((x! x)
         (y! y))
-    (invoke (the-screen) 'translate! x! y!)
+    (invoke (the-painter) 'translate! x! y!)
     (begin . actions)
-    (invoke (the-screen) 'translate! (- x!) (- y!))))
+    (invoke (the-painter) 'translate! (- x!) (- y!))))

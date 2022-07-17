@@ -5,14 +5,14 @@
   (conversions)
   (extent)
   (indexable)
-  (screen)
+  (painter)
   (space)
   (cursor)
   (tile)
   (primitive)
   (symbol)
   (combinators)
-  (text-screen)
+  (text-painter)
   (parse)
   (examples)
   (assert)
@@ -62,7 +62,7 @@
 ;;(set! (cadar parsed) '())
 
 
-(e.g.
+#;(e.g.
  (let ((document ::Tile (as Tile (parse-string "
 (define (! n)
   (if (<= n 0)
@@ -143,23 +143,23 @@
 ;; to podejscie jest niewystarczajace - ze raczej chcielibysmy
 ;; moc "opowiadac historie"
 
-(define (grasped expression::string)::Screen
-  (parameterize ((the-screen (TextScreen)))
+(define (grasped expression::string)::Painter
+  (parameterize ((the-painter (TextPainter)))
     (let ((parsed (call-with-input-string expression parse)))
       (draw! (head parsed)))
-    (the-screen)))
+    (the-painter)))
 
-(set! (the-screen) (TextScreen))
+(set! (the-painter) (TextPainter))
 
-(define (screen-displays? s::string)::boolean
-  (string=? ((the-screen):toString) s))
+(define (painter-displays? s::string)::boolean
+  (string=? ((the-painter):toString) s))
 
 ;(draw! (head parsed))
 
-(display ((the-screen):toString))
+(display ((the-painter):toString))
 
 #;(assert
- (screen-displays? &{
+ (painter-displays? &{
 ╭        ╭             ╮              ╮
 │ define │ factorial n │              │
 │        ╰             ╯              │
@@ -185,17 +185,17 @@ tail)" parse))
 (c d))  .  ((e f)
 (g h)))" parse))
 
-(invoke (the-screen) 'clear!)
+(invoke (the-painter) 'clear!)
 
 (draw! (head horizontal-dotted))
 
-(display (invoke (the-screen) 'toString))
+(display (invoke (the-painter) 'toString))
 
-(invoke (the-screen) 'clear!)
+(invoke (the-painter) 'clear!)
 
 (draw! (head vertical-dotted))
 
-(display (invoke (the-screen) 'toString))
+(display (invoke (the-painter) 'toString))
 
 (define empties (call-with-input-string "\
 ((() . ())
@@ -203,18 +203,18 @@ tail)" parse))
 .
      ( ))" parse))
 
-((the-screen):clear!)
+((the-painter):clear!)
 
 (draw! (head empties))
 
-(display (invoke (the-screen) 'toString))
+(display (invoke (the-painter) 'toString))
 
 
-((the-screen):clear!)
+((the-painter):clear!)
 
-((the-screen):draw-rounded-rectangle! 15 4)
+((the-painter):draw-rounded-rectangle! 15 4)
 
-(display (invoke (the-screen) 'toString))
+(display (invoke (the-painter) 'toString))
 
 
 
@@ -232,12 +232,12 @@ tail)" parse))
 ;; do "wyciagania" podwyrazen, oraz do umieszczania kursora.
 
 ;; No dobra, czyli tak:
-;; 1. do interfejsu Screen dochodzi operacja
+;; 1. do interfejsu Painter dochodzi operacja
 ;;
-;;      (cursor-at left::real top::real on: screen::Screen) -> cursor
+;;      (cursor-at left::real top::real on: painter::Painter) -> cursor
 ;;
 ;;    ktora zwraca kursor wyrazenia dla danych wspolrzednych
-;; 2. ponadto trzeba interfejs Screen odpowiednio rozbudowac,
+;; 2. ponadto trzeba interfejs Painter odpowiednio rozbudowac,
 ;;    zeby wesprzec konstrukcje struktury, ktora bedzie nam
 ;;    odwzorowywac wspolrzedne w kursory
 ;; 3. chcielibysmy tez opracowac API do:

@@ -11,7 +11,7 @@
  (tile)
  (primitive)
  (extent)
- (text-screen)
+ (text-painter)
  (combinators)
  (parse)
  (symbol)
@@ -22,7 +22,7 @@
  (term)
  (functions)
  (print)
- (screen)
+ (painter)
  (for)
  (document-operations)
  (editor-operations)
@@ -88,7 +88,7 @@ mutations of an n-element set.\"
 
   (parameterize ((current-message-handler
 		  (editor-message-handler 6))
-		 (the-screen (TextScreen))
+		 (the-painter (TextPainter))
 		 (current-display-procedure
 		  (lambda (message)
 		    (io:putString
@@ -100,12 +100,12 @@ mutations of an n-element set.\"
     (let continue ()
       (let ((output-extent ::Extent
 			   (extent (head (the-document)))))
-	((the-screen):clear!)
+	((the-painter):clear!)
 	(draw-sequence! (head (the-document)))
 	(io:setCursorVisible #f)
 	(io:clearScreen)
 	(io:setCursorPosition 0 0)
-	(io:putString ((the-screen):toString))
+	(io:putString ((the-painter):toString))
 	(io:setCursorPosition
 	 0
 	 (+ 2 output-extent:height))
@@ -122,8 +122,8 @@ mutations of an n-element set.\"
 		'display-messages io)
 	(io:flush)
 	(io:setCursorPosition
-	 (invoke (the-screen) 'remembered-left)
-	 (invoke (the-screen) 'remembered-top))
+	 (invoke (the-painter) 'remembered-left)
+	 (invoke (the-painter) 'remembered-top))
 	(io:setCursorVisible #t)
 	(let* ((key ::KeyStroke (io:readInput))
 	       (type ::KeyType (key:getKeyType)))
@@ -151,11 +151,11 @@ mutations of an n-element set.\"
 	    
 	    (,KeyType:ArrowUp
 	     (try-catch
-	      (invoke (the-screen)
+	      (invoke (the-painter)
 		      'remember-offset!
-		      (invoke (the-screen)
+		      (invoke (the-painter)
 			      'remembered-left)
-		      (- (invoke (the-screen)
+		      (- (invoke (the-painter)
 				 'remembered-top)
 			 1))
 	      (ex java.lang.Throwable
@@ -164,11 +164,11 @@ mutations of an n-element set.\"
 	    
 	    (,KeyType:ArrowDown
 	     (try-catch
-	      (invoke (the-screen)
+	      (invoke (the-painter)
 		      'remember-offset!
-		      (invoke (the-screen)
+		      (invoke (the-painter)
 			      'remembered-left)
-		      (+ (invoke (the-screen)
+		      (+ (invoke (the-painter)
 				 'remembered-top)
 			 1))
 	      (ex java.lang.Throwable
@@ -233,7 +233,7 @@ mutations of an n-element set.\"
 		((action:isMouseDown)
 		 (match (action:getButton)
 		   (,MouseButton:Left
-		    (invoke (the-screen)
+		    (invoke (the-painter)
 			    'remember-offset!
 			    left top)
 		    (try-catch

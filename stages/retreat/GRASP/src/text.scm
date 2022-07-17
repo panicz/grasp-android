@@ -14,13 +14,13 @@
 (import (cursor))
 (import (tile))
 (import (for))
-(import (screen))
+(import (painter))
 (import (functions))
 (import (print))
 
 (define-object (Text)::Tile
   (define (draw! context::Cursor)
-    (invoke (the-screen) 'draw-quoted-text!
+    (invoke (the-painter) 'draw-quoted-text!
 	    (this)
 	    (and (pair? (the-cursor))
 		 (equal? context
@@ -28,7 +28,7 @@
 		 (cursor-head))))
 
   (define (extent)::Extent
-    (invoke (the-screen) 'quoted-text-extent (this)))
+    (invoke (the-painter) 'quoted-text-extent (this)))
 
   (define (part-at index::Index)::Indexable*
     (this))

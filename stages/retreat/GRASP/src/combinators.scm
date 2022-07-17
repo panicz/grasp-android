@@ -3,7 +3,7 @@
 (import (indexable))
 (import (space))
 (import (cursor))
-(import (screen))
+(import (painter))
 (import (extent))
 (import (match))
 (import (infix))

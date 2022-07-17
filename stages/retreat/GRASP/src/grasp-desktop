@@ -1,4 +1,4 @@
 #!/bin/sh
 # Docelowo bedziemy chcieli sobie zrobic sloik
-# z kawa.
+# z kawa. --debug-print-final-expr
 kawa --no-warn-unreachable -f grasp-desktop.scm

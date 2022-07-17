@@ -11,7 +11,6 @@
  (tile)
  (primitive)
  (extent)
- (text-screen)
  (combinators)
  (parse)
  (symbol)
@@ -21,7 +20,8 @@
  (match)
  (functions)
  (print)
- (screen)
+ (painter)
+ (text-painter)
  (for)
  (document-operations)
  (editor-operations)
@@ -30,19 +30,17 @@
 (define (rendered-with-cursor #!optional
 			      (document (the-document))
 			      (cursor (the-cursor)))
-  (parameterize ((the-screen (TextScreen)))
+  (parameterize ((the-painter (TextPainter)))
     (let* ((target (cursor-ref document cursor))
-	   (screen ::TextScreen (the-screen)))
-      (draw-sequence! (head document)
-		      screen: screen
-		      cursor: cursor)
+	   (painter ::TextPainter (the-painter)))
+      (draw-sequence! (head document) cursor)
       	  
-      (screen:put! (if (is target instance? Space)
-		       #\|
-		       #\^)
-		   (screen:remembered-top)
-		   (screen:remembered-left))
-      (screen:toString))))
+      (painter:put! (if (is target instance? Space)
+			#\|
+			#\^)
+		    (painter:remembered-top)
+		    (painter:remembered-left))
+      (painter:toString))))
 
 (define-syntax snapshot
   (syntax-rules ()

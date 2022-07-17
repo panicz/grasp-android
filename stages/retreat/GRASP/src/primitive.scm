@@ -14,7 +14,7 @@
 (import (cursor))
 (import (tile))
 (import (for))
-(import (screen))
+(import (painter))
 (import (functions))
 (import (print))
 (import (conversions))
@@ -66,13 +66,13 @@
   
   (define (draw! context::Cursor)
     ::void
-    (invoke (the-screen) 'draw-atom! source
+    (invoke (the-painter) 'draw-atom! source
 	    (and (pair? (the-cursor))
 		 (equal? (cursor-tail) context)
 		 (cursor-head))))
 
   (define (extent)::Extent
-    (invoke (the-screen) 'atom-extent source))
+    (invoke (the-painter) 'atom-extent source))
   
   (define (part-at index::Index)::Indexable*
     (this))
@@ -127,18 +127,18 @@
   (define (draw! context::Cursor)
     ::void
     (let ((inner (sequence-extent (this)))
-	  (paren-width (invoke (the-screen) 'paren-width)))
-      (invoke (the-screen) 'open-paren! inner:height 0 0)
+	  (paren-width (invoke (the-painter) 'paren-width)))
+      (invoke (the-painter) 'open-paren! inner:height 0 0)
       (when (equal? (the-cursor) (recons (first-index)
 					 context))
-	(invoke (the-screen) 'remember-offset! 0 2))
+	(invoke (the-painter) 'remember-offset! 0 2))
       (with-translation (paren-width 0)
 	(draw-sequence! (this) context: context))
-      (invoke (the-screen) 'close-paren! inner:height
+      (invoke (the-painter) 'close-paren! inner:height
 	      (+ paren-width inner:width) 0)
       (when (equal? (the-cursor) (recons (last-index)
 					 context))
-	(invoke (the-screen) 'remember-offset!
+	(invoke (the-painter) 'remember-offset!
 		(+ paren-width 1 inner:width)
 		(- inner:height 1)))
       ))
@@ -147,7 +147,7 @@
     (let ((extent ::Extent (sequence-extent
 			    (this))))
       (Extent width: (+ extent:width
-			(* 2 (invoke (the-screen)
+			(* 2 (invoke (the-painter)
 				     'paren-width)))
 	      height: extent:height)))
     
@@ -235,7 +235,7 @@
 (define (empty-space-extent space::Space)
   ::Extent
   (Extent width: (apply max space:fragments)
-	  height: (* (invoke (the-screen) 'min-line-height)
+	  height: (* (invoke (the-painter) 'min-line-height)
 		     (length space:fragments))))
 
 (define (head-extent pair::cons)
@@ -244,7 +244,7 @@
       (let ((inner (empty-space-extent
 		    (null-head-space pair))))
 	(Extent width: (+ inner:width
-			  (* 2 (invoke (the-screen)
+			  (* 2 (invoke (the-painter)
 				       'paren-width)))
 		height: inner:height))
       (extent (head pair))))
@@ -255,7 +255,7 @@
       (let ((inner (empty-space-extent
 		    (null-head-space pair))))
 	(Extent width: (+ inner:width
-			  (* 2 (invoke (the-screen)
+			  (* 2 (invoke (the-painter)
 				       'paren-width)))
 		height: inner:height))
       (extent (tail pair))))
@@ -279,7 +279,7 @@
 			(context::Cursor (recons 1 '())))
   ::void
   (let ((max-width 0)
-        (max-line-height (invoke (the-screen)
+        (max-line-height (invoke (the-painter)
 				 'min-line-height))
         (top 0)
         (left 0)
@@ -295,7 +295,7 @@
 		     ((eqv? next index))
 		     ((is total <= tip <= (+ total
 					     width))))
-	    (invoke (the-screen) 'remember-offset!
+	    (invoke (the-painter) 'remember-offset!
 		    (+ left (- tip total)) (+ top 2)))
 	  (set! left (+ left width))
 	  (set! max-width (max max-width left)))
@@ -306,7 +306,7 @@
 	   (set! top (+ top max-line-height))
            (set! left 0)
            (set! max-line-height
-		 (invoke (the-screen) 'min-line-height))
+		 (invoke (the-painter) 'min-line-height))
 	   (skip (tail input) (+ total (head input) 1)))
 	  (`(,,@integer)
 	   (advance-with-cursor! (head input)))))
@@ -314,7 +314,7 @@
 
     (define (advance! extent::Extent)::void
       (when (equal? (the-cursor) (recons index context))
-	(invoke (the-screen) 'remember-offset! left (+ top 2)))
+	(invoke (the-painter) 'remember-offset! left (+ top 2)))
       (set! left (+ left extent:width))
       (set! max-line-height (max extent:height
 				 max-line-height))
@@ -323,19 +323,19 @@
 
     (define (draw-empty-list! space::Space context)::void
       (let ((inner (empty-space-extent space))
-	    (paren-width (invoke (the-screen) 'paren-width)))
-	(invoke (the-screen) 'open-paren! inner:height 0 0)
-	(invoke (the-screen) 'close-paren! inner:height
+	    (paren-width (invoke (the-painter) 'paren-width)))
+	(invoke (the-painter) 'open-paren! inner:height 0 0)
+	(invoke (the-painter) 'close-paren! inner:height
 		(+ paren-width inner:width) 0)
 	(match (the-cursor)
 	  (`(#\[ . ,,context)
-	   (invoke (the-screen) 'remember-offset! 0 2))
+	   (invoke (the-painter) 'remember-offset! 0 2))
 	  (`(#\] . ,,context)
-	   (invoke (the-screen) 'remember-offset!
+	   (invoke (the-painter) 'remember-offset!
 		   (+ paren-width 1 inner:width)
 		   (- inner:height 1)))
 	  (`(,,@number? 0 . ,,context)
-	   (invoke (the-screen) 'remember-offset!
+	   (invoke (the-painter) 'remember-offset!
 		   (+ 1 (cursor-head)) 2))
 	  (_ (values)))))
     
@@ -351,7 +351,7 @@
     (define (draw-dotted-tail! pair::cons)::void
       (cond ((should-the-bar-be-horizontal? pair)
 	     (with-translation (0 top)
-		 (invoke (the-screen) 'draw-horizontal-bar!
+		 (invoke (the-painter) 'draw-horizontal-bar!
 			 max-width))
              (skip-spaces! (skip-first-line
 			    (pre-tail-space pair)))
@@ -368,11 +368,11 @@
              (skip-spaces! (post-tail-space pair)))
             (else
 	     (with-translation (left top)
-		 (invoke (the-screen) 'draw-vertical-bar!
+		 (invoke (the-painter) 'draw-vertical-bar!
 			 max-line-height))
              (advance!
 	      (Extent
-	       width: (invoke (the-screen) 'vertical-bar-width)
+	       width: (invoke (the-painter) 'vertical-bar-width)
 	       height: 0))
              (skip-spaces! (pre-tail-space pair))
              (let ((context (recons index context)))
@@ -414,7 +414,7 @@
 
 	(else
 	 (with-translation (0 1)
-	     (invoke (the-screen)
+	     (invoke (the-painter)
 		     'draw-string!
 		     (with-output-to-string
 		       (lambda () (write object)))
@@ -429,8 +429,8 @@
   ::Cursor
   (let ((box (extent elems))
 	(max-width 0)
-	(max-line-height (invoke (the-screen) 'min-line-height))
-	(side (invoke (the-screen) 'paren-width))
+	(max-line-height (invoke (the-painter) 'min-line-height))
+	(side (invoke (the-painter) 'paren-width))
 	(ceiling 0)
 	(index (first-index elems)))
 
@@ -445,9 +445,9 @@
 	      ((eq? (spaces i) #\newline)
 	       (set! ceiling
 		 (+ ceiling max-line-height))
-	       (set! side (invoke (the-screen) 'paren-width))
+	       (set! side (invoke (the-painter) 'paren-width))
       (set! max-line-height
-		 (invoke (the-screen) 'min-line-height))
+		 (invoke (the-painter) 'min-line-height))
 	       (cond ((is top < ceiling)
 	              (recons* i index context))
 		     (else
@@ -492,7 +492,7 @@
     (define (check-separating-bar! pair)::Cursor
       (cond ((should-the-bar-be-horizontal? pair)
 	     (let ((bar-height (invoke
-				(the-screen)
+				(the-painter)
 				'horizontal-bar-height)))
 	       (if (is ceiling <= top <= (+ ceiling
 					    bar-height))
@@ -503,7 +503,7 @@
 		     height: bar-height)))))
 	    (else
 	     (let ((bar-width (invoke
-			       (the-screen)
+			       (the-painter)
 			       'vertical-bar-width)))
 	       (if (is side <= left (+ side
 				       bar-width))
@@ -526,11 +526,11 @@
 	  (and (pair? (tail pair))
 	       (check-next! (tail pair)))))
 
-    (or (and (is 0 <= left < (invoke (the-screen) 'paren-width))
+    (or (and (is 0 <= left < (invoke (the-painter) 'paren-width))
 	     (is 0 <= top < box:height)
 	     (recons index context))
 	(and (is (- box:width
-		    (invoke (the-screen)
+		    (invoke (the-painter)
 			    'paren-width)) <= left <= box:width)
 	     (is 0 <= top < box:height)
 	     (recons (last-index elems) context))
@@ -542,7 +542,7 @@
 (define (sequence-extent elems)
   ::Extent
   (let ((max-width 0)
-        (max-line-height (invoke (the-screen) 'min-line-height))
+        (max-line-height (invoke (the-painter) 'min-line-height))
         (top 0)
         (left 0))
 
@@ -561,10 +561,10 @@
 	 (set! top
 	   (+ top
 	      max-line-height
-	      (* (invoke (the-screen) 'min-line-height)
+	      (* (invoke (the-painter) 'min-line-height)
 		 (length rest))))
 	 (set! max-line-height
-	   (invoke (the-screen) 'min-line-height)))
+	   (invoke (the-painter) 'min-line-height)))
 	(`(,single)
 	 (set! left (+ left single))
 	 (set! max-width
@@ -585,7 +585,7 @@
 	    (else
 	     (advance!
 	      (Extent
-	       width: (invoke (the-screen) 'vertical-bar-width)
+	       width: (invoke (the-painter) 'vertical-bar-width)
 	       height: 0))
 	     (skip-spaces! (pre-tail-space pair))
 	     (advance! (tail-extent pair))
@@ -617,18 +617,18 @@
 	 (invoke (as Tile object) 'extent))
 
 	((null? object)
-	 (Extent width: 0 height: (invoke (the-screen)
+	 (Extent width: 0 height: (invoke (the-painter)
 					  'min-line-height)))
 
 	((pair? object)
 	 (sequence-extent object))
 
 	((symbol? object)
-	 (invoke (the-screen) 'atom-extent
+	 (invoke (the-painter) 'atom-extent
 		 (symbol->string object)))
 	
 	(else
-	 (invoke (the-screen) 'atom-extent
+	 (invoke (the-painter) 'atom-extent
 		 (with-output-to-string
 		   (lambda () (write object)))))
 	))
