@@ -1,3 +1,202 @@
+* 17.07.2022
+
+Mamy z grubsza napisany zalazek implementacji
+HorizontalSplit, i mozemy z latwoscia opracowac
+analogiczny VerticalSplit.
+
+Nie rozwiazuje to jednak pewnego problemu,
+ktory mamy, mianowicie zwiazanego z focusem.
+
+(w prototypie androidowym taki problem w ogole
+sie nie pojawial, bo klawiatury uzywalismy
+tylko do edycji poszczegolnych atomow w osobnym
+okienku)
+
+Wydaje sie, ze mamy dwie drogi. Pierwsza to dodanie
+pola "focus" to Splitow, natomiast druga to uzycie
+istniejacego juz mechanizmu kursorow, przy czym
+te ostatnia mozna by realizowac dwojako:
+- rozszerzajac istniejacy kursor
+- dorabiajac dodatkowy "kursor" (nazywany odtad
+"focusem")
+
+Wydaje sie, ze ta druga opcja jest optymalna,
+bo z jednej strony wykorzystuje istniejace
+mechanizmy ("indexable"), ale z drugiej
+nie wprowadza niepotrzebnego "couplingu"
+
+Bedziemy zatem mieli jeden obiekt, 
+"the-focus", kontrolujacy wybor aktywnego
+panelu.
+
+Ale to bedzie mialo znaczenie dopiero wtedy,
+kiedy zaczniemy juz cos renderowac.
+
+Podczas gdy tymczasem nasza implementacja
+wymaga zdefiniowania:
+- with-clip
+- draw-vertical-bar!
+- vertical-bar-width
+oraz zapewne
+- draw-horizontal-bar!
+- horizontal-bar-height
+
+Albo czegos w tym rodzaju.
+
+Wiec moze zacznijmy od tego, zeby ustalic nazwy.
+Niestety, draw-horizontal-bar! i draw-vertical-bar!
+sa juz zajete.
+
+Wiec zamiast nich wolelibysmy cos w rodzaju
+"draw-horizontal-split!" oraz 
+"draw-vertical-split!", a takze
+horizontal-split-height
+i vertical-split-width
+
+OK, tutaj nazwy juz sa wymyslone.
+
+Teraz jednak pozostaje nam implementacja przycinania
+<tego, co rysujemy>.
+
+Jezeli idzie o API javy (ktore mimo wszystko w jakiejs
+mierze jest dla nas wyznacznikiem), to sprawa z przycinaniem
+ma sie tutaj tak, ze mamy jeden prostokat, ktory mozemy
+ustawiac za pomoca "setClip".
+
+Dokumentacja nie wydaje sie tu wyczerpujaca, ale wydaje sie,
+ze wielkosci podawane do setClip sa zawsze we wspolrzednych
+ekranowych.
+
+Natomiast nasze pytanie brzmi: jak powinien wygladac interfejs
+do przycinania w naszym Painterze?
+
+Konkretnie, chodzi nam o to, czy powinnismy - jak w Javie
+- podawac lewa gorna krawedz? Czy moze wystarczy nam
+wysokosc i szerokosc?
+
+Zakladajac, ze tak (tzn. ze lewa gorna krawedz jest domyslnie
+0 0), mozemy dostac problem z reprezentacja.
+
+* 16.07.2022
+
+Wprowadzenie paneli powoduje, ze nalezaloby zapytac,
+czy nazwa Screen jest rzeczywiscie adekwatna, i czy
+nie lepiej byloby ja zmienic np. na Painter.
+
+No OK, przemianowalem.
+
+Ale teraz: o co chodzi?
+
+No, rzecz w tym, ze jak mamy sobie panel w rodzaju
+"Split", to on musi bazowac na jakiejs "szerokosci
+panelu nadrzednego". No i chodzi o to, ze
+na najwyzszym poziomie owa szerokosc to bedzie
+"szerokosc ekranu".
+
+Jednak to, czym jest Panel, rozni sie zasadniczo
+od tego, czym jest Painter (czy tez dawniej Screen)
+i dlatego owo top-levelowe cos powinno byc rodzaju
+Panel, a nie Screen.
+
+No ale dobra, wydaje sie, ze Split musi jakos
+dzielic wysokosc albo szerokosc "czegos".
+
+I teraz mamy dwa spojerzenia: albo wysokosc/szerokosc
+splita to suma wysokosci/szerokosci jego komponentow
+(oraz paska przedzielajacego), albo wysokosc/szerokosc
+komponentow to pewna proporcja biezacego rozmiaru
+panelu.
+
+Ta druga opcja wydaje sie zasadniczo bardziej pozadana,
+ale wydaje sie, ze mamy pewien problem - tzn. oprocz
+panelu bedziemy musieli wprowadzic jakies dodatkowe
+byty.
+
+Chodzi o to, ze musimy znac na samym poczatku rozmiar
+okna. Dopiero na jego postawie mozemy okreslic rozmiary
+podzialow.
+
+Alternatywa bylaby taka, ze musielibysmy znac rozmiary
+wezlow, zeby to z nich wyliczyc rozmiar okna jako calosci
+- ale to sie niestety nie zgadza, bo jest na odwrot, tzn.
+my znamy rozmiar calego ekranu.
+
+W takim razie mamy dwie drogi:
+
+1. albo reprezentujemy relacje pomiedzy kontekstem/rodzicem
+w sposob jawny, za pomoca wskaznika
+
+2. albo reprezentujemy ja implicite, uzywajac parametrow
+
+Ta druga droga pozwala nam zadawac panelowi pytania o rozmiar
+tylko we wlasciwym kontekscie.
+
+Moze warto jednak sie zastanowic, w jakich kontekstach mozemy
+w ogole potrzebowac rozmiaru panelu?
+
+==============================================================
+
+OK, wydaje sie, ze kwestie wymiarowania/rysowania panelu
+mamy jako tako ogarnieta: trzeba wprowadzic parametr
+(the-panel-extent), inicjalizowany rozmiarem okna/ustawiany
+przy zmianie rozmiaru okna.
+
+
+
+
+* 15.07.2022
+
+** droga 1
+
+zaimplementowac interfejs Screen dla AWT i Lanterny
+
+** droga 2
+
+rozpoczac od zaprojektowania interfejsu Panel
+i jego dwoch implementacji: Split oraz Editor
+
+I jeszcze trzecia, nierozwiazana do tej pory
+zagadka, czyli te mapy klawiatury.
+
+Szczerze powiedziawszy, zagadnnienie wydaje sie
+nie az tak trudne, i chyba pozniejsza jego zmiana
+nie powinna byc jakas kosmiczna, ale niepokoj
+pozostaje
+
+** PLAN JEST ZATEM TAKI:
+
+1. Projektujemy interfejs Panel i jego dwie
+implementacje, tj. Split i Editor
+
+Bedzie to wymagalo wzbogacenia interfejsu
+Screen o nowe metody - do rysowania linii
+pionowych i poziomych, wycinania obszarow
+i ewentualnie transformowania (obroty,
+skalowania itd.)
+
+2. implementujemy owe interfejsy dla Lanterny
+i AWT. (raczej nie powinno to wymagac bardzo
+duzo pracy?)
+
+
+* 14.07.2022
+
+ostatni okres nie byl przesadnie produktywny.
+nowe warunki pracy i dojazd SKMka o 6:30 rano
+wydaja sie nie sprzyjac rozwojowi GRASPa
+
+tym niemniej, costam sie udaje pomalu posuwac
+do przodu.
+
+udalo sie zbudowac dwa "zalazki" edytorow:
+dla terminala i dla systemu graficznego.
+
+jak na razie owe "zalazki" nie sa jeszcze polaczone
+z prawie niczym, co zostalo do tej pory zrobione
+
+mamy bowiem kilka mozliwych sciezek dzialania,
+i trzeba sie zastanowic nad optymalna droga.
+
 * 11.07.2022
 
 plan to jest taki, azeby zaimplementowac
