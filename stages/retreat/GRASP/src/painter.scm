@@ -8,7 +8,39 @@
 
 (define-alias CharSequence java.lang.CharSequence)
 
-(define-interface Painter ()
+(define-interface Translatable ()
+  (translate! x::real y::real)::void
+  (current-translation-left)::real
+  (current-translation-top)::real
+  )
+
+(define-interface Rotatable ()
+  (rotate! angle::real)::void
+  (current-rotation-angle)::real
+  )
+
+(define-interface Clippable ()
+  (clip! left::real  top::real
+	 width::real height::real)::void	 
+  (current-clip-width)::real
+  (current-clip-height)::real
+  (current-clip-left)::real
+  (current-clip-top)::real
+  )  
+
+(define-interface Scalable ()
+  (scale! factor::real)::void
+  (current-scale)::real
+  )
+
+(define-interface Splittable ()
+  (draw-horizontal-line! top::real)::void
+  (draw-vertical-line! left::real)::void
+  (horizontal-line-height)::real
+  (vertical-line-width)::real
+  )
+
+(define-interface Painter (Splittable Clippable Translatable)
   (paren-width)::real
   (min-line-height)::real
 
@@ -16,7 +48,7 @@
   (horizontal-bar-height)::real
   
   (clear!)::void
-  (translate! x::real y::real)::void
+    
   (draw-quoted-text! s::CharSequence index::Index)::void
   (draw-string! s::CharSequence index::Index)::void
   (quoted-text-extent text::CharSequence)::Extent
@@ -54,6 +86,41 @@
   
   (define (translate! x::real y::real)::void
     (values))
+
+  (define (current-translation-left)::real
+    0)
+  
+  (define (current-translation-top)::real
+    0)
+
+  (define (clip! left::real  top::real
+		 width::real height::real)
+    ::void
+    (values))
+  
+  (define (current-clip-width)::real
+    0)
+  
+  (define (current-clip-height)::real
+    0)
+  
+  (define (current-clip-left)::real
+    0)
+  
+  (define (current-clip-top)::real
+    0)
+  
+  (define (draw-horizontal-line! top::real)::void
+    (values))
+  
+  (define (draw-vertical-line! left::real)::void
+    (values))
+
+  (define (horizontal-line-height)::real
+    0)
+  
+  (define (vertical-line-width)::real
+    0)
   
   (define (draw-quoted-text! s::CharSequence
 			     index::Index)
@@ -115,8 +182,23 @@
 (define-parameter (the-painter) ::Painter)
 
 (define-syntax-rule (with-translation (x y) . actions)
-  (let ((x! x)
+  (let ((painter (the-painter))
+	(x! x)
         (y! y))
-    (invoke (the-painter) 'translate! x! y!)
+    (invoke painter 'translate! x! y!)
     (begin . actions)
-    (invoke (the-painter) 'translate! (- x!) (- y!))))
+    (invoke painter 'translate! (- x!) (- y!))))
+
+(define-syntax-rule (with-clip (w h) . actions)
+  (let ((painter (the-painter)))
+    (let ((x0 (invoke painter 'current-clip-left))
+	  (y0 (invoke painter 'current-clip-top))
+	  (w0 (invoke painter 'current-clip-width))
+	  (h0 (invoke painter 'current-clip-height))
+	  (x! (invoke painter 'current-translation-left))
+	  (y! (invoke painter 'current-translation-top))
+	  (w! w)
+	  (h! h))
+      (invoke painter 'clip! x! y! w! h!)
+      (begin . actions)
+      (invoke painter 'clip! x0 y0 w0 h0))))

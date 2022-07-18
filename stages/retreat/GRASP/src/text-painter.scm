@@ -13,6 +13,11 @@
   (define width ::int 0)
   (define height ::int 0)
   (define data ::char[])
+
+  (define clip-left ::real 0)
+  (define clip-top ::real 0)
+  (define clip-width ::real +inf.0)
+  (define clip-height ::real +inf.0)
   
   (define left ::real 0)
   (define top ::real 0)
@@ -39,13 +44,13 @@
   (define (put! c::char row::real col::real)::void
     (let ((x (+ col shift-left))
           (y (+ row shift-top)))
-      (when (and (is x >= 0)
-                 (is y >= 0))
-	(when (or (is x >= width)
-                  (is y >= height))
+      (when (and (is x >= (max 0 clip-left))
+                 (is y >= (max 0 clip-top)))
+	(when (or (is x >= (min width clip-width))
+                  (is y >= (min height clip-height)))
          (let* ((new-width (if (is x >= width)
-				(+ x 1)
-				width))
+			       (+ x 1)
+			       width))
                  (new-height (if (is y >= height)
                                  (+ y 1)
                                  height))
@@ -95,6 +100,49 @@
     (set! shift-left (+ shift-left x))
     (set! shift-top (+ shift-top y)))
 
+  (define (clip! left::real  top::real
+		 width::real height::real)
+    ::void
+    (set! clip-left left)
+    (set! clip-top top)
+    (set! clip-width width)
+    (set! clip-height height))
+		 
+  (define (current-clip-width)::real
+    clip-width)
+  
+  (define (current-clip-height)::real
+    clip-height)
+  
+  (define (current-clip-left)::real
+    clip-left)
+  
+  (define (current-clip-top)::real
+    clip-top)
+  
+  (define (current-translation-left)::real
+    shift-left)
+  
+  (define (current-translation-top)::real
+    shift-top)
+
+  (define (draw-horizontal-line! top::real)::void
+    (for i from (max 0 (current-clip-left))
+      below (min width (clip-width))
+      (put! #\─ top i)))
+  
+  (define (draw-vertical-line! left::real)::void
+    (for i from (max 0 (current-clip-top))
+      below (min height (clip-height))
+      (put! #\│ i left)))
+
+  (define (horizontal-line-height)::real
+    1)
+  
+  (define (vertical-line-width)::real
+    1)
+
+  
   (define (draw-horizontal-bar! width::real)::void
     (for i from 0 below width
          (when (eq? (get -1 i) #\space)
