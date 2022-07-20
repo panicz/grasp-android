@@ -1,3 +1,47 @@
+* 19.07.2022
+
+wydaje sie, ze jest malenki progres w kwestii
+inkorporowania modulu "panel" do naszej bazy kodu.
+
+Musimy jednak byc ostrozni, poniewaz pojawiaja sie
+nowe parametry w przestrzeni globalnej:
+
+- the-screen-extent, co do ktorego oczekujemy,
+ze rozne wersje "grasp" beda go ustawiac
+
+- the-panel-extent, ktory ma raczej znaczenie
+instrumentalne
+
+- the-focus, za pomoca ktorego bedziemy sie odnosic
+do poszczegolnych paneli (tyle ze one musialyby sie
+stac Indexable)
+
+- the-top-panel, oznaczajacy glowny panel uzywany
+do rysowania ekranu
+
+
+Teraz bysmy moze sprobowali, w grasp-desktop i grasp-terminal:
+- zalaczyc modul (panel)
+- ustawiac odpowiednie wartosci (the-screen-extent)
+
+
+
+* 18.07.2022
+
+plan dzialania na najblizsze dni jest z grubsza taki:
+
+zasadniczo chcielibysmy juz uwzglednic system paneli
+podczas renderowania
+
+dlatego w kontekscie malarza chcielibysmy dodac mozliwosc
+przycinania ekranu (clipping) i odczytywania
+biezacego przesuniecia?
+
+Tak naprawde, na odczytywaniu biezacego przesuniecia
+srednio nam zalezy - idealem byloby po prostu miec API,
+ktore pozwalaloby w warstwowy sposob doodawac i usuwac
+przyciecia.
+
 * 17.07.2022
 
 Mamy z grubsza napisany zalazek implementacji
