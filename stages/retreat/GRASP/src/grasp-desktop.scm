@@ -11,6 +11,7 @@
 (import (functions))
 (import (for))
 (import (while))
+(import (panel))
 
 (define-alias Font java.awt.Font)
 (define-alias File java.io.File)
