@@ -1,3 +1,40 @@
+* 20.07.2022
+
+udalo sie zalaczyc modul (panel) do grasp-terminal
+i grasp-desktop.
+
+Klient terminalowy rowniez ustanawia rozmiar ekranu
+przed renderowaniem (a przynajmniej tak sie wydaje),
+i byloby niezle, gdyby z klientem AWT tez sie to udalo.
+
+No, to sie chyba udalo.
+
+I co dalej teraz?
+
+Pomysly sa takie:
+
+- zaimplementowac interfejs Painter dla Lanterny i AWT
+- i to chyba tyle na razie?
+
+Tak. Na razie sprobujemy sukcesywnie i konsekwentnie
+zaimplementowac interfejs Painter dla AWT, a po nim
+- dla Lanterny.
+
+Kiedy to bedzie gotowe, bedziemy musieli sie zajac
+takimi rzeczami, jak:
+- edycja (+ jej historia)
+- selekcja
+- operacje 2D (klikniecia mysza, strzalki gora i dol)
+
+a po nich sprobowalibysmy dopracowac guziki, grafy
+i suwaki
+
+a potem klient dla Androida i wykrywacz gestow
+
+No, ale poki co, skupmy sie raczej na implementacji
+naszego Malarza. Na pewno chcielibysmy rysowac nawiasy.
+
+
 * 19.07.2022
 
 wydaje sie, ze jest malenki progres w kwestii
@@ -23,7 +60,6 @@ do rysowania ekranu
 Teraz bysmy moze sprobowali, w grasp-desktop i grasp-terminal:
 - zalaczyc modul (panel)
 - ustawiac odpowiednie wartosci (the-screen-extent)
-
 
 
 * 18.07.2022
