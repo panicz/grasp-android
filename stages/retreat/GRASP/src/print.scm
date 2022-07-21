@@ -42,7 +42,7 @@
   (invoke (current-message-handler) 'add-message args))
 
 (define-syntax-rule (DUMP expr ...)
-  (WARN 'expr ": "expr)
+  (print 'expr ": "expr)
   ...)
 
 (define-syntax-rule (truly actions ...)

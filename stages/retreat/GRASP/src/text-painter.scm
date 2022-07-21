@@ -18,6 +18,26 @@
   (define clip-top ::real 0)
   (define clip-width ::real +inf.0)
   (define clip-height ::real +inf.0)
+
+  (define (clip! left::real  top::real
+		 width::real height::real)
+    ::void
+    (set! clip-left left)
+    (set! clip-top top)
+    (set! clip-width width)
+    (set! clip-height height))
+		 
+  (define (current-clip-width)::real
+    clip-width)
+  
+  (define (current-clip-height)::real
+    clip-height)
+  
+  (define (current-clip-left)::real
+    clip-left)
+  
+  (define (current-clip-top)::real
+    clip-top)
   
   (define left ::real 0)
   (define top ::real 0)
@@ -99,26 +119,6 @@
   (define (translate! x::real y::real)::void
     (set! shift-left (+ shift-left x))
     (set! shift-top (+ shift-top y)))
-
-  (define (clip! left::real  top::real
-		 width::real height::real)
-    ::void
-    (set! clip-left left)
-    (set! clip-top top)
-    (set! clip-width width)
-    (set! clip-height height))
-		 
-  (define (current-clip-width)::real
-    clip-width)
-  
-  (define (current-clip-height)::real
-    clip-height)
-  
-  (define (current-clip-left)::real
-    clip-left)
-  
-  (define (current-clip-top)::real
-    clip-top)
   
   (define (current-translation-left)::real
     shift-left)

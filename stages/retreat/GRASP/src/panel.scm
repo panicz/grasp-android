@@ -5,6 +5,7 @@
 (import (define-object))
 (import (default-value))
 (import (define-parameter))
+(import (define-cache))
 (import (infix))
 (import (match))
 (import (functions))
@@ -16,8 +17,8 @@
 (import (primitive))
 (import (extent))
 (import (parse))
-(import (functions))
 (import (conversions))
+(import (painter))
 
 (define-interface Panel ()
   (draw! context::Cursor)::void
