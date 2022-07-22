@@ -1,3 +1,40 @@
+* 21.07.2022
+
+dzis/jutro bysmy przynajmniej sprobowali narysowac nawiasy
+i dalej pracowac nad tym, azeby screen-renderer implementowal
+interfejs Painter
+
+SPRAWOZDANIE: udalo sie zaimplementowac nastepujace
+metody interfejsu Painter:
+
+- wszystko z Translatable
+- wszystko z Clippable
+- (open-paren! height::real)::void
+- (close-paren! height::real)::void
+- (paren-width)::real
+- (min-line-height)::real
+- (draw-rounded-rectangle! width::real height::real)::void
+- (remember-offset! +left::real +top::real)::void
+- (remembered-left)::real
+- (remembered-top)::real
+- (clear!)::void
+- (draw-horizontal-bar! width::real)::void
+- (draw-vertical-bar! height::real)::void
+- (vertical-bar-width)::real
+- (horizontal-bar-height)::real
+- (draw-atom! text::CharSequence index::Index)::void
+
+Do zaimplementowania pozostaja:
+  
+  (draw-quoted-text! s::CharSequence index::Index)::void
+  (draw-string! s::CharSequence index::Index)::void
+  (quoted-text-extent text::CharSequence)::Extent
+  
+
+  (atom-extent text::CharSequence)::Extent
+
+  
+
 * 20.07.2022
 
 udalo sie zalaczyc modul (panel) do grasp-terminal
