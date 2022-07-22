@@ -10,7 +10,8 @@
 (define-syntax-rule (print elements ...)
   ((current-display-procedure) elements)
   ...
-  ((current-display-procedure) #\newline))
+  ((current-display-procedure) #\newline)
+  (force-output))
 
 (define-interface MessageHandler ()
   (clear-messages!)::void

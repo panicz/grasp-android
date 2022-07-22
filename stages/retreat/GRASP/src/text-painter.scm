@@ -154,19 +154,19 @@
          (put! #\│ i 0))
     (put! #\╵ (- height 1) 0))
 
-  (define (open-paren! height::real left::real top::real)
+  (define (open-paren! height::real)
     ::void
-    (put! #\╭ top left)
+    (put! #\╭ 0 0)
     (for i from 1 to (- height 2)
-         (put! #\│ (+ i top) left))
-    (put! #\╰ (+ top (- height 1)) left))
+         (put! #\│ i 0))
+    (put! #\╰ (- height 1) 0))
   
-  (define (close-paren! height::real left::real top::real)
+  (define (close-paren! height::real)
     ::void
-    (put! #\╮ top (+ left 1))
+    (put! #\╮ 0 1)
     (for i from 1 to (- height 2)
-         (put! #\│ (+ i top) (+ left 1)))
-    (put!  #\╯ (+ top (- height 1)) (+ left 1)))
+         (put! #\│ i 1))
+    (put!  #\╯ (- height 1) 1))
 
   (define (draw-rounded-rectangle! width::real
 				   height::real)

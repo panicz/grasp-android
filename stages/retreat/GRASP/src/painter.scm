@@ -43,9 +43,6 @@
 (define-interface Painter (Splittable Clippable Translatable)
   (paren-width)::real
   (min-line-height)::real
-
-  (vertical-bar-width)::real
-  (horizontal-bar-height)::real
   
   (clear!)::void
     
@@ -59,8 +56,12 @@
 
   (draw-horizontal-bar! width::real)::void
   (draw-vertical-bar! height::real)::void
-  (open-paren! height::real l::real t::real)::void
-  (close-paren! height::real l::real t::real)::void
+
+  (vertical-bar-width)::real
+  (horizontal-bar-height)::real
+
+  (open-paren! height::real)::void
+  (close-paren! height::real)::void
 
   (draw-rounded-rectangle! width::real height::real)::void
   
@@ -146,16 +147,10 @@
   (define (draw-vertical-bar! height::real)::void
    (values))
   
-  (define (open-paren! height::real
-		       left::real
-		       top::real)
-    ::void
+  (define (open-paren! height::real)::void
     (values))
   
-  (define (close-paren! height::real
-			left::real
-			top::real)
-    ::void
+  (define (close-paren! height::real)::void
    (values))
 
   (define (draw-rounded-rectangle! width::real

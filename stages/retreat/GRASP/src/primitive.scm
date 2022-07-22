@@ -128,14 +128,14 @@
     ::void
     (let ((inner (sequence-extent (this)))
 	  (paren-width (invoke (the-painter) 'paren-width)))
-      (invoke (the-painter) 'open-paren! inner:height 0 0)
+      (invoke (the-painter) 'open-paren! inner:height)
       (when (equal? (the-cursor) (recons (first-index)
 					 context))
 	(invoke (the-painter) 'remember-offset! 0 2))
       (with-translation (paren-width 0)
 	(draw-sequence! (this) context: context))
-      (invoke (the-painter) 'close-paren! inner:height
-	      (+ paren-width inner:width) 0)
+      (with-translation ((+ paren-width inner:width) 0)
+	(invoke (the-painter) 'close-paren! inner:height))
       (when (equal? (the-cursor) (recons (last-index)
 					 context))
 	(invoke (the-painter) 'remember-offset!
@@ -324,9 +324,9 @@
     (define (draw-empty-list! space::Space context)::void
       (let ((inner (empty-space-extent space))
 	    (paren-width (invoke (the-painter) 'paren-width)))
-	(invoke (the-painter) 'open-paren! inner:height 0 0)
-	(invoke (the-painter) 'close-paren! inner:height
-		(+ paren-width inner:width) 0)
+	(invoke (the-painter) 'open-paren! inner:height)
+	(with-translation ((+ paren-width inner:width) 0)
+	  (invoke (the-painter) 'close-paren! inner:height))
 	(match (the-cursor)
 	  (`(#\[ . ,,context)
 	   (invoke (the-painter) 'remember-offset! 0 2))
