@@ -1,3 +1,29 @@
+* 25.07.2022
+
+atom-extent i draw-atom! zostaly zmienione tak, zeby
+obslugiwaly wiele linii.
+
+Sprobujemy jeszcze zaimplementowac te 3 pozostale
+metody, i zobaczymy, czy uda sie wyrenderowac
+dokument na AWT.
+
+(no i pewniie bedzie trzeba nieco powalczyc,
+zeby zaimplementowac wyswietlanie kursora)
+
+* 22.07.2022
+
+Jako sie rzeklo wczoraj, do zaimplementowania pozostaja:
+  
+  (draw-quoted-text! s::CharSequence index::Index)::void
+  (draw-string! s::CharSequence index::Index)::void
+  (quoted-text-extent text::CharSequence)::Extent
+
+a udalo sie zaimplementowac:  
+
+  (atom-extent text::CharSequence)::Extent
+
+
+
 * 21.07.2022
 
 dzis/jutro bysmy przynajmniej sprobowali narysowac nawiasy
