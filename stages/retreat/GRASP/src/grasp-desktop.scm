@@ -53,11 +53,6 @@
    java.awt.GraphicsEnvironment
    'getLocalGraphicsEnvironment))
 
-
-
-#;(define-object (AWT-painter)::Painter
-  ...)
-
 (define (load-font path::String)
   (let* ((font-file ::File (File path))
 	 (font ::Font (Font:createFont
@@ -279,12 +274,54 @@
     top)
 
   (define (draw-atom! text::CharSequence index::Index)::void
-    (invoke (the-graphics-output) 'setFont (the-atom-font))
-    (invoke (the-graphics-output) 'drawString text 0 0))
+    (let* ((graphics (the-graphics-output))
+	   (font (the-atom-font))
+	   (line-start 0)
+	   (lines 1)
+	   (height (invoke font 'getSize))
+	   (string-end (invoke text 'length)))
+      (invoke graphics 'setFont font)
+      (for i from 0 below string-end
+	   (when (eq? (invoke text 'charAt i) #\newline)
+	     (invoke graphics
+		     'drawString
+		     (invoke text 'subSequence
+			     line-start i)
+		     0 (* lines height))
+	     (set! lines (+ lines 1))
+	     (set! line-start (+ i 1))))
+      (invoke graphics
+	      'drawString
+	      (invoke text 'subSequence
+		      line-start string-end)
+	      0 (* lines height))))
   
-  #;(define (atom-extent text::CharSequence)::Extent
-    
-    ...)
+  (define (atom-extent text::CharSequence)::Extent
+    (let* ((metrics ::FontMetrics (invoke (the-graphics-output)
+					  'getFontMetrics
+					  (the-atom-font)))
+	   (line-start 0)
+	   (lines 1)
+	   (line-height (invoke metrics 'getHeight))
+	   (max-width 0)
+	   (string-end (invoke text 'length)))
+      (for i from 0 below string-end
+	   (when (eq? (invoke text 'charAt i) #\newline)
+	     (set! max-width
+		   (max max-width
+			(invoke metrics 'stringWidth
+				(invoke text 'subSequence
+					line-start i))))
+	     (set! lines (+ lines 1))
+	     (set! line-start (+ i 1))))
+      (set! max-width
+	    (max max-width
+		 (invoke metrics
+			 'stringWidth
+			 (invoke text 'subSequence
+				 line-start string-end))))
+      (Extent width: max-width
+	      height: (* lines (invoke metrics 'getHeight)))))
 
   (define (clear!)::void
     (error "The `clear!' method is not implemented for the AWT
@@ -302,8 +339,9 @@ automatically by the AWT framework."))
 	(invoke (the-graphics-output) 'setFont (the-atom-font))
 
 	(open-paren! 160)
-	(invoke (the-graphics-output)
-		'drawString "define" target:x target:y)
+	(with-translation* (target:x target:y)
+	    (draw-atom! "define\nor not" #f))
+	;;(DUMP (atom-extent "define\nor not"))
 	(with-translation* (100 0)
 	  (close-paren! 160))
 	))
