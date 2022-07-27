@@ -53,26 +53,26 @@
    java.awt.GraphicsEnvironment
    'getLocalGraphicsEnvironment))
 
-(define (load-font path::String)
+(define (load-font path::String #!key (size ::float 28.0))
   (let* ((font-file ::File (File path))
 	 (font ::Font (Font:createFont
 		       Font:TRUETYPE_FONT
 		       font-file)))
     (invoke (the-graphics-environment)
 	    'registerFont font)
-    (invoke font 'deriveFont (as float 28.0))))
+    (font:deriveFont size)))
 
 (define-constant Basic-Regular
-  (load-font "fonts/Basic-Regular.otf"))
+  (load-font "fonts/Basic-Regular.otf" size: 20))
 
 (define-constant LobsterTwo-Regular
   (load-font "fonts/LobsterTwo-Regular.otf"))
 
 (define-constant Oswald-Regular
-  (load-font "fonts/Oswald-Regular.ttf"))
+  (load-font "fonts/Oswald-Regular.ttf" size: 22))
 
 (define-constant GloriaHallelujah
-  (load-font "fonts/GloriaHallelujah.ttf"))
+  (load-font "fonts/GloriaHallelujah.ttf" size: 16))
 
 (define-constant NotoSerif-Regular
   (load-font "fonts/NotoSerif-Regular.ttf"))
@@ -81,7 +81,10 @@
   LobsterTwo-Regular)
 
 (define-parameter (the-string-font) ::Font
-  Oswald-Regular)
+  Basic-Regular #;Oswald-Regular)
+
+(define-parameter (the-comment-font) ::Font
+  GloriaHallelujah)
 
 (define-syntax-rule (Path (command args ...) ...)
   (let ((path ::Path2D (Path2D:Float)))
@@ -98,7 +101,7 @@
    (closePath)))
 
 (define-constant top-left-bounds ::Rectangle
-  (invoke top-left-paren 'getBounds))
+  (top-left-paren:getBounds))
 
 (define-constant bottom-left-paren ::Path2D
   (Path
@@ -109,7 +112,7 @@
    (closePath)))
 
 (define-constant bottom-left-bounds ::Rectangle
-  (invoke bottom-left-paren 'getBounds))
+  (bottom-left-paren:getBounds))
 
 (define-constant top-right-paren ::Path2D
   (Path
@@ -120,7 +123,7 @@
    (closePath)))
 
 (define-constant top-right-bounds ::Rectangle
-  (invoke top-right-paren 'getBounds))
+  (top-right-paren:getBounds))
 
 (define-constant bottom-right-paren ::Path2D
   (Path
@@ -131,7 +134,7 @@
    (closePath)))
 
 (define-constant bottom-right-bounds ::Rectangle
-  (invoke bottom-right-paren 'getBounds))
+  (bottom-right-paren:getBounds))
 
 #;(let ((fonts (invoke (the-graphics-environment)
 		     'getAvailableFontFamilyNames)))
@@ -139,25 +142,7 @@
     (display font)
     (newline)))
 
-
-(define-object (window-state)
-  (define x :: int 24)
-  (define y :: int 24)
-  (java.awt.Frame))
-
-(define-syntax-rule (with-translation* (x y) . actions)
-  ;; to powinno wyleciec jak tylko screen-renderer
-  ;; zacznie implementowac interfejs Painter
-  (let ((x! x)
-        (y! y))
-    (invoke (this) 'translate! x! y!)
-    (begin . actions)
-    (invoke (this) 'translate! (- x!) (- y!))))
-
-
-(define-object (screen-renderer screen::window-state);::Painter
-  (define target :: window-state)
-
+(define-object (screen-renderer)::Painter
   (define (clip! left::real  top::real
 		 width::real height::real)
     ::void
@@ -168,25 +153,25 @@
     (let ((clip-area ::Rectangle
 		     (invoke (the-graphics-output)
 			     'getClipBounds)))
-      (field clip-area 'width)))
+      clip-area:width))
     
   (define (current-clip-height)::real
     (let ((clip-area ::Rectangle
 		     (invoke (the-graphics-output)
 			     'getClipBounds)))
-      (field clip-area 'height)))
+      clip-area:height))
   
   (define (current-clip-left)::real
     (let ((clip-area ::Rectangle
 		     (invoke (the-graphics-output)
 			     'getClipBounds)))
-      (field clip-area 'x)))
+      clip-area:x))
   
   (define (current-clip-top)::real
     (let ((clip-area ::Rectangle
 		     (invoke (the-graphics-output)
 			     'getClipBounds)))
-      (field clip-area 'y)))
+      clip-area:y))
 
   (define (translate! x::real y::real)::void
     (invoke (the-graphics-output)
@@ -196,47 +181,45 @@
     (let ((transform ::AffineTransform
 		     (invoke (the-graphics-output)
 			     'getTransform)))
-      (invoke transform 'getTranslateX)))
+      (transform:getTranslateX)))
     
   (define (current-translation-top)::real
     (let ((transform ::AffineTransform
 		     (invoke (the-graphics-output)
 			     'getTransform)))
-      (invoke transform 'getTranslateY)))
+      (transform:getTranslateY)))
 
   (define rendering-hints ::RenderingHints
-    (RenderingHints
-     RenderingHints:KEY_TEXT_ANTIALIASING
-     RenderingHints:VALUE_TEXT_ANTIALIAS_ON))
+    (RenderingHints RenderingHints:KEY_TEXT_ANTIALIASING
+		    RenderingHints:VALUE_TEXT_ANTIALIAS_ON))
 
   (define (open-paren! height::real)::void
     (let ((line-height (max 0 (- height
-				 (field top-left-bounds 'height)
-				 (field bottom-left-bounds 'height)))))
+				 top-left-bounds:height
+				 bottom-left-bounds:height))))
       (invoke (the-graphics-output) 'fill top-left-paren)
       (invoke (the-graphics-output) 'fillRect
-	      0 (field top-left-bounds 'height)
+	      0 top-left-bounds:height
 	      5 line-height)
-      (with-translation* (0 (+ (field top-left-bounds 'height)
-			       line-height))
-	(invoke (the-graphics-output) 'fill bottom-left-paren))))
+      (with-translation (0 (+ top-left-bounds:height
+			      line-height))
+	  (invoke (the-graphics-output) 'fill bottom-left-paren))))
 
   (define (close-paren! height::real)::void
     (let ((line-height (max 0 (- height
-				 (field top-right-bounds 'height)
-				 (field bottom-right-bounds
-					'height)))))
+				 top-right-bounds:height
+				 bottom-right-bounds:height))))
       (invoke (the-graphics-output) 'fill top-right-paren)
       (invoke (the-graphics-output) 'fillRect
-	      (- (field top-right-bounds 'width) 5)
-	      (field top-right-bounds 'height) 5 line-height)
+	      (- top-right-bounds:width 5)
+	      top-right-bounds:height 5 line-height)
 
-      (with-translation* (0 (+ (field top-right-bounds 'height)
-			       line-height))
-	(invoke (the-graphics-output) 'fill bottom-right-paren))))
+      (with-translation (0 (+ top-right-bounds:height
+			      line-height))
+	  (invoke (the-graphics-output) 'fill bottom-right-paren))))
 
   (define (paren-width)::real
-    (field top-left-bounds 'width))
+    top-left-bounds:width)
 
   (define (min-line-height)::real
     (invoke (the-atom-font) 'getSize2D))
@@ -252,20 +235,21 @@
     ::void
     (set! left (+ (current-translation-left) +left))
     (set! top (+ (current-translation-top) +top)))
-  
-  (define (draw-horizontal-bar! width::real)::void
-    (invoke (the-graphics-output) 'fillRect
-	    0 0 width 5))
-    
-  (define (draw-vertical-bar! height::real)::void
-    (invoke (the-graphics-output) 'fillRect
-	    0 0 5 height))
-    
+
   (define (vertical-bar-width)::real
     5)
   
   (define (horizontal-bar-height)::real
     5)
+  
+  (define (draw-horizontal-bar! width::real)::void
+    (invoke (the-graphics-output) 'fillRect
+	    0 0 width (horizontal-bar-height)))
+    
+  (define (draw-vertical-bar! height::real)::void
+    (invoke (the-graphics-output) 'fillRect
+	    0 0 (vertical-bar-width) height))
+    
   
   (define (remembered-left)::real
     left)
@@ -273,95 +257,103 @@
   (define (remembered-top)::real
     top)
 
-  (define (draw-atom! text::CharSequence index::Index)::void
+  (define (horizontal-line-height)::real
+    20)
+  
+  (define (vertical-line-width)::real
+    20)
+  
+  (define (draw-horizontal-line! top::real)::void
+    (invoke (the-graphics-output) 'fillRect
+	    (max 0 (current-clip-left)) top
+	    (current-clip-width) (horizontal-line-height)))
+    
+  (define (draw-vertical-line! left::real)::void
+    (invoke (the-graphics-output) 'fillRect
+	    left (max 0 (current-clip-top)) 
+	    (vertical-line-width) (current-clip-height)))
+    
+  (define (draw-text! text::CharSequence font::Font index::Index)::void
     (let* ((graphics (the-graphics-output))
-	   (font (the-atom-font))
 	   (line-start 0)
 	   (lines 1)
-	   (height (invoke font 'getSize))
-	   (string-end (invoke text 'length)))
-      (invoke graphics 'setFont font)
+	   (height (font:getSize))
+	   (string-end (text:length)))
+      (graphics:setFont font)
       (for i from 0 below string-end
-	   (when (eq? (invoke text 'charAt i) #\newline)
-	     (invoke graphics
-		     'drawString
-		     (invoke text 'subSequence
-			     line-start i)
-		     0 (* lines height))
+	   (when (eq? (text:charAt i) #\newline)
+	     (graphics:drawString (text:subSequence line-start i)
+				  0 (* lines height))
 	     (set! lines (+ lines 1))
 	     (set! line-start (+ i 1))))
-      (invoke graphics
-	      'drawString
-	      (invoke text 'subSequence
-		      line-start string-end)
-	      0 (* lines height))))
+      (graphics:drawString (text:subSequence line-start string-end)
+			   0 (* lines height))))
   
-  (define (atom-extent text::CharSequence)::Extent
-    (let* ((metrics ::FontMetrics (invoke (the-graphics-output)
-					  'getFontMetrics
-					  (the-atom-font)))
+  (define (draw-atom! text::CharSequence index::Index)::void
+    (draw-text! text (the-atom-font) index))
+
+  (define (draw-string! text::CharSequence index::Index)::void
+    (draw-text! text (the-string-font) index))
+
+  (define (draw-quoted-text! text::CharSequence index::Index)::void
+    (draw-string! text index))
+
+  (define (text-extent text::CharSequence font::Font)::Extent
+    (let* ((graphics (the-graphics-output))
+	   (metrics ::FontMetrics (graphics:getFontMetrics font))
 	   (line-start 0)
 	   (lines 1)
-	   (line-height (invoke metrics 'getHeight))
+	   (line-height (metrics:getHeight))
 	   (max-width 0)
-	   (string-end (invoke text 'length)))
+	   (string-end (text:length)))
       (for i from 0 below string-end
-	   (when (eq? (invoke text 'charAt i) #\newline)
+	   (when (eq? (text:charAt i) #\newline)
 	     (set! max-width
 		   (max max-width
-			(invoke metrics 'stringWidth
-				(invoke text 'subSequence
-					line-start i))))
+			(metrics:stringWidth (text:subSequence
+					      line-start i))))
 	     (set! lines (+ lines 1))
 	     (set! line-start (+ i 1))))
       (set! max-width
 	    (max max-width
-		 (invoke metrics
-			 'stringWidth
-			 (invoke text 'subSequence
-				 line-start string-end))))
+		 (metrics:stringWidth
+		  (text:subSequence line-start string-end))))
       (Extent width: max-width
-	      height: (* lines (invoke metrics 'getHeight)))))
+	      height: (* lines (metrics:getHeight)))))
+    
+  (define (atom-extent text::CharSequence)::Extent
+    (text-extent text (the-atom-font)))
 
+  (define (quoted-text-extent text::CharSequence)::Extent
+    (text-extent text (the-string-font)))
+  
   (define (clear!)::void
     (error "The `clear!' method is not implemented for the AWT
 screen-renderer, because the screen is cleared 
 automatically by the AWT framework."))
   
   (define (paint graphics::Graphics)::void
-    (invoke-special java.awt.Canvas (this) 'paint graphics)
+    (invoke-special javax.swing.JComponent (this) 'paint graphics)
     (let ((graphics-output ::Graphics2D (as Graphics2D graphics)))
       (set! (the-graphics-output) graphics-output)
+      (set! (the-painter) (this))
 	;; cf. https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
-	(invoke graphics-output 'setRenderingHints
-		rendering-hints)
-	#;(invoke (the-top-panel) 'draw! '())
-	(invoke (the-graphics-output) 'setFont (the-atom-font))
+      (graphics-output:setRenderingHints rendering-hints)
+      (invoke (the-top-panel) 'draw! '())))
 
-	(open-paren! 160)
-	(with-translation* (target:x target:y)
-	    (draw-atom! "define\nor not" #f))
-	;;(DUMP (atom-extent "define\nor not"))
-	(with-translation* (100 0)
-	  (close-paren! 160))
-	))
+  (javax.swing.JComponent)
+  (rendering-hints:put RenderingHints:KEY_ANTIALIASING
+		       RenderingHints:VALUE_ANTIALIAS_ON)
+  (rendering-hints:put RenderingHints:KEY_RENDERING
+		       RenderingHints:VALUE_RENDER_QUALITY))
 
-  (java.awt.Canvas)
-  (invoke rendering-hints 'put
-	  RenderingHints:KEY_ANTIALIASING
-	  RenderingHints:VALUE_ANTIALIAS_ON)
-  (invoke rendering-hints 'put
-	  RenderingHints:KEY_RENDERING
-	  RenderingHints:VALUE_RENDER_QUALITY)
-  (set! target screen))
+(set! (the-painter) (screen-renderer))
 
-(define-simple-class window-screen (window-state
+(define-simple-class window-screen (javax.swing.JFrame
 				    java.awt.event.KeyListener
 				    java.awt.event.FocusListener
 				    java.awt.event.ComponentListener
 				    java.awt.event.WindowListener)
-  (renderer :: screen-renderer)
-  
   ((keyTyped event::KeyEvent)::void
    (values))
 
@@ -369,7 +361,7 @@ automatically by the AWT framework."))
    (values))
 
   ((keyPressed event::KeyEvent)::void
-   (match (event:getKeyCode)
+   #;(match (event:getKeyCode)
      (,KeyEvent:VK_UP
       (set! y (- y 1)))
      (,KeyEvent:VK_DOWN
@@ -380,7 +372,7 @@ automatically by the AWT framework."))
       (set! x (+ x 1)))
      (_
       (values)))
-   (renderer:repaint)
+   (invoke (as screen-renderer (the-painter)) 'repaint)
    (repaint))
 
   ((focusGained event::FocusEvent)::void
@@ -426,9 +418,8 @@ automatically by the AWT framework."))
    (values))
   
   ((*init*)
-   (set! renderer (screen-renderer (this)))
-   ;;(set! (the-painter) renderer)
-   (add renderer)
+   (add (as screen-renderer (the-painter)))
+   
    (setTitle "GRASP")
    (setSize 640 400)
    (setVisible #t)

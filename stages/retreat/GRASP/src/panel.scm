@@ -19,6 +19,7 @@
 (import (parse))
 (import (conversions))
 (import (painter))
+(import (print))
 
 (define-interface Panel ()
   (draw! context::Cursor)::void

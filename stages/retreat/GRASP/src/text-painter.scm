@@ -206,7 +206,8 @@
 	       (set! row (+ row 1))
 	       (set! col 0))
 	      (else
-	       (put! c row col)	       (set! col (+ col 1))))
+	       (put! c row col)
+	       (set! col (+ col 1))))
 	(set! n (+ n 1)))))
   
   (define (quoted-text-extent text::CharSequence)::Extent
