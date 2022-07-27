@@ -1,3 +1,31 @@
+* 26.07.2022
+
+zaimplementowalem wszystkie wymienione wczesniej metody
+interfejsu Painter w grasp-desktop, ale okazalo sie, ze
+brakuje jeszcze metod z interfejsu Splittable:
+
+  (draw-horizontal-line! top::real)::void
+  (draw-vertical-line! left::real)::void
+  (horizontal-line-height)::real
+  (vertical-line-width)::real
+
+
+Ale rowniez to udalo sie zrobic.
+
+Mamy juz zatem dosc sensownie dzialajacego "malarza"
+dla AWT, ale bedzie potrzebnych jeszcze kilka szlifow:
+
+1. zapewnic uzycie podwojnego buforowania w AWT
+2. popracowac nad tym, zeby elementy byly lepiej
+rozmieszczone i zwymiarowane
+3. dodac cudzyslowy do stringow
+4. spacje pomiedzy atomami
+5. ramki wokol atomow (tak jak w wersji na Androida)
+6. ewentualnie dodac odcienie nawiasow na roznym
+poziomie zagniezdzenia (ale bysmy moze tak robili,
+ze im bardziej zewnetrzne, tym dyskretniejsze?)
+
+
 * 25.07.2022
 
 atom-extent i draw-atom! zostaly zmienione tak, zeby
