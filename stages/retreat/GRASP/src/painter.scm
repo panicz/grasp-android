@@ -40,12 +40,24 @@
   (vertical-line-width)::real
   )
 
-(define-interface Painter (Splittable Clippable Translatable)
+(define-interface Memorizing ()
+  (remember-offset! +left::real +top::real)::void
+  (remembered-left)::real
+  (remembered-top)::real
+  )
+
+  
+(define-interface Painter (Splittable
+			   Clippable
+			   Translatable
+			   Memorizing)
+  (space-width)::real
+  
   (paren-width)::real
   (min-line-height)::real
   
   (clear!)::void
-    
+  
   (draw-quoted-text! s::CharSequence index::Index)::void
   (draw-string! s::CharSequence index::Index)::void
   (quoted-text-extent text::CharSequence)::Extent
@@ -64,16 +76,14 @@
   (close-paren! height::real)::void
 
   (draw-rounded-rectangle! width::real height::real)::void
-  
-  (remember-offset! +left::real +top::real)::void
-  (remembered-left)::real
-  (remembered-top)::real
-  
+    
   ;;(end-line! line-height::real)::void
   ;;(cursor-at left::real top::real)::Cursor
   )
 
 (define-object (NullPainter)::Painter
+  (define (space-width)::real 0)
+  
   (define (paren-width)::real 0)
 
   (define (min-line-height)::real 0)

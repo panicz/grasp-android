@@ -90,6 +90,8 @@
             (set! data new-data)))
 	(set! (data (+ (* width y) x)) c))))
 
+  (define (space-width)::real 1)
+  
   (define (paren-width)::real 2)
 
   (define (min-line-height)::real 3)

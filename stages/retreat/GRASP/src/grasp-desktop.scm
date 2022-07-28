@@ -53,7 +53,7 @@
    java.awt.GraphicsEnvironment
    'getLocalGraphicsEnvironment))
 
-(define (load-font path::String #!key (size ::float 28.0))
+(define (load-font path::String #!key (size ::float 12.0))
   (let* ((font-file ::File (File path))
 	 (font ::Font (Font:createFont
 		       Font:TRUETYPE_FONT
@@ -66,7 +66,7 @@
   (load-font "fonts/Basic-Regular.otf" size: 20))
 
 (define-constant LobsterTwo-Regular
-  (load-font "fonts/LobsterTwo-Regular.otf"))
+  (load-font "fonts/LobsterTwo-Regular.otf" size: 30))
 
 (define-constant Oswald-Regular
   (load-font "fonts/Oswald-Regular.ttf" size: 22))
@@ -78,10 +78,10 @@
   (load-font "fonts/NotoSerif-Regular.ttf"))
 
 (define-parameter (the-atom-font) ::Font
-  LobsterTwo-Regular)
+  #;Oswald-Regular LobsterTwo-Regular)
 
 (define-parameter (the-string-font) ::Font
-  Basic-Regular #;Oswald-Regular)
+  Basic-Regular )
 
 (define-parameter (the-comment-font) ::Font
   GloriaHallelujah)
@@ -196,33 +196,37 @@
   (define (open-paren! height::real)::void
     (let ((line-height (max 0 (- height
 				 top-left-bounds:height
-				 bottom-left-bounds:height))))
-      (invoke (the-graphics-output) 'fill top-left-paren)
-      (invoke (the-graphics-output) 'fillRect
-	      0 top-left-bounds:height
-	      5 line-height)
+				 bottom-left-bounds:height)))
+	  (graphics (the-graphics-output)))
+      (graphics:fill top-left-paren)
+      (graphics:fillRect 0 top-left-bounds:height
+			 5 line-height)
       (with-translation (0 (+ top-left-bounds:height
 			      line-height))
-	  (invoke (the-graphics-output) 'fill bottom-left-paren))))
+	  (graphics:fill bottom-left-paren))))
 
   (define (close-paren! height::real)::void
     (let ((line-height (max 0 (- height
 				 top-right-bounds:height
-				 bottom-right-bounds:height))))
-      (invoke (the-graphics-output) 'fill top-right-paren)
-      (invoke (the-graphics-output) 'fillRect
-	      (- top-right-bounds:width 5)
-	      top-right-bounds:height 5 line-height)
+				 bottom-right-bounds:height)))
+	  (graphics (the-graphics-output)))
+      (graphics:fill top-right-paren)
+      (graphics:fillRect (- top-right-bounds:width 5)
+			 top-right-bounds:height 5 line-height)
 
       (with-translation (0 (+ top-right-bounds:height
 			      line-height))
-	  (invoke (the-graphics-output) 'fill bottom-right-paren))))
+	  (graphics:fill bottom-right-paren))))
 
+  (define (space-width)::real 8)
+  
   (define (paren-width)::real
     top-left-bounds:width)
 
   (define (min-line-height)::real
-    (invoke (the-atom-font) 'getSize2D))
+    (max (invoke (the-atom-font) 'getSize2D)
+	 (+ top-left-bounds:height bottom-left-bounds:height)
+	 (+ top-right-bounds:height bottom-right-bounds:height)))
 
   (define (draw-rounded-rectangle! width::real height::real)::void
     (invoke (the-graphics-output) 'drawRoundRect
@@ -273,7 +277,9 @@
 	    left (max 0 (current-clip-top)) 
 	    (vertical-line-width) (current-clip-height)))
     
-  (define (draw-text! text::CharSequence font::Font index::Index)::void
+  (define (draw-text! text::CharSequence
+		      font::Font
+		      index::Index)::void
     (let* ((graphics (the-graphics-output))
 	   (line-start 0)
 	   (lines 1)
@@ -290,7 +296,8 @@
 			   0 (* lines height))))
   
   (define (draw-atom! text::CharSequence index::Index)::void
-    (draw-text! text (the-atom-font) index))
+    (with-translation (4 6)
+	(draw-text! text (the-atom-font) index)))
 
   (define (draw-string! text::CharSequence index::Index)::void
     (draw-text! text (the-string-font) index))
@@ -322,7 +329,9 @@
 	      height: (* lines (metrics:getHeight)))))
     
   (define (atom-extent text::CharSequence)::Extent
-    (text-extent text (the-atom-font)))
+    (let ((inner (text-extent text (the-atom-font))))
+      (Extent width: (+ inner:width 8)
+	      height: (+ inner:height 12))))
 
   (define (quoted-text-extent text::CharSequence)::Extent
     (text-extent text (the-string-font)))
