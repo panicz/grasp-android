@@ -248,4 +248,10 @@
 (e.g.
  (char-hex-value #\f) ===> 15)
 
+(define (nothing . _)::void (values))
+
+(define (never . _)::boolean #f)
+
+(define (always . _) ::boolean #t)
+
 (define-alias hypotenuse java.lang.Math:hypot)

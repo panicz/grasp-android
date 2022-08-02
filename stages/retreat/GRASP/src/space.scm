@@ -191,8 +191,7 @@
 	   (`(block-comment . ,text)
 	    (assert (= index* 0))
 	    text)))))
-	   
-  
+
   ((first-index)::Index 0)
   
   ((last-index)::Index
@@ -284,10 +283,10 @@
 
 
 (define (insert-space! space::Space position::int)
-  (invoke space 'insert-space! position))
+  (space:insert-space! position))
 
 (define (insert-break! space::Space position::int)
-  (invoke space 'insert-break! position))
+  (space:insert-break! position))
 
 (define (insert-whitespace! c::char space::Space
 			    position::int)
@@ -554,7 +553,6 @@
 	((pair? (head d))
 	 (print-space (pre-head-space (head d)))
 	 (show-pair (head d)))))
-      
 
 (define (show->string p)::string
   (with-output-to-string

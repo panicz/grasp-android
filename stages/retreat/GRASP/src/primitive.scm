@@ -5,6 +5,8 @@
 (import (define-object))
 (import (define-property))
 (import (define-cache))
+(import (default-value))
+(import (define-parameter))
 (import (match))
 (import (examples))
 (import (infix))
@@ -40,8 +42,14 @@
 ;; so that we can only see their (value).
 ;; But if we're not (evaluating?), then we can
 ;; see (and operate on) Atoms themselves
-(define-constant evaluating?::parameter[boolean]
-  (make-parameter #f))
+(define-parameter (evaluating?) ::boolean #f)
+
+
+;; This parameter is modified during rendering
+;; to reflect the nesting level of the currently
+;; rendered expression (used e.g. for coloring
+;; parentheses)
+(define-parameter (current-rendering-level) ::int 0)
 
 ;; The purpose of Atoms is to solve the problem that
 ;; the actual atomic Scheme values have different
@@ -275,53 +283,72 @@
 	     ((Space fragments: `(,_ ,_ . ,_))
 	      (pre-tail-space dotted-pair)))))
 
+(define-interface Traversing ()
+  (skip-spaces! space::Space context::Cursor)::void
+  (advance! extent::Extent context::Cursor)::void)
+  
+(define-type (Traversal left: real := 0
+			top: real := 0
+			index: int := 0
+			max-width: real := 0
+			max-line-height: real
+			:= (invoke (the-painter) 'min-line-height))
+  implementing Traversing with
+  ((skip-spaces! space::Space context::Cursor)::void
+   (let* ((painter (the-painter))
+	  (space-width (painter:space-width)))
+     (let skip ((input space:fragments)
+		(total 0))
+       (define (advance-with-cursor! width::real)
+	 (let ((width (* width space-width)))
+	   (and-let* ((`(,tip ,next . ,sub) (the-cursor))
+		      ((integer? tip))
+		      ((equal? sub context))
+		      ((eqv? next index))
+		      ((is total <= tip <= (+ total
+					      width))))
+	     (painter:remember-offset!
+	      (+ left (- tip total)) (+ top 2)))
+	   (set! left (+ left width))
+	   (set! max-width (max max-width left))))
+       
+       (match input
+	 (`(,,@integer? ,,@integer? . ,_)
+	  (advance-with-cursor! (head input))
+	  (set! top (+ top max-line-height))
+          (set! left 0)
+          (set! max-line-height
+		(painter:min-line-height))
+	  (skip (tail input) (+ total (head input) 1)))
+	 (`(,,@integer)
+	  (advance-with-cursor! (head input)))))
+     (set! index (+ index 1))))
+
+  ((advance! extent::Extent context::Cursor)::void
+   (when (equal? (the-cursor) (recons index context))
+     (invoke (the-painter) 'remember-offset! left (+ top 2)))
+   (set! left (+ left extent:width))
+   (set! max-line-height (max extent:height
+			      max-line-height))
+   (set! max-width (max left max-width))
+   (set! index (+ index 1)))
+  )
+
+#;(define (traverse sequence #!key
+		  (doing ::procedure nothing)
+		  (eventually-returning ::procedure nothing)
+		  (until ::procedure never))
+  (let* ((painter ::Painter (the-painter))
+	 (space-width ::real (painter:space-width))
+	 (state ::Traversal (Traversal max-line-height:
+(painter:min-line-height))))
+    ...))
+
 (define (draw-sequence! elems::list #!key
 			(context::Cursor (recons 1 '())))
   ::void
-  (let* ((painter (the-painter))
-	 (max-width 0)
-         (max-line-height (painter:min-line-height))
-	 (space-width (painter:space-width))
-         (top 0)
-         (left 0)
-         (index 0))
-
-    (define (skip-spaces! space::Space)::void
-      (let skip ((input space:fragments)
-		 (total 0))
-	(define (advance-with-cursor! width::real)
-	  (let ((width (* width space-width)))
-	    (and-let* ((`(,tip ,next . ,sub) (the-cursor))
-		       ((integer? tip))
-		       ((equal? sub context))
-		       ((eqv? next index))
-		       ((is total <= tip <= (+ total
-					       width))))
-	      (painter:remember-offset!
-	       (+ left (- tip total)) (+ top 2)))
-	    (set! left (+ left width))
-	    (set! max-width (max max-width left))))
-	
-	(match input
-	  (`(,,@integer? ,,@integer? . ,_)
-	   (advance-with-cursor! (head input))
-	   (set! top (+ top max-line-height))
-           (set! left 0)
-           (set! max-line-height
-		 (painter:min-line-height))
-	   (skip (tail input) (+ total (head input) 1)))
-	  (`(,,@integer)
-	   (advance-with-cursor! (head input)))))
-      (set! index (+ index 1)))
-
-    (define (advance! extent::Extent)::void
-      (when (equal? (the-cursor) (recons index context))
-	(painter:remember-offset! left (+ top 2)))
-      (set! left (+ left extent:width))
-      (set! max-line-height (max extent:height
-				 max-line-height))
-      (set! max-width (max left max-width))
-      (set! index (+ index 1)))
+  (let* ((painter ::Painter (the-painter))
+	 (traverse ::Traversal (Traversal)))
 
     (define (draw-empty-list! space::Space context)::void
       (let ((inner (empty-space-extent space))
@@ -342,8 +369,8 @@
 	  (_ (values)))))
     
     (define (draw-head! pair::cons)::void
-      (let ((context (recons index context)))
-        (with-translation (left top)
+      (let ((context (recons traverse:index context)))
+        (with-translation (traverse:left traverse:top)
           (if (null? (head pair))
               (draw-empty-list! (null-head-space
 				 pair)
@@ -352,12 +379,13 @@
 
     (define (draw-dotted-tail! pair::cons)::void
       (cond ((should-the-bar-be-horizontal? pair)
-	     (with-translation (0 top)
-		 (painter:draw-horizontal-bar! max-width))
-             (skip-spaces! (skip-first-line
-			    (pre-tail-space pair)))
-             (let ((context (recons index context)))
-	       (with-translation (left top)
+	     (with-translation (traverse:left traverse:top)
+		 (painter:draw-horizontal-bar! traverse:max-width))
+             (traverse:skip-spaces! (skip-first-line
+				     (pre-tail-space pair))
+				    context)
+             (let ((context (recons traverse:index context)))
+	       (with-translation (traverse:left traverse:top)
 		 (if (null? (tail pair))
 		     (draw-empty-list!
 		      (null-tail-space
@@ -365,43 +393,48 @@
 		      context)
 		     (draw! (tail pair)
 			    context: context))))
-             (advance! (tail-extent pair))
-             (skip-spaces! (post-tail-space pair)))
+             (traverse:advance! (tail-extent pair) context)
+             (traverse:skip-spaces! (post-tail-space pair)
+				    context))
             (else
-	     (with-translation (left top)
+	     (with-translation (traverse:left traverse:top)
 		 (painter:draw-vertical-bar!
-			 max-line-height))
-             (advance!
+			 traverse:max-line-height))
+             (traverse:advance!
 	      (Extent
 	       width: (painter:vertical-bar-width)
-	       height: 0))
-             (skip-spaces! (pre-tail-space pair))
-             (let ((context (recons index context)))
-	       (with-translation (left top)
+	       height: 0)
+	      context)
+             (traverse:skip-spaces! (pre-tail-space pair)
+				    context)
+             (let ((context (recons traverse:index context)))
+	       (with-translation (traverse:left traverse:top)
 		 (if (null? (tail pair))
 		     (draw-empty-list!
 		      (null-tail-space pair)
 		      context)
 		     (draw! (tail pair)
 			    context: context))))
-             (advance! (tail-extent pair))
-             (skip-spaces! (post-tail-space pair))
+             (traverse:advance! (tail-extent pair) context)
+             (traverse:skip-spaces! (post-tail-space pair)
+				    context)
              )))
 
     (define (draw-next! pair::cons)::void
       (draw-head! pair)
-      (advance! (head-extent pair))
-      (skip-spaces! (post-head-space pair))
+      (traverse:advance! (head-extent pair) context)
+      (traverse:skip-spaces! (post-head-space pair) context)
       (cond ((dotted? pair)
              (draw-dotted-tail! pair))
 
             ((pair? (tail pair))
              (draw-next! (tail pair)))))
-
-    (unless (null? elems)
-      (skip-spaces! (pre-head-space elems))
-      (draw-next! elems))
-    ))
+    
+    (parameterize ((current-rendering-level
+		    (+ (current-rendering-level) 1)))
+      (unless (null? elems)
+	(traverse:skip-spaces! (pre-head-space elems) context)
+	(draw-next! elems)))))
 
 (define (draw! object #!key
 	       (context::Cursor '()))
@@ -536,8 +569,7 @@
 	(check-next! elems)
 	#!null)))
 
-(define (sequence-extent elems)
-  ::Extent
+(define (sequence-extent elems)::Extent
   (let* ((painter (the-painter))
 	 (max-width 0)
 	 (space-width (painter:space-width))

@@ -16,6 +16,7 @@
 (import (indexable))
 (import (painter))
 (import (print))
+(import (primitive))
 
 
 (define-alias Font java.awt.Font)
@@ -45,7 +46,17 @@
 (define-alias Rectangle java.awt.Rectangle)
 (define-alias AffineTransform java.awt.geom.AffineTransform)
 
+(define-alias Color java.awt.Color)
+
 (define-parameter (the-graphics-output) :: Graphics2D)
+
+(define-cache (color rgb) (Color rgb))
+
+(define-parameter (parenthesis-color) :: procedure
+  (lambda ()
+    ::Color
+    (let ((level (current-rendering-level)))
+      (color #xcccccc) #;(color (- #xcccccc (* #x101010 level))))))
 
 (define-parameter (the-graphics-environment)
   ::java.awt.GraphicsEnvironment
@@ -66,7 +77,7 @@
   (load-font "fonts/Basic-Regular.otf" size: 20))
 
 (define-constant LobsterTwo-Regular
-  (load-font "fonts/LobsterTwo-Regular.otf" size: 30))
+  (load-font "fonts/LobsterTwo-Regular.otf" size: 28))
 
 (define-constant Oswald-Regular
   (load-font "fonts/Oswald-Regular.ttf" size: 22))
@@ -78,10 +89,19 @@
   (load-font "fonts/NotoSerif-Regular.ttf"))
 
 (define-parameter (the-atom-font) ::Font
-  #;Oswald-Regular LobsterTwo-Regular)
+  #;Basic-Regular LobsterTwo-Regular)
+
+(define-parameter (the-atom-text-color) ::Color
+  Color:DARK_GRAY)
+  
+(define-parameter (the-atom-background-color) ::Color
+  (Color #xdddddd))
 
 (define-parameter (the-string-font) ::Font
-  Basic-Regular )
+  Basic-Regular #;LobsterTwo-Regular)
+
+(define-parameter (the-string-text-color) ::Color
+  Color:DARK_GRAY)
 
 (define-parameter (the-comment-font) ::Font
   GloriaHallelujah)
@@ -198,6 +218,7 @@
 				 top-left-bounds:height
 				 bottom-left-bounds:height)))
 	  (graphics (the-graphics-output)))
+      (graphics:setColor ((parenthesis-color)))
       (graphics:fill top-left-paren)
       (graphics:fillRect 0 top-left-bounds:height
 			 5 line-height)
@@ -210,6 +231,7 @@
 				 top-right-bounds:height
 				 bottom-right-bounds:height)))
 	  (graphics (the-graphics-output)))
+      (graphics:setColor ((parenthesis-color)))
       (graphics:fill top-right-paren)
       (graphics:fillRect (- top-right-bounds:width 5)
 			 top-right-bounds:height 5 line-height)
@@ -253,8 +275,7 @@
   (define (draw-vertical-bar! height::real)::void
     (invoke (the-graphics-output) 'fillRect
 	    0 0 (vertical-bar-width) height))
-    
-  
+
   (define (remembered-left)::real
     left)
   
@@ -295,14 +316,12 @@
       (graphics:drawString (text:subSequence line-start string-end)
 			   0 (* lines height))))
   
-  (define (draw-atom! text::CharSequence index::Index)::void
-    (with-translation (4 6)
-	(draw-text! text (the-atom-font) index)))
-
   (define (draw-string! text::CharSequence index::Index)::void
     (draw-text! text (the-string-font) index))
 
   (define (draw-quoted-text! text::CharSequence index::Index)::void
+    (invoke (the-graphics-output) 'setColor
+	    (the-string-text-color))
     (draw-string! text index))
 
   (define (text-extent text::CharSequence font::Font)::Extent
@@ -331,8 +350,19 @@
   (define (atom-extent text::CharSequence)::Extent
     (let ((inner (text-extent text (the-atom-font))))
       (Extent width: (+ inner:width 8)
-	      height: (+ inner:height 12))))
+	      height: (+ inner:height 16))))
 
+  (define (draw-atom! text::CharSequence index::Index)::void
+    (let* ((graphics (the-graphics-output))
+	   (extent (atom-extent text)))
+      (graphics:setColor (the-atom-background-color))
+      (graphics:fillRoundRect 0 14
+			      extent:width (- extent:height 28)
+			      12 12)
+      (graphics:setColor (the-atom-text-color))
+      (with-translation (4 8)
+	  (draw-text! text (the-atom-font) index))))
+  
   (define (quoted-text-extent text::CharSequence)::Extent
     (text-extent text (the-string-font)))
   
@@ -346,7 +376,7 @@ automatically by the AWT framework."))
     (let ((graphics-output ::Graphics2D (as Graphics2D graphics)))
       (set! (the-graphics-output) graphics-output)
       (set! (the-painter) (this))
-	;; cf. https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
+      ;; cf. https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
       (graphics-output:setRenderingHints rendering-hints)
       (invoke (the-top-panel) 'draw! '())))
 
