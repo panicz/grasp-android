@@ -1,3 +1,234 @@
+* 01.08.2022
+
+Trzeba bedzie stworzyc takie oto rodzaje obiektow:
+- EmptyList
+- HorizontalBar
+- VerticalBar
+
+ewentualnie moglibysmy jeszcze dodac
+- OpeningParen
+- ClosingParen
+
+Natomiast definicja cursor-under bedzie sobie korzystac
+z kontynujacji, mniej wiecej w taki sposob:
+
+(define (cursor-under x::real y::real #;in sequence 
+         #;within context := (recons 1 '()))
+  (call/cc
+   (lambda (return)
+    (traverse sequence
+     doing:
+     (lambda (item::Tile t::Traversal)
+       (when (and (is t:left <= x <= (+ t:left (width item)))
+                  (is t:top <= y <= (+ t:top (height item))))
+         (let ((context (recons traversal:index context)))
+           (if (pair? item)
+              (return (cursor-under (- x t:left) (- y t:top)
+                                    item context))
+              (return context)))))))))
+
+* 01.08-31.07.2022
+
+(define (traverse sequence 
+                  doing: action := nothing
+                  returning: result := nothing)
+  (let ((painter ::Painter (the-painter))
+        (traversal ::Traversal (Traversal)))
+
+    (define (head* pair::cons)::Tile
+      (if (null? (head pair))
+         (empty-list-proxy (null-head-space pair))
+         (head pair)))
+
+    (define (tail* pair::cons)::Tile
+      (if (null? (tail pair))
+         (empty-list-proxy (null-tail-space pair))
+         (tail pair)))
+
+    (define (step-over-dotted-tail! pair::cons)::void
+      (let* ((horizontal? (should-the-bar-be-horizontal? pair))
+             (bar (if horizontal?
+                     (horizontal-bar traversal:max-width)
+                     (vertical-bar traversal:max-line-height)))
+             (pre-tail (if horizontal?
+                           (skip-first-line (pre-tail-space pair))
+                           (pre-tail-space pair)))
+             (item (tail* pair)))
+	 (action bar traverse)
+         (traversal:advance! (extent bar))
+         (traversal:skip-spaces! pre-tail)
+         (action item traversal)
+         (traversal:advance! (extent item))
+         (traversal:skip-spaces! (post-tail-space pair))))
+
+    (define (step! pair::cons)
+      (let ((item (head* pair)))
+        (action item traversal)
+        (traversal:advance! (extent item))
+        (traversal:skip-spaces! (post-head-space pair))
+        (cond ((dotted? pair)
+               (step-over-dotted-tail! pair)
+               (result traversal))
+              ((pair? (tail pair))
+               (step! (tail pair)))
+              (else
+               (result traversal)))))
+
+    (unless (null? sequence)
+      (traversal:skip-spaces! (pre-head-space sequence))
+      (step! sequence))))
+
+* 30.07.2022
+
+Udalo sie odrobine zrefaktoryzowac draw-sequence!, tworzac
+obiekt Traverse i wyodrebniajac do niego metody skip-spaces!
+i advance!.
+
+Pewna mysl jest taka, zeby uzyc tego nowego obiektu
+do wyrefaktoryzowania sequence-extent oraz cursor-under.
+
+Inna jest taka, zeby sobie opisac dzialanie tych funkcji,
+i dopiero na tej podstawie opracowac ostateczny interfejs
+metody "traverse".
+
+Narracja o metodzie draw-sequence! wygladalaby tak:
+1. zwiekszamy wartosc (current-rendering-level)
+2. o ile sekwencja nie jest pusta:
+  - przeskakujemy pre-head-space
+  - wywolujemy funkcje iterujaca, ktora:
+    - rysuje glowe
+    - przeskakuje rozmiar glowy
+    - przeskakuje "post-head-space"
+    - a nastepnie:
+      - jezeli para jest kropkowana, rysuje "kropkowany ogonek"
+      - w przeciwnym razie, jezeli ogon jest para, wywolujemy
+       kroki jak w p. 2 na ogonie pary
+
+Niuanse:
+- rysowanie glowy sprawdza, czy glowa jest "null"
+- rysowanie ogona podobnie
+- dodatkowo przy rysowaniu ogona trzeba odpowiednio
+  obsluzyc "kreske przedzielajaca" (ktora moze byc pionowa
+  albo pozioma)
+- ponadto sa jeszcze niesnaski zwiazane ze sledzeniem
+  kontekstu, tzn. podczas renderowania chcemy miec mozliwosc
+  wyswietlenia kursora na bialych znakach
+
+Pomysl bylby zatem taki, zeby:
+- funkcja traverse wywolywala callback na kazdym "elemencie",
+przy czym "element" moglby byc takze rozumiany jako
+pionowa albo pozioma kreska
+- dodatkowo do callbacku byl przekazywany "extent" elementu,
+zeby moc w taki sposob obsluzyc null-head-space i null-head-tail  
+
+* 29.07.2022
+
+Nie mamy na razie cudzyslowow przy stringach,
+i co nam Pan zrobisz?
+
+Temat wydaje sie niezbyt pilny, i wydaje sie,
+ze sa wazniejsze rzeczy do zrobienia, takie jak:
+
+- uwzglednienie kursora w kliencie AWT
+- operacje edycji
+- scrollowanie i zoomowanie
+- dzielenie paneli
+- obsluga myszy
+- prawidlowa obsluga strzalek w gore/dol
+- klient terminalowy w Lanternie
+
+Ponadto wyglada na to, ze wyswietlanie spacji - pomimo, 
+ze obsluzone w parserze - jest w ogole nieobsluzone
+przy wyswietlaniu i przy "wymiarowaniu".
+
+Byc moze jednak warto byloby rozpoczac prace
+od ujednolicenia funkcji:
+
+- draw-sequence!
+- sequence-extent
+- cursor-under
+
+Tym, co te trzy funkcje - jak sie zdaje - maja ze soba
+wspolnego - jest schemat iteracji. To znaczy, za kazdym
+razem iterujemy po liscie, bazujac na wymiarach
+poszczegolnych elementow, oraz na rozmiarach spacji.
+
+(define (traverse sequence
+                  with: element-wise::procedure := noop
+                  until: terminating-condition? :: predicate
+		         := (lambda (element left top context) #f)
+	          within: context :: Cursor := (recons 1 '()))
+   ...)
+
+draw-sequence! bedzie przemierzac kazdy element
+i wyrysowywac go na plotnie
+
+sequence-extent bedzie dokonywac pomiaru i zwroci
+ostateczny rozmiar
+
+cursor-under bedzie przeszukiwac sobie wszystkie elementy,
+i jezeli znajdzie taki, ktory obejmuje zadane wspolrzedne,
+to (rekurencyjnie) zwroci odpowiadajacy im kursor
+
+
+(define-type (Traverse left: real
+                       top: real
+                       index: int))
+
+
+(define (sequence-extent sequence)
+  (traverse sequence
+            eventually-returning: (lambda (t::Traverse)
+                         (Extent width: t:left
+                                 height: t:top))))
+
+(define (draw-sequence! sequence context := (recons 1 '()))
+  (traverse sequence
+            with: (lambda (t::Traverse item)
+                    (with-translation (t:left t:top)
+                      (draw! item (recons index context))))))
+
+(define (cursor-under left top sequence context)
+  (traverse sequence
+            until: (lambda (t::Traverse item e::Extent)
+                     (and (is t:left <= left <= (+ t:left e:width))
+                          (is t:top <= top <= (+ t:top e:height))
+                          (if (pair? item)
+                             (cursor-under (- left t:left) (- top t:top)
+                                           item
+                                           (recons t:index context))
+                             (recons t:index context))))))
+            eventually-returning (lambda (t::Traverse)
+                                   context)))
+
+(define (nothing . _) (values))
+
+(define (never . _) #f)
+
+(define (always . _) #t)
+
+(define (traverse sequence::(list ,a)
+                  doing: operation ::(maps ,a to: void) := nothing
+                  eventually-returning: result ::(maps Traverse to: ,b) := nothing
+                  until: early-termination? ::(maps Traverse ,a Extent to: (maybe ,b)) := never)::,b
+  "The `traverse' abstraction may seem like a \
+generic operation, but it is designed specifically \
+to implement the three functions: `draw-sequence!', \
+`sequence-extent' and `cursor-under'.
+
+If each result of `early-termination?' is #f,
+then the value of the `traverse' function is the result \
+of applying the `result' function to the traverse state \
+after having traversed all the elements of the sequence.
+
+Otherwise the result is the first non-#f result of \
+`early-termination?'.
+
+For every element of the sequence, the `operation' \
+is performed (which is meant to be effectful). In practice, \
+this is only used for drawing items on the screen.
+"
+
 * 27.07.2022
 
 udalo sie (dosc latwo) odpalic podwojne buforowanie
