@@ -1,3 +1,119 @@
+* 03.08.2022
+
+Mamy taki problem, ze jak renderujemy sobie spacje,
+to mozemy zaczac renderowanie z parametrem "left"
+roznym od 0, i parametr "max-line-height" tez moze
+miec jakas wartosc nie-domyslna.
+
+Stad rodzi sie pomysl, zeby uczynic "Traversal"
+dodatkowym parametrem dla draw! - tak trzeba zrobic
+w przypadku spacji, ale chyba tez mozna to przekazac
+do poostalych instancji Tile'a, zeby miec spojny
+interfejs?
+
+Lepiej zamiast tego dodac parametr (the-traversal),
+ktory bedzie dynamicznie ustawiany w funkcji "traverse",
+i z ktorego bedzie sobie korzystac draw! spacji.
+
+* 02.08.2022
+
+Trzeba rozwazyc, w jaki sposob mozna obsluzyc
+"kursor-w-spacjach" w Traversalu.
+
+Wydaje sie, ze mozliwosci sa dwie:
+- albo wyodrebnic metode Visible z interfejsu Box,
+i zamiast iterowac po Tile, iterowac po
+VisibleIndexable (co w praktyce oznaczaloby
+po prostu Element)
+- albo zrobic dwa osobne callbacki dla spacji
+i dla pozostalych elementow
+
+Jednak ta druga opcja wydaje sie lamerska.
+
+Teraz tak: Space nie bedzie Indexable, tylko
+Element.
+
+Dodatkowo, metody z Traversal (skip-spaces!
+i advance!) chcielibysmy przeniesc do Element
+(jako traverse!).
+
+Docelowo chcielibysmy jednak rowniez, zeby
+wykomentowane elementy takze byly uwzgledniane
+podczas trawersowania.
+
+(define (traverse sequence :: list
+                  doing: action::(maps (Element Traverse) to: void) := nothing
+                  returning: result::(maps (Traverse) to: ,result) := nothing)
+  ::,result
+  (let ((painter (the-painter))
+        (traversal (Traversal)))
+
+    (define (head* pair::cons)::Tile
+      (if (null? (head pair))
+         (empty-list-proxy (null-head-space pair))
+         (head pair)))
+
+    (define (tail* pair::cons)::Tile
+      (if (null? (tail pair))
+         (empty-list-proxy (null-tail-space pair))
+         (tail pair)))
+
+    (define (step-over-dotted-tail! pair::cons)::void
+      (let* ((horizontal? (should-the-bar-be-horizontal? pair))
+             (bar (if horizontal?
+                      (horizontal-bar traversal:max-width)
+                      (vertical-bar traversal:max-line-height)))
+             (pre-tail (if horizontal?
+                           (skip-first-line (pre-tail-space pair))
+                           (pre-tail-space pair)))
+             (item (tail* pair))
+	     (post-tail (post-tail-space pair)))
+        (action pre-tail traversal)
+        (advance! traversal pre-tail)
+        (action bar traversal)
+        (advance! traversal bar)
+        (action item traversal)
+        (advance! traversal item)
+        (action post-tail traversal)
+        (advance! traversal post-tail)))
+
+    (define (step! pair::cons)
+      (let ((item (head* pair))
+            (post-head (post-head-space pair)))
+        (action item traversal)
+        (advance! traversal item)
+        (action post-head traversal)
+        (advance! traversal post-head)
+        (cond ((dotted? pair)
+               (step-over-dotted-tail! pair)
+               (result traversal))
+              ((pair? (tail pair))
+               (step! (tail pair)))
+              (else
+               (result traversal)))))
+
+    (if (pair? sequence)
+      (let ((pre-head (pre-head-space sequence)))
+        (action pre-head traversal)
+        (advance! traversal pre-head)
+        (step! sequence))
+      (result traversal))
+  ))
+
+(define (advance! traversal::Traversal #;through element::Element)
+  (cond ((is element instance? Space)
+         (let ((space (as Space element)))
+           (space:advance! traversal)))
+        ((is element instance? Tile)
+         (traversal:advance! (extent (as Tile element))))))
+
+Trzeba zaimplementowac:
+
+- metode draw! w Space
+- horizontal-bar (jako Tile)
+- vertical-bar (jako Tile)
+- empty-list-proxy
+
 * 01.08.2022
 
 Trzeba bedzie stworzyc takie oto rodzaje obiektow:
@@ -21,7 +137,7 @@ z kontynujacji, mniej wiecej w taki sposob:
      (lambda (item::Tile t::Traversal)
        (when (and (is t:left <= x <= (+ t:left (width item)))
                   (is t:top <= y <= (+ t:top (height item))))
-         (let ((context (recons traversal:index context)))
+         (let ((context (recons t:index context)))
            (if (pair? item)
               (return (cursor-under (- x t:left) (- y t:top)
                                     item context))
