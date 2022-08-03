@@ -4,7 +4,6 @@
 (import (define-object))
 (import (mapping))
 (import (indexable))
-(import (tile))
 (import (primitive))
 (import (match))
 (import (functions))

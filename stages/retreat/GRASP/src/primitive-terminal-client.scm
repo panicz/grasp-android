@@ -8,7 +8,6 @@
  (indexable)
  (space)
  (cursor)
- (tile)
  (primitive)
  (extent)
  (text-painter)

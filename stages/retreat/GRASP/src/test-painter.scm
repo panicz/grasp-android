@@ -8,7 +8,6 @@
   (painter)
   (space)
   (cursor)
-  (tile)
   (primitive)
   (symbol)
   (combinators)

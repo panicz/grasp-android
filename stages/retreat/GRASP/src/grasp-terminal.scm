@@ -11,7 +11,6 @@
 ;;(import (indexable))
 ;;(import (space))
 (import (cursor))
-(import (tile))
 (import (primitive))
 (import (extent))
 ;;(import (text-painter))

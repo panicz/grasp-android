@@ -55,8 +55,7 @@
 (define-parameter (parenthesis-color) :: procedure
   (lambda ()
     ::Color
-    (let ((level (current-rendering-level)))
-      (color #xcccccc) #;(color (- #xcccccc (* #x101010 level))))))
+    (color #xcccccc)))
 
 (define-parameter (the-graphics-environment)
   ::java.awt.GraphicsEnvironment

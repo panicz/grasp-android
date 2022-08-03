@@ -2,7 +2,6 @@
 (import (indexable))
 (import (cursor))
 (import (painter))
-(import (tile))
 (import (infix))
 (import (extent))
 (import (functions))

@@ -12,7 +12,6 @@
 (import (indexable))
 (import (space))
 (import (cursor))
-(import (tile))
 (import (for))
 (import (painter))
 (import (functions))

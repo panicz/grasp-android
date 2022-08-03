@@ -7,7 +7,6 @@
 (import (extent))
 (import (match))
 (import (infix))
-(import (tile))
 
 (define-type (Over back: Tile front: Tile)
   implementing Tile

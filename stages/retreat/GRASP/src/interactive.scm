@@ -1,7 +1,7 @@
 (import (define-interface))
 (import (define-type))
 (import (define-object))
-(import (tile))
+(import (indexable))
 
 (define-interface Interactive ()
   ;; by convention, the return value of #true means

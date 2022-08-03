@@ -10,11 +10,10 @@
 (import (match))
 (import (examples))
 (import (infix))
-(import (extent))
 (import (indexable))
+(import (extent))
 (import (space))
 (import (cursor))
-(import (tile))
 (import (for))
 (import (painter))
 (import (functions))
@@ -43,13 +42,6 @@
 ;; But if we're not (evaluating?), then we can
 ;; see (and operate on) Atoms themselves
 (define-parameter (evaluating?) ::boolean #f)
-
-
-;; This parameter is modified during rendering
-;; to reflect the nesting level of the currently
-;; rendered expression (used e.g. for coloring
-;; parentheses)
-(define-parameter (current-rendering-level) ::int 0)
 
 ;; The purpose of Atoms is to solve the problem that
 ;; the actual atomic Scheme values have different
@@ -429,12 +421,9 @@
 
             ((pair? (tail pair))
              (draw-next! (tail pair)))))
-    
-    (parameterize ((current-rendering-level
-		    (+ (current-rendering-level) 1)))
-      (unless (null? elems)
+    (unless (null? elems)
 	(traverse:skip-spaces! (pre-head-space elems) context)
-	(draw-next! elems)))))
+	(draw-next! elems))))
 
 (define (draw! object #!key
 	       (context::Cursor '()))

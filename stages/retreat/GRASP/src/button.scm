@@ -8,7 +8,6 @@
 (import (indexable))
 (import (painter))
 (import (cursor))
-(import (tile))
 (import (primitive))
 (import (extension))
 (import (print))
