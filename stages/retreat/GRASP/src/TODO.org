@@ -1,3 +1,26 @@
+* 05.08.2022
+
+Jest problem z definicja funkcji cursor-under, mianowicie
+taki, ze wolamy "extent" na obiekcie "Space".
+
+Wydaje sie, ze ten problem bedzie trzeba rozwiazac, dodajac
+do Space metode "contains?".
+
+* 04.08.2022
+
+Plan jest taki:
+- dodac modul "traversal" i parametr (the-traversal) V
+  - Traversal powinien miec metode "advance!",
+    ale bez parametru "context" V
+  - Traversal nie powinien miec metody "skip-spaces!" V
+- do typu "Space" dodac metode "draw!" V
+- do typu "Space" dodac metode "advance!" V
+- zdefiniowac obiekty HorizonralBar, VerticalBar i EmptyList
+oraz ich cache V
+- zdefiniowac funkcje traverse V
+- zdefiniowac draw-sequence!, sequence-extent i cursor-under
+opierajac sie o traverse V
+
 * 03.08.2022
 
 Mamy taki problem, ze jak renderujemy sobie spacje,
@@ -8,7 +31,7 @@ miec jakas wartosc nie-domyslna.
 Stad rodzi sie pomysl, zeby uczynic "Traversal"
 dodatkowym parametrem dla draw! - tak trzeba zrobic
 w przypadku spacji, ale chyba tez mozna to przekazac
-do poostalych instancji Tile'a, zeby miec spojny
+do pozostalych instancji Tile'a, zeby miec spojny
 interfejs?
 
 Lepiej zamiast tego dodac parametr (the-traversal),
