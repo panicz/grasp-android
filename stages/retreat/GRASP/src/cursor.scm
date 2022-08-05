@@ -6,6 +6,7 @@
 (import (default-value))
 (import (define-parameter))
 (import (infix))
+(import (fundamental))
 (import (indexable))
 (import (match))
 (import (space))

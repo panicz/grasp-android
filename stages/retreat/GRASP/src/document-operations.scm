@@ -2,6 +2,7 @@
 (import (define-interface))
 (import (define-type))
 (import (define-property))
+(import (fundamental))
 (import (indexable))
 (import (space))
 (import (cursor))

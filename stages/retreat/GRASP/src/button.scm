@@ -5,13 +5,13 @@
 (import (match))
 (import (infix))
 (import (functions))
+(import (fundamental))
 (import (indexable))
 (import (painter))
 (import (cursor))
 (import (primitive))
 (import (extension))
 (import (print))
-
 
 (define-type (Button action: procedure
 		     label: string)

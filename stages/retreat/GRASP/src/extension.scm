@@ -3,6 +3,7 @@
 (import (define-type))
 (import (define-object))
 (import (mapping))
+(import (fundamental))
 (import (indexable))
 (import (primitive))
 (import (match))

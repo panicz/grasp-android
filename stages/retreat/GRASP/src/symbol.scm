@@ -1,4 +1,5 @@
 (import (define-object))
+(import (fundamental))
 (import (indexable))
 (import (cursor))
 (import (painter))

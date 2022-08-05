@@ -4,9 +4,7 @@
 (import (define-parameter))
 (import (default-value))
 (import (extent))
-(import (indexable))
-
-(define-alias CharSequence java.lang.CharSequence)
+(import (fundamental))
 
 (define-interface Translatable ()
   (translate! x::real y::real)::void

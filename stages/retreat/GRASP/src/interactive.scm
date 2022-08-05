@@ -1,6 +1,7 @@
 (import (define-interface))
 (import (define-type))
 (import (define-object))
+(import (fundamental))
 (import (indexable))
 
 (define-interface Interactive ()

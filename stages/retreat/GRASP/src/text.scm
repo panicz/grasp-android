@@ -9,6 +9,7 @@
 (import (examples))
 (import (infix))
 (import (extent))
+(import (fundamental))
 (import (indexable))
 (import (space))
 (import (cursor))

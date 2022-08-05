@@ -11,6 +11,7 @@
 (import (functions))
 (import (for))
 (import (while))
+(import (fundamental))
 (import (indexable))
 (import (cursor))
 (import (interactive))

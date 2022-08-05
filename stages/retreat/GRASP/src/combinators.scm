@@ -1,4 +1,5 @@
 (import (define-type))
+(import (fundamental))
 (import (primitive))
 (import (indexable))
 (import (space))

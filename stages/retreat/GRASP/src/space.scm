@@ -2,6 +2,8 @@
 (import (define-interface))
 (import (define-property))
 (import (define-object))
+(import (define-cache))
+(import (fundamental))
 (import (indexable))
 (import (infix))
 (import (examples))
@@ -12,6 +14,10 @@
 (import (print))
 (import (conversions))
 (import (srfi :11))
+(import (painter))
+(import (traversal))
+(import (cursor))
+(import (extent))
 
 (define (fragment-size fragment)
   (match fragment
@@ -170,8 +176,7 @@
 	(eq? result fragments))))
 
 (define-type (Space fragments: pair)
-  implementing Indexable
-  with
+  implementing Element with
   ((part-at index::Index)::Indexable*
    (let-values (((fragments* index*) (space-fragment-index
 				      fragments index)))
@@ -235,7 +240,36 @@
 			       fragments
 			       position)))
      (set! (tail cell) (cons 0 (tail cell)))))
-    
+
+  ((draw! context::Cursor)::void
+   (let* ((painter (the-painter))
+	  (space-width (painter:space-width))
+	  (t (invoke (the-traversal) 'clone)))
+     (let skip ((input fragments)
+		(total 0))
+       (define (advance-with-cursor! width::real)
+	 (let ((width (* width space-width)))
+	   (and-let* ((`(,tip ,next . ,sub) (the-cursor))
+		      ((integer? tip))
+		      ((equal? sub context))
+		      ((eqv? next t:index))
+		      ((is total <= tip <= (+ total
+					      width))))
+	     (painter:remember-offset!
+	      (+ t:left (- tip total)) (+ t:top 2)))
+	   (t:advance-by! width)))
+       
+       (match input
+	 (`(,,@integer? ,,@integer? . ,_)
+	  (advance-with-cursor! (head input))
+	  (set! t:top (+ t:top t:max-line-height))
+          (set! t:left 0)
+          (set! t:max-line-height (painter:min-line-height))
+	  (skip (tail input) (+ total (head input) 1)))
+	 (`(,,@integer)
+	  (advance-with-cursor! (head input)))))
+     (set! t:index (+ t:index 1))))
+
   ((print out::gnu.lists.Consumer)::void
    (let process ((input fragments))
      (match input
@@ -279,6 +313,23 @@
 
        (_
 	(values)))))
+
+  ((advance! t::Traversal)::void
+   (let* ((painter (the-painter))
+	  (space-width (painter:space-width)))
+     (let skip ((input fragments)
+		(total 0))
+       (match input
+	 (`(,,@integer? ,,@integer? . ,_)
+	  (t:advance-by! (* space-width (head input)))
+	  (set! t:top (+ t:top t:max-line-height))
+          (set! t:left 0)
+          (set! t:max-line-height
+		(painter:min-line-height))
+	  (skip (tail input) (+ total (head input) 1)))
+	 (`(,,@integer?)
+	  (t:advance-by! (* space-width (head input))))))
+     (set! t:index (+ t:index 1))))
   )
 
 
@@ -367,6 +418,13 @@
    (and (equal? space (Space fragments: '(3 6 0)))
 	(equal? rest (Space fragments: '(9))))))
 
+(define (skip-first-line s::Space)::Space
+  (match s:fragments
+    (`(,_ ,_ . ,_)
+     (Space fragments: (tail s:fragments)))
+    (_
+     (Space fragments: '(0)))))
+
 ;; a cell is "dotted?" naturally when it is
 ;; a pair whose "tail" isn't a list (so for example,
 ;; if it's a symbol or a number).
@@ -444,8 +502,90 @@
 (define (head/tail-separator? x)
   (instance? x HeadTailSeparator))
 
+(define-object (HorizontalBar width0::real)::Tile
+  (define width :: real 0)
+  (define (draw! context::Cursor)::void
+   (invoke (the-painter) 'draw-horizontal-bar! width))
+  (define (extent)::Extent
+    (Extent width: width
+	    height: (invoke (the-painter) 'horizontal-bar-height)))
+  (HeadTailSeparator)
+  (set! width width0))
+
+(define-object (VerticalBar height0::real)::Tile
+  (define height :: real 0)
+  (define (draw! context::Cursor)::void
+    (invoke (the-painter) 'draw-vertical-bar! height))
+  (define (extent)::Extent
+    (Extent width: (invoke (the-painter) 'vertical-bar-width)
+	    height: height))
+  (HeadTailSeparator)
+  (set! height height0))
+
+(define-cache (horizontal-bar width)
+  (HorizontalBar (as real width)))
+
+(define-cache (vertical-bar height)
+  (VerticalBar (as real height)))
+
+(define (should-the-bar-be-horizontal? dotted-pair)
+  ::boolean
+  (assert (dotted? dotted-pair))
+  (and-let* (((Space fragments: `(,_ ,_ . ,_))
+	      (post-head-space dotted-pair))
+	     ((Space fragments: `(,_ ,_ . ,_))
+	      (pre-tail-space dotted-pair)))))
+
 (define-property (head-tail-separator cell)
   head/tail-separator)
+
+(define-object (EmptyListProxy inner::Space)::Tile  
+  (define space :: Space)
+  
+  (define (part-at index::Index)::Indexable*
+    (match index
+      (0 space)
+      (_ (this))))
+  
+  (define (first-index)::Index #\[)
+  
+  (define (last-index)::Index #\])
+  
+  (define (next-index index::Index)::Index
+    (match index
+      (#\[ 0)
+      (_ #\])))
+  
+  (define (previous-index index::Index)::Index
+    (match index
+      (#\] 0)
+      (_ #\[)))
+  
+  (define (index< a::Index b::Index)
+    (or (and (eqv? a #\[) (or (eqv? b 0)
+			      (eqv? b #\])))
+	(and (eqv? a 0) (eqv? b #\]))))
+
+  (define (extent)::Extent
+    (let ((traversal (Traversal))
+	  (painter (the-painter)))
+      (space:advance! traversal)
+      (Extent width: (+ (* 2 (painter:paren-width))
+			traversal:max-width)
+	      height: (+ traversal:top traversal:max-line-height))))
+
+  (define (draw! context::Cursor)::void
+    (let ((outer (extent))
+	  (painter (the-painter)))
+      (painter:open-paren! outer:height)
+      (with-translation ((- outer:width (painter:paren-width)) 0)
+	  (painter:close-paren! outer:height))))
+  
+  (gnu.lists.EmptyList)
+  (set! space inner))
+
+(define-cache (empty-list-proxy space)
+  (EmptyListProxy (as Space space)))
 
 (define cell-display-properties
   (list
