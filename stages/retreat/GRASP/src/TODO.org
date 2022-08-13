@@ -1,3 +1,42 @@
+* 07.06.2022
+
+Teraz mozemy zajac sie jedna z dwoch rzeczy:
+1. klikaniem (wraz z testami jednostkowymi)
+2. renderowaniem 3 rodzajow komentarzy
+
+Wydaje sie, ze rozsadniejszym pomyslem jest
+najpierw naprawienie klikania w biezacej implementacji,
+a dopiero pozniej rozszerzenie trawersowania
+na komentarze -- a to dlatego, ze to juz
+wczesniej teoretycznie mielismy zrobione
+(chociaz nie dzialalo :P), natomiast renderowanie
+komentarzy bedzie wymagalo troche rozkminek.
+
+Plan jest zatem taki, zeby:
+- do interfejsu Indexable dodac metode
+(cursor-under* left::real top::real context::Cursor)::Cursor*
+ktora bedzie zwracac #f w sytuacji, kiedy dane wspolrzedne
+nie znajduja sie w odpowiednim miejscu, albo bedzie
+reconsowac odpowiednie indeksy (byc moze rekurencyjnie)
+
+* 06.08.2022
+
+Do nastepnego commita (13.08) chcielibysmy sie zajac
+takimi kwestiami, jak:
+1. ekstensywne testy jednostkowe dla "klikania"
+2. prawidlowa (i przetestowana) metoda cursor-under
+3. renderowanie i wyklikiwanie 3 rodzajow komentarzy
+4. poprawe dzialania testow w (test-painter) V
+
+I uwaga: prawdopodobnie bedzie trzeba "zreifikowac"
+nawias otwierajacy i zamykajacy (w taki sposob, w jaki
+to zrobilismy z pionowa i pozioma kreska)
+
+No, ale na razie zajmijmy sie lepiej niesnaskami zwiazanymi
+z wyswietlaniem poziomej kreski.
+
+OK, to zostalo juz naprawione.
+
 * 05.08.2022
 
 Jest problem z definicja funkcji cursor-under, mianowicie
