@@ -67,6 +67,11 @@ controls the indices.
 
 (define-alias Cursor java.lang.Object #;gnu.lists.LList)
 
+;; we consider Cursor* to be a "nullable" variant
+;; of Cursor (where #f or #!null represents a lack
+;; of value)
+(define-alias Cursor* java.lang.Object)
+
 #|
 Each tile can choose whatever it pleases to be 
 its index except #!null, for the reason explained

@@ -262,9 +262,7 @@
        (match input
 	 (`(,,@integer? ,,@integer? . ,_)
 	  (advance-with-cursor! (head input))
-	  (set! t:top (+ t:top t:max-line-height))
-          (set! t:left 0)
-          (set! t:max-line-height (painter:min-line-height))
+	  (t:new-line!)
 	  (skip (tail input) (+ total (head input) 1)))
 	 (`(,,@integer)
 	  (advance-with-cursor! (head input)))))
@@ -322,10 +320,7 @@
        (match input
 	 (`(,,@integer? ,,@integer? . ,_)
 	  (t:advance-by! (* space-width (head input)))
-	  (set! t:top (+ t:top t:max-line-height))
-          (set! t:left 0)
-          (set! t:max-line-height
-		(painter:min-line-height))
+	  (t:new-line!)
 	  (skip (tail input) (+ total (head input) 1)))
 	 (`(,,@integer?)
 	  (t:advance-by! (* space-width (head input))))))

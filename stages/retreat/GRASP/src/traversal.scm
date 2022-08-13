@@ -29,6 +29,11 @@
   ((advance-by! width::real)::void
    (set! left (+ left width))
    (set! max-width (max max-width left)))
+
+  ((new-line!)::void
+   (set! top (+ top max-line-height))
+   (set! left 0)
+   (set! max-line-height (invoke (the-painter) 'min-line-height)))
   
   )
 
