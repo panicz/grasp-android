@@ -576,7 +576,7 @@
       (with-translation ((- outer:width (painter:paren-width)) 0)
 	  (painter:close-paren! outer:height))))
   
-  (gnu.lists.EmptyList)
+  (gnu.lists.LList)
   (set! space inner))
 
 (define-cache (empty-list-proxy space)
