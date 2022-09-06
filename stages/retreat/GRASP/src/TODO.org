@@ -1,4 +1,83 @@
-* 07.06.2022
+* 20.08.2022
+
+  wydaje sie, ze powinnismy hyz miec jako tako dzialajacy
+  wariant ‘cursor-under*' dla spacji.
+
+pozostaja nam jeszcze:
+  
+- Atom
+- Text
+- cons
+- below, beside, over
+- HorizontalBar, VerticalBar, EmptyListProxy
+- Magic
+
+dobrze byloby rowniez wyrzucic obiekt Symbol
+(ale to moze przy okazji prac nad edycja?)
+
+
+* 18.08.2022
+
+watpliwosci, jakie pojawily sie do tej pory:
+- podczas trawersowania linii nie znamy jeszcze
+  jej wysokosci.
+
+  dlatego - jezeli kursor znajduje sie pomiedzy
+  t:left a (+ t:left biezaca-szerokosc) - to
+  powinnismy go jakos zachowac
+
+  to znaczy, scisle rzecz biorac to moze byc tak,
+  ze jak klikniemy na spacje pod pudelkiem,
+  to zamiast na ktorys element pudelka bedziemy sie
+  focusowac na ostatniej spacji przed tym pudelkiem
+
+  (bo czemu nie)
+
+no dobra, czyli dla spacji algorytm bedzie wygladal
+tak:
+
+
+1. jezeli y jest powyzej traverse:top, zwracamy #f
+2. bierzemy nastepna spacje. zakladajac, ze to dlugosc linii:
+   jezeli x jest pomiedzy left a left+width,
+   to:
+   a. jezeli y jest ponizej top+max-line-height,
+   zwracamy odpowiefnia wspolrzexna
+   b. w przeciwnym razie zapamietujemy sobie
+      'tentative-result' i nastepnie:
+      i. jezeli to koniec, zwracamy #f
+      ii. jezeli to nowa linia
+   
+* 17.08.2022
+
+trzeba bedzie scommitowac zmiane EmptyList na LList
+
+poza tym jedyna zmiana byla w testach jednostkowych.
+mozemy zrobic tak, zeby cursor-under (oraz wszystkie
+pozostale trawersy) domyslnie brala (the-document)
+
+ok, i co teraz?
+
+teraz cisniemy dalej z tym cursor-under*
+
+jakie elementy beda musialy dostac swoja implementacje?
+- Space
+- Atom
+- Text
+- cons
+- below, beside, over
+- HorizontalBar, VerticalBar, EmptyListProxy
+- Magic
+
+Zaczniemy od implementacji cursor-under* dla spacji.
+
+
+* 16.08.2022
+
+mala rekapitulacja: chcemy, zeby klikanie bylo dobrze
+zrobione, i mamy juz napisanych troche testow jednostkowych.
+
+* 07.08.2022
 
 Teraz mozemy zajac sie jedna z dwoch rzeczy:
 1. klikaniem (wraz z testami jednostkowymi)
