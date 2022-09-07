@@ -5,6 +5,11 @@
 
 ;;(define-alias Cloneable java.lang.Cloneable)
 
+(define-syntax maps
+  (syntax-rules (to:)
+    ((_ input-types to: output-type + ...)
+     procedure)))
+
 
 (define-simple-class Struct ()
   interface: #t

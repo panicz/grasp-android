@@ -13,21 +13,22 @@
 (import (extension))
 (import (print))
 
-(define-type (Button action: procedure
+(define-type (Button action: (maps () to: void)
 		     label: string)
   extending Magic
   with
   ((draw! context::Cursor)::void
    (let* ((painter ::Painter (the-painter))
 	  (inner ::Extent (string-extent label)))
-     (invoke painter 'draw-rounded-rectangle!
-	     (+ inner:width 4)
-	     (+ inner:height 2))
+     (painter:draw-rounded-rectangle!
+      (+ inner:width 4)
+      (+ inner:height 2))
      (with-translation (2 1)
-	 (invoke painter 'draw-string! label
-		 (and (pair? (the-cursor))
-		      (equal? (cursor-tail) context)
-		      (cursor-head))))))
+	 (painter:draw-string!
+	  label
+	  (and (pair? (the-cursor))
+	       (equal? (cursor-tail) context)
+	       (cursor-head))))))
   
   ((extent)::Extent
    (let ((inner ::Extent (string-extent label)))
@@ -40,7 +41,7 @@
 	  #t)
 	 (else
 	  #f)))
-   
+  
   ((tapped x::real y::real)::boolean
    (action)
    #t))

@@ -360,13 +360,13 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 (define (cursor-retreat!)
   (set! (the-cursor) (cursor-retreat)))
 
-
 ;; We stipulate that, for any N >= 1, () < (x1 ... xN)
 ;; (as a consequence, whenever one cursor is a proper
 ;; suffix of another, it is considered to be "earlier"
 ;; than the longer one)
 
-(define (cursor< a::Cursor b::Cursor document::Indexable)
+(define (cursor< a::Cursor b::Cursor
+		 #!optional (document (the-document)))
   ::boolean
   (define (k< k::int a*::Cursor b*::Cursor parent::Indexable)
     ::boolean

@@ -72,12 +72,14 @@
 				 in: document))
 	  (and-let* ((target (if (pair? target)
 				 target
-				 (innermost-composition in: document
-							at: cursor)))
+				 (innermost-composition
+				  in: document
+				  at: cursor)))
 		     (`(,name . ,_) target)
 		     ((symbol? name))
 		     (extension (extension name))
-		     (illustration (invoke (as Extension extension)
+		     (illustration (invoke (as Extension
+					       extension)
 					   'create-from target)))
 	    (set! (origin illustration) target)
 	    (replace-expression! at: cursor

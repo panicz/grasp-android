@@ -17,7 +17,8 @@
 			index: int := 0
 			max-width: real := 0
 			max-line-height: real
-			:= (invoke (the-painter) 'min-line-height))
+			:= (invoke (the-painter)
+				   'min-line-height))
   extending Base with
   ((advance/extent! extent::Extent)::void
    (set! left (+ left extent:width))
@@ -33,9 +34,15 @@
   ((new-line!)::void
    (set! top (+ top max-line-height))
    (set! left 0)
-   (set! max-line-height (invoke (the-painter) 'min-line-height)))
+   (set! max-line-height (invoke (the-painter)
+				 'min-line-height)))
   
   )
 
 
-(define-parameter (the-traversal) ::Traversal)
+(define-parameter (the-traversal) ::Traversal
+  (Traversal left: 0
+	     top: 0
+	     index: 0
+	     max-width: 0
+	     max-line-height: 0))
