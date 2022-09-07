@@ -18,98 +18,30 @@
   (infix)
   (match)
   (functions)
+  (print)
   )
 
+#|
 (define parsed (with-input-from-string "\
 (#;(a (b c) d) #|efg|# ;hij
- define (factorial n #|int|#) ; -> int
+ define (! n #|int|#) ; -> int
   (if #;(<= n 1) (is n <= 1)
       1 ; base case
       (* n (! (- n 1)))))" parse-document))
+|#
 
-
-(define parsed (parse-string "\
-(define (factorial n)
-  (if (<= n 0)
-      1
-      (* n (! (- n 1)))))"))
-
-(show parsed)
-
-(define cur '())
-
-(define (ccf)
-  (set! cur (cursor-climb-front cur parsed))
-  cur)
-
-(define (ccb)
-  (set! cur (cursor-climb-back cur parsed))
-  cur)
-
-(define (cn)
-  (set! cur (cursor-next cur parsed))
-  cur)
-
-(define (cb)
-  (set! cur (cursor-back cur parsed))
-  cur)
-
-(define (at)
-  (cursor-ref parsed cur))
-
-
-;;(set! (cadar parsed) '())
-
-
-#;(e.g.
- (let ((document ::Tile (as Tile (parse-string "
+(define document (with-input-from-string "\
 (define (! n)
   (if (<= n 0)
-    1
-   (* n (! (- n 1)))))
+      1
+      (* n (! (- n 1)))))
 
 (e.g. (! 5) ===> 120)
-"))))
-   ;;(show (part-at '(5 5 1)))   
-   (and (equal? (cursor-ref document '(1 1))
-		'define)
-	(equal? (cursor-ref document '(1 3 1))
-		'!)
-	(equal? (cursor-ref document '(3 3 1))
-	     'n)
-	(equal? (cursor-ref document '(1 5 1))
-	     'if)
-	(equal? (cursor-ref document '(1 3 5 1))
-		'<=)
-#|
-	(equal? (cursor-ref document '(5 5 1))
-		1)
-|#
-	(equal? (cursor-ref document '(1 7 5 1))
-		'*)
-	(equal? (cursor-ref document '(3 7 5 1))
-		'n)
+" parse-document))
 
-	(equal? (cursor-ref document '(1 5 7 5 1))
-		'!)
-	(equal? (cursor-ref document '(1 3 5 7 5 1))
-		'-)
-	(equal? (cursor-ref document '(3 3 5 7 5 1))
-		'n)
-	(cursor< '(1 1) '(1 3 1) document)
-	(not (cursor< '(1 3 1) '(1 1) document))
-	(cursor< '(1 3 1) '(3 3 1) document)
-	(not (cursor< '(3 3 1) '(1 3 1) document))
-	(cursor< '(3 3 1) '(1 5 1) document)
-	(not (cursor< '(1 5 1) '(3 3 1) document))
-	
-	
-	#|
-	(equal? (cursor-ref document '(5 3 5 7 5 1))
-		1)
-|#
-	)))
+(set! (the-document) document)
 
+;;(show parsed)
 
 
 ;; this is what we're aiming for:
@@ -146,22 +78,47 @@
   (parameterize ((the-painter (TextPainter)))
     (let ((parsed (call-with-input-string expression parse)))
       (draw! (head parsed)))
-    (the-painter)))
+    (as Painter (the-painter))))
 
 (set! (the-painter) (TextPainter))
 
 (define (painter-displays? s::string)::boolean
   (string=? ((the-painter):toString) s))
 
-;(draw! (head parsed))
+(draw-document! document)
 
-(display ((the-painter):toString))
+(parameterize ((evaluating? #t))
+  (e.g. (the-expression at: '(1 1 1)) ===> define)
+  (e.g. (the-expression at: '(1 3 1 1)) ===> !)
+  (e.g. (the-expression at: '(3 3 1 1)) ===> n)
+  (e.g. (the-expression at: '(1 5 1 1)) ===> if)
+  (e.g. (the-expression at: '(1 3 5 1 1)) ===> <=)
+  (e.g. (the-expression at: '(5 5 1 1)) ===> 1)
+  (e.g. (the-expression at: '(1 7 5 1 1)) ===> *)
+  (e.g. (the-expression at: '(3 7 5 1 1)) ===> n)
+  (e.g. (the-expression at: '(1 5 7 5 1 1)) ===> !)
+  (e.g. (the-expression at: '(1 3 5 7 5 1 1)) ===> -)
+  (e.g. (the-expression at: '(3 3 5 7 5 1 1)) ===> n)
+  (e.g. (the-expression at: '(5 3 5 7 5 1 1)) ===> 1)
+  )
 
-#;(assert
- (painter-displays? &{
-╭        ╭             ╮              ╮
-│ define │ factorial n │              │
-│        ╰             ╯              │
+(e.g. (is '(1 1 1) cursor< '(1 3 1 1)))
+(e.g. (isnt '(1 3 1 1) cursor< '(1 1 1)))
+(e.g. (is '(1 3 1 1) cursor< '(3 3 1 1)))
+(e.g. (isnt '(3 3 1 1) cursor< '(1 3 1 1)))
+(e.g. (is '(3 3 1 1) cursor< '(1 5 1 1)))
+(e.g. (isnt '(1 5 1 1) cursor< '(3 3 1 1)))	
+
+(DUMP (the-expression at: '(#\[ 3 1 1)))
+
+(define x 18)
+(define y 10)
+
+(assert
+ (painter-displays? "
+╭        ╭     ╮                      ╮
+│ define │ ! n │                      │
+│        ╰     ╯                      │
 │   ╭    ╭        ╮                 ╮ │
 │   │ if │ <= n 0 │                 │ │
 │   │    ╰        ╯                 │ │
@@ -171,9 +128,74 @@
 │   │       ╭     ╭   ╭       ╮ ╮ ╮ │ │
 │   │       │ * n │ ! │ - n 1 │ │ │ │ │
 ╰   ╰       ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
-}))
+                                       
+                                       
+                                       
+╭      ╭     ╮          ╮              
+│ e.g. │ ! 5 │ ===> 120 │              
+╰      ╰     ╯          ╯              
+"))
+
+(invoke (as TextPainter (the-painter))
+	'put! #\⊙ y x)
+
+(display ((the-painter):toString))
 
 
+;; w sobote chcemy zrobic commit z komputera,
+;; natomiast po nim mielibysmy nastepujace prace:
+;; - wdrozyc ten design z cursor-under*
+;; - (the) document jako argument domyslny w cursor-under
+;; 
+(define everything-ready? #false)
+
+#|
+              11111111112222222222333333333
+    012345678901234567890123456789012345678
+  0 ╭        ╭     ╮                      ╮
+  1 │ define │ ! n │                      │
+  2 │        ╰     ╯                      │
+  3 │   ╭    ╭        ╮                 ╮ │
+  4 │   │ if │ <= n 0 │                 │ │
+  5 │   │    ╰        ╯                 │ │
+  6 │   │                               │ │
+  7 │   │       1                       │ │
+  8 │   │                               │ │
+  9 │   │       ╭     ╭   ╭       ╮ ╮ ╮ │ │
+ 10 │   │       │ * n │ ! │ - n 1 │ │ │ │ │
+ 11 ╰   ╰       ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
+ 12                                        
+ 13                                        
+ 14                                        
+ 15 ╭      ╭     ╮          ╮              
+ 16 │ e.g. │ ! 5 │ ===> 120 │              
+ 17 ╰      ╰     ╯          ╯              
+
+|#
+
+#;(when everything-ready?
+  (e.g. (cursor-under 0 0) ===> (#\[ 1 1)) ; (define ...)
+  (e.g. (cursor-under 0 11) ===> (#\[ 1 1)) ; (define ...)
+  (e.g. (cursor-under 0 38) ===> (#\] 1 1)) ; (define ...)
+  (e.g. (cursor-under 11 38) ===> (#\] 1 1)) ; (define ...)
+  (e.g. (cursor-under 2 1) ===> (0 1 1 1)) ; define
+  (e.g. (cursor-under 7 1) ===> (5 1 1 1)) ; define
+  (e.g. (cursor-under 9 1) ===> (#\[ 3 1 1)) ; (! n)
+  (e.g. (cursor-under 11 1) ===> (0 1 3 1 1)) ; !
+  (e.g. (cursor-under 12 1) ===> (0 2 3 1 1)) ; [Space (1)]
+  (e.g. (cursor-under 15 1) ===> (#\] 3 1 1)) ; (! n)
+  (e.g. (cursor-under 4 3) ===> (#\[ 5 1 1)) ; (if ...)
+  (e.g. (cursor-under 4 11) ===> (#\[ 5 1 1)) ; (if ...)
+  (e.g. (cursor-under 6 4) ===> (0 1 5 1 1)) ; if
+  (e.g. (cursor-under 9 4) ===> (#\[ 3 5 1 1)) ; (<= n 0)
+  (e.g. (cursor-under 18 4) ===> (#\] 3 5 1 1)) ; (<= n 0)
+  (e.g. (cursor-under 12 7) ===> (0 5 5 1 1)) ; 1
+  (e.g. (cursor-under 12 10) ===> (#\[ 7 5 1 1)) ; (* n ...)
+  (e.g. (cursor-under 0 16) ===> (#\[ 3 1)) ; (e.g. ...)
+  (e.g. (cursor-under 24 17) ===> (#\] 3 1)) ; (e.g. ...)
+  (e.g. (cursor-under 7 16) ===> (#\[ 3 3 1)) ; (! 5)
+  )
+ 
 (define horizontal-dotted (call-with-input-string "\
 (head
 .
