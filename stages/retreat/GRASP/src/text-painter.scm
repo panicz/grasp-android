@@ -8,12 +8,9 @@
 (import (define-object))
 (import (indexable))
 
-(define-object (TextPainter)::Painter
+(define-object (CharPainter)::Painter
   (define shift-left ::real 0)
   (define shift-top ::real 0)
-  (define width ::int 0)
-  (define height ::int 0)
-  (define data ::char[])
 
   (define clip-left ::real 0)
   (define clip-top ::real 0)
@@ -53,43 +50,6 @@
   
   (define (remembered-top)::real
     top)
-  
-  (define (get row::real col::real)::char
-    (let ((x (+ col shift-left))
-          (y (+ row shift-top)))
-      (if (and (is 0 <= x < width)
-               (is 0 <= y < height))
-          (data (+ (* width y) x))
-          #\space)))
-  
-  (define (put! c::char row::real col::real)::void
-    (let ((x (+ col shift-left))
-          (y (+ row shift-top)))
-      (when (and (is x >= (max 0 clip-left))
-                 (is y >= (max 0 clip-top)))
-	(when (or (is x >= (min width clip-width))
-                  (is y >= (min height clip-height)))
-         (let* ((new-width (if (is x >= width)
-			       (+ x 1)
-			       width))
-                 (new-height (if (is y >= height)
-                                 (+ y 1)
-                                 height))
-                 (new-data (char[] length: (* new-width
-					      new-height))))
-            (for line from 0 below new-height
-                 (for column from 0 below new-width
-                      (set! (new-data (+ (* new-width line)
-                                         column))
-                            (if (and (is column < width)
-                                     (is line < height))
-                                (data (+ (* width line)
-                                         column))
-                                #\space))))
-            (set! width new-width)
-            (set! height new-height)
-            (set! data new-data)))
-	(set! (data (+ (* width y) x)) c))))
 
   (define (space-width)::real 1)
   
@@ -101,24 +61,6 @@
 
   (define (horizontal-bar-height)::real 1)
   
-  (define (clear!)::void
-   (for line from 0 below height
-        (for column from 0 below width
-             (set! (data (+ (* line width) column))
-                   #\space)))
-   (set! shift-left 0)
-   (set! shift-top 0))
-
-  (define (toString)::String
-    (with-output-to-string
-      (lambda ()
-	(write-char #\newline)
-	(for line from 0 below height
-             (for column from 0 below width
-                  (write-char (data (+ (* line width)
-				       column))))
-             (write-char #\newline)))))
-
   (define (translate! x::real y::real)::void
     (set! shift-left (+ shift-left x))
     (set! shift-top (+ shift-top y)))
@@ -131,12 +73,12 @@
 
   (define (draw-horizontal-line! top::real)::void
     (for i from (max 0 (current-clip-left))
-      below (min width (clip-width))
+      below (min (current-width) (clip-width))
       (put! #\─ top i)))
   
   (define (draw-vertical-line! left::real)::void
     (for i from (max 0 (current-clip-top))
-      below (min height (clip-height))
+      below (min (current-height) (clip-height))
       (put! #\│ i left)))
 
   (define (horizontal-line-height)::real
@@ -144,7 +86,6 @@
   
   (define (vertical-line-width)::real
     1)
-
   
   (define (draw-horizontal-bar! width::real)::void
     (for i from 0 below width
@@ -192,11 +133,11 @@
   
   (define (draw-quoted-text! s::CharSequence index::Index)
     ::void
-    (let ((extent (string-extent s)))
+    (let ((extent ::Extent (string-extent s)))
       (put! #\❝ 0 0)
       (with-translation (2 1)
 	  (draw-string! s index))
-      (put! #\❞ (+ extent:height 1) (+ extent:width 2))))
+      (put! #\❞ (+ extent:height 1) (+ extent:width 3))))
 
   (define (draw-string! text::CharSequence index::Index)::void
     (let ((row 0)
@@ -224,6 +165,85 @@
 
   (define (atom-extent text::CharSequence)::Extent
     (string-extent text))
+
+  (define (get row::real col::real)::char #!abstract)
+
+  (define (put! c::char row::real col::real)::void #!abstract)
+
+  (define (clear!)::void #!abstract)
+
+  (define (current-width)::real #!abstract)
+
+  (define (current-height)::real #!abstract)
   
   )
+  
+  
+(define-object (TextPainter)::Painter
+  (define width ::int 0)
+  (define height ::int 0)
+  (define data ::char[])
+
+  (define (get row::real col::real)::char
+    (let ((x (+ col shift-left))
+          (y (+ row shift-top)))
+      (if (and (is 0 <= x < width)
+               (is 0 <= y < height))
+          (data (+ (* width y) x))
+          #\space)))
+  
+  (define (put! c::char row::real col::real)::void
+    (let ((x (+ col shift-left))
+          (y (+ row shift-top))
+	  (left (max 0 clip-left))
+	  (top (max 0 clip-top)))
+      (when (and (is left <= x < (+ left clip-width))
+                 (is top <= y < (+ top clip-height)))
+	(when (or (is x >= width)
+                  (is y >= height))
+          (let* ((new-width (if (is x >= width)
+			       (+ x 1)
+			       width))
+                 (new-height (if (is y >= height)
+                                 (+ y 1)
+                                 height))
+                 (new-data (char[] length: (* new-width
+					      new-height))))
+            (for line from 0 below new-height
+                 (for column from 0 below new-width
+                      (set! (new-data (+ (* new-width line)
+                                         column))
+                            (if (and (is column < width)
+                                     (is line < height))
+                                (data (+ (* width line)
+                                         column))
+                                #\space))))
+            (set! width new-width)
+            (set! height new-height)
+            (set! data new-data)))
+	(set! (data (+ (* width y) x)) c))))
+
+  (define (clear!)::void
+   (for line from 0 below height
+        (for column from 0 below width
+             (set! (data (+ (* line width) column))
+                   #\space)))
+   (set! shift-left 0)
+   (set! shift-top 0))
+
+  (define (toString)::String
+    (with-output-to-string
+      (lambda ()
+	(write-char #\newline)
+	(for line from 0 below height
+             (for column from 0 below width
+                  (write-char (data (+ (* line width)
+				       column))))
+             (write-char #\newline)))))
+
+  (define (current-width)::real width)
+
+  (define (current-height)::real height)
+  
+  (CharPainter))
 
