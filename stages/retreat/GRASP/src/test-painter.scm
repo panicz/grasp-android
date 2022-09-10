@@ -9,7 +9,6 @@
   (space)
   (cursor)
   (primitive)
-  (symbol)
   (combinators)
   (text-painter)
   (parse)

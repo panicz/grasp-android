@@ -12,7 +12,6 @@
 (import (examples))
 (import (indexable))
 (import (space))
-(import (symbol))
 (import (text))
 (import (match))
 

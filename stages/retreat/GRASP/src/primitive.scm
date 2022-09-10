@@ -113,11 +113,30 @@
   (define (subpart start::int)::Atom
     (Atom (invoke source 'substring start)))
 
+  (define (cursor-under* x::real y::real path::Cursor)::Cursor*
+   #f)
+  
   (define (toString)::String
     source)
   
   (set! builder (java.lang.StringBuilder source-string))
   (set! source (builder:toString)))
+
+(define (atom-length a::Atom)::int
+  (a:builder:length))
+
+(define (insert-char! c::char a::Atom index::int)::void
+  (a:insert-char! c index))
+
+(define (delete-char! a::Atom index::int)::void
+  (a:delete-char! index))
+
+(define (truncate-atom! a::Atom length::int)::void
+  (a:truncate! length))
+
+(define (atom-subpart a::Atom start::int)::Atom
+  (a:subpart start))
+
 
 (define-object (cons a d)::Tile
   (define (equals object)::boolean
@@ -272,7 +291,6 @@
 	 (let ((tile ::Tile (as Tile element)))
            (traversal:advance/extent! (tile:extent))))))
 
-
 (define (traverse sequence::list
 		  #!key
 		  (doing nothing)
@@ -298,7 +316,8 @@
 			(horizontal-bar traversal:max-width)
 			(vertical-bar traversal:max-line-height)))
                (pre-tail (if horizontal?
-                             (skip-first-line (pre-tail-space pair))
+                             (skip-first-line
+			      (pre-tail-space pair))
                              (pre-tail-space pair)))
                (item (tail* pair))
 	       (post-tail (post-tail-space pair)))
@@ -336,20 +355,30 @@
 	  (returning traversal))
       )))
 
-(define (draw-sequence! elems::list
+(define (draw-sequence! #!optional
+			(elems::list (head (the-document)))
 			#!key (context::Cursor (recons 1 '())))
   ::void
-  (traverse elems doing: (lambda (item::Element traversal::Traversal)
-			   (with-translation (traversal:left
-					      traversal:top)
-			       (item:draw! (recons traversal:index
-						   context))))))
+  (traverse elems
+	    doing:
+	    (lambda (item::Element traversal::Traversal)
+	      (with-translation (traversal:left
+				 traversal:top)
+		  (item:draw! (recons traversal:index
+				      context))))))
+
+(define (draw-document! document::pair)
+  (cond ((null? (head document))
+	 (draw! (null-head-space document)))
+	((pair? (head document))
+	 (draw! (pre-head-space (head document)))
+	 (draw-sequence! (head document)))))
 
 (define (draw! object #!key
 	       (context::Cursor '()))
   ::void
-  (cond ((instance? object Tile)
-	 (invoke (as Tile object)
+  (cond ((instance? object Element)
+	 (invoke (as Element object)
 		 'draw! context))
 
 	((null? object)
@@ -365,7 +394,9 @@
 			  (equal? (cursor-tail) context)
 			  (cursor-head)))))))
 
-(define (cursor-under left::real top::real elems::list
+(define (cursor-under left::real top::real
+		      #!optional
+		      (elems::list (head (the-document)))
 		      #!key (context::Cursor (recons 1 '())))
   ::Cursor
   (call/cc
@@ -388,7 +419,9 @@
 	       returning: (lambda (t::Traversal)
 			    context)))))
 
-(define (sequence-extent elems::list)::Extent
+(define (sequence-extent #!optional
+			 (elems::list (head (the-document))))
+  ::Extent
   (traverse elems
 	    returning:
 	    (lambda (traversal::Traversal)

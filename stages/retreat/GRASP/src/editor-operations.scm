@@ -4,7 +4,6 @@
 (import (space))
 (import (cursor))
 (import (primitive))
-(import (symbol))
 (import (document-operations))
 (import (infix))
 (import (match))
@@ -13,10 +12,10 @@
 (define (delete! position::Index)::void
   (let* ((target (the-expression)))
     (cond
-     ((is target instance? Symbol)
-      (cond ((is 0 <= position < (symbol-length target))
+     ((is target instance? Atom)
+      (cond ((is 0 <= position < (atom-length target))
 	     (delete-char! target position)
-	     (when (= (symbol-length target) 0)
+	     (when (= (atom-length target) 0)
 	       (take-cell-at! (cursor-tail))
 	       (set! (the-cursor)
 		     (cursor-climb-back
@@ -81,7 +80,7 @@
       (set! (the-cursor)
 	    (recons #\] root)))
      
-     ((is target instance? Symbol)
+     ((is target instance? Atom)
       (cond
        ((or (eq? c #\space) (eq? c #\newline))
 	(cond ((eqv? (cursor-head) (first-index target))
@@ -102,17 +101,16 @@
 				      following-space))
 		 (cursor-advance!)))
 	      (else
-	       (let* ((suffix (symbol-subpart target tip))
+	       (let* ((suffix (atom-subpart target tip))
 		      (owner (drop (quotient top 2) parent))
 		      (cell (cons suffix (tail owner))))
-		 (truncate-symbol! target tip)
+		 (truncate-atom! target tip)
 		 (set! (tail owner) cell)
 		 (set! (post-head-space cell)
 		   (post-head-space owner))
 		 (set! (post-head-space owner)
 		   (Space fragments: (if (eq? c #\newline)
-					 (cons 0
-					       (cons 0 '()))
+					 (cons* 0 0 '())
 					 (cons 1 '()))))
 		 (cursor-advance!)))))
        
@@ -143,7 +141,7 @@
 			     (cursor-head))))
 	  (put-into-cell-at!
 	   (cursor-tail)
-	   (cons (Symbol (list->string (list c)))
+	   (cons (Atom (list->string (list c)))
 		 '()))
 	  (set! (the-cursor)
 	    (recons* 1 (+ (head (cursor-tail)) 1)

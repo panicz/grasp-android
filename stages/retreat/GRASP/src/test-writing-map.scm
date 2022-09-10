@@ -12,7 +12,6 @@
  (extent)
  (combinators)
  (parse)
- (symbol)
  (examples)
  (assert)
  (infix)

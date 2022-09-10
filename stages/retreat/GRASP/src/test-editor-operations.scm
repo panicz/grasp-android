@@ -13,7 +13,6 @@
  (text-painter)
  (combinators)
  (parse)
- (symbol)
  (examples)
  (assert)
  (infix)
