@@ -13,7 +13,7 @@
 (define-alias ExtendedTerminal
   com.googlecode.lanterna.terminal.ExtendedTerminal)
 
-(define-alias TextColor
+(define-alias Color
   com.googlecode.lanterna.TextColor)
 
 (define-alias Terminal
@@ -36,8 +36,13 @@
 
 (define-alias Character java.lang.Character)
 
-(define-alias TextCharacter
+(define-alias Letter
   com.googlecode.lanterna.TextCharacter)
+
+(define-alias TextDecoration
+  com.googlecode.lanterna.SGR)
+
+(define-alias TextStyle java.util.EnumSet[TextDecoration])
 
 (define MouseButton:None ::int 0)
 (define MouseButton:Left ::int 1)

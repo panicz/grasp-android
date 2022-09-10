@@ -9,7 +9,8 @@
        #'(lambda args . body))
 
       ((_ args . body)
-       #'(%lambda/kw args #;req () #;opt () #;kw () #;destruct () body)))))
+       #'(%lambda/kw args #;req () #;opt () #;kw ()
+		     #;destruct () body)))))
 
 (define-syntax %lambda/kw
   (lambda (stx)

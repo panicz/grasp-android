@@ -1,3 +1,5 @@
+(define-alias EnumSet java.util.EnumSet)
+
 (define-alias CharSequence java.lang.CharSequence)
 
 (define-alias Index java.lang.Object)
