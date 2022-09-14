@@ -153,11 +153,33 @@
 	       (put! c row col)
 	       (set! col (+ col 1))))
 	(set! n (+ n 1)))))
+
+  (define (string-character-index-under x::real y::real
+					text::CharSequence)
+    ::int
+    (let ((end (length text)))
+      (let next ((row 0)
+		 (col 0)
+		 (n ::int 0))
+	(if (or (and (is x = col) (is y <= row))
+		(is n >= end))
+	    n
+	    (let ((c (text n)))
+	      (if (eq? c #\newline)
+		  (if (is y <= row)
+		      n
+		      (next (+ row 1) 0 (+ n 1)))
+		  (next row (+ col 1) (+ n 1))))))))
   
   (define (quoted-text-extent text::CharSequence)::Extent
     (let ((inner ::Extent (string-extent text)))
       (Extent width: (+ inner:width 4)
 	      height: (+ (max inner:height 1) 2))))
+
+  (define (quoted-text-character-index-under x::real y::real
+					     text::CharSequence)
+    ::int
+   (string-character-index-under (- x 2) (- y 1) text))
   
   (define (draw-atom! text::CharSequence index::Index)::void
     (with-translation (0 1)
@@ -166,6 +188,11 @@
   (define (atom-extent text::CharSequence)::Extent
     (string-extent text))
 
+  (define (atom-character-index-under x::real y::real
+				      text::CharSequence)
+    ::int
+    (string-character-index-under x (- y 1) text))
+  
   (define (get row::real col::real)::char #!abstract)
 
   (define (put! c::char row::real col::real)::void #!abstract)

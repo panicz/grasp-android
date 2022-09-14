@@ -44,6 +44,16 @@
   ((previous-index index::Index)::Index
    (first-index))
 
+  ((cursor-under* x::real y::real path::Cursor)::Cursor*
+   (let ((front-extent (front:extent))
+	 (back-extent (back:extent)))
+     (or (and (is 0 <= x < front-extent:width)
+	      (is 0 <= y < front-extent:height)
+	      (front:cursor-under* x y (recons (last-index) path)))
+	 (and (is 0 <= x < back-extent:width)
+	      (is 0 <= y < back-extent:height)
+	      (back:cursor-under* x y (recons (first-index) path))))))
+  
   ((index< a::Index b::Index)::boolean
    (and (is a eq? (first-index))
 	(isnt b eq? (first-index))))
@@ -86,6 +96,17 @@
   ((previous-index index::Index)::Index
    (first-index))
 
+  ((cursor-under* x::real y::real path::Cursor)::Cursor*
+   (let ((top-extent (top:extent)))
+     (or (and (is 0 <= x < top-extent:width)
+	      (is 0 <= y < top-extent:height)
+	      (top:cursor-under* x y (recons (first-index) path)))
+	 (let ((y (- y top-extent:height))
+	       (bottom-extent (bottom:extent)))
+	   (and (is 0 <= x < bottom-extent:width)
+		(is 0 <= y < bottom-extent:height)
+		(bottom:cursor-under* x y (recons (last-index) path)))))))
+  
   ((index< a::Index b::Index)::boolean
    (and (is a eq? (first-index))
 	(isnt b eq? (first-index))))
@@ -130,6 +151,17 @@
   ((previous-index index::Index)::Index
    (first-index))
 
+  ((cursor-under* x::real y::real path::Cursor)::Cursor*
+   (let ((left-extent (left:extent)))
+     (or (and (is 0 <= x < left-extent:width)
+	      (is 0 <= y < left-extent:height)
+	      (left:cursor-under* x y (recons (first-index) path)))
+	 (let ((x (- x left-extent:height))
+	       (right-extent (right:extent)))
+	   (and (is 0 <= x < right-extent:width)
+		(is 0 <= y < right-extent:height)
+		(right:cursor-under* x y (recons (last-index) path)))))))
+  
   ((index< a::Index b::Index)::boolean
    (and (is a eq? (first-index))
 	(isnt b eq? (first-index))))

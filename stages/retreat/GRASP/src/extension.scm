@@ -6,6 +6,7 @@
 (import (fundamental))
 (import (indexable))
 (import (primitive))
+(import (infix))
 (import (match))
 (import (functions))
 (import (cursor))
@@ -44,6 +45,12 @@
   (define (draw! context::Cursor)::void #!abstract)
 
   (define (extent)::Extent #!abstract)
+
+  (define (cursor-under* x::real y::real path::Cursor)::Cursor*
+    (let ((size (extent)))
+      (and (is 0 <= x < size:width)
+	   (is 0 <= y < size:height)
+	   (recons (invoke (this) 'first-index) path))))
   
   (Simple))
 

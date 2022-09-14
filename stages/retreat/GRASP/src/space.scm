@@ -265,9 +265,41 @@
 	  (t:new-line!)
 	  (skip (tail input) (+ total (head input) 1)))
 	 (`(,,@integer)
-	  (advance-with-cursor! (head input)))))
-     (set! t:index (+ t:index 1))))
+	  (advance-with-cursor! (head input)))))))
 
+  ((cursor-under* x::real y::real path::Cursor)::Cursor*
+   (and-let* ((painter (the-painter))
+	      (space-width (painter:space-width))
+	      (tentative-result #f)
+	      (t (invoke (the-traversal) 'clone))
+	      ((is y < t:top)))
+     (let skip ((input fragments)
+		(total 0))
+       (match input
+	 (`(,,@integer? ,,@integer? . ,rest)
+	  (cond
+	   ((is t:top <= y < (+ t:top t:max-line-height))
+	    (hash-cons* (+ total
+			   (min (head input)
+				(quotient (- x t:left)
+					  space-width)))
+			t:index
+			path))
+	   (else
+	    (t:advance-by! (* space-width (head input)))
+	    (t:new-line!)
+	    (skip (tail input)
+		  (+ total (head input))))))
+	 (`(,,@integer?)
+	  (and (is t:left <= x < (+ t:left
+				 (* space-width
+				    (head input))))
+	       (hash-cons* (+ total
+			      (quotient (- x t:left)
+					space-width))
+			   t:index
+			   path)))))))
+  
   ((print out::gnu.lists.Consumer)::void
    (let process ((input fragments))
      (match input
@@ -504,6 +536,13 @@
   (define (extent)::Extent
     (Extent width: width
 	    height: (invoke (the-painter) 'horizontal-bar-height)))
+  
+  (define (cursor-under* x::real y::real path::Cursor)::Cursor*
+    (let ((inner (extent)))
+      (and (is 0 <= x < inner:width)
+	   (is 0 <= y < inner:height)
+	   (hash-cons (invoke (this) 'first-index) path))))
+
   (HeadTailSeparator)
   (set! width width0))
 
@@ -511,9 +550,17 @@
   (define height :: real 0)
   (define (draw! context::Cursor)::void
     (invoke (the-painter) 'draw-vertical-bar! height))
+  
   (define (extent)::Extent
     (Extent width: (invoke (the-painter) 'vertical-bar-width)
 	    height: height))
+  
+  (define (cursor-under* x::real y::real path::Cursor)::Cursor*
+    (let ((inner (extent)))
+      (and (is 0 <= x < inner:width)
+	   (is 0 <= y < inner:height)
+	   (hash-cons (invoke (this) 'first-index) path))))
+
   (HeadTailSeparator)
   (set! height height0))
 
@@ -555,6 +602,20 @@
     (match index
       (#\] 0)
       (_ #\[)))
+
+  (define (cursor-under* x::real y::real path::Cursor)::Cursor*
+    (let* ((outer (extent))
+	   (painter (the-painter))
+	   (paren-width (painter:paren-width)))
+      (and (is 0 <= x < outer:width)
+	   (is 0 <= y < outer:height)
+	   (cond ((is 0 <= x < paren-width)
+		  (hash-cons (first-index) path))
+		 ((is paren-width <= x < (- outer:width
+					    paren-width))
+		  (hash-cons 0 path))
+		 ((is (- outer:width paren-width) <= x)
+		  (hash-cons (last-index) path))))))
   
   (define (index< a::Index b::Index)
     (or (and (eqv? a #\[) (or (eqv? b 0)

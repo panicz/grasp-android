@@ -111,10 +111,17 @@
     (set! source ((builder:toString):intern)))
 
   (define (subpart start::int)::Atom
-    (Atom (invoke source 'substring start)))
+    (Atom (source:substring start)))
 
   (define (cursor-under* x::real y::real path::Cursor)::Cursor*
-   #f)
+    (let ((inner (extent))
+	  (painter (the-painter)))
+      (and (is 0 <= x < inner:width)
+	   (is 0 <= y < inner:height)
+	   (recons (painter:atom-character-index-under x y
+						       source)
+		   path)
+	   )))
   
   (define (toString)::String
     source)
@@ -161,9 +168,20 @@
 					 context))
 	(invoke (the-painter) 'remember-offset!
 		(+ paren-width 1 inner:width)
-		(- inner:height 1)))
-      ))
+		(- inner:height 1)))))
 
+  (define (cursor-under* x::real y::real path::Cursor)::Cursor*
+    (let ((inner (sequence-extent (this)))
+	  (paren-width (invoke (the-painter) 'paren-width)))
+      (and (is 0 <= y < inner:height)
+	   (or (and (is 0 <= x < paren-width)
+		    (recons (first-index) path))
+	       (and (is 0 <= (- x paren-width inner:width) < paren-width)
+		    (recons (last-index) path))
+	       (and (is 0 <= (- x paren-width) < inner:width)
+		    (cursor-under (- x paren-width) y
+				  (this) context: path))))))
+  
   (define (extent)::Extent
     (let ((extent ::Extent (sequence-extent
 			    (this))))
@@ -401,23 +419,17 @@
   ::Cursor
   (call/cc
    (lambda (return)
-     (traverse elems
-	       doing:
-	       (lambda (item::Element t::Traversal)
-		 (let* ((size (extent item)))
-		   (when (and (is t:left <= left <= (+ t:left
-						       size:width))
-			      (is t:top <= top <= (+ t:top
-						     size:height)))
-		     (let ((cursor (recons t:index context)))
-		       (if (pair? item)
-			   (return (cursor-under (- left t:left)
+     (traverse
+      elems
+      doing:
+      (lambda (item::Element t::Traversal)
+	(let* ((size (extent item)))
+	  (and-let* ((cursor (item:cursor-under* (- left t:left)
 						 (- top t:top)
-						 item
-						 context: cursor))
-			   (return cursor))))))
-	       returning: (lambda (t::Traversal)
-			    context)))))
+						 (recons t:index context))))
+	    (return cursor))))
+      returning: (lambda (t::Traversal)
+		   context)))))
 
 (define (sequence-extent #!optional
 			 (elems::list (head (the-document))))

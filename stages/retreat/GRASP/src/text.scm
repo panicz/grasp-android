@@ -63,4 +63,14 @@
 	(and (is b eqv? (last-index))
 	     (isnt a eqv? (last-index)))))
 
+  (define (cursor-under* x::real y::real path::Cursor)::Cursor*
+    (let ((inner (extent))
+	  (painter (the-painter)))
+      (and (is 0 <= x < inner:width)
+	   (is 0 <= y < inner:height)
+	   (hash-cons (painter:quoted-text-character-index-under x y
+								 (this))
+		   path)
+	   )))
+  
   (gnu.lists.FString))

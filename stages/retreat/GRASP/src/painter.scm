@@ -61,6 +61,9 @@
   (quoted-text-extent text::CharSequence)::Extent
   
   (draw-atom! text::CharSequence index::Index)::void
+
+  (atom-character-index-under x::real y::real text::CharSequence)::int
+  (quoted-text-character-index-under x::real y::real text::CharSequence)::int
   
   (atom-extent text::CharSequence)::Extent
 
@@ -74,9 +77,6 @@
   (close-paren! height::real)::void
 
   (draw-rounded-rectangle! width::real height::real)::void
-    
-  ;;(end-line! line-height::real)::void
-  ;;(cursor-at left::real top::real)::Cursor
   )
 
 (define-object (NullPainter)::Painter
@@ -146,6 +146,16 @@
   (define (draw-atom! text::CharSequence index::Index)::void
     (values))
 
+  (define (atom-character-index-under x::real y::real
+				      text::CharSequence)
+    ::int
+    0)
+  
+  (define (quoted-text-character-index-under x::real y::real
+					     text::CharSequence)
+    ::int
+    0)
+  
   (define (atom-extent text::CharSequence)::Extent
     (Extent width: 0 height: 0))
   

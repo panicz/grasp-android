@@ -18,6 +18,9 @@
 (import (extent))
 (import (fundamental))
 
+;; the methods provided by these interfaces should be thought of as
+;; implicitly parameterized with (the-painter) and (the-cursor)
+;; parameters
 
 (define-interface Indexable ()
   (part-at index::Index)::Indexable*
@@ -27,11 +30,16 @@
   
   (next-index index::Index)::Index
   (previous-index index::Index)::Index
-
+  
   (index< a::Index b::Index)::boolean
-)
+  )
 
-(define-object (Simple)::Indexable
+(define-interface Element (Indexable)
+  (draw! context::Cursor)::void
+  (cursor-under* x::real y::real path::Cursor)::Cursor*
+  )
+
+(define-object (Simple)::Element
   (define (typename)::String "Simple")
   (define (part-at index::Index)::Indexable* (this))
   
@@ -43,14 +51,10 @@
 
   (define (index< a::Index b::Index)::boolean #f)
 
-  (Base))
+  (define (cursor-under* x::real y::real path::Cursor)::Cursor*
+    #!abstract)
   
-;; the methods provided by these interfaces should be thought of as
-;; implicitly parameterized with (the-painter) and (the-cursor)
-;; parameters
-
-(define-interface Element (Indexable)
-  (draw! context::Cursor)::void)
+  (Base))
 
 (define-interface Tile (Element)
   (extent)::Extent)
