@@ -86,6 +86,21 @@
 
 (draw-document! document)
 
+
+(print document)
+
+(e.g.
+ (parameterize ((evaluating? #t))
+   (equal?
+    document
+    '(((define (! n)
+	 (if (<= n 0)
+	     1
+	     (* n (! (- n 1)))))
+       
+       (e.g. (! 5) ===> 120))))))
+
+
 (parameterize ((evaluating? #t))
   (e.g. (the-expression at: '(1 1 1)) ===> define)
   (e.g. (the-expression at: '(1 3 1 1)) ===> !)
@@ -174,21 +189,20 @@
 (e.g. (cursor-under 0 0) ===> (#\[ 1 1)) ; (define ...)
 (e.g. (cursor-under 0 11) ===> (#\[ 1 1)) ; (define ...)
 
-
-;(e.g. (cursor-under 0 38) ===> (#\] 1 1)) ; (define ...)
-;(e.g. (cursor-under 11 38) ===> (#\] 1 1)) ; (define ...)
-;(e.g. (cursor-under 2 1) ===> (0 1 1 1)) ; define
-;(e.g. (cursor-under 7 1) ===> (5 1 1 1)) ; define
+(e.g. (cursor-under 38 0) ===> (#\] 1 1)) ; (define ...)
+(e.g. (cursor-under 38 11) ===> (#\] 1 1)) ; (define ...)
+(e.g. (cursor-under 2 1) ===> (0 1 1 1)) ; define
+(e.g. (cursor-under 7 1) ===> (5 1 1 1)) ; define
 (e.g. (cursor-under 9 1) ===> (#\[ 3 1 1)) ; (! n)
-;(e.g. (cursor-under 11 1) ===> (0 1 3 1 1)) ; !
-;(e.g. (cursor-under 12 1) ===> (0 2 3 1 1)) ; [Space (1)]
+(e.g. (cursor-under 11 1) ===> (0 1 3 1 1)) ; !
+(e.g. (cursor-under 12 1) ===> (0 2 3 1 1)) ; [Space (1)]
 (e.g. (cursor-under 15 1) ===> (#\] 3 1 1)) ; (! n)
 (e.g. (cursor-under 4 3) ===> (#\[ 5 1 1)) ; (if ...)
 (e.g. (cursor-under 4 11) ===> (#\[ 5 1 1)) ; (if ...)
-;(e.g. (cursor-under 6 4) ===> (0 1 5 1 1)) ; if
+(e.g. (cursor-under 6 4) ===> (0 1 5 1 1)) ; if
 (e.g. (cursor-under 9 4) ===> (#\[ 3 5 1 1)) ; (<= n 0)
 (e.g. (cursor-under 18 4) ===> (#\] 3 5 1 1)) ; (<= n 0)
-;(e.g. (cursor-under 12 7) ===> (0 5 5 1 1)) ; 1
+(e.g. (cursor-under 12 7) ===> (0 5 5 1 1)) ; 1
 (e.g. (cursor-under 12 10) ===> (#\[ 7 5 1 1)) ; (* n ...)
 (e.g. (cursor-under 0 16) ===> (#\[ 3 1)) ; (e.g. ...)
 (e.g. (cursor-under 24 17) ===> (#\] 3 1)) ; (e.g. ...)
