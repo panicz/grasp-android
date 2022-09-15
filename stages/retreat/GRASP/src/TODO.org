@@ -1,3 +1,125 @@
+* 14.09.2022
+
+plan:
+- dodac nowe metody do desktopowej implementacji paintera
+- zrobic tak, zeby testy przechodzily
+
+* 13.09.2022
+
+wszystko wyglada cacy jak na razie, tzn. interfejs Element
+udalo sie wzbogacic o metode cursor-under*, ktora jest
+uzywana przez funkcje cursor-under.
+
+teraz pozostaje nam to przetestowac (brrr)
+
+A no i trzeba bedzie jeszcze dodac do screen-renderera
+nowe metody Paintera (ale to na laptopie)
+
+
+
+* 12.09.2022
+
+Interfejs Painter rozszerzony, wraz z implementacja dla
+CharPaintera. Brakuje jednak kilku implementacji cursor-under*,
+i teraz trzeba ich dostarczyc, zanim sie znow uda odpalic kod.
+
+Trzeba tez dostarczyc implementaacji nowych metod Paintera
+do screen-renderera (ale to pewnie dopiero w okolicach srody)
+
+Mamy zatem implementacje cursor-under* dla:
+- Space
+- Atom
+- cons
+- Text
+- below, beside, over
+- HorizontalBar, VerticalBar, EmptyListProxy
+- Magic  
+zeby moc dodac cursor-under* do interfejsu Element.
+
+* 11.09.2022
+
+Plan jest teraz taki:
+
+- dodac metody atom-character-index-under, quoted-text-character-index-under
+  do interfejsu Painter
+- dodac ich implementacje dla CharPaintera
+
+  
+
+* 10.09.2022
+
+udalo sie uzyc paintera w kliencie terminalowym,
+jak rowniez pocommitowac wszystkie zmiany - oprocz
+jednej, mianowicie implementacji cursor-under*
+dla spacji
+
+teraz jednak zajelibysymy sie wlasnie rozbudowywaniem
+cursor-under*
+
+na pewno trzeba:
+- napisac testy ze spacjami
+- dostarczyc implementacji cursor-under* dla wszystkich klas
+- zmienic implementacje cursor-under tak zeby zamiast warunku
+  uzywac cursor-under*
+
+No dobra, to teraz pytanie: jak powinno wygladac cursor-under*
+dla cons? Wydaje sie, ze powinno po prostu rekurencyjnie
+wywolywac cursor-under, z tym ze Traverse powinien tez
+dzialac dla nawiasa otwierajacego i zamykajacego
+
+Mozemy albo zrobic OpenParenProxy i CloseParenProxy
+(analogicznie do EmptyListProxy), albo ten kod powinien
+to uwzgledniac
+
+No, olewamy tworzenie nowych proxy. 
+
+Ale niezbedne jest napisanie w painterze metody, ktora
+bierze wspolrzedne (x, y) i zwraca indeks literki
+
+(index-under x y)
+
+
+* 09.09.2022
+
+plan jest taki:
+- commitujemy osratnie zmiany  
+- biierzemy sie za implementacje cursor-under* - tak aby
+  przechodzilo testy jednostkowe
+- tworzymy klienta terminalowego (na bazie desktopowego)
+
+* 08.09.2022
+
+pojawil sie pomysl, zeby define-cache przeprowadzalo
+currying swoich argumentow (i zeby obslugiwalo skladnie
+z (keyword-arguments))
+
+fajnie by bylo wszedzie uzywac naszej skladni, namiast
+#!optional i #!key, ale te zmiane lepiej zrobic
+na komputerze
+
+i to sie wlasnie udalo zaimplementowac!
+
+ale co dalej?
+
+na pewno trzeba przywrocic dzialanie na 'golym'
+PCcie (bez zmodyfikowanej Kawy), w tym (chyba)
+wywalic pliki "symbol" i "box"
+
+i powrocic do implementowania cursor-under
+
+* 07.09.2022
+
+z powodu awarii telefonu mielismy dosc dluga przerwe
+- na tyle, ze trzeba sobie przypomniec, co zostalo zrobione
+(a co nie)
+
+w szczegolnosci zastanawia trywialna implementacja
+cursor-under* dla klasy Atom - czy nie powinnismy raczej
+dostarczyc tam sensownej implementacji?
+
+i przy okazji: wywalmy cache, zastepujac go property+
+
+
 * 20.08.2022
 
   wydaje sie, ze powinnismy hyz miec jako tako dzialajacy
