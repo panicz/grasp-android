@@ -244,19 +244,20 @@
   ((draw! context::Cursor)::void
    (let* ((painter (the-painter))
 	  (space-width (painter:space-width))
-	  (t (invoke (the-traversal) 'clone)))
+	  (t (invoke (the-traversal) 'clone))
+	  (left t:left)
+	  (top t:top))
      (let skip ((input fragments)
 		(total 0))
        (define (advance-with-cursor! width::real)
 	 (let ((width (* width space-width)))
-	   (and-let* ((`(,tip ,next . ,sub) (the-cursor))
+	   (and-let* ((`(,tip . ,sub) (the-cursor))
 		      ((integer? tip))
 		      ((equal? sub context))
-		      ((eqv? next t:index))
 		      ((is total <= tip <= (+ total
 					      width))))
 	     (painter:remember-offset!
-	      (+ t:left (- tip total)) (+ t:top 2)))
+	      (- t:left left (- total tip)) (- t:top top -2)))
 	   (t:advance-by! width)))
        
        (match input
@@ -270,20 +271,21 @@
   ((cursor-under* x::real y::real path::Cursor)::Cursor*
    (and-let* ((painter (the-painter))
 	      (space-width (painter:space-width))
-	      (tentative-result #f)
 	      (t (invoke (the-traversal) 'clone))
-	      ((is y < t:top)))
+	      ;; we need to restore the coordinates to
+	      ;; the-traverse's reference frame
+	      (x (+ x t:left))
+	      (y (+ y t:top)))
      (let skip ((input fragments)
 		(total 0))
        (match input
 	 (`(,,@integer? ,,@integer? . ,rest)
 	  (cond
-	   ((is t:top <= y < (+ t:top t:max-line-height))
-	    (hash-cons* (+ total
+	   ((is 0 <= (- y t:top) < t:max-line-height)
+	    (hash-cons (+ total
 			   (min (head input)
 				(quotient (- x t:left)
 					  space-width)))
-			t:index
 			path))
 	   (else
 	    (t:advance-by! (* space-width (head input)))
@@ -291,14 +293,13 @@
 	    (skip (tail input)
 		  (+ total (head input))))))
 	 (`(,,@integer?)
-	  (and (is t:left <= x < (+ t:left
-				 (* space-width
+	  (and (is 0 <= (- y t:top) < t:max-line-height)
+	       (is x < (+ t:left (* space-width
 				    (head input))))
-	       (hash-cons* (+ total
-			      (quotient (- x t:left)
-					space-width))
-			   t:index
-			   path)))))))
+	       (hash-cons (+ total
+			     (quotient (- x t:left)
+				       space-width))
+			  path)))))))
   
   ((print out::gnu.lists.Consumer)::void
    (let process ((input fragments))
