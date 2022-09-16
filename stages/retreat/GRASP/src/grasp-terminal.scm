@@ -77,14 +77,13 @@
 (define-parameter (the-background-color)::Color
   Color:ANSI:BLACK)
 
-(define-cache (letter
-	       character
-	       color: color::Color := (the-text-color)
-	       background: background::Color
-	       := (the-background-color)
-	       style: style::TextStyle := (the-text-style))
+(define-cache (letter character
+		      color: color::Color := (the-text-color)
+		      background: background::Color
+		      := (the-background-color)
+		      style: style::TextStyle := (the-text-style))
   ::Letter
-  (Letter character color background style))
+   (Letter character color background style))
 
 (define (render io :: LanternaScreen)::void
   (synchronized screen-up-to-date?
@@ -118,7 +117,8 @@
   
 (define (edit io :: LanternaScreen)::void
   (let* ((key ::KeyStroke (io:readInput))
-	 (type ::KeyType (key:getKeyType)))
+	 (type ::KeyType (key:getKeyType))
+	 (caret ::TerminalPosition (io:getCursorPosition)))
 
     ;; powinnismy sobie wymyslic jakas warstwe abstrakcji,
     ;; ktora obslugiwalaby klawisze:
@@ -128,19 +128,24 @@
 
     (match type
       (,KeyType:ArrowLeft
-       (values))
+       (io:setCursorPosition (caret:withRelativeColumn -1)))
       (,KeyType:ArrowRight
-       (values))
+       (io:setCursorPosition (caret:withRelativeColumn +1)))
       (,KeyType:ArrowUp
-       (values))
+       (io:setCursorPosition (caret:withRelativeRow -1)))
       (,KeyType:ArrowDown
-       (values))
+       (io:setCursorPosition (caret:withRelativeRow +1)))
       (,KeyType:EOF
        (io:stopScreen)
        (exit))
       (,KeyType:Escape
        (io:stopScreen)
        (exit))
+      (,KeyType:MouseEvent
+       (let* ((action ::MouseAction (as MouseAction key)))
+	 (when (and (action:isMouseDown)
+		    (eq? (action:getButton) MouseButton:Left))
+	   (io:setCursorPosition (action:getPosition)))))
       (_
        (values)))
     
