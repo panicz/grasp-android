@@ -154,21 +154,22 @@
 
   (define (draw! context::Cursor)
     ::void
-    (let ((inner (sequence-extent (this)))
-	  (paren-width (invoke (the-painter) 'paren-width)))
-      (invoke (the-painter) 'open-paren! inner:height)
+    (let* ((inner (sequence-extent (this)))
+	   (painter (the-painter))
+	   (paren-width (painter:paren-width)))
+      (painter:open-paren! inner:height)
       (when (equal? (the-cursor) (recons (first-index)
 					 context))
-	(invoke (the-painter) 'remember-offset! 0 2))
+	(painter:remember-offset! 0 2))
       (with-translation (paren-width 0)
 	(draw-sequence! (this) context: context))
       (with-translation ((+ paren-width inner:width) 0)
-	(invoke (the-painter) 'close-paren! inner:height))
+	(painter:close-paren! inner:height))
       (when (equal? (the-cursor) (recons (last-index)
 					 context))
-	(invoke (the-painter) 'remember-offset!
-		(+ paren-width 1 inner:width)
-		(- inner:height 1)))))
+	(painter:remember-offset!
+	 (+ paren-width 1 inner:width)
+	 (- inner:height 1)))))
 
   (define (cursor-under* x::real y::real path::Cursor)::Cursor*
     (let ((inner (sequence-extent (this)))
@@ -176,11 +177,13 @@
       (and (is 0 <= y < inner:height)
 	   (or (and (is 0 <= x < paren-width)
 		    (recons (first-index) path))
-	       (and (is 0 <= (- x paren-width inner:width) < paren-width)
-		    (recons (last-index) path))
+	       
 	       (and (is 0 <= (- x paren-width) < inner:width)
 		    (cursor-under (- x paren-width) y
-				  (this) context: path))))))
+				  (this) context: path))
+	       (and (is 0 <= (- x paren-width inner:width)
+			< paren-width)
+		    (recons (last-index) path))))))
   
   (define (extent)::Extent
     (let ((extent ::Extent (sequence-extent
@@ -189,7 +192,7 @@
 			(* 2 (invoke (the-painter)
 				     'paren-width)))
 	      height: extent:height)))
-    
+  
   (define (part-at index::Index)::Indexable*
     (if (or (eq? index (first-index))
 	    (eq? index (last-index)))
@@ -198,7 +201,7 @@
   
   (define (first-index)::Index
     #\[)
-   
+  
   (define (last-index)::Index
     #\])
   
@@ -242,12 +245,8 @@
 
   (pair a d))
 
-(define-cache (heads tail)
-  (cache (head)
-	 (cons head tail)))
-
-(define (recons head tail)::cons
-  ((heads tail) head))
+(define-cache (recons head tail)
+  (cons head tail))
 
 (define-syntax cons*
   (syntax-rules ()
@@ -423,11 +422,11 @@
       elems
       doing:
       (lambda (item::Element t::Traversal)
-	(let* ((size (extent item)))
-	  (and-let* ((cursor (item:cursor-under* (- left t:left)
-						 (- top t:top)
-						 (recons t:index context))))
-	    (return cursor))))
+	(and-let* ((cursor (item:cursor-under*
+			    (- left t:left)
+			    (- top t:top)
+			    (recons t:index context))))
+	    (return cursor)))
       returning: (lambda (t::Traversal)
 		   context)))))
 

@@ -157,7 +157,7 @@
   (define (string-character-index-under x::real y::real
 					text::CharSequence)
     ::int
-    (let ((end (length text)))
+    (let ((end (text:length)))
       (let next ((row 0)
 		 (col 0)
 		 (n ::int 0))
@@ -186,7 +186,9 @@
 	(draw-string! text index)))
 
   (define (atom-extent text::CharSequence)::Extent
-    (string-extent text))
+    (let ((inner ::Extent (string-extent text)))
+      (Extent width: inner:width
+	      height: (max (min-line-height) inner:height))))
 
   (define (atom-character-index-under x::real y::real
 				      text::CharSequence)
