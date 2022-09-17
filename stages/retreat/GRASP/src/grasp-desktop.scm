@@ -346,7 +346,33 @@
 		  (text:subSequence line-start string-end))))
       (Extent width: max-width
 	      height: (* lines (metrics:getHeight)))))
-    
+
+  (define (text-character-index-under x::real y::real
+				      text::CharSequence
+				      font::Font)
+    ::int
+    (let* ((graphics (the-graphics-output))
+	   (metrics ::FontMetrics (graphics:getFontMetrics font))
+	   (line-height (metrics:getHeight))
+	   (string-end (text:length)))
+      (let loop ((i 0)
+		 (left 0)
+		 (top 0))
+	(if (is i >= string-end)
+	    (max 0 (- i 1))
+	    (let ((c (text:charAt i)))
+	      (match c
+		(#\newline
+		 (if (is top <= y < (+ top line-height))
+		     i
+		     (loop (+ i 1) 0 (+ top line-height))))
+		(_
+		 (let ((width (metrics:charWidth c)))
+		   (if (and (is top <= y < (+ top line-height))
+			    (is left <= x < (+ left width)))
+		       i
+		       (loop (+ i 1) (+ left width) top))))))))))
+  
   (define (atom-extent text::CharSequence)::Extent
     (let ((inner (text-extent text (the-atom-font))))
       (Extent width: (+ inner:width 8)
@@ -362,9 +388,19 @@
       (graphics:setColor (the-atom-text-color))
       (with-translation (4 8)
 	  (draw-text! text (the-atom-font) index))))
+
+  (define (atom-character-index-under x::real y::real
+				      text::CharSequence)
+    ::int
+    (text-character-index-under x y text (the-atom-font)))
   
   (define (quoted-text-extent text::CharSequence)::Extent
     (text-extent text (the-string-font)))
+
+  (define (quoted-text-character-index-under x::real y::real
+					     text::CharSequence)
+    ::int
+    (text-character-index-under x y text (the-string-font)))
   
   (define (clear!)::void
     (error "The `clear!' method is not implemented for the AWT
