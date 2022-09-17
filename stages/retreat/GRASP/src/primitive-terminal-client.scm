@@ -24,6 +24,7 @@
  (for)
  (document-operations)
  (editor-operations)
+ (interactive)
  (extension)
  (button)
  )
@@ -85,7 +86,7 @@ mutations of an n-element set.\"
 	    MouseCaptureMode:CLICK_RELEASE_DRAG))
 
   (parameterize ((current-message-handler
-		  (editor-message-handler 6))
+		  (editor-message-handler 4))
 		 (the-painter (TextPainter))
 		 (current-display-procedure
 		  (lambda (message)
@@ -237,7 +238,7 @@ mutations of an n-element set.\"
 		    (try-catch
 		     (let ((cursor+
 			    (cursor-under
-			     left top
+			     left (- top 1)
 			     (head (the-document)))))
 		       (set! (the-cursor) cursor+)
 		       (WARN "cursor: "
@@ -256,8 +257,13 @@ mutations of an n-element set.\"
 		 (WARN "mouse move to "
 		       (position:toString)))
 		((action:isMouseUp)
-		 (WARN "mouse released at "
-		       (position:toString)))))
+		 (let ((target (the-expression)))
+		   (when (is target Interactive?)
+		     (invoke (as Interactive target)
+			     'tapped left top)))
+		 
+		 )
+		))
 	     (continue))
 	    
 	    (_
