@@ -24,6 +24,7 @@
 
 (define-interface Panel ()
   (draw! context::Cursor)::void
+  (touch! x::real y::real finger::byte)::void
   )
 
 ;; this parameter must be set by the
@@ -74,6 +75,19 @@
 			    height: extent:height)))
 	     (invoke right 'draw!
 		     (recons 'right context))))))))
+  ((touch! x::real y::real finger::byte)::void
+   (let* ((painter (the-painter))
+	  (extent (the-panel-extent))
+	  (line-width (invoke painter 'vertical-line-width))
+          (inner-width (- extent:width
+			  line-width))
+          (left-width (* at inner-width))
+          (right-width (- inner-width left-width)))
+     (cond ((is x < left-width)
+	    (left:touch! x y finger))
+	   ((is (+ left-width line-width) < x)
+	    (right:touch! (- x left-width line-width) y finger)))))
+   
   )
 
 (define-object (Editor)::Panel
@@ -95,6 +109,12 @@ mutations of an n-element set.\"
     (parameterize ((the-document document)
 		   (the-cursor cursor))
       (draw-sequence! (head document))))
+  (define (touch! x::real y::real finger::byte)::void
+    (parameterize ((the-document document))
+      (set! cursor (cursor-under x y))
+      (display cursor)
+      (display (the-expression at: cursor))
+      (newline)))
   )
   
 (define-parameter (the-top-panel) ::Panel

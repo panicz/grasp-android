@@ -18,7 +18,7 @@
 (import (painter))
 (import (print))
 (import (primitive))
-
+(import (cursor))
 
 (define-alias Font java.awt.Font)
 (define-alias FontMetrics java.awt.FontMetrics)
@@ -28,8 +28,6 @@
 (define-alias KeyEvent java.awt.event.KeyEvent)
 (define-alias ComponentEvent java.awt.event.ComponentEvent)
 
-(define-alias MouseListener java.awt.event.MouseListener)
-(define-alias MouseMotionListener java.awt.event.MouseMotionListener)
 (define-alias MouseEvent java.awt.event.MouseEvent)
 
 (define-alias MouseWheelListener java.awt.event.MouseWheelListener)
@@ -277,7 +275,7 @@
 	    0 0 (vertical-bar-width) height))
 
   (define (remembered-left)::real
-    left)
+   left)
   
   (define (remembered-top)::real
     top)
@@ -428,7 +426,33 @@ automatically by the AWT framework."))
 				    java.awt.event.KeyListener
 				    java.awt.event.FocusListener
 				    java.awt.event.ComponentListener
-				    java.awt.event.WindowListener)
+				    java.awt.event.WindowListener
+				    java.awt.event.MouseMotionListener
+				    java.awt.event.MouseListener)
+  ((mouseEntered event::MouseEvent)::void
+   (values))
+
+  ((mouseExited event::MouseEvent)::void
+   (values))
+
+  ((mouseClicked event::MouseEvent)::void
+   (values))
+
+  ((mousePressed event::MouseEvent)::void
+   (invoke (the-top-panel) 'touch!
+	   (event:getX)
+	   (- (event:getY) 26)
+	   0))
+
+  ((mouseReleased event::MouseEvent)::void
+   (values))
+
+  ((mouseDragged event::MouseEvent)::void
+   (values))
+
+  ((mouseMoved event::MouseEvent)::void
+   (values))
+  
   ((keyTyped event::KeyEvent)::void
    (values))
 
@@ -505,6 +529,11 @@ automatically by the AWT framework."))
 
    (addFocusListener (this))
 
-   (addComponentListener (this))))
+   (addComponentListener (this))
+
+   (addMouseListener (this))
+
+   (addMouseMotionListener (this))
+   ))
 
 (window-screen)

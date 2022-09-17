@@ -174,6 +174,7 @@
   (define (cursor-under* x::real y::real path::Cursor)::Cursor*
     (let ((inner (sequence-extent (this)))
 	  (paren-width (invoke (the-painter) 'paren-width)))
+
       (and (is 0 <= y < inner:height)
 	   (or (and (is 0 <= x < paren-width)
 		    (recons (first-index) path))
@@ -317,17 +318,17 @@
 
     (parameterize ((the-traversal traversal))
       
-      (define (head* pair::cons)::Tile
+      (define (head* pair::pair)::Tile
 	(if (null? (head pair))
             (empty-list-proxy (null-head-space pair))
             (head pair)))
 
-      (define (tail* pair::cons)::Tile
+      (define (tail* pair::pair)::Tile
 	(if (null? (tail pair))
             (empty-list-proxy (null-tail-space pair))
             (tail pair)))
 
-      (define (step-over-dotted-tail! pair::cons)::void
+      (define (step-over-dotted-tail! pair::pair)::void
 	(let* ((horizontal? (should-the-bar-be-horizontal? pair))
                (bar (if horizontal?
 			(horizontal-bar traversal:max-width)
@@ -349,7 +350,7 @@
           (doing post-tail traversal)
           (advance-traversal! traversal post-tail)))
 
-      (define (step! pair::cons)
+      (define (step! pair::pair)
 	(let ((item (head* pair))
               (post-head (post-head-space pair)))
           (doing item traversal)
@@ -426,7 +427,7 @@
 			    (- left t:left)
 			    (- top t:top)
 			    (recons t:index context))))
-	    (return cursor)))
+	  (return cursor)))
       returning: (lambda (t::Traversal)
 		   context)))))
 
@@ -461,6 +462,3 @@
 		 (with-output-to-string
 		   (lambda () (write object)))))
 	))
-
-
-
