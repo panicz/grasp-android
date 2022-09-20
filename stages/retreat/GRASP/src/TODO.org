@@ -1,3 +1,208 @@
+* 19.09.2022
+
+Cos tam sobie pisalismy na telefonie - konkretnie,
+mielismy w planie stworzyc forme parameterize-up!
+ktora dziala tak, jak parameterize, ale dodatkowo
+aktualizuje pod koniec dzialania zrodla wartosci
+(o ile sa symbolami albo wywolaniami procedur,
+ktore maja settery)
+
+* 17.09.2022
+
+Chyba zbliza sie moment podejmowania istotnych decyzji
+architektonicznych.
+
+Trzeba bedzie stworzyc klase Application, ktora bedzie
+posredniczyc miedzy systemowymi operacjami wejscia/wyjscia
+(czyli z jednej strony mysz, klawiatura, dotyk, ...,
+a z drugiej - z implementacja Malarza), a poszczegolnymi
+klientami (AWT, Lanterna, Android)
+
+I to wlasnie owa klasa bedzie w posiadaniu:
+- glownego panelu
+- wartswy "overlay"
+- callbackow zwiazanych z drag&drop
+
+I teraz mamy dwie mozliwosci:
+- mozemy albo sie zajac drag & dropem oraz resize'owaniem
+- albo mozemy sie zajac renderowaniem komentarzy,
+a w szczegolnosci nalezaloby przemyslec, co mozna zrobic,
+zeby miec jakies ladniejsze kolory w terminalu
+
+Konkretniej, chcielibysmy wyswietlac komentarze na szaro
+i kursywa, a symbole - pogrubiona czcionka, z kolorem zaleznym od
+relacji pomiedzy wyrazeniem a interpreterem
+
+(czyli: definicje na bialo albo zielono albo zolto,
+quote'y na bialo, przyklady na zielono albo czerwono,
+zwykle wyrazenia na bialo)
+
+Do tego tez dochodzi u nas kwestia selekcji. Selekcja,
+to wszystko, co znajduje sie pomiedzy (the-cursor)
+a (the-selection-anchor), jezeli 
+(is (the-cursor) cursor< (the-selection-anchor)), natomiast
+w przeciwnym razie, tj. gdy
+(is (the-selection-anchor) cursor< (the-cursor)), to selekcja
+jest tym, co znajduje sie miedzy (the-selection-anchor)
+a (the-cursor).
+
+To tak brzmi dosc koslawo. Ale chodzi o to, ze jezeli dochodzimy
+do poczatku selekcji, to chcemy wywolac (start-selection!),
+zas gdy dochodzimy do konca selekcji, chcemy wywolac (end-selection!).
+
+
+W przypadku CharPaintera, start-selection! spowoduje, ze zawsze
+w ostatniej linijce danego wiersza rysujemy ~~~... (podczas rysowania
+atomow i spacji), a w przypadku TerminalPaintera i screen-renderera
+zamieniamy ze soba kolory (tekstu i tla).
+
+Pewnie trzeba bedzie troche zmienic interfejs "malarza", zeby
+podczas rysowania pudelek rowniez bylo rysowane tlo
+
+
+* 16.09.2022
+
+Plan na dzis (albo jutro) jest taki, zeby zaimplementowac
+metode "text-character-index-under" w screen-rendererze.
+
+Musi to dzialac w taki sposob, ze iterujemy sobie
+znak po znaku, i wywolujemy charWidth, sprawdzajac,
+czy y jest pomiedzy szczytem poprzedniej linii
+i wysokoscia linii, i czy x jest pomiedzy koncem aktualnego
+znaku a koncem aktualnego znaku + charWidth aktualnego znaku.
+
+No dobra, to juz jest zrobione - a przynajmniej tak sie wydaje,
+bo jeszcze tego nie przetestowalismy.
+
+Wiec pomysl na teraz jest taki, zeby do klienta AWT dodac
+wykrywanie kliknietego elementu - tzn. zeby klikniecie myszka
+wywolywalo cursor-under.
+
+To tez juz jest zrobione, tyle ze w miedzyczasie sie pojawily
+pewne niesnaski. Chodzi o to, ze docelowo wszystkie interakcje
+- z mysza, klawiatura itd. - musza byc w jakis sposob powiazane
+z obiektem "the-top-panel".
+
+* 15.09.2022
+
+Plan sie czesciowo udalo zrealizowac, ale sa jeszcze
+problemy ze spacjami.
+
+Pewnie te problemy w koncu rozwiazemy, ale tez
+fajnie jest sobie chwile pomarzyc. Tak wiec marze sobie,
+ze ten edytor dziala, i mozna w nim otwierac pliki,
+i jest pare rozszerzen, ktore dzialaja, i mamy mechanizm
+selekcji, ktory jest zintegrowany ze schowkiem
+systemowym, i opracowuje wersje na Androida, i ona
+tez dziala, i dla niej tworze edytor gestow, ktory
+mozna tez uzywac w pozostalych klientach, choc to
+troche niepotrzebne, ale skoro juz jest, to czemu nie.
+I teraz, majac do dyspozycji ten system, pisze ksiazke.
+Na poczatku to moze byc po prostu ksiazka o edytorze
+GRASP, ale tez bym chcial stworzyc ksiazke o komputerach,
+i o neuronach - a nawet o mamutach! (W sensie,
+"Jak To Dziala" w wydaniu interaktywnym).
+
+Ksiazki te moge wydac w specjalnym trybie jako osobne
+aplikacje w sklepie Play, a takze moge wydac specjalna
+wersje GRASP, ktora by umozliwiala ludziom generowanie
+APK z ich tresciami. (I ta specjalna wersja rowniez
+moglaby byc sprzedawana, np. po $20 od licencji)
+
+Ale wreszcie chcialbym sobie stworzys swoj wlasny
+sklep, poprzez ktory mozna by bylo sprzedawac
+ksiazki - a ktory bylby dostepny z mojej aplikacji.
+
+Musialoby to dzialac w taki sposob, ze kazdy
+uzytkownik mialby swoje konto, na ktorym moglby
+trzymac swoje pliki.
+
+Pliki bylyby widoczne tylko dla niego i dla osob,
+ktorym zostaly udostepnione. Kazdy uzytkownik
+mialby swoja liste udostepnien dla kazdego folderu.
+
+Zakup ksiazki polegalby na tym, ze - po otryzmaniu
+przelewu - uzytkownik dodawalby innego uzytkownika
+do listy udostepnien danego zasobu (owo dodawanie
+mogloby sie oczywiscie odbywac automatycznie,
+gdyby ktos wystawil swoje zasoby na sprzedaz)
+
+No ale dobrze, teraz musimy sie uporac z bledem,
+ktory mamy, w implementacji cursor-under*
+dla klasy Space. Wyobrazmy sobie taka sytuacje:
+
+╭        ╭     ╮+-+                   ╮
+│ define │ ! n │|x|                   │
+│+--------------+ |                   │
+│| +--------------+                 ╮ │
+│| |│ if │ <= n 0 │                 │ │
+│| |│    ╰        ╯                 │ │
+│| |│                               │ │
+│| |│       1                       │ │
+│| |│                               │ │
+│| |│       ╭     ╭   ╭       ╮ ╮ ╮ │ │
+│| |│       │ * n │ ! │ - n 1 │ │ │ │ │
+╰+-+╰       ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
+
+|   max-height  |
+|------...------|
+|               |
+
+
+                |t
+                |o
+                |p
+    left        V
+--------------->+-+ ---
+                |x|  |
+ +--------------+ |  |
+ | +--------------+ ---
+ | |
+ | |
+ | |
+ | |
+ | |
+ | |
+ | |
+ +-+
+
+Super. Wyglada na to, ze udalo sie naprawic dzialanie
+cursor-under dla spacji.
+
+Tym jednak, czego jeszcze brakuje, jest renderowanie
+polozenia spacji.
+
+No dobrze, tutaj tez sie udalo wcisnac pare poprawek.
+W takim razie kolejne zadanie to bedzie przywrocenie
+dzialania kilenta desktopowego (ktorego nie probowalismy
+odpalac, ale ktory raczej nie zadziala z powodu braku
+implementacji nowych metod Paintera w screen-rendererze)
+
+
+Jeszcze na koniec dnia pytanie: czy istnieje jakas
+szybka sciezka do realizacji powyzszego planu?
+
+Czy bylibysmy w stanie miec sprawny edytor za, dajmy
+na to, dwa miesiace?
+
+Na pewno potrzebne by bylo do tego duzo skupienia.
+Ale taka wymarzona sciezka bylaby taka:
+1. konczymy wszystkie niesnaski zwiazane z cursor-under
+2. implementujemy mechanizmy drag&drop oraz drag&resize
+3. implementujemy mechanizm selekcji
+4. implementujemy mechanizmy dzielenia widokow
+oraz scrollowania
+5. implementujemy obsluge komentarzy (3 rodzaje)
+6. implementujemy mechanizmy edycji (i historii)
+7. implementujemy mapy klawiatury
+8. implementujemy otwieranie i zapisywanie plikow
+
+9. implementujemy rozszerzenie - Envisulator
+10. edytor grafow i algorytm A*
+
+11. klient mobilny
+12. rozpoznawanie gestow
+
 * 14.09.2022
 
 plan:
