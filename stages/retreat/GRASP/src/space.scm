@@ -641,8 +641,8 @@
   (gnu.lists.LList)
   (set! space inner))
 
-(define-cache (empty-list-proxy space)
-  (EmptyListProxy (as Space space)))
+(define-cache (empty-list-proxy space::Space)
+  (EmptyListProxy space))
 
 (define cell-display-properties
   (list

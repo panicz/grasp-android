@@ -72,10 +72,10 @@
   (TextStyle:noneOf TextDecoration:class))
 
 (define-parameter (the-text-color)::Color
-  Color:ANSI:WHITE)
+  Color:ANSI:DEFAULT)
 
 (define-parameter (the-background-color)::Color
-  Color:ANSI:BLACK)
+  Color:ANSI:DEFAULT)
 
 (define-cache (letter character
 		      color: color::Color := (the-text-color)
