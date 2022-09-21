@@ -21,6 +21,7 @@
 (import (conversions))
 (import (painter))
 (import (print))
+(import (parameterize-up))
 
 (define-interface Panel ()
   (draw! context::Cursor)::void
@@ -106,11 +107,12 @@ mutations of an n-element set.\"
   (define cursor :: Cursor '())
   
   (define (draw! context::Cursor)::void
-    (parameterize ((the-document document)
-		   (the-cursor cursor))
+    (parameterize/update-sources ((the-document document)
+				  (the-cursor cursor))
       (draw-sequence! (head document))))
+  
   (define (touch! x::real y::real finger::byte)::void
-    (parameterize ((the-document document))
+    (parameterize/update-sources ((the-document document))
       (set! cursor (cursor-under x y))
       (display cursor)
       (display (the-expression at: cursor))
