@@ -1,5 +1,93 @@
+* 21.09.2022
+
+wyswietlanie selekcji:
+
+powinno dzialac tak, ze jezeli context znajdzie
+sie na (argmin cursor< (the-cursor) (the-selection-anchor))),
+wywolujemy (painter:enter-selection-drawing-mode!), a gdy
+znajdzie sie na (argmax cursor (the-cursor) (the-selection-anchor)),
+to wywolujemy (painter:exit-selection-drawing-mode!).
+
+W tym celu zaciagnelibysmy argmin+argmax z (grand scheme)
+do (functions).
+
+Jednak to nic nie daje, bo cursor< nie odwzorowuje w real,
+tylko jest predykatem.
+
+Raczej nalezaloby wziac cursor< i uzyc go do sortowania.
+Albo po prostu uzyc ifa.
+
+Aha no i trzeba jeszcze zaimplementowac ruszanue kursorem
+do gory i na dol.
+
+
+Ale moze zacznijmy od tego, jak zaimplementowac
+enter/exit-selection-drawing-mode! dla poszczegolnych
+klientow, tj. dla:
+
+** TextPainter
+   - chcemy, zeby pod atomami znajdowaly sie
+     tyldy ~~
+   - natomiast nawiasy chcemy rysowac za pomoca
+
+   ⎛  ⎞
+   ⎜  ⎟
+   ⎝  ⎠
+  
+   dodatkowo chcemy uzywac znaku ^ albo |
+   do oznaczania kursora
+     
+** TerminalPainter
+   - chcemy odwrocic kolory
+   
+** screen-renderer
+   - podobnie tutaj chcemy odwrocic kolory
+
+
+Ale chyba tak naprawde wcale nie potrzebujemy
+enter/exit-selection-drawing-mode! - wystarczy,
+ze kazda z implementacji metody 'draw!' bedzie
+sprawdzac, czy podczas renderowania context
+ma odpowiednia relacje do the-selection-anchor
+   
+* 20.09.2022
+
+Mamy ta parametryzacje.
+
+Teraz bysmy chcieli miec:
+- powiekszanie selekcji
+- wyswietlanie selekcji
+
+Rzecz z powiekszaniem selekcji ma sie tak, ze ono moze wplywac
+nie tylko na (the-selection-anchor), ale rowniez na (the-cursor)
+(ale tylko w takim zakresie, ze moze pomijac poczatek kursora).
+
+
+
 * 19.09.2022
 
+Dalsze opcje dzialania:
+1. implementacja selekcji
+2. implementacja komentarzy
+
+Z implementowaniem selekcji wiazalyby sie takie oto czynnosci:
+- nowy parametr, (the-selection-anchor)
+- nowe funkcje: (selection-left!) i (selection-right!), ktore
+  modyfikowalyby 
+
+Trzeba by tez zrobic forme parameterize!, ktora bedzie
+sie zachowywac jak "parameterize", tyle ze dodatkowo po
+wykonaniu bloku kodu bedzie ustawial wartosci zrodlowe
+na wartosci zmodyfikowanych parametrow, tj.
+
+(define-syntax (parametrize! (bindings ...) body + ...)
+  (parameterize (bindings ...)
+    (call-with-values (lambda () body + ...)
+      (lambda result (update-parameter-value-sources! bindings ...)
+        (apply values result)))))
+
+** komputer
+	
 Cos tam sobie pisalismy na telefonie - konkretnie,
 mielismy w planie stworzyc forme parameterize-up!
 ktora dziala tak, jak parameterize, ale dodatkowo
