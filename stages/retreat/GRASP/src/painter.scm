@@ -37,18 +37,14 @@
   (horizontal-line-height)::real
   (vertical-line-width)::real
   )
-
-(define-interface Memorizing ()
-  (remember-offset! +left::real +top::real)::void
-  (remembered-left)::real
-  (remembered-top)::real
-  )
-
   
 (define-interface Painter (Splittable
 			   Clippable
-			   Translatable
-			   Memorizing)
+			   Translatable)
+
+  (mark-cursor! +left::real +top::real)::void
+  (cursor-position)::Position
+  
   (space-width)::real
   
   (paren-width)::real
@@ -176,18 +172,12 @@
     ::void
     (values))
 
-  
-  (define (remember-offset! +left::real
-			    +top::real)
-    ::void
+  (define (mark-cursor! +left::real +top::real)::void
     (values))
   
-  (define (remembered-left)::real
-    0)
-  
-  (define (remembered-top)::real
-    0)
-  
+  (define (cursor-position)::Position
+    (Position left: 0
+	      top: 0))  
   )
 
 (set! (default-value Painter) (NullPainter))

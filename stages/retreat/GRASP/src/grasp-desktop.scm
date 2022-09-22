@@ -252,13 +252,18 @@
     (invoke (the-graphics-output) 'drawRoundRect
 	    0 0 (as int width) (as int height) 5 5))
 
-  (define left ::real 0)
-  (define top ::real 0)
+  (define marked-cursor-position
+    (Position left: 0
+	      top: 0))
+  
+  (define (mark-cursor! +left::real +top::real)::void
+    (set! marked-cursor-position:left (+ (current-translation-left)
+					 +left))
+    (set! marked-cursor-position:top (+ (current-translation-top)
+					+top)))
 
-  (define (remember-offset! +left::real +top::real)
-    ::void
-    (set! left (+ (current-translation-left) +left))
-    (set! top (+ (current-translation-top) +top)))
+  (define (cursor-position)::Position
+    marked-cursor-position)
 
   (define (vertical-bar-width)::real
     5)
@@ -273,12 +278,6 @@
   (define (draw-vertical-bar! height::real)::void
     (invoke (the-graphics-output) 'fillRect
 	    0 0 (vertical-bar-width) height))
-
-  (define (remembered-left)::real
-   left)
-  
-  (define (remembered-top)::real
-    top)
 
   (define (horizontal-line-height)::real
     20)

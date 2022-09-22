@@ -256,8 +256,8 @@
 		      ((equal? sub context))
 		      ((is total <= tip <= (+ total
 					      width))))
-	     (painter:remember-offset!
-	      (- t:left left (- total tip)) (- t:top top -2)))
+	     (painter:mark-cursor! (- t:left left (- total tip))
+				   (- t:top top -2)))
 	   (t:advance-by! width)))
        
        (match input

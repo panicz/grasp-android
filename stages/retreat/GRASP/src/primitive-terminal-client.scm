@@ -120,9 +120,10 @@ mutations of an n-element set.\"
 	(invoke (current-message-handler)
 		'display-messages io)
 	(io:flush)
-	(io:setCursorPosition
-	 (invoke (the-painter) 'remembered-left)
-	 (invoke (the-painter) 'remembered-top))
+	(let ((cursor-position (invoke (the-painter)
+				       'cursor-position)))
+	  (io:setCursorPosition cursor-position:left
+				cursor-position:top))
 	(io:setCursorVisible #t)
 	(let* ((key ::KeyStroke (io:readInput))
 	       (type ::KeyType (key:getKeyType)))
@@ -147,33 +148,7 @@ mutations of an n-element set.\"
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
-	    
-	    (,KeyType:ArrowUp
-	     (try-catch
-	      (invoke (the-painter)
-		      'remember-offset!
-		      (invoke (the-painter)
-			      'remembered-left)
-		      (- (invoke (the-painter)
-				 'remembered-top)
-			 1))
-	      (ex java.lang.Throwable
-		  (WARN (ex:toString))))
-	     (continue))
-	    
-	    (,KeyType:ArrowDown
-	     (try-catch
-	      (invoke (the-painter)
-		      'remember-offset!
-		      (invoke (the-painter)
-			      'remembered-left)
-		      (+ (invoke (the-painter)
-				 'remembered-top)
-			 1))
-	      (ex java.lang.Throwable
-		  (WARN (ex:toString))))
-	     (continue))
-	    
+	    	    
 	    (,KeyType:EOF
 	     (values))
 
@@ -207,7 +182,7 @@ mutations of an n-element set.\"
 
 	    (,KeyType:Enter
 	     (insert-character! #\newline)
-	     (cursor-advance!)
+	     (move-cursor-right!)
 	     (continue))
 	    
 	    (,KeyType:Backspace
@@ -232,20 +207,7 @@ mutations of an n-element set.\"
 		((action:isMouseDown)
 		 (match (action:getButton)
 		   (,MouseButton:Left
-		    (invoke (the-painter)
-			    'remember-offset!
-			    left top)
-		    (try-catch
-		     (let ((cursor+
-			    (cursor-under
-			     left (- top 1)
-			     (head (the-document)))))
-		       (set! (the-cursor) cursor+)
-		       (WARN "cursor: "
-			     (the-cursor)))
-
-		     (ex java.lang.Throwable
-			 (WARN (ex:toString)))))
+		    (WARN "cursor: " (the-cursor)))
 		   (,MouseButton:Right
 		    (WARN "right mouse at "
 			  (position:toString)))

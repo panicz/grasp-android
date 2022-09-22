@@ -36,21 +36,18 @@
   
   (define (current-clip-top)::real
     clip-top)
-  
-  (define left ::real 0)
-  (define top ::real 0)
 
-  (define (remember-offset! +left::real +top::real)
-    ::void
-    (set! left (+ shift-left +left))
-    (set! top (+ shift-top +top)))
+  (define marked-cursor-position
+    (Position left: 0
+	      top: 0))
   
-  (define (remembered-left)::real
-    left)
-  
-  (define (remembered-top)::real
-    top)
+  (define (mark-cursor! +left::real +top::real)::void
+    (set! marked-cursor-position:left (+ shift-left +left))
+    (set! marked-cursor-position:top (+ shift-top +top)))
 
+  (define (cursor-position)::Position
+    marked-cursor-position)
+  
   (define (space-width)::real 1)
   
   (define (paren-width)::real 2)
@@ -145,7 +142,7 @@
 	  (n 0))
       (for c in text
 	(when (eqv? n index)
-	  (remember-offset! col (+ row 1)))
+	  (mark-cursor! col (+ row 1)))
         (cond ((eq? c #\newline)
 	       (set! row (+ row 1))
 	       (set! col 0))

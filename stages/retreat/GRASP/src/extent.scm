@@ -24,3 +24,6 @@
  (string-extent "\
 abc
 def") ===> [Extent width: 3 height: 2])
+
+(define-type (Position left: real
+		       top: real))

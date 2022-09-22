@@ -99,7 +99,7 @@
 		 (insert-whitespace! c following-space
 				     (first-index
 				      following-space))
-		 (cursor-advance!)))
+		 (move-cursor-right!)))
 	      (else
 	       (let* ((suffix (atom-subpart target tip))
 		      (owner (drop (quotient top 2) parent))
@@ -112,7 +112,7 @@
 		   (Space fragments: (if (eq? c #\newline)
 					 (cons* 0 0 '())
 					 (cons 1 '()))))
-		 (cursor-advance!)))))
+		 (move-cursor-right!)))))
        
 	 (else
 	  (insert-char! c target (cursor-head))
@@ -133,7 +133,7 @@
 	(put-into-cell-at! (cursor-tail)
 			   head/tail-separator
 			   (the-document))
-	(times 2 cursor-advance!))
+	(times 2 move-cursor-right!))
        
        (else
 	(let* ((space-after (split-space!

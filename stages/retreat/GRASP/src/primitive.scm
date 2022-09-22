@@ -160,14 +160,14 @@
       (painter:open-paren! inner:height)
       (when (equal? (the-cursor) (recons (first-index)
 					 context))
-	(painter:remember-offset! 0 2))
+	(painter:mark-cursor! 0 2))
       (with-translation (paren-width 0)
 	(draw-sequence! (this) context: context))
       (with-translation ((+ paren-width inner:width) 0)
 	(painter:close-paren! inner:height))
       (when (equal? (the-cursor) (recons (last-index)
 					 context))
-	(painter:remember-offset!
+	(painter:mark-cursor!
 	 (+ paren-width 1 inner:width)
 	 (- inner:height 1)))))
 

@@ -360,7 +360,7 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
   (set! (the-cursor) (cursor-advance))
   (set! (the-selection-anchor) (the-cursor)))
 
-(define (move-cursor-left)
+(define (move-cursor-left!)
   (set! (the-cursor) (cursor-retreat))
   (set! (the-selection-anchor) (the-cursor)))
 

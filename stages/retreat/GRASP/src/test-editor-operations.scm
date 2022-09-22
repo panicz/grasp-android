@@ -30,14 +30,15 @@
 			      (cursor (the-cursor)))
   (parameterize ((the-painter (TextPainter)))
     (let* ((target (cursor-ref document cursor))
-	   (painter ::TextPainter (the-painter)))
+	   (painter ::TextPainter (the-painter))
+	   (cursor-position (painter:cursor-position)))
       (draw-sequence! (head document))
       	  
       (painter:put! (if (is target instance? Space)
 		       #\|
 		       #\^)
-		   (painter:remembered-top)
-		   (painter:remembered-left))
+		    cursor-position:top
+		    cursor-position:left)
       (painter:toString))))
 
 
