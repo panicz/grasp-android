@@ -255,3 +255,49 @@
 (define (always . _) ::boolean #t)
 
 (define-alias hypotenuse java.lang.Math:hypot)
+
+(define (min+max first . args)
+  #;(assert (and (number? first)
+	       (every number? args)))
+  (let loop ((min first)
+	     (max first)
+	     (remaining args))
+    (match remaining
+      ('()
+       (values min max))
+      (`(,current . ,remaining)
+       (cond ((is current < min)
+	      (loop current max remaining))
+	     ((is current > max)
+	      (loop min current remaining))
+	     (else
+	      (loop min max remaining)))))))
+
+(e.g.
+ (min+max 5 4 6 3 7 2 8 1)
+ ===> 1 8)
+
+(define (argmin+argmax property element . elements)
+  (let ((quality (property element)))
+    (let next-trial ((winner element)
+		     (looser element)
+		     (mastery quality)
+		     (failure quality)
+		     (opponents elements))
+      (if (null? opponents)
+	  (values looser winner)
+	  (let* ((rival (head opponents))
+		 (quality (property rival)))
+	    (cond ((is quality < failure)
+		   (next-trial winner rival mastery quality 
+			       (tail opponents)))
+		  ((is quality > mastery)
+		   (next-trial rival looser quality failure 
+			       (tail opponents)))
+		  (else
+		   (next-trial winner looser mastery failure 
+			       (tail opponents)))))))))
+
+(e.g.
+ (argmin+argmax length '(1 2) '(3) '(4 5 6))
+ ===> (3) (4 5 6))
