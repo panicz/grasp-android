@@ -130,7 +130,7 @@ mutations of an n-element set.\"
 	    (,KeyType:ArrowLeft
 	     (try-catch
 	      (begin
-		(cursor-retreat!))
+		(move-cursor-left!))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
@@ -138,7 +138,7 @@ mutations of an n-element set.\"
 	    (,KeyType:ArrowRight
 	     (try-catch
 	      (begin
-		(cursor-advance!)
+		(move-cursor-right!)
 		(cond ((key:shift-down?)
 		       "powiekszamy selekcje")
 		      

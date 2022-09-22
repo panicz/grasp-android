@@ -19,8 +19,8 @@
 (import (fundamental))
 
 ;; the methods provided by these interfaces should be thought of as
-;; implicitly parameterized with (the-painter) and (the-cursor)
-;; parameters
+;; implicitly parameterized with (the-painter), (the-cursor)
+;; and (the-selection-anchor) parameters
 
 (define-interface Indexable ()
   (part-at index::Index)::Indexable*

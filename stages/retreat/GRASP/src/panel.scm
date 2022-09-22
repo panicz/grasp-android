@@ -105,10 +105,13 @@ mutations of an n-element set.\"
         label: \"Press me!\")
 " parse-document))
   (define cursor :: Cursor '())
+
+  (define selection-anchor :: Cursor '())
   
   (define (draw! context::Cursor)::void
-    (parameterize/update-sources ((the-document document)
-				  (the-cursor cursor))
+    (parameterize ((the-document document)
+		   (the-cursor cursor)
+		   (the-selection-anchor selection-anchor)))
       (draw-sequence! (head document))))
   
   (define (touch! x::real y::real finger::byte)::void

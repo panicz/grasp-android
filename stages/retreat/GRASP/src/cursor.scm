@@ -24,6 +24,8 @@ operate on cursors.
 (define-parameter (the-document) :: pair
   (cons (cons '() '()) '()))
 
+(define-parameter (the-selection-anchor) :: Cursor '())
+
 (define (cursor-head)
   (head (the-cursor)))
 
@@ -354,11 +356,19 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 	  (next updated))
 	updated)))
   
-(define (cursor-advance!)
-  (set! (the-cursor) (cursor-advance)))
+(define (move-cursor-right!)
+  (set! (the-cursor) (cursor-advance))
+  (set! (the-selection-anchor) (the-cursor)))
 
-(define (cursor-retreat!)
+(define (move-cursor-left)
+  (set! (the-cursor) (cursor-retreat))
+  (set! (the-selection-anchor) (the-cursor)))
+
+(define (expand-selection-left!)
   (set! (the-cursor) (cursor-retreat)))
+
+(define (expand-selection-right!)
+  (set! (the-cursor) (cursor-advance)))
 
 ;; We stipulate that, for any N >= 1, () < (x1 ... xN)
 ;; (as a consequence, whenever one cursor is a proper
@@ -389,3 +399,8 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
     
 	  ((is length/a > length/b)
 	   (not (cursor< b a document))))))
+
+(define (the-selection)
+  (if (is (the-selection-anchor) cursor< (the-cursor))
+      (values (the-selection-anchor) (the-cursor))
+      (values (the-cursor) (the-selection-anchor))))
