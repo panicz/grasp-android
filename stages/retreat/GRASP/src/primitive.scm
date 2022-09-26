@@ -69,10 +69,8 @@
   (define (draw! context::Cursor)
     ::void
     (invoke (the-painter) 'draw-atom! source
-	    (and (pair? (the-cursor))
-		 (equal? (cursor-tail) context)
-		 (cursor-head))))
-
+	    context))
+  
   (define (extent)::Extent
     (invoke (the-painter) 'atom-extent source))
   
@@ -157,19 +155,11 @@
     (let* ((inner (sequence-extent (this)))
 	   (painter (the-painter))
 	   (paren-width (painter:paren-width)))
-      (painter:open-paren! inner:height)
-      (when (equal? (the-cursor) (recons (first-index)
-					 context))
-	(painter:mark-cursor! 0 2))
+      (painter:draw-box! (+ inner:width (* 2 paren-width))
+			 inner:height
+			 context)
       (with-translation (paren-width 0)
-	(draw-sequence! (this) context: context))
-      (with-translation ((+ paren-width inner:width) 0)
-	(painter:close-paren! inner:height))
-      (when (equal? (the-cursor) (recons (last-index)
-					 context))
-	(painter:mark-cursor!
-	 (+ paren-width 1 inner:width)
-	 (- inner:height 1)))))
+	  (draw-sequence! (this) context: context))))
 
   (define (cursor-under* x::real y::real path::Cursor)::Cursor*
     (let ((inner (sequence-extent (this)))

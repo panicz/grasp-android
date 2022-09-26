@@ -73,21 +73,15 @@
 ;; to podejscie jest niewystarczajace - ze raczej chcielibysmy
 ;; moc "opowiadac historie"
 
-(define (grasped expression::string)::Painter
-  (parameterize ((the-painter (TextPainter)))
-    (let ((parsed (call-with-input-string expression parse)))
-      (draw! (head parsed)))
-    (as Painter (the-painter))))
+(define (grasped program-text::string)::String
+  (let ((document (call-with-input-string program-text
+					  parse-document)))
+    (parameterize ((the-painter (TextPainter))
+		   (the-document document))
+      (draw-document! document)
+      (invoke (the-painter) 'toString))))
 
 (set! (the-painter) (TextPainter))
-
-(define (painter-displays? s::string)::boolean
-  (string=? ((the-painter):toString) s))
-
-(draw-document! document)
-
-
-(print document)
 
 (e.g.
  (parameterize ((evaluating? #t))
@@ -123,13 +117,15 @@
 (e.g. (is '(3 3 1 1) cursor< '(1 5 1 1)))
 (e.g. (isnt '(1 5 1 1) cursor< '(3 3 1 1)))	
 
-(DUMP (the-expression at: '(#\[ 3 1 1)))
 
-(define x 18)
-(define y 10)
+(e.g. (grasped "\
+(define (! n)
+  (if (<= n 0)
+      1
+      (* n (! (- n 1)))))
 
-(assert
- (painter-displays? "
+(e.g. (! 5) ===> 120)
+") ===> "
 ╭        ╭     ╮                      ╮
 │ define │ ! n │                      │
 │        ╰     ╯                      │
@@ -148,19 +144,123 @@
 ╭      ╭     ╮          ╮              
 │ e.g. │ ! 5 │ ===> 120 │              
 ╰      ╰     ╯          ╯              
-"))
-
-(invoke (as TextPainter (the-painter))
-	'put! #\⊙ y x)
-
-(display ((the-painter):toString))
+")
 
 
-;; w sobote chcemy zrobic commit z komputera,
-;; natomiast po nim mielibysmy nastepujace prace:
-;; - wdrozyc ten design z cursor-under*
-;; - (the) document jako argument domyslny w cursor-under
-;; 
+(e.g.
+ (parameterize ((the-cursor (cursor 0 1 3 1 1)))
+   (grasped "\
+(define (! n)
+  (if (<= n 0)
+      1
+      (* n (! (- n 1)))))
+")) ===> "
+╭        ╭     ╮                      ╮
+│ define │ ! n │                      │
+│        ╰ ^   ╯                      │
+│   ╭    ╭        ╮                 ╮ │
+│   │ if │ <= n 0 │                 │ │
+│   │    ╰        ╯                 │ │
+│   │                               │ │
+│   │       1                       │ │
+│   │                               │ │
+│   │       ╭     ╭   ╭       ╮ ╮ ╮ │ │
+│   │       │ * n │ ! │ - n 1 │ │ │ │ │
+╰   ╰       ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
+")
+
+
+(e.g.
+ (parameterize ((the-cursor (cursor 0 2 3 1 1)))
+   (grasped "\
+(define (! n)
+  (if (<= n 0)
+      1
+      (* n (! (- n 1)))))
+")) ===> "
+╭        ╭     ╮                      ╮
+│ define │ ! n │                      │
+│        ╰  |  ╯                      │
+│   ╭    ╭        ╮                 ╮ │
+│   │ if │ <= n 0 │                 │ │
+│   │    ╰        ╯                 │ │
+│   │                               │ │
+│   │       1                       │ │
+│   │                               │ │
+│   │       ╭     ╭   ╭       ╮ ╮ ╮ │ │
+│   │       │ * n │ ! │ - n 1 │ │ │ │ │
+╰   ╰       ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
+")
+
+(e.g.
+ (parameterize ((the-cursor (cursor 0 1 1 1)))
+   (grasped "\
+(define (! n)
+  (if (<= n 0)
+      1
+      (* n (! (- n 1)))))
+")) ===> "
+╭        ╭     ╮                      ╮
+│ define │ ! n │                      │
+│ ^      ╰     ╯                      │
+│   ╭    ╭        ╮                 ╮ │
+│   │ if │ <= n 0 │                 │ │
+│   │    ╰        ╯                 │ │
+│   │                               │ │
+│   │       1                       │ │
+│   │                               │ │
+│   │       ╭     ╭   ╭       ╮ ╮ ╮ │ │
+│   │       │ * n │ ! │ - n 1 │ │ │ │ │
+╰   ╰       ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
+")
+
+
+(e.g.
+ (parameterize ((the-cursor (cursor 6 1 1 1)))
+   (grasped "\
+(define (! n)
+  (if (<= n 0)
+      1
+      (* n (! (- n 1)))))
+")) ===> "
+╭        ╭     ╮                      ╮
+│ define │ ! n │                      │
+│       ^╰     ╯                      │
+│   ╭    ╭        ╮                 ╮ │
+│   │ if │ <= n 0 │                 │ │
+│   │    ╰        ╯                 │ │
+│   │                               │ │
+│   │       1                       │ │
+│   │                               │ │
+│   │       ╭     ╭   ╭       ╮ ╮ ╮ │ │
+│   │       │ * n │ ! │ - n 1 │ │ │ │ │
+╰   ╰       ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
+")
+
+
+(e.g.
+ (parameterize ((the-selection-anchor (cursor 0 1 1 1))
+		(the-cursor (cursor 6 1 1 1)))
+   (grasped "\
+(define (! n)
+  (if (<= n 0)
+      1
+      (* n (! (- n 1)))))
+")) ===> "
+╭        ╭     ╮                      ╮
+│ define │ ! n │                      │
+│ ~~~~~~^╰     ╯                      │
+│   ╭    ╭        ╮                 ╮ │
+│   │ if │ <= n 0 │                 │ │
+│   │    ╰        ╯                 │ │
+│   │                               │ │
+│   │       1                       │ │
+│   │                               │ │
+│   │       ╭     ╭   ╭       ╮ ╮ ╮ │ │
+│   │       │ * n │ ! │ - n 1 │ │ │ │ │
+╰   ╰       ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
+")
+
 
 #|
               11111111112222222222333333333
@@ -188,7 +288,6 @@
 
 (e.g. (cursor-under 0 0) ===> (#\[ 1 1)) ; (define ...)
 (e.g. (cursor-under 0 11) ===> (#\[ 1 1)) ; (define ...)
-
 (e.g. (cursor-under 38 0) ===> (#\] 1 1)) ; (define ...)
 (e.g. (cursor-under 38 11) ===> (#\] 1 1)) ; (define ...)
 (e.g. (cursor-under 2 1) ===> (0 1 1 1)) ; define
@@ -208,85 +307,49 @@
 (e.g. (cursor-under 24 17) ===> (#\] 3 1)) ; (e.g. ...)
 (e.g. (cursor-under 7 16) ===> (#\[ 3 3 1)) ; (! 5)
 
+;; (DUMP (cursor-under 16 1))
+;; (DUMP (cursor-under 17 1))
+;; (DUMP (cursor-under 2 3))
+;; (DUMP (cursor-under 3 4))
 
-(exit)
+;; (exit)
 
-(define horizontal-dotted (call-with-input-string "\
+(e.g. (grasped "\
 (head
 .
-tail)" parse))
+tail)") ===> "
+╭      ╮
+│ head │
+│ ____ │
+│      │
+│ tail │
+╰      ╯
+")
 
-(define vertical-dotted (call-with-input-string "\
+(e.g. (grasped "\
 (((a b)
 (c d))  .  ((e f)
-(g h)))" parse))
+(g h)))") ===> "
+╭ ╭ ╭     ╮ ╮  ╷  ╭ ╭     ╮ ╮ ╮
+│ │ │ a b │ │  │  │ │ e f │ │ │
+│ │ ╰     ╯ │  │  │ ╰     ╯ │ │
+│ │ ╭     ╮ │  │  │ ╭     ╮ │ │
+│ │ │ c d │ │  │  │ │ g h │ │ │
+╰ ╰ ╰     ╯ ╯  ╵  ╰ ╰     ╯ ╯ ╯
+")
 
-(invoke (the-painter) 'clear!)
-
-(draw! (head horizontal-dotted))
-
-(display (invoke (the-painter) 'toString))
-
-(invoke (the-painter) 'clear!)
-
-(draw! (head vertical-dotted))
-
-(display (invoke (the-painter) 'toString))
-
-(define empties (call-with-input-string "\
+(e.g. (grasped "\
 ((() . ())
     (   )
 .
-     ( ))" parse))
-
-((the-painter):clear!)
-
-(draw! (head empties))
-
-(display (invoke (the-painter) 'toString))
-
-
-((the-painter):clear!)
-
-((the-painter):draw-rounded-rectangle! 15 4)
-
-(display (invoke (the-painter) 'toString))
-
-
-
-#|
-(e.g.
- (cursor at: (Finger left: 8 top: 4)
-         in: (head parsed))
- ===> (5 2 0))
-|#
-
-;; Iteracja po wyrazeniach:
-;; Schemat iteracji, ktorego uzywamy do rysowania sekwencji,
-;; chcielibysmy rowniez wykorzystywac do przekazywania
-;; zdarzen dotyku do poszczegolnych komponentow, a w szczegolnosci
-;; do "wyciagania" podwyrazen, oraz do umieszczania kursora.
-
-;; No dobra, czyli tak:
-;; 1. do interfejsu Painter dochodzi operacja
-;;
-;;      (cursor-at left::real top::real on: painter::Painter) -> cursor
-;;
-;;    ktora zwraca kursor wyrazenia dla danych wspolrzednych
-;; 2. ponadto trzeba interfejs Painter odpowiednio rozbudowac,
-;;    zeby wesprzec konstrukcje struktury, ktora bedzie nam
-;;    odwzorowywac wspolrzedne w kursory
-;; 3. chcielibysmy tez opracowac API do:
-;;    - odnoszenia sie do elementu wskazywanego przez kursor
-;;      (cursor-ref cursor expr) -> expr
-;;    - wyciagania elementu
-;;      (cursor-take! cursor expr) -> expr
-;;    - umieszczania elementu
-;;      (cursor-put! element cursor expr)
-;;    - nawigowania w obrebie kursora:
-;;      (cursor-next cursor expr) -> cursor
-;;      (cursor-back cursor expr) -> cursor
-;;
-;; Co nie mniej wazne, chcemy 
-
-
+     ( ))") ===> "
+╭ ╭ ╭  ╮ ╷ ╭  ╮ ╮ ╮
+│ │ │  │ │ │  │ │ │
+│ ╰ ╰  ╯ ╵ ╰  ╯ ╯ │
+│     ╭     ╮     │
+│     │     │     │
+│ ____╰_____╯____ │
+│      ╭   ╮      │
+│      │   │      │
+╰      ╰   ╯      ╯
+")

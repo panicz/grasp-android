@@ -1,3 +1,4 @@
+(import (srfi :11))
 (import (define-syntax-rule))
 (import (define-interface))
 (import (define-type))
@@ -401,6 +402,22 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 	   (not (cursor< b a document))))))
 
 (define (the-selection)
+  ;; implicitly parameterized with (the-document),
+  ;; (the-cursor) and (the-selection-anchor),
+  ;; because cursor< is parameterized with (the-document)
+  ;; and the remaining parameters are used directly
   (if (is (the-selection-anchor) cursor< (the-cursor))
       (values (the-selection-anchor) (the-cursor))
       (values (the-cursor) (the-selection-anchor))))
+
+(define (within-selection? context::Cursor)::boolean
+  ;; implicitly parameterized with (the-document),
+  ;; (the-cursor) and (the-selection-anchor),
+  ;; because cursor< is parameterized with (the-document),
+  ;; and (the-selection) is implicitly parameterized
+  ;; with (the-document), (the-cursor)
+  ;; and (the-selection-anchor)
+  (and (pair? (the-selection-anchor))
+       (isnt (the-selection-anchor) equal? (the-cursor))
+       (let-values (((selection-start selection-end) (the-selection)))
+	 (is selection-start cursor< context cursor< selection-end))))

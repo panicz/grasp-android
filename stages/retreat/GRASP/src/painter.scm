@@ -52,11 +52,11 @@
   
   (clear!)::void
   
-  (draw-quoted-text! s::CharSequence index::Index)::void
-  (draw-string! s::CharSequence index::Index)::void
+  (draw-quoted-text! s::CharSequence context::Cursor)::void
+  (draw-string! s::CharSequence context::Cursor)::void
   (quoted-text-extent text::CharSequence)::Extent
   
-  (draw-atom! text::CharSequence index::Index)::void
+  (draw-atom! text::CharSequence context::Cursor)::void
 
   (atom-character-index-under x::real y::real text::CharSequence)::int
   (quoted-text-character-index-under x::real y::real text::CharSequence)::int
@@ -69,9 +69,8 @@
   (vertical-bar-width)::real
   (horizontal-bar-height)::real
 
-  (open-paren! height::real)::void
-  (close-paren! height::real)::void
-
+  (draw-box! width::real height::real context::Cursor)::void
+  
   (draw-rounded-rectangle! width::real height::real)::void
   )
 
@@ -128,18 +127,18 @@
     0)
   
   (define (draw-quoted-text! s::CharSequence
-			     index::Index)
+			     context::Cursor)
     ::void
     (values))
   
-  (define (draw-string! s::CharSequence index::Index)
+  (define (draw-string! s::CharSequence context::Cursor)
     ::void
     (values))
 
   (define (quoted-text-extent text::CharSequence)::Extent
     (Extent width: 0 height: 0))
   
-  (define (draw-atom! text::CharSequence index::Index)::void
+  (define (draw-atom! text::CharSequence context::Cursor)::void
     (values))
 
   (define (atom-character-index-under x::real y::real
@@ -160,12 +159,9 @@
   
   (define (draw-vertical-bar! height::real)::void
    (values))
-  
-  (define (open-paren! height::real)::void
+
+  (define (draw-box! width::real height::real context::Cursor)::void
     (values))
-  
-  (define (close-paren! height::real)::void
-   (values))
 
   (define (draw-rounded-rectangle! width::real
 				   height::real)

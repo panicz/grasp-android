@@ -22,10 +22,7 @@
   (define (draw! context::Cursor)
     (invoke (the-painter) 'draw-quoted-text!
 	    (this)
-	    (and (pair? (the-cursor))
-		 (equal? context
-			 (cursor-tail))
-		 (cursor-head))))
+	    context))
 
   (define (extent)::Extent
     (invoke (the-painter) 'quoted-text-extent (this)))

@@ -634,9 +634,7 @@
   (define (draw! context::Cursor)::void
     (let ((outer (extent))
 	  (painter (the-painter)))
-      (painter:open-paren! outer:height)
-      (with-translation ((- outer:width (painter:paren-width)) 0)
-	  (painter:close-paren! outer:height))))
+      (painter:draw-box! outer:width outer:height context)))
   
   (gnu.lists.LList)
   (set! space inner))

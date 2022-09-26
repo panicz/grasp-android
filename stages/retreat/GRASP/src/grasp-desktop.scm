@@ -210,7 +210,7 @@
   (define rendering-hints ::RenderingHints
     (RenderingHints RenderingHints:KEY_TEXT_ANTIALIASING
 		    RenderingHints:VALUE_TEXT_ANTIALIAS_ON))
-
+    
   (define (open-paren! height::real)::void
     (let ((line-height (max 0 (- height
 				 top-left-bounds:height
@@ -238,6 +238,11 @@
 			      line-height))
 	  (graphics:fill bottom-right-paren))))
 
+  (define (draw-box! width::real height::real context::Cursor)::void
+    (open-paren! height)
+    (with-translation ((- width (paren-width)) 0)
+	(close-paren! height)))
+  
   (define (space-width)::real 8)
   
   (define (paren-width)::real
@@ -297,7 +302,7 @@
     
   (define (draw-text! text::CharSequence
 		      font::Font
-		      index::Index)::void
+		      context::Cursor)::void
     (let* ((graphics (the-graphics-output))
 	   (line-start 0)
 	   (lines 1)
@@ -313,13 +318,13 @@
       (graphics:drawString (text:subSequence line-start string-end)
 			   0 (* lines height))))
   
-  (define (draw-string! text::CharSequence index::Index)::void
-    (draw-text! text (the-string-font) index))
+  (define (draw-string! text::CharSequence context::Cursor)::void
+    (draw-text! text (the-string-font) context))
 
-  (define (draw-quoted-text! text::CharSequence index::Index)::void
+  (define (draw-quoted-text! text::CharSequence context::Cursor)::void
     (invoke (the-graphics-output) 'setColor
 	    (the-string-text-color))
-    (draw-string! text index))
+    (draw-string! text context))
 
   (define (text-extent text::CharSequence font::Font)::Extent
     (let* ((graphics (the-graphics-output))
@@ -375,7 +380,7 @@
       (Extent width: (+ inner:width 8)
 	      height: (+ inner:height 16))))
 
-  (define (draw-atom! text::CharSequence index::Index)::void
+  (define (draw-atom! text::CharSequence context::Cursor)::void
     (let* ((graphics (the-graphics-output))
 	   (extent (atom-extent text)))
       (graphics:setColor (the-atom-background-color))
@@ -384,7 +389,7 @@
 			      12 12)
       (graphics:setColor (the-atom-text-color))
       (with-translation (4 8)
-	  (draw-text! text (the-atom-font) index))))
+	  (draw-text! text (the-atom-font) context))))
 
   (define (atom-character-index-under x::real y::real
 				      text::CharSequence)

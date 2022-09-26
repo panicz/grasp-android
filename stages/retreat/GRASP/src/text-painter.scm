@@ -7,6 +7,9 @@
 (import (painter))
 (import (define-object))
 (import (indexable))
+(import (cursor))
+(import (match))
+(import (space))
 
 (define-object (CharPainter)::Painter
   (define shift-left ::real 0)
@@ -43,7 +46,8 @@
   
   (define (mark-cursor! +left::real +top::real)::void
     (set! marked-cursor-position:left (+ shift-left +left))
-    (set! marked-cursor-position:top (+ shift-top +top)))
+    (set! marked-cursor-position:top (+ shift-top +top))
+    )
 
   (define (cursor-position)::Position
     marked-cursor-position)
@@ -95,20 +99,16 @@
          (put! #\│ i 0))
     (put! #\╵ (- height 1) 0))
 
-  (define (open-paren! height::real)
-    ::void
+  (define (draw-box! width::real height::real context::Cursor)::void
     (put! #\╭ 0 0)
     (for i from 1 to (- height 2)
          (put! #\│ i 0))
-    (put! #\╰ (- height 1) 0))
-  
-  (define (close-paren! height::real)
-    ::void
-    (put! #\╮ 0 1)
+    (put! #\╰ (- height 1) 0)
+    (put! #\╮ 0 (- width 1))
     (for i from 1 to (- height 2)
-         (put! #\│ i 1))
-    (put!  #\╯ (- height 1) 1))
-
+         (put! #\│ i (- width 1)))
+    (put!  #\╯ (- height 1) (- width 1)))
+  
   (define (draw-rounded-rectangle! width::real
 				   height::real)
     ::void
@@ -128,20 +128,22 @@
     
     (values))
   
-  (define (draw-quoted-text! s::CharSequence index::Index)
+  (define (draw-quoted-text! s::CharSequence context::Cursor)
     ::void
     (let ((extent ::Extent (string-extent s)))
       (put! #\❝ 0 0)
       (with-translation (2 1)
-	  (draw-string! s index))
+	  (draw-string! s context))
       (put! #\❞ (+ extent:height 1) (+ extent:width 3))))
 
-  (define (draw-string! text::CharSequence index::Index)::void
-    (let ((row 0)
+  (define (draw-string! text::CharSequence context::Cursor)::void
+    (let ((focused? (and (pair? (the-cursor))
+			 (equal? context (cursor-tail))))
+	  (row 0)
 	  (col 0)
 	  (n 0))
       (for c in text
-	(when (eqv? n index)
+	(when (and focused? (eqv? n (cursor-head)))
 	  (mark-cursor! col (+ row 1)))
         (cond ((eq? c #\newline)
 	       (set! row (+ row 1))
@@ -149,7 +151,10 @@
 	      (else
 	       (put! c row col)
 	       (set! col (+ col 1))))
-	(set! n (+ n 1)))))
+	(set! n (+ n 1)))
+      (when (and focused? (eqv? n (cursor-head)))
+	(mark-cursor! col (+ row 1)))))
+
 
   (define (string-character-index-under x::real y::real
 					text::CharSequence)
@@ -178,9 +183,9 @@
     ::int
    (string-character-index-under (- x 2) (- y 1) text))
   
-  (define (draw-atom! text::CharSequence index::Index)::void
+  (define (draw-atom! text::CharSequence context::Cursor)::void
     (with-translation (0 1)
-	(draw-string! text index)))
+	(draw-string! text context)))
 
   (define (atom-extent text::CharSequence)::Extent
     (let ((inner ::Extent (string-extent text)))
@@ -257,6 +262,16 @@
    (set! shift-left 0)
    (set! shift-top 0))
 
+  (define (mark-cursor! +left::real +top::real)::void
+    (invoke-special CharPainter (this) 'mark-cursor! +left +top)
+    (match (the-expression)
+      (,@Space?
+       (put! #\| +top +left))
+      (,@Atom?
+       (put! #\^ +top +left))
+      (_
+       (values))))
+  
   (define (toString)::String
     (with-output-to-string
       (lambda ()
@@ -272,4 +287,3 @@
   (define (current-height)::real height)
   
   (CharPainter))
-
