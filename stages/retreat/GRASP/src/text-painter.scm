@@ -1,3 +1,4 @@
+(import (srfi :11))
 (import (for))
 (import (fundamental))
 (import (primitive))
@@ -137,24 +138,38 @@
       (put! #\❞ (+ extent:height 1) (+ extent:width 3))))
 
   (define (draw-string! text::CharSequence context::Cursor)::void
-    (let ((focused? (and (pair? (the-cursor))
-			 (equal? context (cursor-tail))))
-	  (row 0)
-	  (col 0)
-	  (n 0))
-      (for c in text
-	(when (and focused? (eqv? n (cursor-head)))
-	  (mark-cursor! col (+ row 1)))
-        (cond ((eq? c #\newline)
-	       (set! row (+ row 1))
-	       (set! col 0))
-	      (else
-	       (put! c row col)
-	       (set! col (+ col 1))))
-	(set! n (+ n 1)))
-      (when (and focused? (eqv? n (cursor-head)))
-	(mark-cursor! col (+ row 1)))))
-
+    (let-values (((selection-start selection-end) (the-selection)))
+      (let ((focused? (and (pair? (the-cursor))
+			   (equal? context (cursor-tail))))
+	    (alters-selection-drawing-mode?
+	     (and (pair? selection-start)
+		  (pair? selection-end)
+		  (or (equal? (tail selection-start) context)
+		      (equal? (tail selection-end) context))))
+	    (row 0)
+	    (col 0)
+	    (n 0))
+	
+	(define (handle-cursor-and-selection!)
+	  (when alters-selection-drawing-mode?
+	    (cond ((eqv? n (head selection-start))
+		   (enter-selection-drawing-mode!))
+		  ((eqv? n (head selection-end))
+		   (exit-selection-drawing-mode!))))
+	  (when (and focused? (eqv? n (cursor-head)))
+	    (mark-cursor! col (+ row 1))))
+	
+	(for c in text
+	  (handle-cursor-and-selection!)
+          (cond ((eq? c #\newline)
+		 (set! row (+ row 1))
+		 (set! col 0))
+		(else
+		 (put! c row col)
+		 (set! col (+ col 1))))
+	  
+	  (set! n (+ n 1)))
+	(handle-cursor-and-selection!))))
 
   (define (string-character-index-under x::real y::real
 					text::CharSequence)
@@ -206,7 +221,17 @@
   (define (current-width)::real #!abstract)
 
   (define (current-height)::real #!abstract)
+
+  (define selection-drawing-mode? ::boolean #f)
   
+  (define (enter-selection-drawing-mode!)::void
+    (set! selection-drawing-mode? #t))
+
+  (define (exit-selection-drawing-mode!)::void
+    (set! selection-drawing-mode? #f))
+  
+  (define (in-selection-drawing-mode?)::boolean
+    selection-drawing-mode?)
   )
   
   
@@ -252,7 +277,10 @@
             (set! width new-width)
             (set! height new-height)
             (set! data new-data)))
-	(set! (data (+ (* width y) x)) c))))
+	(set! (data (+ (* width y) x)) c)
+	(when (and selection-drawing-mode?
+		   (is (+ y 1) < height))
+	  (set! (data (+ (* width (+ y 1)) x)) #\~)))))
 
   (define (clear!)::void
    (for line from 0 below height

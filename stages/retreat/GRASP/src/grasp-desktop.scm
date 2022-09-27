@@ -266,10 +266,20 @@
 					 +left))
     (set! marked-cursor-position:top (+ (current-translation-top)
 					+top)))
-
   (define (cursor-position)::Position
     marked-cursor-position)
 
+  (define selection-drawing-mode? ::boolean #f)
+  
+  (define (enter-selection-drawing-mode!)::void
+    (set! selection-drawing-mode? #t))
+
+  (define (exit-selection-drawing-mode!)::void
+    (set! selection-drawing-mode? #f))
+  
+  (define (in-selection-drawing-mode?)::boolean
+    selection-drawing-mode?)
+  
   (define (vertical-bar-width)::real
     5)
   

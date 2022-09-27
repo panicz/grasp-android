@@ -72,6 +72,10 @@
   (draw-box! width::real height::real context::Cursor)::void
   
   (draw-rounded-rectangle! width::real height::real)::void
+
+  (enter-selection-drawing-mode!)::void
+  (exit-selection-drawing-mode!)::void
+  (in-selection-drawing-mode?)::boolean
   )
 
 (define-object (NullPainter)::Painter
@@ -173,7 +177,16 @@
   
   (define (cursor-position)::Position
     (Position left: 0
-	      top: 0))  
+	      top: 0))
+
+  (define (enter-selection-drawing-mode!)::void
+    (values))
+
+  (define (exit-selection-drawing-mode!)::void
+    (values))
+  
+  (define (in-selection-drawing-mode?)::boolean
+    #f)
   )
 
 (set! (default-value Painter) (NullPainter))
