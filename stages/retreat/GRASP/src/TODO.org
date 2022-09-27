@@ -1,3 +1,236 @@
+* 27.09.2022
+
+No dobra, mamy juz mechanizm rysowania selekcji
+dla atomow w TextPainterze.
+
+Pytanie, jakie kolejne kroki powinnismy podjac,
+zeby nasza droga byla jak najsensowniejsza.
+
+Albo: jakie mamy pomysly na to, zeby w ogole byla
+jakakolwiek?
+
+Na razie pomysl jest taki, ze chcielibysmy moc
+poruszac kursorem w kliencie tesktopowym (terminalowym
+oczywiscie tez).
+
+Dlatego tym, co musimy zrobic koniecznie, jest
+po pierwsze wyswietlanie kursora, po drugie - poruszanie
+kursorem, a po trzecie - wyswietlanie selekcji w kliencie
+desktopotowym i terminalowym.
+
+(wczoraj przyszedl mi jeszcze do glowy pomysl, zeby
+przenoszone wyrazenie zachowywalo sie "galaretowato".
+
+No ale dobra, tutaj mamy przed soba jeszcze kilka wyzwan,
+a w szczegolnosci - obsluge klawiatury.
+
+* 26.09.2022
+
+Przypomnijmy sobie wczorajsze ustalenia: bedziemy wywolywac
+enter/exit-selection-drawing-mode! w tych 4 miejscach:
+
+1. w metodzie draw-atom! (czy posrednio draw-string!) Paintera
+2. w funkcji draw-sequence!
+3. w metodzie draw! klasy cons
+4. ewentualnie w metodzie "draw!" klasy Space
+
+Wydaje sie to dziwne, bo w niektorych miejscach to framework
+zarzadza wyswietlaniem selekcji, a w innych - implementacje
+poszczegolnych elementow.
+
+Nie boli nas to jednak o tyle, ze przynajmniej w przypadku
+rozszerzen, wiele z nich bedzie dziedziczyc po klasie Magic,
+ktora dziedziczy po klasie Simple - co oznacza, ze wewnatrz
+niej nie bedzie sie dalo niczego zaznaczac.
+
+OK, zatem zacznijmy od metody draw-atom!:
+
+Bedzie ona dzialac w taki sposob, ze najpierw sprawdzamy,
+czy w ogole mamy szanse na to, zeby w trakcie dzialania funkcji
+rysujacej dochodzilo do zmiany trybu rysowania selekcji.
+
+Jezeli tak, to dzielimy sobie atom na 3 czesci (z ktorych
+jedna moze byc pusta): przed selekcja, selekcje, i za selekcja.
+
+No dobra, niewazne. Zmiana w atomie zostala juz zaimplementowana.
+Pozostaja nam jeszcze:
+- spacja
+- sekwencje
+- "cons"
+nie wiem, czy teraz chcemy to robic, bo aktualnie i tak
+nie mamy zadnego sposobu na to, zeby przetestowac poprawnosc
+tego.
+
+
+* 25.09.2022
+
+Dzisiaj bysmy chcieli zrobic wyswietlanie
+selekcji przez TextPaintera.
+
+Plan jest taki, ze dodajemy "enter-selection-drawing-mode!"
+i "exit-selection-drawing-mode!" do paintera.
+
+Dalej: w implementacji TextPaintera dodajemy (do implementacji
+put!) takie cos, ze zawsze dodatkowo rysujemy znak ~
+pod kazdym wyrysowanym znakiem, o ile painter jest
+in-selection-drawing-mode?. Generalnie - choc to nie najpiekniejsze
+rozwiazanie - nie powinno ono nic psuc, bo rysujemy od gory
+do dolu.
+
+(w docelowych klientach, tj. TerminalPainterze i screen-rendererze
+wolelibysmy raczej uzywac do tego celu kolorow)
+
+No dobra, ale teraz pozostaje kwestia tego, w jakich okolicznosciach
+te nowe metody do wchodzenia i wychodzenia do trybu rysowania selekcji
+maja byc wywolywane?
+
+Wydaje sie, ze okolicznosci sa nastepujace:
+1. w metodzie draw-atom! (czy posrednio draw-string!) Paintera
+2. w funkcji draw-sequence!
+3. w metodzie draw! klasy cons
+4. ewentualnie w metodzie "draw!" klasy Space
+
+
+* 24.09.2022
+
+Co nam pozostaje z TODO-listy:
+
+- wyswietlanie kursora w TerminalPainterze
+- wyswietlanie kursora w screen-rendererze
+- poruszanie sie strzalkami (lewo/prawo) po kliencie 
+  tekstowym i desktopowym
+- obsluga map klawiatury (potrzebne do przetestowania
+poruszania kursorem)
+- test dla wyswietlania selekcji w TextPainterze
+- implementacja wyswietlania selekcji
+
+OK, no to ten test to juz jest :D
+
+Nasze postanowienie jest takie, ze nie mozemy zaznaczac
+samych spacji. Mozemy jedynie zaznaczac ciagi wyrazen,
+albo pojedyncze wyrazenia, albo ciagi znakow w jednym
+wyrazeniu.
+
+W kazdym razie od strony formalnej musi byc tak, ze
+(the-selection-anchor) ma taka sama dlugosc, jak
+(the-cursor) - pomijajac wyjatkowa sytuacje, gdy ma
+wartosc '(), co interpretujemy jako brak selekcji
+(inny taki przypadek, to gdy (equal? (the-cursor)
+(the-selection-anchor))).
+
+No dobra, ale jak mamy to zaimplementowac?
+Po pierwsze, musimy pamietac, ze TextPainter
+i TerminalPainter maja wspolnego przodka
+w postaci CharPaintera.
+
+Moze jednak warto powrocic do tego pomyslu zeby
+dodac metody enter-selection-drawing-mode!,
+exit-selection-drawing-mode! oraz
+in-selection-drawing-mode? do interfejsu Painter.
+
+Wowczas to by musialo mniej wiecej tak dzialac,
+ze jak renderujemy atom, to sprawdzamy:
+- czy mamy w ogole szanse, zeby na tym atomie
+sobie lezal poczatek albo koniec selekcji
+(a to sprawdzamy w taki sposob, ze sprawdzamy,
+czy context jest taki sam, jak ogon
+
+
+* 23.09.2022
+
+sprobujmy opracowac TODO-liste z wczorajszego wpisu:
+
+- test dla wyswietlania kursora w TextPainterze V
+- wyswietlanie kursora w TextPainterze V
+- weryfikacja testu V
+- wyswietlanie kursora w TerminalPainterze
+- wyswietlanie kursora w screen-rendererze
+- poruszanie sie strzalkami (lewo/prawo) po kliencie 
+  tekstowym i desktopowym
+- obsluga map klawiatury (potrzebne do przetestowania
+poruszania kursorem)
+
+XXX JESZCZE WYSWIETLANIE SELEKCJI!
+
+UWAGA TAKA: w TextPainterze chcemy oznaczac kursor
+i selekcje w inny sposob, niz w TerminalPainterze.
+
+Moze w zwiazku z tym przyjrzymy sie uzyciom "mark-cursor!".
+Sa wywolywane w:
+- primitive.scm (metoda draw! klasy cons, przy renderowaniu nawiasow)
+- space.scm (metoda draw! klasy Space)
+
+To sa jedyne miejsca. Stad mamy pomysl taki, zeby:
+- zastapic metody open-paren! i close-paren! jedna metoda,
+  draw-box!, ktora bedzie przyjmowala kontekst (i ona sobie
+  bedzie sama decydowac)
+- wywalic w ogole metode "mark-cursor!"? (czy moze nie?)
+
+Te ostatnia kwestie trzeba jeszcze jakos przemyslec.
+Ogolnie pytanie jest takie: w jaki sposob sprawic, zeby
+kursor pod spacja byl wyswietlany inaczej, niz kursor
+pod atomem?
+
+Moze zostawic "mark-cursor!", ale dodac do niego context?
+
+Albo po prostu zrobic tak, zeby implementacja mark-cursor!
+w TextPainter dzialala w taki sposob, ze sprawdza, czy
+(the-painter) to spacja, i jesli tak, to rysuje |,
+a w przeciwnym razie rysuje ^.
+
+
+
+
+* 22.09.2022
+
+Teraz zrobimy po prostu cos takiego, ze jak renderujemy
+atom z kursorem, to wyswietlamy ^ pod literka, za ktora
+znajduje sie kursor.
+
+Zmienilibysmy tez nazwy metod "remember-offset!",
+"remembered-left" i "remembered-top" na "mark-cursor!"
+oraz "cursor-position".
+
+OK, ale czy to wystarczy?
+
+Wydaje sie, ze mamy taki problem, ze metody klasy painter
+przyjmuja index -- zamiast context, i to zupelnie niepotrzebnie.
+
+Musimy zatem zmodyfikowac je tak, zeby przyjmowaly context.
+
+Mowiac konkretnie: interfejs painter, jego implementacje
+oraz uzycia.
+
+To sie jakos wydaje dzialac.
+
+I co dalej?
+
+No, teraz chcemy, zeby funkcja renderujaca atomy dodatkowo
+wyrysowywala ^, jezeli wyrazenie jest na "focusie",
+oraz zeby wyrysowywala ~~~~, jezeli wyrazenie (albo
+jego fragment) znajduje sie pod selekcja.
+
+Tak chcemy, zeby sie dzialo w TextPainterze.
+
+W TerminalPainterze chcemy raczej oznaczac selekcje za pomoca
+odwroconych kolorow (i uzywac moze zwyklego terminalowego
+markera to wyrazenia polozenia kursora), zas w screen-rendererze
+po pierwsze chcemy jakos oznaczyc polozenie kursora,
+(tzn. po prostu rysowac pionowa kreske), a po drugie
+wyrazac selekcje za pomoca jakiegos koloru tla i jakiegos
+koloru czcionki
+
+Dodatkowo bedziemy chcieli tak zmodyfikowac renderowanie,
+zeby nie rysowac z osobna lewego i prawego nawiasu, tylko
+zeby rysowac od razu cale pudelko (i wtedy bedzie mialo sens
+nadanie mu jakiegos tla podczas rysowania)
+
+I jeszcze bardziej dodatkowo bedziemy od razu chcieli
+zaimplementowac ruszanie kursorem w lewo i prawo w kliencie
+desktopowym i terminalowym, a takze selekcja poprzez klikanie.
+(Ale trzeba to bedzie jakos zrobic przez Panel, i przez mechanizm
+obslugi mapy klawiatury)
+
 * 21.09.2022
 
 wyswietlanie selekcji:
