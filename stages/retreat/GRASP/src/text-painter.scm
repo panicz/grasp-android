@@ -133,6 +133,15 @@
     ::void
     (let ((extent ::Extent (string-extent s)))
       (put! #\❝ 0 0)
+      (put! #\• 0 (+ extent:width 3))
+      (for i from 1 below (+ extent:width 3)
+	   (put! #\┈ (+ extent:height 1) i)
+	   (put! #\┈ 0 i))
+      (for i from 1 to extent:height
+	   (put! #\┊ i 0)
+	   (put! #\┊ i (+ extent:width 3)))
+      (put! #\• (+ extent:height 1) 0)
+      (put! #\❞ (+ extent:height 1) (+ extent:width 3))
       (with-translation (2 1)
 	  (draw-string! s context))
       (put! #\❞ (+ extent:height 1) (+ extent:width 3))))
