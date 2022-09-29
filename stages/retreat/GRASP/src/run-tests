@@ -1,0 +1,3 @@
+#!/bin/sh
+
+kawa --no-warn-unreachable -f test-painter.scm
