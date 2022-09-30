@@ -27,8 +27,17 @@
   (define (assign source::Struct)::Struct
     (this))
 
-  (define (key-pressed key::char)::boolean #f)
-  (define (key-released key::char)::boolean #f)
+  (define key-press-binding ::(maps char to: (maps char to: boolean))
+    (mapping (key) never))
+
+  (define key-release-binding ::(maps char to: (maps char to: boolean))
+    (mapping (key) never))
+  
+  (define (key-pressed key::char)::boolean
+    ((key-press-binding key) key))
+  
+  (define (key-released key::char)::boolean
+    ((key-release-binding key) key))
   
   (define (tapped x::real y::real)::boolean #f)
   (define (pressed x::real y::real)::boolean #f)
