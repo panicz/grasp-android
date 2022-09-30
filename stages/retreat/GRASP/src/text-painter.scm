@@ -11,6 +11,7 @@
 (import (cursor))
 (import (match))
 (import (space))
+(import (functions))
 
 (define-object (CharPainter)::Painter
   (define shift-left ::real 0)
