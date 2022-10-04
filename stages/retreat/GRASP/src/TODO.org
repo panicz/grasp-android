@@ -1,3 +1,198 @@
+* 03.10.2022
+
+co wiemy o naszym bledzie:
+
+bierze sie stad, ze w funkcji cursor< probujemy
+potraktowac () jako Indexable
+
+jakie mozliwe rozwiazania przychodza do glowy:
+- zeby w fazie (editing?) getCar i getCdr zamiast
+  () zwracaly empty-list-proxy
+  - jednak problemem przy takim podejsciu jest to,
+    ze element () na koncu listy nabiera podwojnej
+    tozsamosci, i jedna z nich nie dziala w pattern
+     matchingu ani przy operacji null?
+- alternatywa jest taka, zeby zmodyfikowac cell-index
+  tak, zeby zamiast () zwracala empty-list-proxy.
+  i ta metoda dziala (choc nie jest jeszcze calkiem
+  jasne, jak lowinna dzialac set-cell-index!)
+
+ok, czyli blad naprawiony. i co dalej?
+
+ciagle pozostaje temat obslugi komentarzy,
+oraz strzalek gora-dol.
+
+chyba dosc nisko wiszacym owocem jest rysowanie
+kursora w kliencie desktopowym, choc niewatpliwie
+bedzie to wymagalo takze obsluzenia klawiatury
+(i przerzucenia zmian do laptoka)
+
+a kiedy to bedziemy mieli - to co wtedy?
+
+selekcja?
+edycja?
+
+tym, co na pewno trzeba zrobic, jest wsparcie
+dla modyfikatorow
+
+
+* 02.10.2022
+
+wyglada na to, ze gdzies po drodze jakos tam
+zepsulismy iterowanie kursorem i trzeba by
+to bylo naprawic (problem objawia sie na
+listach pustych)
+
+ale tak poza tym to:
+- rysowanie kursora w kliencie awt
+- rysowanie selekcji w kliencie terminalowym i awt
+- obsluga klawiatury w kliencie awt
+- strzalki w gore i w dol
+- operacje edycji
+
+* 01.10.2022
+
+plan jest wobec tego mniej wiecej taki:
+
+- dodajemy do (panel) mapy klawiatury
+- do Panel i Editor dodajemy metody
+  key-pressed, key-released, key-typed,
+- podpinamy zdarzenia w grasp-terminal,
+  no i w grasp-desktop (a docelowo takze
+  w grasp-android)
+- dodajemy funkcje do poruszania kursorem
+  (a docelowo takze do edycji)
+- rozkoszujemy sie
+
+* 30.09.2022
+
+no dobra, teraz mamy problem:
+
+podczas edycji probujemy wywolac move-cursor-left!
+i move-cursor-right!, ale one nie przynaleza do
+glownego panelu
+
+tak naprawde wydaje sie, ze mamy tez inny problem:
+lanterna, awt i android zawiera alternattwne metody obslugi
+zdarzen (com.googlecode.lanterna.input.KeyStroke,
+com.googlecode.lanterna.input.KeyType,
+java.awt.event.KeyEvent, android.view.KeyEvent).
+
+Docelowo chcielibysmy jednak miec ujednolicony system
+(byc moze bazujacy na awt, ale nie wiadomo jak jest z
+dostepnoscia androida)
+
+No dobra, 'ujednoliconosc' naszego systemu bedzie sie
+brala stad, ze zarowno android jak i awt dostarczaja tylko
+nazw dla typu 'int'.
+
+wyglada na to, ze w wypadku terminala bedziemy mogli
+obslugiwac tylko zdarzenia w rodzaju KEY_TYPED.
+
+W przypadku klienta Android, nasza wczesniejsza
+implementacja dzialala tak, ze mielismy argumenty
+'keyCode', 'unicode' oraz 'meta'
+
+Lanterna:
+public class KeyStroke {
+// gdzie keyType to enum z klawiszami specjalnymi
+    private final KeyType keyType;
+    private final Character character;
+    private final boolean ctrlDown;
+    private final boolean altDown;
+    private final boolean shitfDown;
+...
+}
+
+java.awt.event.KeyEvent:
+
+int	getExtendedKeyCode()
+static int	getExtendedKeyCodeForChar(int c)
+char	getKeyChar()
+int	getKeyCode()
+int	getKeyLocation()
+static String	getKeyModifiersText(int modifiers)
+static String	getKeyText(int keyCode)
+boolean	isActionKey()
+String	paramString()
+void	setKeyChar(char keyChar)
+void	setKeyCode(int keyCode)
+void	setModifiers(int modifiers)
+
+Methods inherited from class java.awt.event.InputEvent
+consume, getMaskForButton, getModifiers, getModifiersEx,
+getModifiersExText, getWhen, isAltDown, isAltGraphDown,
+isConsumed, isControlDown, isMetaDown, isShiftDown
+
+API androida jest bardzo podobne (ale dokumentacja
+nieco zbyt rozwlekla, zeby ja wkleic)
+
+Mozemy zrobic tak:
+
+(define-enum Modifier (Shift Ctrl Alt Meta))
+
+(define-alias Modifiers java.util.EnumSet[Modifier])
+
+i wowczas prototyp bedzie mial postac
+
+(lambda (scancode character modifiers) ...)
+
+
+sprobujmy skompilowac dla Androida z java.awt.event.
+ok, juz wiemy, ze sie nie da.
+
+
+w takim razie decyzje sa nastepujace:
+1. interaction bedzie mialo - oprocz key-presses i key-released
+   - rowniez metode key-typed
+
+  pierwsze dwie otrzymaja scancode, modifiers oraz device,
+  a trzecia - znak unicode i modyfikatory
+
+2, w kliencie lanterny bedziemy generowac tylko key-typed
+  (dla normalnych znakow) oraz key-pressed (dla strzalek itd.)
+
+3. mapy klawiatury sa hierarchiczne, i moga byc skojarzone tak:
+   - globalne mapa klawiatury, domyslnie wspoldzielone
+     przez wszystkie edytory
+   - zmodyfikowana mapa klawiattury dla poszczegolnych instancji
+     edytora
+   - mapy klawiatury domyslnie wspoldzielone przez
+     poszczegolne instancje rozszerzen
+   - mapy klawiatury dla poszczegolnych instancji rozszerzen
+
+
+* 29.09.2022
+
+przypomnijmy sobue nasze zalozenia dotyczace obslugi
+klawiatury:
+
+mamy dwa swiaty. jeden jest zwykly, regularny. swiat
+pudelek i atomow.
+
+drugi jest czarodziejski i cudowny. magiczny.
+to swiat rozszerzen.
+
+wsrod rozszerzen mamy funkcje key-pressed i key-released,
+ktore powinny zwracac #true, jezeli udalo sie dokonac
+obslugi zdarzenia, i #false w przeciwnym przypadku.
+
+
+teraz tak: kiedy przychodzi do nas zdarzenie, to najpierw
+rekurencyjnie wyszukujemy obiektu (na sciezce kursora),
+ktory bylby Interactive, i dla ktorego odpowiednia metoda
+zwroocilaby #true, a jezeli do tego nie dojdzie, to
+wywolujemyglobalna funkcje?
+
+A moze raczej nie?
+Moze raczej niech to globalna funkcja sama sprawdza
+(jesli chce) - my tylko dostarczamy odpowiednich
+mechanizmow.
+
+Dodatkowo chcielibysmy miec zaszyta na sztywno funkcje
+klawisza 'escape'.
+
+
 * 27.09.2022
 
 No dobra, mamy juz mechanizm rysowania selekcji
