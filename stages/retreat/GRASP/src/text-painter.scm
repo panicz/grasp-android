@@ -42,7 +42,7 @@
   (define (current-clip-top)::real
     clip-top)
 
-  (define marked-cursor-position
+  (define marked-cursor-position ::Position
     (Position left: 0
 	      top: 0))
   
@@ -102,6 +102,12 @@
     (put! #\╵ (- height 1) 0))
 
   (define (draw-box! width::real height::real context::Cursor)::void
+    (when (and (pair? (the-cursor))
+	       (equal? context (tail (the-cursor))))
+      (match (head (the-cursor))
+	(#\[ (mark-cursor! 0 1))
+	(#\] (mark-cursor! (- width 1) (- height 2)))
+	(_ (values))))
     (put! #\╭ 0 0)
     (for i from 1 to (- height 2)
          (put! #\│ i 0))
@@ -167,7 +173,7 @@
 		  ((eqv? n (head selection-end))
 		   (exit-selection-drawing-mode!))))
 	  (when (and focused? (eqv? n (cursor-head)))
-	    (mark-cursor! col (+ row 1))))
+	    (mark-cursor! col row)))
 	
 	(for c in text
 	  (handle-cursor-and-selection!)
@@ -304,9 +310,9 @@
     (invoke-special CharPainter (this) 'mark-cursor! +left +top)
     (match (the-expression)
       (,@Space?
-       (put! #\| +top +left))
+       (put! #\| (+ +top 1) +left))
       (,@Atom?
-       (put! #\^ +top +left))
+       (put! #\^ (+ +top 1) +left))
       (_
        (values))))
   

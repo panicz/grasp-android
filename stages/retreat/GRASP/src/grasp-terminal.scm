@@ -31,8 +31,10 @@
 (import (text-painter))
 ;;(import (extension))
 ;;(import (button))
-
+(import (input))
 (import (panel))
+
+
 
 (define-alias Thread java.lang.Thread)
 
@@ -126,28 +128,21 @@
     ;; - z jakichs natywnych interfejsow javowych
     ;; - z API androida
 
-    (match type
-      (,KeyType:ArrowLeft
-       (io:setCursorPosition (caret:withRelativeColumn -1)))
-      (,KeyType:ArrowRight
-       (io:setCursorPosition (caret:withRelativeColumn +1)))
-      (,KeyType:ArrowUp
-       (io:setCursorPosition (caret:withRelativeRow -1)))
-      (,KeyType:ArrowDown
-       (io:setCursorPosition (caret:withRelativeRow +1)))
-      (,KeyType:EOF
-       (io:stopScreen)
-       (exit))
-      (,KeyType:Escape
-       (io:stopScreen)
-       (exit))
-      (,KeyType:MouseEvent
-       (let* ((action ::MouseAction (as MouseAction key)))
-	 (when (and (action:isMouseDown)
-		    (eq? (action:getButton) MouseButton:Left))
-	   (io:setCursorPosition (action:getPosition)))))
-      (_
-       (values)))
+    (parameterize ((ctrl-pressed? (key:ctrl-down?))
+		   (alt-pressed? (key:alt-down?))
+		   (shift-pressed? (key:shift-down?)))
+      
+      (match type
+	(,KeyType:Character
+	 (invoke (the-top-panel) 'key-typed!
+		 (invoke (key:getCharacter) 'charValue)))
+	(,KeyType:EOF
+	 (io:stopScreen)
+	 (exit))
+
+	(_
+	 (invoke (the-top-panel) 'key-pressed!
+		 type))))
     
     (synchronized screen-up-to-date?
 		  (set! (screen-up-to-date?) #f)
@@ -156,8 +151,18 @@
     (edit io)
     ))
 
-(define-object (TerminalPainter screen::LanternaScreen)::Painter
+(set! (on-key-press KeyType:ArrowLeft) move-cursor-left!
+      #;(lambda ()
+    (if (shift-pressed?)
+	...
+	(move-cursor-left!))))
 
+(set! (on-key-press KeyType:ArrowRight) move-cursor-right!)
+(set! (on-key-type #\x) exit)
+
+
+(define-object (TerminalPainter screen::LanternaScreen)::Painter
+  
   (define io::LanternaScreen #!null)
   
   (define (put! c::char row::real col::real)::void
@@ -169,6 +174,13 @@
                  (is top <= y < (+ top clip-height)))
 	(io:setCharacter x y (letter c)))))
 
+  (define (mark-cursor! +left::real +top::real)::void
+    (invoke-special CharPainter (this)
+		    'mark-cursor! +left +top)
+    (io:setCursorPosition
+     (TerminalPosition marked-cursor-position:left
+		       marked-cursor-position:top)))
+    
   (define (get row::real col::real)::char
     (let ((letter (io:getBackCharacter col row)))
       (letter:getCharacter)))

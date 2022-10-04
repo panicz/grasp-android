@@ -11,8 +11,10 @@
   ;;
   ;; This is used by the event system to find out
   ;; whether the event has been consumed or not.
-  (key-pressed key::char)::boolean
-  (key-released key::char)::boolean
+  (key-pressed key::int)::boolean
+  (key-released key::int)::boolean
+
+  (key-typed unicode::int)::boolean
   
   (tapped x::real y::real)::boolean
   (pressed x::real y::real)::boolean
@@ -28,9 +30,13 @@
 
   )
 
+
+
 (define-object (Passive)::Interactive
-  (define (key-pressed key::char)::boolean #f)
-  (define (key-released key::char)::boolean #f)
+  (define (key-pressed key::int)::boolean #f)
+  (define (key-released key::int)::boolean #f)
+  (define (key-typed unicode::int)::boolean #f)
+
   
   (define (tapped x::real y::real)::boolean #f)
   (define (pressed x::real y::real)::boolean #f)

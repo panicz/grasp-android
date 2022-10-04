@@ -38,7 +38,11 @@ operate on cursors.
   (cond ((= index 0)
          (pre-head-space cell))
         ((= index 1)
-	 (car cell))
+	 (let ((item (car cell)))
+	   (if (null? item)
+	       (empty-list-proxy
+		(null-head-space cell))
+	       item)))
         ((= index 2)
          (post-head-space cell))
         ((dotted? cell)
@@ -47,7 +51,11 @@ operate on cursors.
                ((= index 4)
                 (pre-tail-space cell))
                ((= index 5)
-		(cdr cell))
+		(let ((item (cdr cell)))
+		  (if (null? item)
+		      (empty-list-proxy
+		       (null-head-space cell))
+		      item)))
                ((= index 6)
                 (post-tail-space cell))))
         (else
@@ -58,7 +66,9 @@ operate on cursors.
   (cond ((= index 0)
          (set! (pre-head-space cell) value))
         ((= index 1)
-	 (set! (car cell) value))
+	 (if (is value instance? EmptyListProxy)
+	     (set! (car cell) '())
+	     (set! (car cell) value)))
         ((= index 2)
          (set! (post-head-space cell) value))
         ((dotted? cell)
@@ -67,7 +77,9 @@ operate on cursors.
                ((= index 4)
                 (set! (pre-tail-space cell) value))
                ((= index 5)
-		(set! (cdr cell) value))
+		(if (is value instance? EmptyListProxy)
+		    (set! (car cell) '())
+		    (set! (cdr cell) value)))
                ((= index 6)
                 (set! (post-tail-space cell) value))))
         (else
@@ -100,7 +112,7 @@ operate on cursors.
 	 (if (or (eq? index #\[) (eq? index #\]))
 	     object
 	     (cell-index object (as int index))))
-	 
+	
 	(else
 	 object
 	 #;(error "Don't know how to extract "index
@@ -231,21 +243,6 @@ operate on cursors.
 	 (error "Don't know how to obtain previous index to "
 		index " in "object))))
 
-
-#|
-inny pomysl na kursor jest taki, ze to ciag 
-dowolnych obiektow, czyli np. kombinatory moga
-miec takie "indeksy", jak 'left czy 'right, ktore 
-beda ze soba porownywanw za pomoca predykatu eqv?.
-
-W kazdym razie jest tutaj jeszcze inny pomysl:
-zeby zamiast stringa ze spacjami, zwracac raczej
-obiekty: albo (Space ...) albo (LineBreak ...)
-
-Wowczas tez sens moze miec to, zeby indeks lewego
-nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
-|#
-
 (define (cursor-next #!optional
 		     (cursor::Cursor (the-cursor))
 		     (expression (the-document)))
@@ -359,11 +356,11 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
   
 (define (move-cursor-right!)
   (set! (the-cursor) (cursor-advance))
-  (set! (the-selection-anchor) (the-cursor)))
+  #;(set! (the-selection-anchor) (the-cursor)))
 
 (define (move-cursor-left!)
   (set! (the-cursor) (cursor-retreat))
-  (set! (the-selection-anchor) (the-cursor)))
+  #;(set! (the-selection-anchor) (the-cursor)))
 
 (define (expand-selection-left!)
   (set! (the-cursor) (cursor-retreat)))
@@ -386,7 +383,7 @@ nawiasu to bylo (reverse (indeks-wyrazenia 0 -1)),
 	(let* ((a/k (a* k))
 	       (b/k (b* k)))
 	  (if (eqv? a/k b/k)
-	      (k< (- k 1) a* b* (parent:part-at a/k))
+	      (k< (- k 1) a* b* (part-at a/k parent))
 	      (parent:index< a/k b/k)))))
   
   (let* ((length/a (length a))

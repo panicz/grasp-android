@@ -76,6 +76,12 @@ mutations of an n-element set.\"
   (set! history-length size))
 
 
+(define (stack-trace ex::java.lang.Throwable)
+  (let* ((sw ::java.io.StringWriter (java.io.StringWriter))
+	 (pw ::java.io.PrintWriter (java.io.PrintWriter sw)))
+    (ex:printStackTrace pw)
+    (sw:toString)))
+
 (define (run-editor #!optional
 		    (io ::Terminal (make-terminal)))
   ::void
@@ -100,7 +106,12 @@ mutations of an n-element set.\"
       (let ((output-extent ::Extent
 			   (extent (head (the-document)))))
 	((the-painter):clear!)
-	(draw-sequence! (head (the-document)))
+	(try-catch
+	 (begin
+	   (draw-document! (the-document)))
+	 (ex java.lang.Throwable
+	     (for-each WARN
+		       (take 4 (string-split (stack-trace ex) "\n")))))
 	(io:setCursorVisible #f)
 	(io:clearScreen)
 	(io:setCursorPosition 0 0)
@@ -109,12 +120,11 @@ mutations of an n-element set.\"
 	 0
 	 (+ 2 output-extent:height))
 	(try-catch
-	 (begin
-	   (io:putString (with-output-to-string
-			   (lambda () (write (the-cursor)))))
-	   (io:putString (with-output-to-string
-			   (lambda ()
-			     (write (the-expression))))))
+	 (io:putString (with-output-to-string
+			 (lambda ()
+			   (write (the-cursor))
+			   (write (the-selection-anchor))
+			   (write (the-expression)))))
 	 (ex java.lang.Throwable
 	     (WARN (ex:toString))))
 	(invoke (current-message-handler)
@@ -123,29 +133,23 @@ mutations of an n-element set.\"
 	(let ((cursor-position (invoke (the-painter)
 				       'cursor-position)))
 	  (io:setCursorPosition cursor-position:left
-				cursor-position:top))
+				(+ cursor-position:top 1)))
 	(io:setCursorVisible #t)
 	(let* ((key ::KeyStroke (io:readInput))
 	       (type ::KeyType (key:getKeyType)))
 	  (match type	
 	    (,KeyType:ArrowLeft
 	     (try-catch
-	      (begin
-		(move-cursor-left!))
+	      (move-cursor-left!)
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
 	    
 	    (,KeyType:ArrowRight
 	     (try-catch
-	      (begin
-		(move-cursor-right!)
-		(cond ((key:shift-down?)
-		       "powiekszamy selekcje")
-		      
-		      ((key:ctrl-down?)
-		       "przeskakujemy atomy")))
+	      (move-cursor-right!)
 	      (ex java.lang.Throwable
+		  (display (ex:toString) (current-error-port))
 		  (WARN (ex:toString))))
 	     (continue))
 	    	    

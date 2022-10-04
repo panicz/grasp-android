@@ -42,8 +42,11 @@
 ;; Atoms behave as if they were transparent,
 ;; so that we can only see their (value).
 ;; But if we're not (evaluating?), then we can
-;; see (and operate on) Atoms themselves
+;; see (and operate on) Atoms themselves.
 (define-parameter (evaluating?) ::boolean #f)
+
+(define (editing?) ::boolean
+  (not (evaluating?)))
 
 ;; The purpose of Atoms is to solve the problem that
 ;; the actual atomic Scheme values have different

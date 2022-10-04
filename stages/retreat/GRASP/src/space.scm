@@ -257,7 +257,7 @@
 		      ((is total <= tip <= (+ total
 					      width))))
 	     (painter:mark-cursor! (- t:left left (- total tip))
-				   (- t:top top -2)))
+				   (- t:top top -1)))
 	   (t:advance-by! width)))
        
        (match input
@@ -536,7 +536,8 @@
    (invoke (the-painter) 'draw-horizontal-bar! width))
   (define (extent)::Extent
     (Extent width: width
-	    height: (invoke (the-painter) 'horizontal-bar-height)))
+	    height: (invoke (the-painter)
+			    'horizontal-bar-height)))
   
   (define (cursor-under* x::real y::real path::Cursor)::Cursor*
     (let ((inner (extent)))

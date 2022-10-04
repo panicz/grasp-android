@@ -36,6 +36,9 @@
       (* n (! (- n 1)))))
 
 (e.g. (! 5) ===> 120)
+
+(Button action: (lambda () (WARN \"button pressed!\"))
+        label: \"Press me!\")
 " parse-document))
 
 (set! (the-document) document)
@@ -88,11 +91,14 @@
    (equal?
     document
     '(((define (! n)
-	 (if (<= n 0)
-	     1
-	     (* n (! (- n 1)))))
-       
-       (e.g. (! 5) ===> 120))))))
+	  (if (<= n 0)
+	      1
+	      (* n (! (- n 1)))))
+	
+	(e.g. (! 5) ===> 120)
+
+	(Button action: (lambda () (WARN "button pressed!"))
+		label: "Press me!"))))))
 
 
 (parameterize ((evaluating? #t))

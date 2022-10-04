@@ -6,6 +6,7 @@
 (import (default-value))
 (import (define-parameter))
 (import (define-cache))
+(import (mapping))
 (import (infix))
 (import (match))
 (import (functions))
@@ -23,9 +24,13 @@
 (import (print))
 (import (parameterize-up))
 
+
 (define-interface Panel ()
   (draw! context::Cursor)::void
   (touch! x::real y::real finger::byte)::void
+  (key-pressed! key-code)::boolean
+  (key-released! key-code)::boolean
+  (key-typed! unicode)::boolean
   )
 
 ;; this parameter must be set by the
@@ -46,9 +51,13 @@
 
 (define-parameter (the-focus)::Cursor '())
 
+(define-enum HorizontalSplitFocus (Left Right))
+
 (define-type (HorizontalSplit at: rational
 			      left: Panel
-			      right: Panel)
+			      right: Panel
+			      focus: HorizontalSplitFocus
+			      := HorizontalSplitFocus:Left)
   implementing Panel
   with
   ((draw! context::Cursor)::void
@@ -85,11 +94,40 @@
           (left-width (* at inner-width))
           (right-width (- inner-width left-width)))
      (cond ((is x < left-width)
+	    (set! focus HorizontalSplitFocus:Left)
 	    (left:touch! x y finger))
 	   ((is (+ left-width line-width) < x)
-	    (right:touch! (- x left-width line-width) y finger)))))
-   
+	    (set! focus HorizontalSplitFocus:Right)
+	    (right:touch! (- x left-width line-width) y
+			  finger)))))
+  
+  ((key-pressed! key-code)::boolean
+   (match focus
+     (,HorizontalSplitFocus:Left
+      (left:key-pressed! key-code))
+     (,HorizontalSplitFocus:Right
+      (right:key-pressed! key-code))))
+
+  ((key-released! key-code)::boolean
+   (match focus
+     (,HorizontalSplitFocus:Left
+      (left:key-released! key-code))
+     (,HorizontalSplitFocus:Right
+      (right:key-released! key-code))))
+
+  ((key-typed! key-code)::boolean
+   (match focus
+     (,HorizontalSplitFocus:Left
+      (left:key-typed! key-code))
+     (,HorizontalSplitFocus:Right
+      (right:key-typed! key-code))))
   )
+
+(define on-key-press (mapping (code) never))
+
+(define on-key-release (mapping (code) never))
+
+(define on-key-type (mapping (code) never))
 
 (define-object (Editor)::Panel
   (define document (with-input-from-string "\
@@ -120,6 +158,28 @@ mutations of an n-element set.\"
       (display cursor)
       (display (the-expression at: cursor))
       (newline)))
+
+  (define (key-pressed! key-code)::boolean
+    (parameterize/update-sources ((the-document document)
+				  (the-cursor cursor)
+				  (the-selection-anchor
+				   selection-anchor))
+      ((on-key-press key-code))))
+  
+  (define (key-released! key-code)::boolean
+    (parameterize/update-sources ((the-document document)
+				  (the-cursor cursor)
+				  (the-selection-anchor
+				   selection-anchor))
+      ((on-key-release key-code))))
+  
+  (define (key-typed! unicode)::boolean
+    (parameterize/update-sources ((the-document document)
+				  (the-cursor cursor)
+				  (the-selection-anchor
+				   selection-anchor))
+      ((on-key-type unicode) unicode)))
+
   )
   
 (define-parameter (the-top-panel) ::Panel

@@ -238,7 +238,9 @@
 			      line-height))
 	  (graphics:fill bottom-right-paren))))
 
-  (define (draw-box! width::real height::real context::Cursor)::void
+  (define (draw-box! width::real height::real
+		     context::Cursor)
+    ::void
     (open-paren! height)
     (with-translation ((- width (paren-width)) 0)
 	(close-paren! height)))
@@ -257,7 +259,7 @@
     (invoke (the-graphics-output) 'drawRoundRect
 	    0 0 (as int width) (as int height) 5 5))
 
-  (define marked-cursor-position
+  (define marked-cursor-position ::Position
     (Position left: 0
 	      top: 0))
   

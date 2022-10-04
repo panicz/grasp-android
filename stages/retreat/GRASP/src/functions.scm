@@ -58,6 +58,14 @@
    (drop-after! 5 items))
  ===> (a b c))
 
+(define (take k::integer #;elements-from s::list)::list
+  (if (is k <= 0)
+      '()
+      (cons (car s) (take (- k 1) #;elements-from (cdr s)))))
+
+(e.g.
+ (take 3 #;elements-from '(1 2 3 4 5))
+ ===> (1 2 3))
 
 (define (suffix? ending::list stem::list)::boolean
   (let ((m ::integer (length ending))
