@@ -353,14 +353,26 @@ operate on cursors.
 		   ((eqv? (head updated) limit)))
 	  (next updated))
 	updated)))
-  
-(define (move-cursor-right!)
-  (set! (the-cursor) (cursor-advance))
-  #;(set! (the-selection-anchor) (the-cursor)))
 
-(define (move-cursor-left!)
+(define-enum Selection (resize discard))
+
+(define (move-cursor-right!
+	 #!key (selection::Selection Selection:discard))
+  (set! (the-cursor) (cursor-advance))
+  (match selection
+    (,Selection:discard
+     (set! (the-selection-anchor) (the-cursor)))
+    (,Selection:resize
+     (values))))
+
+(define (move-cursor-left!
+	 #!key (selection::Selection Selection:discard))
   (set! (the-cursor) (cursor-retreat))
-  #;(set! (the-selection-anchor) (the-cursor)))
+  (match selection
+    (,Selection:discard
+     (set! (the-selection-anchor) (the-cursor)))
+    (,Selection:resize
+     (values))))
 
 (define (expand-selection-left!)
   (set! (the-cursor) (cursor-retreat)))

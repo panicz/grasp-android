@@ -1,3 +1,4 @@
+(import (srfi :11))
 (import (define-syntax-rule))
 (import (assert))
 (import (define-interface))
@@ -19,6 +20,7 @@
 (import (print))
 (import (primitive))
 (import (cursor))
+(import (input))
 
 (define-alias Font java.awt.Font)
 (define-alias FontMetrics java.awt.FontMetrics)
@@ -264,10 +266,16 @@
 	      top: 0))
   
   (define (mark-cursor! +left::real +top::real)::void
-    (set! marked-cursor-position:left (+ (current-translation-left)
-					 +left))
-    (set! marked-cursor-position:top (+ (current-translation-top)
-					+top)))
+    (let ((graphics (the-graphics-output)))
+      (set! marked-cursor-position:left (+ (current-translation-left)
+					   +left))
+      (set! marked-cursor-position:top (+ (current-translation-top)
+					  +top))
+      ;; TODO: polozenie i wysokosc kursor powinny zalezec
+      ;; od wybranej czcionki (w praktyce wolajacy powinien
+      ;; raczej przekazywac parametr)
+      (graphics:fillRect +left (+ +top 16) 2 20)))
+  
   (define (cursor-position)::Position
     marked-cursor-position)
 
@@ -314,21 +322,30 @@
     
   (define (draw-text! text::CharSequence
 		      font::Font
-		      context::Cursor)::void
-    (let* ((graphics (the-graphics-output))
-	   (line-start 0)
-	   (lines 1)
-	   (height (font:getSize))
-	   (string-end (text:length)))
-      (graphics:setFont font)
-      (for i from 0 below string-end
-	   (when (eq? (text:charAt i) #\newline)
-	     (graphics:drawString (text:subSequence line-start i)
-				  0 (* lines height))
-	     (set! lines (+ lines 1))
-	     (set! line-start (+ i 1))))
-      (graphics:drawString (text:subSequence line-start string-end)
-			   0 (* lines height))))
+		      context::Cursor)
+    ::void
+    (let-values (((selection-start selection-end) (the-selection)))
+      (let* ((graphics (the-graphics-output))
+	     (focused? (and (pair? (the-cursor))
+			    (equal? context (cursor-tail))))
+	     (alters-selection-drawing-mode?
+	      (and (pair? selection-start)
+		   (pair? selection-end)
+		   (or (equal? (tail selection-start) context)
+		       (equal? (tail selection-end) context))))
+	     (line-start 0)
+	     (lines 1)
+	     (height (font:getSize))
+	     (string-end (text:length)))
+	(graphics:setFont font)
+	(for i from 0 below string-end
+	     (when (eq? (text:charAt i) #\newline)
+	       (graphics:drawString (text:subSequence line-start i)
+				    0 (* lines height))
+	       (set! lines (+ lines 1))
+	       (set! line-start (+ i 1))))
+	(graphics:drawString (text:subSequence line-start string-end)
+			     0 (* lines height)))))
   
   (define (draw-string! text::CharSequence context::Cursor)::void
     (draw-text! text (the-string-font) context))
@@ -470,25 +487,43 @@ automatically by the AWT framework."))
    (values))
   
   ((keyTyped event::KeyEvent)::void
-   (values))
+   ;;(display (event:toString))
+   ;;(newline)
+   ;;(flush-output-port)
+   (parameterize ((ctrl-pressed? (event:control-down?))
+		  (alt-pressed? (event:alt-down?))
+		  (shift-pressed? (event:shift-down?))
+		  (meta-pressed? (event:meta-down?)))
+     (invoke (the-top-panel) 'key-typed!
+	     (event:getKeyChar))
+     (invoke (as screen-renderer (the-painter)) 'repaint)
+     (repaint)))
 
   ((keyReleased event::KeyEvent)::void
-   (values))
+   ;;(display (event:toString))
+   ;;(newline)
+   ;;(flush-output-port)
+   (parameterize ((ctrl-pressed? (event:control-down?))
+		  (alt-pressed? (event:alt-down?))
+		  (shift-pressed? (event:shift-down?))
+		  (meta-pressed? (event:meta-down?)))
+     (invoke (the-top-panel) 'key-released!
+	     (event:getKeyCode))
+     (invoke (as screen-renderer (the-painter)) 'repaint)
+     (repaint)))
 
   ((keyPressed event::KeyEvent)::void
-   #;(match (event:getKeyCode)
-     (,KeyEvent:VK_UP
-      (set! y (- y 1)))
-     (,KeyEvent:VK_DOWN
-      (set! y (+ y 1)))
-     (,KeyEvent:VK_LEFT
-      (set! x (- x 1)))
-     (,KeyEvent:VK_RIGHT
-      (set! x (+ x 1)))
-     (_
-      (values)))
-   (invoke (as screen-renderer (the-painter)) 'repaint)
-   (repaint))
+   ;;(display (event:toString))
+   ;;(newline)
+   ;;(flush-output-port)
+   (parameterize ((ctrl-pressed? (event:control-down?))
+		  (alt-pressed? (event:alt-down?))
+		  (shift-pressed? (event:shift-down?))
+		  (meta-pressed? (event:meta-down?)))
+     (invoke (the-top-panel) 'key-pressed!
+	     (event:getKeyCode))
+     (invoke (as screen-renderer (the-painter)) 'repaint)
+     (repaint)))
 
   ((focusGained event::FocusEvent)::void
    (values))
@@ -551,5 +586,18 @@ automatically by the AWT framework."))
 
    (addMouseMotionListener (this))
    ))
+
+(set! (on-key-press KeyEvent:VK_LEFT)
+      (lambda _
+	(move-cursor-left!)
+	#;(display (the-cursor))
+	#;(newline)))
+
+(set! (on-key-press KeyEvent:VK_RIGHT)
+      (lambda _
+	(move-cursor-right!)
+	#;(display (the-cursor))
+	#;(newline)))
+
 
 (window-screen)

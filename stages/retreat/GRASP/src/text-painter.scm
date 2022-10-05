@@ -158,9 +158,9 @@
       (let ((focused? (and (pair? (the-cursor))
 			   (equal? context (cursor-tail))))
 	    (alters-selection-drawing-mode?
-	     (and (pair? selection-start)
-		  (pair? selection-end)
-		  (or (equal? (tail selection-start) context)
+	     (or (and (pair? selection-start)
+		      (equal? (tail selection-start) context))
+		 (and (pair? selection-end)
 		      (equal? (tail selection-end) context))))
 	    (row 0)
 	    (col 0)
@@ -168,10 +168,10 @@
 	
 	(define (handle-cursor-and-selection!)
 	  (when alters-selection-drawing-mode?
-	    (cond ((eqv? n (head selection-start))
-		   (enter-selection-drawing-mode!))
-		  ((eqv? n (head selection-end))
-		   (exit-selection-drawing-mode!))))
+	    (when (eqv? n (head selection-start))
+	      (enter-selection-drawing-mode!))
+	    (when (eqv? n (head selection-end))
+	      (exit-selection-drawing-mode!)))
 	  (when (and focused? (eqv? n (cursor-head)))
 	    (mark-cursor! col row)))
 	

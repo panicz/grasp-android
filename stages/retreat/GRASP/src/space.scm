@@ -1,3 +1,4 @@
+(import (srfi :11))
 (import (define-type))
 (import (define-interface))
 (import (define-property))
@@ -242,31 +243,50 @@
      (set! (tail cell) (cons 0 (tail cell)))))
 
   ((draw! context::Cursor)::void
-   (let* ((painter (the-painter))
-	  (space-width (painter:space-width))
-	  (t (invoke (the-traversal) 'clone))
-	  (left t:left)
-	  (top t:top))
-     (let skip ((input fragments)
-		(total 0))
-       (define (advance-with-cursor! width::real)
-	 (let ((width (* width space-width)))
-	   (and-let* ((`(,tip . ,sub) (the-cursor))
-		      ((integer? tip))
-		      ((equal? sub context))
-		      ((is total <= tip <= (+ total
-					      width))))
-	     (painter:mark-cursor! (- t:left left (- total tip))
-				   (- t:top top -1)))
-	   (t:advance-by! width)))
-       
-       (match input
-	 (`(,,@integer? ,,@integer? . ,_)
-	  (advance-with-cursor! (head input))
-	  (t:new-line!)
-	  (skip (tail input) (+ total (head input) 1)))
-	 (`(,,@integer)
-	  (advance-with-cursor! (head input)))))))
+   (let-values (((selection-start selection-end) (the-selection)))
+     (let* ((painter (the-painter))
+	    (enters-selection-drawing-mode?
+	     (and (pair? selection-start)
+		  (equal? (tail selection-start) context)
+		  (integer? (head selection-start))))
+	    (exits-selection-drawing-mode?
+	     (and (pair? selection-end)
+		  (equal? (tail selection-end) context)
+		  (integer? (head selection-end))))
+	    (space-width (painter:space-width))
+	    (t (invoke (the-traversal) 'clone))
+	    (left t:left)
+	    (top t:top))
+       (let skip ((input fragments)
+		  (total 0))
+	 (define (advance-with-cursor! width::real)
+	   (and-let* ((`(,tip . ,sub) (the-cursor)))
+	     (when (and (integer? tip)
+			(equal? sub context)
+			(is total <= tip <= (+ total
+					       width)))
+	       (painter:mark-cursor! (- t:left left
+					(- total tip))
+				     (- t:top top -1)))
+	     (when (and enters-selection-drawing-mode?
+			(is total <= (head
+				      selection-start) <= (+ total
+							     width)))
+	       (painter:enter-selection-drawing-mode!))
+	     (when (and exits-selection-drawing-mode?
+			(is total <= (head
+				      selection-end) <= (+ total
+							   width)))
+	       (painter:exit-selection-drawing-mode!)))
+	   (t:advance-by! (* width space-width)))
+	 
+	 (match input
+	   (`(,,@integer? ,,@integer? . ,_)
+	    (advance-with-cursor! (head input))
+	    (t:new-line!)
+	    (skip (tail input) (+ total (head input) 1)))
+	   (`(,,@integer)
+	    (advance-with-cursor! (head input))))))))
 
   ((cursor-under* x::real y::real path::Cursor)::Cursor*
    (and-let* ((painter (the-painter))

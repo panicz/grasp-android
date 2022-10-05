@@ -140,14 +140,18 @@ mutations of an n-element set.\"
 	  (match type	
 	    (,KeyType:ArrowLeft
 	     (try-catch
-	      (move-cursor-left!)
+	      (move-cursor-left! selection: (if (key:shift-down?)
+						Selection:resize
+						Selection:discard))
 	      (ex java.lang.Throwable
 		  (WARN (ex:toString))))
 	     (continue))
 	    
 	    (,KeyType:ArrowRight
 	     (try-catch
-	      (move-cursor-right!)
+	      (move-cursor-right! selection: (if (key:shift-down?)
+						Selection:resize
+						Selection:discard))
 	      (ex java.lang.Throwable
 		  (display (ex:toString) (current-error-port))
 		  (WARN (ex:toString))))
