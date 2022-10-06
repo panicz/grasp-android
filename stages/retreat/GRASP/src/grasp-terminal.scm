@@ -151,19 +151,27 @@
     (edit io)
     ))
 
-(set! (on-key-press KeyType:ArrowLeft) move-cursor-left!
-      #;(lambda ()
-    (if (shift-pressed?)
-	...
-	(move-cursor-left!))))
+(set! (on-key-press KeyType:ArrowLeft)
+  (lambda ()
+    (move-cursor-left! selection: (if (shift-pressed?)
+				      Selection:resize
+				      Selection:discard))))
 
-(set! (on-key-press KeyType:ArrowRight) move-cursor-right!)
+(set! (on-key-press KeyType:ArrowRight)
+  (lambda ()
+    (move-cursor-right! selection: (if (shift-pressed?)
+				       Selection:resize
+				       Selection:discard))))
+
 (set! (on-key-type #\x) exit)
 
 
 (define-object (TerminalPainter screen::LanternaScreen)::Painter
   
   (define io::LanternaScreen #!null)
+
+  (define text-color ::Color Color:ANSI:DEFAULT)
+  (define background-color ::Color Color:ANSI:DEFAULT)
   
   (define (put! c::char row::real col::real)::void
     (let ((x (+ col shift-left))
@@ -172,7 +180,8 @@
 	  (top (max 0 clip-top)))
       (when (and (is left <= x < (+ left clip-width))
                  (is top <= y < (+ top clip-height)))
-	(io:setCharacter x y (letter c)))))
+	(io:setCharacter x y (letter c color: text-color
+				     background: background-color)))))
 
   (define (mark-cursor! +left::real +top::real)::void
     (invoke-special CharPainter (this)
@@ -180,7 +189,19 @@
     (io:setCursorPosition
      (TerminalPosition marked-cursor-position:left
 		       marked-cursor-position:top)))
-    
+  
+  (define (enter-selection-drawing-mode!)::void
+    (invoke-special CharPainter (this)
+		    'enter-selection-drawing-mode!)
+    (set! text-color Color:ANSI:BLACK)
+    (set! background-color Color:ANSI:YELLOW))
+
+  (define (exit-selection-drawing-mode!)::void
+    (invoke-special CharPainter (this)
+		    'exit-selection-drawing-mode!)
+    (set! text-color Color:ANSI:DEFAULT)
+    (set! background-color Color:ANSI:DEFAULT))
+  
   (define (get row::real col::real)::char
     (let ((letter (io:getBackCharacter col row)))
       (letter:getCharacter)))
