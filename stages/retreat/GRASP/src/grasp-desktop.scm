@@ -274,7 +274,7 @@
       ;; TODO: polozenie i wysokosc kursor powinny zalezec
       ;; od wybranej czcionki (w praktyce wolajacy powinien
       ;; raczej przekazywac parametr)
-      (graphics:fillRect +left (+ +top 16) 2 20)))
+      (graphics:fillRect +left +top 2 20)))
   
   (define (cursor-position)::Position
     marked-cursor-position)
@@ -328,24 +328,43 @@
       (let* ((graphics (the-graphics-output))
 	     (focused? (and (pair? (the-cursor))
 			    (equal? context (cursor-tail))))
-	     (alters-selection-drawing-mode?
+	     (enters-selection-drawing-mode?
 	      (and (pair? selection-start)
-		   (pair? selection-end)
-		   (or (equal? (tail selection-start) context)
-		       (equal? (tail selection-end) context))))
-	     (line-start 0)
+		   (equal? (tail selection-start) context)))
+	     (exits-selection-drawing-mode?
+	      (and (pair? selection-end)
+		   (equal? (tail selection-end) context)))
+	     (metrics ::FontMetrics (graphics:getFontMetrics font))
+	     (segment-start 0)
+	     (left ::float 0)
 	     (lines 1)
-	     (height (font:getSize))
+	     (height ::float (font:getSize))
 	     (string-end (text:length)))
 	(graphics:setFont font)
 	(for i from 0 below string-end
+	     (when (and focused? (eqv? (head (the-cursor)) i))
+	       (let* ((fragment (text:subSequence segment-start i))
+		      (width (metrics:stringWidth fragment)))
+		 (graphics:drawString fragment left (* lines height))
+		 (set! left (+ left width))
+		 (set! segment-start i)
+		 (mark-cursor! left (* (- lines 1) height))))#|
+	     (when (and enters-selection-drawing-mode?
+			(eqv? (head selection-start) i))
+	       ...)
+	     (when (and exits-selection-drawing-mode?
+			(eqv? (head selection-end) i))
+	       ...)|#
 	     (when (eq? (text:charAt i) #\newline)
-	       (graphics:drawString (text:subSequence line-start i)
-				    0 (* lines height))
+	       (graphics:drawString (text:subSequence
+				     segment-start i)
+				    left (* lines height))
+	       (set! left 0)
 	       (set! lines (+ lines 1))
-	       (set! line-start (+ i 1))))
-	(graphics:drawString (text:subSequence line-start string-end)
-			     0 (* lines height)))))
+	       (set! segment-start (+ i 1))))
+	(graphics:drawString (text:subSequence segment-start
+					       string-end)
+			     left (* lines height)))))
   
   (define (draw-string! text::CharSequence context::Cursor)::void
     (draw-text! text (the-string-font) context))
@@ -589,15 +608,16 @@ automatically by the AWT framework."))
 
 (set! (on-key-press KeyEvent:VK_LEFT)
       (lambda _
-	(move-cursor-left!)
-	#;(display (the-cursor))
-	#;(newline)))
+	(move-cursor-left!
+	 selection: (if (shift-pressed?)
+			Selection:resize
+			Selection:discard))))
 
 (set! (on-key-press KeyEvent:VK_RIGHT)
       (lambda _
-	(move-cursor-right!)
-	#;(display (the-cursor))
-	#;(newline)))
-
+	(move-cursor-right!
+	 selection: (if (shift-pressed?)
+			Selection:resize
+			Selection:discard))))
 
 (window-screen)
