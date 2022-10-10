@@ -1,3 +1,184 @@
+* 08.10.2022
+
+No dobra, to teraz zajmiemy sie wyswietlaniem selekcji.
+
+Chcemy wobec tego miec cos takiego, ze:
+- do screen-renderer dodajemy wlasciwosci text-color i background-color
+- do funkcji renderujacej tekst dodajemy wyswietlanie prostokata
+w kolorze background-color
+- enter-selection-drawing-mode! i exit-selection-drawing-mode!
+maja powodowac zmiane text-color i background-color
+- renderowanie tekstu powinno wywolywac (w odpowiednich
+ okolicznosciach) enter/exit-selection-drawing-mode!
+
+OKI, ale zanim wprowadzimy zmiany, musimy jeszcze sprawdzic
+jak dziala aktualny system:
+
+mamy jedna wspolna metode draw-text!, ktora wywoluje graphics:setFont,
+a ktora jest uzywana przez metody interfejsu Painter:
+- draw-string!
+- draw-quoted-text! ktora najpierw robi graphics:setColor, a potem wola
+draw-string!, podajac (the-string-font) jako argument
+- draw-atom!, ktora najpierw rysuje zaokraglony prostokat,
+pozniej wola setColor, a na koncu draw-text!, podajac (the-atom-font)
+jako argument
+
+Wiec moze dla uproszczenia przyjmijmy sobie, ze mamy tylko dwa kolory:
+text-color i background-color, ktore na dodatek nie sa parametrami,
+tylko wlasciwosciami klasy
+
+
+* 07.10.2022
+
+problem, ktory chcemy rozwiazac w najblizszym czasie:
+- chcemy rysowac kursor o okreslonej wielkosci, z okreslonym offsetem
+
+proponowane rozwiazanie:
+dodajemy parametry:
+
+(the-cursor-offset)
+(the-cursor-extent)
+(the-cursor-color)
+
+I co chcemy dalej zrobic?
+
+Na pewno wyswietlanie selekcji. 
+
+* 06.10.2022
+
+poruszanie w lewo i w prawo kursorem w kliencie AWT jako tako
+dziala. trzeba jeszcze popracowac nad pozycja i rozmiarem
+(i ewentualnie kolorem i ksztaltem) tego kursora.
+
+nie nalezy sie spieszyc i sprawe trzeba przemyslec
+
+natomiast pozostaja nam jeszcze takie sprawy, jak:
+- rysowanie selekcji w kliencie AWT
+- poruszanie kursorem w gore i w dol
+- wyswietlanie kursora na koncu stringa
+- podswietlanie nawiasow (i to zarowno w kliencie
+terminalowym, jak i AWT)
+- obsluga myszy w kliencie terminalowym i AWT
+(tzn. na razie samo klikanie)
+
+kiedy bedziemy mieli to, zajmiemy sie operacjami edycji,
+a dalej - otwieraniem i zapisywaniem plikow
+
+i jak to bedziemy mieli, to ach.
+
+to wtedy chyba bysmy sie wzieli za klienta androidowego,
+za doszlifowanie mechanizmu rozszerzen, i za implementacje
+tych ciekawszych:
+- grafow
+- envisulatora
+- guzikow
+
+a w kliencie androidowym:
+- rozpoznawanie gestow
+
+no dobrze, ale wrocmy do naszych problemow biezacych.
+
+kwestia kursora i selekcji wydaje sie o tyle skomplikowana,
+ze:
+- rozmiar kursora powinien byc jakos spowinowacony
+z rozmiarem czcionki
+- polozenie kursora - w przypadku spacji jest sporo
+za wysoko, w przypadku atomu nieco za wysoko;
+w przypadku stringa wydaje sie OK, ale kursor powinien
+byc ciut krotszy i ciut nizej
+
+Zacznijmy od tego, zeby wyjasnic sobie roznice pomiedzy
+wysokoscia kursora w atomie i spacji.
+
+HA! Wszystko jasne: w przypadku atomu renderujemy tekst
+w kontekscie "with-translation (4 8)", natomiast w przypadku
+spacji jedyna translacja pochodzi od traversala
+w draw-sequence!.
+
+W porzadku, ale teraz: jak mamy sobie z tym poradzic?
+
+Mozemy sprobowac dodac parametry, np.
+
+(define-parameter (cursor-offset)::Position (Position left: 0 top: 0))
+(define-parameter (cursor-extent)::Extent (Extent width: 2 height: 16))
+
+i w momencie, kiedy renderujemy poszczegolne rodzaje tekstu, moglibysmy
+ustawiac odpowiednio wartosci tych parametrow, ktore bylyby nastepnie
+uzywane przez metode "mark-cursor!".
+
+Problem jednak wydaje sie taki, ze metoda draw! w klasie Space 
+w bardzo niewielkim stopniu uzywa metod specyficznych dla danego
+paintera.
+
+
+
+* 05.10.2022
+
+wczoraj udalo sie nam jakos obsluzyc klawiature w kliencie
+desktopowym, i naprawic pare bugow, ale brakuje jeszcze kilku
+rzeczy: po pierwsze, chcemy wyswietlac w kliencie graficznym
+kursor; po drugie, chcemy tam (oraz w kliencie terminalowym)
+wyswietlac selekcje; po trzecie, wydaje sie, ze nadal cos
+nie dziala z ta selekcja (w kliencie smieciowym)
+- z cala pewnoscia trzeba uwzglednic zmiane trybu
+wyswietlania selekcji podczas renderowania.
+
+OK, teraz wyswietlanie dziala tak:
+
+1. identyfikujemy znak konca linii
+2. wyodrebniamy pod-sekwencje odpowiadajaca biezacej linii,
+i rysujemy tekst na odpowiedniej wysokosci (z kazda kolejna
+linia coraz nizej)
+3. az dojdziemy do ostatniego znaku
+
+
+Alternatywy:
+1. rysowac znak po znaku
+2. alternatywa znacznie ciekawsza:
+- tak jak wyzej, tylko ze oprocz napotkania znaku konca linii
+dodajemy jeszcze dodatkowe warunki:
+- jezeli indeks odpowiada kursorowi, wywolujemy "mark-cursor!"
+- jezeli indeks odpowiada wejsciu w selekcje, to bierzemy
+pod-string od (ostatniego) poczatku do biezacego miejsca,
+rysujemy go i wywolujemy "enter-selection-drawing-mode!"
+- jezeli indeks odpowiada wyjsciu z selekcji, to bierzemy
+pod-string od (ostaniego) poczatku do biezacego miejsca
+i wywolujemy "exit-selection-drawing-mode!"
+
+
+* 04.10.2022
+
+glownym celem na dzis jest:
+1. rysowanie kursora w kliencie desktopowym
+2. obsluga klawiatury w kliencie desktopowym
+
+OK, no to tak:
+klawiatura jako tako obsluzona (w sposob w miare spojny
+z tym, w jaki obsluzylismy klienta terminalowego)
+
+teraz pozostaje nam zajac sie kursorem w napisach.
+i tutaj sprawa wyglada tak, ze moze rzecz warto
+zrobic podobnie do tego, jak obslugujemy znak nowej
+linii w stringach - tj. w momencie, gdy biezacy indeks
+bedzie poczatkiem kursora (a ogony do siebie pasuja),
+to bierzemy sobie pod-string.
+
+
+przy okazji mozna od razu (za jednym zamachem)
+obsluzyc selekcje, ale tutaj mamy taki problem,
+ze nie mamy jeszcze tego obsluzonego z klawiatury,
+wiec byloby ciezko z testowaniem.
+
+stad tez pojawiaja sie nastepujace pomysly:
+1. prawidlowo obsluzyc selekcje w smieciowym klienice
+2. obsluzyc ladne wyswietlanie selekcji w kliencie
+terminalowym
+3. dopiero wtedy zabrac sie za wyswietlanie kursora
+w kliencie graficznym, i zrobic to jednoczesnie
+z wyswietlaniem selekcji w tymze
+
+
+
 * 03.10.2022
 
 co wiemy o naszym bledzie:
