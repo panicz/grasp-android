@@ -64,6 +64,7 @@
    java.awt.GraphicsEnvironment
    'getLocalGraphicsEnvironment))
 
+
 (define (load-font path::String #!key (size ::float 12.0))
   (let* ((font-file ::File (File path))
 	 (font ::Font (Font:createFont
@@ -91,20 +92,17 @@
 (define-parameter (the-atom-font) ::Font
   #;Basic-Regular LobsterTwo-Regular)
 
-(define-parameter (the-atom-text-color) ::Color
-  Color:DARK_GRAY)
-  
-(define-parameter (the-atom-background-color) ::Color
-  (Color #xdddddd))
-
 (define-parameter (the-string-font) ::Font
   Basic-Regular #;LobsterTwo-Regular)
 
-(define-parameter (the-string-text-color) ::Color
-  Color:DARK_GRAY)
-
 (define-parameter (the-comment-font) ::Font
   GloriaHallelujah)
+
+(define-parameter (the-cursor-offset)::Position
+  (Position left: 0 top: 16))
+
+(define-parameter (the-cursor-extent)::Extent
+  (Extent width: 2 height: 16))
 
 (define-syntax-rule (Path (command args ...) ...)
   (let ((path ::Path2D (Path2D:Float)))
@@ -161,6 +159,8 @@
   (for font in fonts
     (display font)
     (newline)))
+
+(define-constant transparent :: Color (Color 0.0 0.0 0.0 0.0))
 
 (define-object (screen-renderer)::Painter
   (define (clip! left::real  top::real
@@ -266,26 +266,36 @@
 	      top: 0))
   
   (define (mark-cursor! +left::real +top::real)::void
-    (let ((graphics (the-graphics-output)))
+    (let ((graphics (the-graphics-output))
+	  (cursor-extent (the-cursor-extent))
+	  (cursor-offset (the-cursor-offset)))
       (set! marked-cursor-position:left (+ (current-translation-left)
 					   +left))
       (set! marked-cursor-position:top (+ (current-translation-top)
 					  +top))
-      ;; TODO: polozenie i wysokosc kursor powinny zalezec
-      ;; od wybranej czcionki (w praktyce wolajacy powinien
-      ;; raczej przekazywac parametr)
-      (graphics:fillRect +left +top 2 20)))
+      (graphics:fillRect (+ +left cursor-offset:left)
+			 (+ +top cursor-offset:top)
+			 cursor-extent:width
+			 cursor-extent:height)))
   
   (define (cursor-position)::Position
     marked-cursor-position)
 
+  (define text-color ::Color Color:DARK_GRAY)
+
+  (define background-color ::Color transparent)
+  
   (define selection-drawing-mode? ::boolean #f)
   
   (define (enter-selection-drawing-mode!)::void
-    (set! selection-drawing-mode? #t))
+    (set! selection-drawing-mode? #t)
+    (set! text-color Color:WHITE)
+    (set! background-color Color:DARK_GRAY))
 
   (define (exit-selection-drawing-mode!)::void
-    (set! selection-drawing-mode? #f))
+    (set! selection-drawing-mode? #f)
+    (set! text-color Color:DARK_GRAY)
+    (set! background-color transparent))
   
   (define (in-selection-drawing-mode?)::boolean
     selection-drawing-mode?)
@@ -340,39 +350,54 @@
 	     (lines 1)
 	     (height ::float (font:getSize))
 	     (string-end (text:length)))
-	(graphics:setFont font)
-	(for i from 0 below string-end
-	     (when (and focused? (eqv? (head (the-cursor)) i))
-	       (let* ((fragment (text:subSequence segment-start i))
-		      (width (metrics:stringWidth fragment)))
-		 (graphics:drawString fragment left (* lines height))
-		 (set! left (+ left width))
+	(parameterize ((the-cursor-extent (Extent width: 2
+						  height: height)))
+	  (define (render-fragment! segment-end::int)
+	    (let* ((fragment (text:subSequence segment-start
+					       segment-end))
+		   (width (metrics:stringWidth fragment)))
+	      (graphics:setColor background-color)
+	      (graphics:fillRect left (* (- lines 1) height)
+				 width height)
+	      (graphics:setColor text-color)
+	      (graphics:drawString fragment left (* lines height))
+	      (set! left (+ left width))))
+	  
+	  (graphics:setFont font)
+	  (for i from 0 below string-end
+	       (when (and focused? (eqv? (head (the-cursor)) i))
+		 (render-fragment! i)
 		 (set! segment-start i)
-		 (mark-cursor! left (* (- lines 1) height))))#|
-	     (when (and enters-selection-drawing-mode?
-			(eqv? (head selection-start) i))
-	       ...)
-	     (when (and exits-selection-drawing-mode?
-			(eqv? (head selection-end) i))
-	       ...)|#
-	     (when (eq? (text:charAt i) #\newline)
-	       (graphics:drawString (text:subSequence
-				     segment-start i)
-				    left (* lines height))
-	       (set! left 0)
-	       (set! lines (+ lines 1))
-	       (set! segment-start (+ i 1))))
-	(graphics:drawString (text:subSequence segment-start
-					       string-end)
-			     left (* lines height)))))
+		 (mark-cursor! left (* (- lines 1) height)))
+	       
+	       (when (and enters-selection-drawing-mode?
+			  (eqv? (head selection-start) i))
+		 (render-fragment! i)
+		 (set! segment-start i)
+		 (enter-selection-drawing-mode!))
+	       
+	       (when (and exits-selection-drawing-mode?
+			  (eqv? (head selection-end) i))
+		 (render-fragment! i)
+		 (set! segment-start i)
+		 (exit-selection-drawing-mode!))
+	       
+	       (when (eq? (text:charAt i) #\newline)
+		 (render-fragment! i)
+		 (set! left 0)
+		 (set! lines (+ lines 1))
+		 (set! segment-start (+ i 1))))
+	  (render-fragment! string-end)))))
   
   (define (draw-string! text::CharSequence context::Cursor)::void
     (draw-text! text (the-string-font) context))
 
+  (define quoted-text-cursor-offset::Position
+    (Position left: -1 top: 2))
+  
   (define (draw-quoted-text! text::CharSequence context::Cursor)::void
-    (invoke (the-graphics-output) 'setColor
-	    (the-string-text-color))
-    (draw-string! text context))
+    (parameterize ((the-cursor-offset quoted-text-cursor-offset))
+      (draw-string! text context)))
 
   (define (text-extent text::CharSequence font::Font)::Extent
     (let* ((graphics (the-graphics-output))
@@ -428,16 +453,21 @@
       (Extent width: (+ inner:width 8)
 	      height: (+ inner:height 16))))
 
+  (define atom-cursor-offset::Position (Position left: 0 top: 4))
+
+  (define atom-frame-color ::Color (Color #xdddddd))
+  
   (define (draw-atom! text::CharSequence context::Cursor)::void
     (let* ((graphics (the-graphics-output))
-	   (extent (atom-extent text)))
-      (graphics:setColor (the-atom-background-color))
+	   (extent (atom-extent text))
+	   (font (the-atom-font)))
+      (graphics:setColor atom-frame-color)
       (graphics:fillRoundRect 0 14
 			      extent:width (- extent:height 28)
 			      12 12)
-      (graphics:setColor (the-atom-text-color))
       (with-translation (4 8)
-	  (draw-text! text (the-atom-font) context))))
+	  (parameterize ((the-cursor-offset atom-cursor-offset))
+	    (draw-text! text font context)))))
 
   (define (atom-character-index-under x::real y::real
 				      text::CharSequence)
@@ -494,7 +524,8 @@ automatically by the AWT framework."))
    (invoke (the-top-panel) 'touch!
 	   (event:getX)
 	   (- (event:getY) 26)
-	   0))
+	   0)
+   (invoke (as screen-renderer (the-painter)) 'repaint))
 
   ((mouseReleased event::MouseEvent)::void
    (values))
