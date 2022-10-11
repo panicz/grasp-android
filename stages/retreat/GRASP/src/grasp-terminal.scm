@@ -68,7 +68,24 @@
 ;;
 ;; 
 
-(define-parameter (screen-up-to-date?)::boolean #f)
+(define-syntax define-box
+  (syntax-rules (::)
+    ((_ (name)::type initial-value)
+     (define-constant name 
+       (let* ((state ::type initial-value)
+	      (getter (lambda () state)))
+	 (set! (setter getter) (lambda (value::type) (set! state value)))
+	 getter)))
+       
+    ((_ (name) initial-value)
+     (define-constant name 
+       (let* ((state initial-value)
+	      (getter (lambda () state)))
+	 (set! (setter getter) (lambda (value) (set! state value)))
+	 getter)))
+    ))
+
+(define-box (screen-up-to-date?)::boolean #f)
 
 (define-parameter (the-text-style)::TextStyle
   (TextStyle:noneOf TextDecoration:class))
@@ -89,8 +106,8 @@
 
 (define (render io :: LanternaScreen)::void
   (synchronized screen-up-to-date?
-		(when (screen-up-to-date?)
-		       (invoke screen-up-to-date? 'wait))
+		(while (screen-up-to-date?)
+		  (invoke screen-up-to-date? 'wait))
 		;; if - during rendering - the state of
 		;; the panel changes (by the editing thread),
 		;; then this value will be set to #f, and
@@ -105,18 +122,20 @@
   ;; aczkolwiek na poczatek wystarczy po prostu rysowac
   ;; pojedynczy znaczek, przesuwany za pomoca klawiszy strzalek,
   ;; albo cos takiego
-  (let ((size ::TerminalSize (or (io:doResizeIfNecessary)
-				 (io:getTerminalSize)))
-	(extent ::Extent (the-screen-extent)))
+  (let* ((resize ::TerminalSize (io:doResizeIfNecessary))
+	 (size (or resize (io:getTerminalSize)))
+	 (extent ::Extent (the-screen-extent))
+	 (painter (the-painter)))
     (set! extent:width (size:getColumns))
-    (set! extent:height (size:getRows)))
-  (let ((painter (the-painter)))
+    (set! extent:height (size:getRows))
     (painter:clear!)
     (invoke (the-top-panel) 'draw! ())
-     ;; swap front- and back-buffer
-    (io:refresh LanternaScreen:RefreshType:DELTA)
+    ;; swap front- and back-buffer
+    (io:refresh (if resize
+		    LanternaScreen:RefreshType:COMPLETE
+		    LanternaScreen:RefreshType:DELTA))
     (render io)))
-  
+
 (define (edit io :: LanternaScreen)::void
   (let* ((key ::KeyStroke (io:readInput))
 	 (type ::KeyType (key:getKeyType))
@@ -164,7 +183,6 @@
 				       Selection:discard))))
 
 (set! (on-key-type #\x) exit)
-
 
 (define-object (TerminalPainter screen::LanternaScreen)::Painter
   
