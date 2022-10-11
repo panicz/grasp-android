@@ -1,3 +1,27 @@
+
+* 09.10.2022 (telefon)
+
+tak sobie dla zartu naprawilismy kilka bugow w kliencie
+terminalowym
+
+ale pojawia sie pewien dosc interesujacy aspekt,
+mianowicie cicielibysmy w jakis sposob sygnalizowac
+jakiego rodzaju odawiezenia ekranu oczekujemy
+(delta vs complete)
+
+complete jest oczekiwany, gdy:
+- dokonalismy przescrollowania ekranu
+- doszlo do zmiany rozmiaru ekranu
+
+tak naprawde to warto by bylo moze przebudowac te lanterne
+tak zeby mogla generowac dodatkowe zdarzenie resize,
+albo cos w tym stylu
+
+ale bardziej pytanie: jaki chcielibysmy stworzyc
+mechanizm sygnalizacji tego, ze trzeba przerysowac caly ekran?
+
+pytanie tez, czy to jest kwestia na teraz?
+
 * 08.10.2022
 
 No dobra, to teraz zajmiemy sie wyswietlaniem selekcji.
