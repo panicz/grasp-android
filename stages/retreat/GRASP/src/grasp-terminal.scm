@@ -182,6 +182,12 @@
 				       Selection:resize
 				       Selection:discard))))
 
+(set! (on-key-press KeyType:ArrowUp)
+      move-cursor-up!)
+
+(set! (on-key-press KeyType:ArrowDown)
+      move-cursor-down!)
+
 (set! (on-key-type #\x) exit)
 
 (define-object (TerminalPainter screen::LanternaScreen)::Painter

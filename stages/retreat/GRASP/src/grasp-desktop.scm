@@ -653,4 +653,10 @@ automatically by the AWT framework."))
 			Selection:resize
 			Selection:discard))))
 
+(set! (on-key-press KeyEvent:VK_UP)
+      move-cursor-up!)
+
+(set! (on-key-press KeyEvent:VK_DOWN)
+      move-cursor-down!)
+
 (window-screen)
