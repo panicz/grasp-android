@@ -1,3 +1,5 @@
+
+(import (srfi :11))
 (import (define-syntax-rule))
 (import (assert))
 (import (define-interface))
@@ -239,8 +241,18 @@
 
   (pair a d))
 
+(define-object (immutable-cons a d)::Tile
+
+  (define (setCar value)
+    (error "The cons cell is immutable: " (this)))
+
+  (define (setCdr value)
+    (error "The cons cell is immutable: "(this)))
+  
+  (cons a d))
+
 (define-cache (recons head tail)
-  (cons head tail))
+  (immutable-cons head tail))
 
 (define-syntax cons*
   (syntax-rules ()
@@ -370,13 +382,21 @@
 			(elems::list (head (the-document)))
 			#!key (context::Cursor (recons 1 '())))
   ::void
-  (traverse elems
-	    doing:
-	    (lambda (item::Element traversal::Traversal)
-	      (with-translation (traversal:left
-				 traversal:top)
-		  (item:draw! (recons traversal:index
-				      context))))))
+  (let-values (((selection-start selection-end) (the-selection)))
+    (let ((painter (the-painter)))
+      (traverse
+       elems
+       doing:
+       (lambda (item::Element traversal::Traversal)
+	 (with-translation (traversal:left
+			    traversal:top)
+	     (let ((context (recons traversal:index
+				    context)))
+	       (when (equal? context selection-start)
+		 (painter:enter-selection-drawing-mode!))
+	       (item:draw! context)
+	       (when (equal? context selection-end)
+		 (painter:exit-selection-drawing-mode!)))))))))
 
 (define (draw-document! document::pair)
   (cond ((null? (head document))

@@ -387,7 +387,9 @@
 		 (set! left 0)
 		 (set! lines (+ lines 1))
 		 (set! segment-start (+ i 1))))
-	  (render-fragment! string-end)))))
+	  (render-fragment! string-end)
+	  (when (and focused? (eqv? (head (the-cursor)) string-end))
+	    (mark-cursor! left (* (- lines 1) height)))))))
   
   (define (draw-string! text::CharSequence context::Cursor)::void
     (draw-text! text (the-string-font) context))

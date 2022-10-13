@@ -154,7 +154,8 @@
 
 
 (e.g.
- (parameterize ((the-cursor (cursor 0 1 3 1 1)))
+ (parameterize ((the-cursor (cursor 0 1 3 1 1))
+		(the-selection-anchor (cursor 0 1 3 1 1)))
    (grasped "\
 (define (! n)
   (if (<= n 0)
@@ -177,7 +178,8 @@
 
 
 (e.g.
- (parameterize ((the-cursor (cursor 0 2 3 1 1)))
+ (parameterize ((the-cursor (cursor 0 2 3 1 1))
+		(the-selection-anchor (cursor 0 2 3 1 1)))
    (grasped "\
 (define (! n)
   (if (<= n 0)
@@ -199,7 +201,8 @@
 ")
 
 (e.g.
- (parameterize ((the-cursor (cursor 0 1 1 1)))
+ (parameterize ((the-cursor (cursor 0 1 1 1))
+		(the-selection-anchor (cursor 0 1 1 1)))
    (grasped "\
 (define (! n)
   (if (<= n 0)
@@ -222,7 +225,8 @@
 
 
 (e.g.
- (parameterize ((the-cursor (cursor 6 1 1 1)))
+ (parameterize ((the-cursor (cursor 6 1 1 1))
+		(the-selection-anchor (cursor 6 1 1 1)))
    (grasped "\
 (define (! n)
   (if (<= n 0)

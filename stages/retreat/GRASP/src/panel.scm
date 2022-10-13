@@ -155,6 +155,7 @@ mutations of an n-element set.\"
   (define (touch! x::real y::real finger::byte)::void
     (parameterize/update-sources ((the-document document))
       (set! cursor (cursor-under x y))
+      (set! selection-anchor cursor)
       (display cursor)
       (display (the-expression at: cursor))
       (newline)))

@@ -3,6 +3,7 @@
 (import (hash-table))
 (import (define-property))
 (import (keyword-arguments))
+(import (define-object))
 
 (define-synonym cache property+)
 
@@ -93,6 +94,16 @@
 ;; the `hash-cons` definition presented here is only used
 ;; for bootstrapping. Prefer the analogous definition of
 ;; `recons` that is defined in the `(primitive)` module.
+
+(define-object (immutable-pair a d)
+
+  (define (setCar value)
+    (error "The pair is immutable: " (this)))
+
+  (define (setCdr value)
+    (error "The pair is immutable: "(this)))
+  
+  (pair a d))
 
 (define-cache (hash-cons head tail)
   (cons head tail))
