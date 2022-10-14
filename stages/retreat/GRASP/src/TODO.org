@@ -1,3 +1,125 @@
+* 13.10.2022
+
+Mamy zrobione jakies tam poruszanie strzalkami w gore
+i w dol, ktore troche dziala a troche nie dziala.
+
+W kazdym razie jest to jakis punkt wyjscia.
+
+Teraz moglibysmy to dopracowac. Moze zrobic tak,
+ze to, co teraz jest w procedurach move-cursor-up/down,
+byloby wykonywane przez metody cursor-above i cursor-below
+
+
+
+
+* 12.10.2022
+
+Uwaga na szybko: warto by bylo zrobic tak, zeby "recons"
+zwracal niemutowalne komorki (tzn. takie, ze jak sie na nich
+wywola setCar albo setCdr, to jest blad)
+
+OK, to zrobilismy. Ale to nie rozwiazuje nam problemu
+z poruszaniem strzalkami kursora w gore i w dol :/
+
+To jeszcze raz. Moze tym razem od dolu:
+1. dodajemy funkcje "move-cursor-up!" i "move-cursor-down!"
+2. co robia te metody?
+- pierwsza z nich wywoluje cursor-under bazujac na
+cursor-position - min-line-height (albo krotnosci, dopoki
+kursor sie nie zmienia albo nie dojechalismy do konca dokumentu)
+- druga wywoluje cursor-under bazujac na 
+cursor-position + min-line-height, albo krotnosci, dopoki
+kursor sie nie zmieni albo nie dojedziemy do konca dokumentu.
+
+
+* 11.10.2022
+
+To co teraz robimy?
+
+Propozycje:
+- strzalki gora/dol
+- obsluga myszy/dotyku
+- operacje edycji
+- doszlifowanie selekcji
+- zarys klienta androidowego
+
+moze pomyslmy troche o tych strzalkach?
+
+rozwazmy taka implementacje: wcisniecie strzalki w dol
+dziala tak, ze symulujemy klikniecie w polowie
+min-line-height na tym samym polozeniu "cursor",
+ale w kolejnej linii.
+
+tyle ze:
+
+- co z pustymi liniami w spacjach?
+(moze spacje trzeba traktowac jakos szczegolnie?)
+
+- co z pudelkami, ktore maja wiele linii?
+
+- co ze strzalka do gory?
+
+- co ze stringami, ktore maja wiele linii?
+
+wezmy moze cos w rodzaju
+
+/   \
+| + |
+|   |
+| 2 |
+|   |
+| 2 |
+|   |
+\   /
+
+
+jak zewnetrzne pudelko wysle sygnal "up" do +, powinno otrzymac
+#f swiadczacy o tym, ze juz sie nie da przesunac wyzej.
+
+wowczas samo rowniez powinno zwrocic #f.
+
+Natomiast jak wyslemy sygnal #t...
+
+
+Moze tak: dodajmy metody "cursor-above*" i "cursor-below*",
+ktore beda jak cursor-under*.
+
+Ale wtedy tez do interfejsu Painter bedzie trzeba dodac cos,
+co pozwoli nam wykonac ruch w gore albo w dol w obrebie atomu.
+
+
+* 10.10.2022
+
+Teraz, kiedy mamy juz zaimplementowany mechanizm selekcji,
+trzeba pomyslec o kolejnych krokach:
+1. strzalki w gore i w dol
+2. operacje edycji
+
+Strzalki w gore i w dol mozna rozwiazac dwojako:
+- "geometrycznie" (ze udajemy klikniecia)
+- "systemowo/architektonicznie" (ze dodajemy funkcje)
+
+rozwiazanie geometryczne wydaje sie dosc atrakcyjne,
+ale nie jest wykluczone, ze konieczne bedzie
+jakies rozwiazanie hybrydowe
+
+Tymczasem wydaje sie tez, ze "enter-selection-drawing-mode!"
+i "exit-selection-drawing-mode!" nalezaloby dodac rowniez
+do "draw-sequence!"
+
+OK, to zrobione. Ale jeszcze z tymi zaznaczeniami
+nie wszystko dziala :/
+
+Ach, no i chcielibysmy wreszcie dodac tego drag&dropa,
+bo wydaje sie, ze juz jestesmy dosc blisko.
+
+Pytanie tylko:
+- jak to sie bedzie mialo do "operacji edycji"
+- co z zapisywaniem historii?
+
+No i jak zaprojektowac system zdarzen w perspektywie
+multi-toucha? Czy po prostu zrobic to tak, jak bylo
+w javowym graspie na Androida?
 
 * 09.10.2022 (telefon)
 
