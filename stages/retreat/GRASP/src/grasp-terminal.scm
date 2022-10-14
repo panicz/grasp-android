@@ -159,6 +159,29 @@
 	 (io:stopScreen)
 	 (exit))
 
+	(,KeyType:MouseEvent
+	 (let* ((action ::MouseAction
+			(as MouseAction key))
+		(position ::TerminalPosition
+			  (action:getPosition))
+		(left (position:getColumn))
+		(top (position:getRow)))
+	   (cond ((action:isMouseMove)
+		  (values))
+		 ((action:isMouseDown)
+		  
+		  (match (action:getButton)
+		    (,MouseButton:Left
+		     (values))
+		    (,MouseButton:Right
+		     (values))
+		    (_
+		     (values))))
+		 ((action:isMouseDrag)
+		  (values))
+		 ((action:isMouseUp)
+		  (values)))))
+	
 	(_
 	 (invoke (the-top-panel) 'key-pressed!
 		 type))))

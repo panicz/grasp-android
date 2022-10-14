@@ -1,3 +1,33 @@
+* 14.10.2022 (telefon)
+
+doszlifowanie kwestii kursora: poniewaz teraz nie dziala tak,
+jak bysmy chcieli, wwarto sie zastanowic nad rozbudowa tego
+mechanizmu
+
+sam mechanizm 'probkowania' nie wydaje sie zly - problemem
+raczej jest to, ze zawsze do naszych probek dodajemy albo
+odejmujemy 1, natomiast ta wartosc powinna raczej zalezec
+od kontekstu (i to zarowno od rodzaju elementu, jak i od
+malarza).
+
+Konkretniej, w obiekcie text powinnismy dodawac jedna linie
+(o ile nie dojdziemy do krawedzi)
+
+Bedac na atomie albo spacji, powinnismy dodawac wysokosc
+biezacej linii
+
+Ale do tego dochodzi jeszcze kwestia obslugi myszy i dotyku.
+
+Roznica miedzy mysza i dotykiem jest taka:
+- kursor myszy jest tylko jeden, ale jest wiele przyciskow
+- palcow jest wiele
+
+
+* 13.10.2022 (telefon)
+
+chcemy teraz dodac obsluge myszy
+
+
 * 13.10.2022
 
 Mamy zrobione jakies tam poruszanie strzalkami w gore
@@ -8,8 +38,6 @@ W kazdym razie jest to jakis punkt wyjscia.
 Teraz moglibysmy to dopracowac. Moze zrobic tak,
 ze to, co teraz jest w procedurach move-cursor-up/down,
 byloby wykonywane przez metody cursor-above i cursor-below
-
-
 
 
 * 12.10.2022
