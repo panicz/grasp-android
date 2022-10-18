@@ -1,3 +1,6 @@
+(module-name grasp-terminal)
+(module-compile-options main: #t)
+
 (import (define-syntax-rule))
 (import (define-interface))
 (import (define-property))

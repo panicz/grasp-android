@@ -1,0 +1,2 @@
+#!/bin/sh
+kawa --no-warn-unreachable -f analdep.scm -- $@

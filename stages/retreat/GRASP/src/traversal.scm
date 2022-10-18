@@ -2,7 +2,6 @@
 (import (define-type))
 (import (default-value))
 (import (define-parameter))
-(import (cursor))
 (import (extent))
 (import (fundamental))
 (import (indexable))

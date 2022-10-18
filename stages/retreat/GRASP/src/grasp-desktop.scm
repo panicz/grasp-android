@@ -1,3 +1,6 @@
+(module-name grasp-desktop)
+(module-compile-options main: #t)
+
 (import (srfi :11))
 (import (define-syntax-rule))
 (import (assert))
@@ -21,10 +24,14 @@
 (import (primitive))
 (import (cursor))
 (import (input))
+(import (extent))
 
 (define-alias Font java.awt.Font)
 (define-alias FontMetrics java.awt.FontMetrics)
 (define-alias File java.io.File)
+(define-alias InputStream java.io.InputStream)
+(define ClassLoader ::java.lang.ClassLoader
+  (java.lang.ClassLoader:getSystemClassLoader))
 
 (define-alias FocusEvent java.awt.event.FocusEvent)
 (define-alias KeyEvent java.awt.event.KeyEvent)
@@ -65,7 +72,7 @@
    'getLocalGraphicsEnvironment))
 
 
-(define (load-font path::String #!key (size ::float 12.0))
+#;(define (load-font path::String #!key (size ::float 12.0))
   (let* ((font-file ::File (File path))
 	 (font ::Font (Font:createFont
 		       Font:TRUETYPE_FONT
@@ -73,6 +80,17 @@
     (invoke (the-graphics-environment)
 	    'registerFont font)
     (font:deriveFont size)))
+
+(define (load-font path::String #!key (size ::float 12.0))
+  (let* ((font-source ::InputStream
+		      (ClassLoader:getResourceAsStream path))
+	 (font ::Font (Font:createFont
+		       Font:TRUETYPE_FONT
+		       font-source)))
+    (invoke (the-graphics-environment)
+	    'registerFont font)
+    (font:deriveFont size)))
+
 
 (define-constant Basic-Regular
   (load-font "fonts/Basic-Regular.otf" size: 20))

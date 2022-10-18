@@ -29,11 +29,19 @@
 (define (all-scm-files-from-current-directory)
   (only (is _ matching "\\.scm$") (string-split (shell "ls") "\n")))
 
+(define list?::boolean #f)
+
 (define files
   (match (command-line)
     (`(,command)
      (all-scm-files-from-current-directory))
-    (`(,command . ,args)
+
+    (`(,command "--" "--list" . ,args)
+     (set! list? #t)
+     args)
+	   
+    
+    (`(,command "--" . ,args)
      args)))
 
 (define (dependency-graph files)
@@ -55,7 +63,8 @@
 				(_
 				 '()))) contents)))
 	     (source-module `(,(string->symbol
-				(string-drop-right file 4)))))
+				(string-take file
+					     (- (length file) 4))))))
 	(set! (dependencies source-module) imports)))
     dependencies))
 
@@ -65,3 +74,27 @@
   (let ((dependencies (reach files-dependency-graph module)))
     (when (is module in dependencies)
       (print "circular dependency from "module": "dependencies))))
+
+(define (system-module? x)
+  (match x
+    (`(srfi ,_)
+     #t)
+    (_
+     #f)))
+
+(define (module-file module)
+  (string-append (string-join (map symbol->string module) "/") ".scm"))
+
+(and-let* ((list?))#;((list? (get-environment-variable "LIST"))
+	   ((string=? list? "yes")))
+  (let ((dependencies '()))
+    (for module in (keys files-dependency-graph)
+	 (set! dependencies (union dependencies
+				   (only (isnt _ system-module?)
+					 (reach files-dependency-graph
+						module)))))
+    (for module in dependencies
+	 (display (module-file module))
+	 (display " "))))
+
+(exit)

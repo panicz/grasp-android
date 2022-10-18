@@ -17,7 +17,6 @@
 (import (srfi :11))
 (import (painter))
 (import (traversal))
-(import (cursor))
 (import (extent))
 
 (define (fragment-size fragment)

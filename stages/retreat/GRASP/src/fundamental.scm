@@ -1,3 +1,5 @@
+(import (define-parameter))
+
 (define-alias EnumSet java.util.EnumSet)
 
 (define-alias CharSequence java.lang.CharSequence)
