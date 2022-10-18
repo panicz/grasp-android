@@ -1,3 +1,24 @@
+* 17.10.2022
+
+taki niesmialy plan na dzis (a moze raczej na jutro)
+to sprobowac zamienic funkcje ladujaca czcionki
+z takiej, ktora uzywa plikow, na taka, ktora najpierw
+probuje zaladowac zasob z pliku jar
+
+
+* 15.10.2022
+
+plan dzialania (skryptu budujacego):
+1. kompilujemy - za pomoca Kawy - wszystkie
+   moduly do osobnego folderu
+2. pliki .class dodajemy do pliku .jar z kawa
+   oraz dla klienta terminalowego - z lanterna
+   (ewentualnie mozna zbundlowac wszystko razem
+   i okreslac osobne punkty wejscia?)
+   
+   
+
+
 * 14.10.2022 (telefon)
 
 doszlifowanie kwestii kursora: poniewaz teraz nie dziala tak,
@@ -21,6 +42,18 @@ Ale do tego dochodzi jeszcze kwestia obslugi myszy i dotyku.
 Roznica miedzy mysza i dotykiem jest taka:
 - kursor myszy jest tylko jeden, ale jest wiele przyciskow
 - palcow jest wiele
+
+Ogolnie chcemy raczej skupic sie na dotyku niz na myszy.
+Ewentualnie mozemy zrobic udawanie (za pomoca myszy), ze
+mamy dwa palce.
+
+Mozemy tez zrobic applowski gest trzema palcami do wycinania
+i wklejania wyrzen.
+
+Moze jednak tez warto by bylo troche zboczyc na inne tory,
+i sprobowac:
+1. kompilacji kawy do jara
+2. budowy klienta androidowego
 
 
 * 13.10.2022 (telefon)
