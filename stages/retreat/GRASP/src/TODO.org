@@ -1,3 +1,31 @@
+* 19.10.2022
+
+wczorajszy dzien to byla walka z tym, zeby miec
+odpowiednia wersje bajtkodu w kawa.jar. Walka
+'na swoj sposob przegrana' - ogolnie jezeli ustawimy
+odpowiednio wysoka wersje javy (czyli 8), to wprawdzie
+dexer nie narzeka (o ile damy min-sdk-version na 28,
+czyli Android 9), ale proces trwa BARDZO dlugo
+i konczy sie wykrzaczeniem.
+
+na razie pomysl jest taki, zeby sprobowac go odpalic
+na mocniejszej maszynie i zobaczyc, jaki bedzie skutek.
+
+* 18.10.2022
+
+wyglada na to, ze z tymi czcionkami udalo sie bez
+problemu, ale z jakichs wzgledow na lapku nie dziala
+sloik z klientem terminalowym (to dziwne, bo klient
+poza sloikiem dziala)
+
+No dobra, juz teraz dziala.
+
+To co? To dzisiaj moze sprobowalibysmy sie przymierzyc
+do zbudowania klienta terminalowego?
+
+OK, ale to i tak jest czyms, co lepiej jest robic
+na telefonie. Ale nie szkodzi.
+
 * 17.10.2022
 
 taki niesmialy plan na dzis (a moze raczej na jutro)
