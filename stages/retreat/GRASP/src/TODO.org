@@ -1,3 +1,14 @@
+* 20.10.2022
+
+udalo sie zbudowac projekt HelloKawa z najnowsza
+wersja Kawy.
+
+Dalszy plan:
+- dodac do repozytorium zalazek GRASP na Android
+  (zaczelibtsmy - jak zawsze - od plotna, na ktorym
+  mozemy rysowac kreski)
+- zaimplementowac malarza na Androida
+
 * 19.10.2022
 
 wczorajszy dzien to byla walka z tym, zeby miec
