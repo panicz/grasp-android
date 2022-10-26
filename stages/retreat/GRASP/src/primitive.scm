@@ -152,8 +152,8 @@
   (define (equals object)::boolean
    (eq? object (this)))
 
-  (define (hash-code)::int
-    (java.lang.System:identity-hash-code (this)))
+  (define (hashCode)::int
+    (java.lang.System:identityHashCode (this)))
 
   (define (draw! context::Cursor)
     ::void

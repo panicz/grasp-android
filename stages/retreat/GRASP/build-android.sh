@@ -1,7 +1,5 @@
 #!/bin/sh
 
-ANDROID_JAR='/data/data/com.termux/files/usr/share/java/android.jar'
-
 mkdir -p build/android/bin
 mkdir -p build/android/gen
 mkdir -p build/android/obj
@@ -13,14 +11,17 @@ aapt package -f -m \
      -J "build/android/gen" \
      -S "res"
 
-java -cp ./kawa.jar:$ANDROID_JAR kawa.repl \
-     -d build/android/obj -P $PKGNAME. \
-     -T $PKGNAME.Grasp -C \
-     `./analdep --list grasp-android.scm` \
-     grasp-android.scm
+cd src
 
-d8 --min-api 28 --lib $ANDROID_JAR \
-   `find build/android/obj -name '*.class'` kawa.jar
+java -cp "../libs/kawa.jar:../libs/android.jar" kawa.repl \
+     -d ../build/android/obj -P $PKGNAME. \
+     -T $PKGNAME.Grasp -C \
+     `java -jar ../libs/kawa.jar -f analdep.scm -- --list grasp-android.scm` \
+     grasp-android.scm
+cd ..
+
+d8 --min-api 28 --lib libs/android.jar \
+   `find build/android/obj -name '*.class'` libs/kawa.jar
 
 mv classes.dex build/android/bin/
 

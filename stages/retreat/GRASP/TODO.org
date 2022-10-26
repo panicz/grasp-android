@@ -1,246 +1,5603 @@
-* Plan implementacji GRASP w Kawa
+* 20.10.2022
 
-  1. Bedziemy opierac wyswietlanie 'porzadku
-     tekstowego' na slabych hasz-mapach
+udalo sie zbudowac projekt HelloKawa z najnowsza
+wersja Kawy.
 
-  2. Dla pozostalych form interakcji chcemy
-     miec kombinatory Beside, Below, Over
+Dalszy plan:
+- dodac do repozytorium zalazek GRASP na Android
+  (zaczelibtsmy - jak zawsze - od plotna, na ktorym
+  mozemy rysowac kreski)
+- zaimplementowac malarza na Androida
 
-  3. Chcemy miec dwie implementacje:
-     - taka, ktora mozemy sobie testowac
-       w Emacsie (i ktora byc moze stanie
-       sie trybem dla Emacsa)
+* 19.10.2022
 
-     - taka, ktora bedzie appka androidowa
+wczorajszy dzien to byla walka z tym, zeby miec
+odpowiednia wersje bajtkodu w kawa.jar. Walka
+'na swoj sposob przegrana' - ogolnie jezeli ustawimy
+odpowiednio wysoka wersje javy (czyli 8), to wprawdzie
+dexer nie narzeka (o ile damy min-sdk-version na 28,
+czyli Android 9), ale proces trwa BARDZO dlugo
+i konczy sie wykrzaczeniem.
 
-  4. w zwiazku z tym, bedziemy chcieli miec
-     jeden interfejs i dwie implementacje
+na razie pomysl jest taki, zeby sprobowac go odpalic
+na mocniejszej maszynie i zobaczyc, jaki bedzie skutek.
+
+* 18.10.2022
+
+wyglada na to, ze z tymi czcionkami udalo sie bez
+problemu, ale z jakichs wzgledow na lapku nie dziala
+sloik z klientem terminalowym (to dziwne, bo klient
+poza sloikiem dziala)
+
+No dobra, juz teraz dziala.
+
+To co? To dzisiaj moze sprobowalibysmy sie przymierzyc
+do zbudowania klienta terminalowego?
+
+OK, ale to i tak jest czyms, co lepiej jest robic
+na telefonie. Ale nie szkodzi.
+
+* 17.10.2022
+
+taki niesmialy plan na dzis (a moze raczej na jutro)
+to sprobowac zamienic funkcje ladujaca czcionki
+z takiej, ktora uzywa plikow, na taka, ktora najpierw
+probuje zaladowac zasob z pliku jar
+
+
+* 15.10.2022
+
+plan dzialania (skryptu budujacego):
+1. kompilujemy - za pomoca Kawy - wszystkie
+   moduly do osobnego folderu
+2. pliki .class dodajemy do pliku .jar z kawa
+   oraz dla klienta terminalowego - z lanterna
+   (ewentualnie mozna zbundlowac wszystko razem
+   i okreslac osobne punkty wejscia?)
+   
+   
+
+
+* 14.10.2022 (telefon)
+
+doszlifowanie kwestii kursora: poniewaz teraz nie dziala tak,
+jak bysmy chcieli, wwarto sie zastanowic nad rozbudowa tego
+mechanizmu
+
+sam mechanizm 'probkowania' nie wydaje sie zly - problemem
+raczej jest to, ze zawsze do naszych probek dodajemy albo
+odejmujemy 1, natomiast ta wartosc powinna raczej zalezec
+od kontekstu (i to zarowno od rodzaju elementu, jak i od
+malarza).
+
+Konkretniej, w obiekcie text powinnismy dodawac jedna linie
+(o ile nie dojdziemy do krawedzi)
+
+Bedac na atomie albo spacji, powinnismy dodawac wysokosc
+biezacej linii
+
+Ale do tego dochodzi jeszcze kwestia obslugi myszy i dotyku.
+
+Roznica miedzy mysza i dotykiem jest taka:
+- kursor myszy jest tylko jeden, ale jest wiele przyciskow
+- palcow jest wiele
+
+Ogolnie chcemy raczej skupic sie na dotyku niz na myszy.
+Ewentualnie mozemy zrobic udawanie (za pomoca myszy), ze
+mamy dwa palce.
+
+Mozemy tez zrobic applowski gest trzema palcami do wycinania
+i wklejania wyrzen.
+
+Moze jednak tez warto by bylo troche zboczyc na inne tory,
+i sprobowac:
+1. kompilacji kawy do jara
+2. budowy klienta androidowego
+
+
+* 13.10.2022 (telefon)
+
+chcemy teraz dodac obsluge myszy
+
+
+* 13.10.2022
+
+Mamy zrobione jakies tam poruszanie strzalkami w gore
+i w dol, ktore troche dziala a troche nie dziala.
+
+W kazdym razie jest to jakis punkt wyjscia.
+
+Teraz moglibysmy to dopracowac. Moze zrobic tak,
+ze to, co teraz jest w procedurach move-cursor-up/down,
+byloby wykonywane przez metody cursor-above i cursor-below
+
+
+* 12.10.2022
+
+Uwaga na szybko: warto by bylo zrobic tak, zeby "recons"
+zwracal niemutowalne komorki (tzn. takie, ze jak sie na nich
+wywola setCar albo setCdr, to jest blad)
+
+OK, to zrobilismy. Ale to nie rozwiazuje nam problemu
+z poruszaniem strzalkami kursora w gore i w dol :/
+
+To jeszcze raz. Moze tym razem od dolu:
+1. dodajemy funkcje "move-cursor-up!" i "move-cursor-down!"
+2. co robia te metody?
+- pierwsza z nich wywoluje cursor-under bazujac na
+cursor-position - min-line-height (albo krotnosci, dopoki
+kursor sie nie zmienia albo nie dojechalismy do konca dokumentu)
+- druga wywoluje cursor-under bazujac na 
+cursor-position + min-line-height, albo krotnosci, dopoki
+kursor sie nie zmieni albo nie dojedziemy do konca dokumentu.
+
+
+* 11.10.2022
+
+To co teraz robimy?
+
+Propozycje:
+- strzalki gora/dol
+- obsluga myszy/dotyku
+- operacje edycji
+- doszlifowanie selekcji
+- zarys klienta androidowego
+
+moze pomyslmy troche o tych strzalkach?
+
+rozwazmy taka implementacje: wcisniecie strzalki w dol
+dziala tak, ze symulujemy klikniecie w polowie
+min-line-height na tym samym polozeniu "cursor",
+ale w kolejnej linii.
+
+tyle ze:
+
+- co z pustymi liniami w spacjach?
+(moze spacje trzeba traktowac jakos szczegolnie?)
+
+- co z pudelkami, ktore maja wiele linii?
+
+- co ze strzalka do gory?
+
+- co ze stringami, ktore maja wiele linii?
+
+wezmy moze cos w rodzaju
+
+/   \
+| + |
+|   |
+| 2 |
+|   |
+| 2 |
+|   |
+\   /
+
+
+jak zewnetrzne pudelko wysle sygnal "up" do +, powinno otrzymac
+#f swiadczacy o tym, ze juz sie nie da przesunac wyzej.
+
+wowczas samo rowniez powinno zwrocic #f.
+
+Natomiast jak wyslemy sygnal #t...
+
+
+Moze tak: dodajmy metody "cursor-above*" i "cursor-below*",
+ktore beda jak cursor-under*.
+
+Ale wtedy tez do interfejsu Painter bedzie trzeba dodac cos,
+co pozwoli nam wykonac ruch w gore albo w dol w obrebie atomu.
+
+
+* 10.10.2022
+
+Teraz, kiedy mamy juz zaimplementowany mechanizm selekcji,
+trzeba pomyslec o kolejnych krokach:
+1. strzalki w gore i w dol
+2. operacje edycji
+
+Strzalki w gore i w dol mozna rozwiazac dwojako:
+- "geometrycznie" (ze udajemy klikniecia)
+- "systemowo/architektonicznie" (ze dodajemy funkcje)
+
+rozwiazanie geometryczne wydaje sie dosc atrakcyjne,
+ale nie jest wykluczone, ze konieczne bedzie
+jakies rozwiazanie hybrydowe
+
+Tymczasem wydaje sie tez, ze "enter-selection-drawing-mode!"
+i "exit-selection-drawing-mode!" nalezaloby dodac rowniez
+do "draw-sequence!"
+
+OK, to zrobione. Ale jeszcze z tymi zaznaczeniami
+nie wszystko dziala :/
+
+Ach, no i chcielibysmy wreszcie dodac tego drag&dropa,
+bo wydaje sie, ze juz jestesmy dosc blisko.
+
+Pytanie tylko:
+- jak to sie bedzie mialo do "operacji edycji"
+- co z zapisywaniem historii?
+
+No i jak zaprojektowac system zdarzen w perspektywie
+multi-toucha? Czy po prostu zrobic to tak, jak bylo
+w javowym graspie na Androida?
+
+* 09.10.2022 (telefon)
+
+tak sobie dla zartu naprawilismy kilka bugow w kliencie
+terminalowym
+
+ale pojawia sie pewien dosc interesujacy aspekt,
+mianowicie cicielibysmy w jakis sposob sygnalizowac
+jakiego rodzaju odawiezenia ekranu oczekujemy
+(delta vs complete)
+
+complete jest oczekiwany, gdy:
+- dokonalismy przescrollowania ekranu
+- doszlo do zmiany rozmiaru ekranu
+
+tak naprawde to warto by bylo moze przebudowac te lanterne
+tak zeby mogla generowac dodatkowe zdarzenie resize,
+albo cos w tym stylu
+
+ale bardziej pytanie: jaki chcielibysmy stworzyc
+mechanizm sygnalizacji tego, ze trzeba przerysowac caly ekran?
+
+pytanie tez, czy to jest kwestia na teraz?
+
+* 08.10.2022
+
+No dobra, to teraz zajmiemy sie wyswietlaniem selekcji.
+
+Chcemy wobec tego miec cos takiego, ze:
+- do screen-renderer dodajemy wlasciwosci text-color i background-color
+- do funkcji renderujacej tekst dodajemy wyswietlanie prostokata
+w kolorze background-color
+- enter-selection-drawing-mode! i exit-selection-drawing-mode!
+maja powodowac zmiane text-color i background-color
+- renderowanie tekstu powinno wywolywac (w odpowiednich
+ okolicznosciach) enter/exit-selection-drawing-mode!
+
+OKI, ale zanim wprowadzimy zmiany, musimy jeszcze sprawdzic
+jak dziala aktualny system:
+
+mamy jedna wspolna metode draw-text!, ktora wywoluje graphics:setFont,
+a ktora jest uzywana przez metody interfejsu Painter:
+- draw-string!
+- draw-quoted-text! ktora najpierw robi graphics:setColor, a potem wola
+draw-string!, podajac (the-string-font) jako argument
+- draw-atom!, ktora najpierw rysuje zaokraglony prostokat,
+pozniej wola setColor, a na koncu draw-text!, podajac (the-atom-font)
+jako argument
+
+Wiec moze dla uproszczenia przyjmijmy sobie, ze mamy tylko dwa kolory:
+text-color i background-color, ktore na dodatek nie sa parametrami,
+tylko wlasciwosciami klasy
+
+
+* 07.10.2022
+
+problem, ktory chcemy rozwiazac w najblizszym czasie:
+- chcemy rysowac kursor o okreslonej wielkosci, z okreslonym offsetem
+
+proponowane rozwiazanie:
+dodajemy parametry:
+
+(the-cursor-offset)
+(the-cursor-extent)
+(the-cursor-color)
+
+I co chcemy dalej zrobic?
+
+Na pewno wyswietlanie selekcji. 
+
+* 06.10.2022
+
+poruszanie w lewo i w prawo kursorem w kliencie AWT jako tako
+dziala. trzeba jeszcze popracowac nad pozycja i rozmiarem
+(i ewentualnie kolorem i ksztaltem) tego kursora.
+
+nie nalezy sie spieszyc i sprawe trzeba przemyslec
+
+natomiast pozostaja nam jeszcze takie sprawy, jak:
+- rysowanie selekcji w kliencie AWT
+- poruszanie kursorem w gore i w dol
+- wyswietlanie kursora na koncu stringa
+- podswietlanie nawiasow (i to zarowno w kliencie
+terminalowym, jak i AWT)
+- obsluga myszy w kliencie terminalowym i AWT
+(tzn. na razie samo klikanie)
+
+kiedy bedziemy mieli to, zajmiemy sie operacjami edycji,
+a dalej - otwieraniem i zapisywaniem plikow
+
+i jak to bedziemy mieli, to ach.
+
+to wtedy chyba bysmy sie wzieli za klienta androidowego,
+za doszlifowanie mechanizmu rozszerzen, i za implementacje
+tych ciekawszych:
+- grafow
+- envisulatora
+- guzikow
+
+a w kliencie androidowym:
+- rozpoznawanie gestow
+
+no dobrze, ale wrocmy do naszych problemow biezacych.
+
+kwestia kursora i selekcji wydaje sie o tyle skomplikowana,
+ze:
+- rozmiar kursora powinien byc jakos spowinowacony
+z rozmiarem czcionki
+- polozenie kursora - w przypadku spacji jest sporo
+za wysoko, w przypadku atomu nieco za wysoko;
+w przypadku stringa wydaje sie OK, ale kursor powinien
+byc ciut krotszy i ciut nizej
+
+Zacznijmy od tego, zeby wyjasnic sobie roznice pomiedzy
+wysokoscia kursora w atomie i spacji.
+
+HA! Wszystko jasne: w przypadku atomu renderujemy tekst
+w kontekscie "with-translation (4 8)", natomiast w przypadku
+spacji jedyna translacja pochodzi od traversala
+w draw-sequence!.
+
+W porzadku, ale teraz: jak mamy sobie z tym poradzic?
+
+Mozemy sprobowac dodac parametry, np.
+
+(define-parameter (cursor-offset)::Position (Position left: 0 top: 0))
+(define-parameter (cursor-extent)::Extent (Extent width: 2 height: 16))
+
+i w momencie, kiedy renderujemy poszczegolne rodzaje tekstu, moglibysmy
+ustawiac odpowiednio wartosci tych parametrow, ktore bylyby nastepnie
+uzywane przez metode "mark-cursor!".
+
+Problem jednak wydaje sie taki, ze metoda draw! w klasie Space 
+w bardzo niewielkim stopniu uzywa metod specyficznych dla danego
+paintera.
+
+
+
+* 05.10.2022
+
+wczoraj udalo sie nam jakos obsluzyc klawiature w kliencie
+desktopowym, i naprawic pare bugow, ale brakuje jeszcze kilku
+rzeczy: po pierwsze, chcemy wyswietlac w kliencie graficznym
+kursor; po drugie, chcemy tam (oraz w kliencie terminalowym)
+wyswietlac selekcje; po trzecie, wydaje sie, ze nadal cos
+nie dziala z ta selekcja (w kliencie smieciowym)
+- z cala pewnoscia trzeba uwzglednic zmiane trybu
+wyswietlania selekcji podczas renderowania.
+
+OK, teraz wyswietlanie dziala tak:
+
+1. identyfikujemy znak konca linii
+2. wyodrebniamy pod-sekwencje odpowiadajaca biezacej linii,
+i rysujemy tekst na odpowiedniej wysokosci (z kazda kolejna
+linia coraz nizej)
+3. az dojdziemy do ostatniego znaku
+
+
+Alternatywy:
+1. rysowac znak po znaku
+2. alternatywa znacznie ciekawsza:
+- tak jak wyzej, tylko ze oprocz napotkania znaku konca linii
+dodajemy jeszcze dodatkowe warunki:
+- jezeli indeks odpowiada kursorowi, wywolujemy "mark-cursor!"
+- jezeli indeks odpowiada wejsciu w selekcje, to bierzemy
+pod-string od (ostatniego) poczatku do biezacego miejsca,
+rysujemy go i wywolujemy "enter-selection-drawing-mode!"
+- jezeli indeks odpowiada wyjsciu z selekcji, to bierzemy
+pod-string od (ostaniego) poczatku do biezacego miejsca
+i wywolujemy "exit-selection-drawing-mode!"
+
+
+* 04.10.2022
+
+glownym celem na dzis jest:
+1. rysowanie kursora w kliencie desktopowym
+2. obsluga klawiatury w kliencie desktopowym
+
+OK, no to tak:
+klawiatura jako tako obsluzona (w sposob w miare spojny
+z tym, w jaki obsluzylismy klienta terminalowego)
+
+teraz pozostaje nam zajac sie kursorem w napisach.
+i tutaj sprawa wyglada tak, ze moze rzecz warto
+zrobic podobnie do tego, jak obslugujemy znak nowej
+linii w stringach - tj. w momencie, gdy biezacy indeks
+bedzie poczatkiem kursora (a ogony do siebie pasuja),
+to bierzemy sobie pod-string.
+
+
+przy okazji mozna od razu (za jednym zamachem)
+obsluzyc selekcje, ale tutaj mamy taki problem,
+ze nie mamy jeszcze tego obsluzonego z klawiatury,
+wiec byloby ciezko z testowaniem.
+
+stad tez pojawiaja sie nastepujace pomysly:
+1. prawidlowo obsluzyc selekcje w smieciowym klienice
+2. obsluzyc ladne wyswietlanie selekcji w kliencie
+terminalowym
+3. dopiero wtedy zabrac sie za wyswietlanie kursora
+w kliencie graficznym, i zrobic to jednoczesnie
+z wyswietlaniem selekcji w tymze
+
+
+
+* 03.10.2022
+
+co wiemy o naszym bledzie:
+
+bierze sie stad, ze w funkcji cursor< probujemy
+potraktowac () jako Indexable
+
+jakie mozliwe rozwiazania przychodza do glowy:
+- zeby w fazie (editing?) getCar i getCdr zamiast
+  () zwracaly empty-list-proxy
+  - jednak problemem przy takim podejsciu jest to,
+    ze element () na koncu listy nabiera podwojnej
+    tozsamosci, i jedna z nich nie dziala w pattern
+     matchingu ani przy operacji null?
+- alternatywa jest taka, zeby zmodyfikowac cell-index
+  tak, zeby zamiast () zwracala empty-list-proxy.
+  i ta metoda dziala (choc nie jest jeszcze calkiem
+  jasne, jak lowinna dzialac set-cell-index!)
+
+ok, czyli blad naprawiony. i co dalej?
+
+ciagle pozostaje temat obslugi komentarzy,
+oraz strzalek gora-dol.
+
+chyba dosc nisko wiszacym owocem jest rysowanie
+kursora w kliencie desktopowym, choc niewatpliwie
+bedzie to wymagalo takze obsluzenia klawiatury
+(i przerzucenia zmian do laptoka)
+
+a kiedy to bedziemy mieli - to co wtedy?
+
+selekcja?
+edycja?
+
+tym, co na pewno trzeba zrobic, jest wsparcie
+dla modyfikatorow
+
+
+* 02.10.2022
+
+wyglada na to, ze gdzies po drodze jakos tam
+zepsulismy iterowanie kursorem i trzeba by
+to bylo naprawic (problem objawia sie na
+listach pustych)
+
+ale tak poza tym to:
+- rysowanie kursora w kliencie awt
+- rysowanie selekcji w kliencie terminalowym i awt
+- obsluga klawiatury w kliencie awt
+- strzalki w gore i w dol
+- operacje edycji
+
+* 01.10.2022
+
+plan jest wobec tego mniej wiecej taki:
+
+- dodajemy do (panel) mapy klawiatury
+- do Panel i Editor dodajemy metody
+  key-pressed, key-released, key-typed,
+- podpinamy zdarzenia w grasp-terminal,
+  no i w grasp-desktop (a docelowo takze
+  w grasp-android)
+- dodajemy funkcje do poruszania kursorem
+  (a docelowo takze do edycji)
+- rozkoszujemy sie
+
+* 30.09.2022
+
+no dobra, teraz mamy problem:
+
+podczas edycji probujemy wywolac move-cursor-left!
+i move-cursor-right!, ale one nie przynaleza do
+glownego panelu
+
+tak naprawde wydaje sie, ze mamy tez inny problem:
+lanterna, awt i android zawiera alternattwne metody obslugi
+zdarzen (com.googlecode.lanterna.input.KeyStroke,
+com.googlecode.lanterna.input.KeyType,
+java.awt.event.KeyEvent, android.view.KeyEvent).
+
+Docelowo chcielibysmy jednak miec ujednolicony system
+(byc moze bazujacy na awt, ale nie wiadomo jak jest z
+dostepnoscia androida)
+
+No dobra, 'ujednoliconosc' naszego systemu bedzie sie
+brala stad, ze zarowno android jak i awt dostarczaja tylko
+nazw dla typu 'int'.
+
+wyglada na to, ze w wypadku terminala bedziemy mogli
+obslugiwac tylko zdarzenia w rodzaju KEY_TYPED.
+
+W przypadku klienta Android, nasza wczesniejsza
+implementacja dzialala tak, ze mielismy argumenty
+'keyCode', 'unicode' oraz 'meta'
+
+Lanterna:
+public class KeyStroke {
+// gdzie keyType to enum z klawiszami specjalnymi
+    private final KeyType keyType;
+    private final Character character;
+    private final boolean ctrlDown;
+    private final boolean altDown;
+    private final boolean shitfDown;
+...
+}
+
+java.awt.event.KeyEvent:
+
+int	getExtendedKeyCode()
+static int	getExtendedKeyCodeForChar(int c)
+char	getKeyChar()
+int	getKeyCode()
+int	getKeyLocation()
+static String	getKeyModifiersText(int modifiers)
+static String	getKeyText(int keyCode)
+boolean	isActionKey()
+String	paramString()
+void	setKeyChar(char keyChar)
+void	setKeyCode(int keyCode)
+void	setModifiers(int modifiers)
+
+Methods inherited from class java.awt.event.InputEvent
+consume, getMaskForButton, getModifiers, getModifiersEx,
+getModifiersExText, getWhen, isAltDown, isAltGraphDown,
+isConsumed, isControlDown, isMetaDown, isShiftDown
+
+API androida jest bardzo podobne (ale dokumentacja
+nieco zbyt rozwlekla, zeby ja wkleic)
+
+Mozemy zrobic tak:
+
+(define-enum Modifier (Shift Ctrl Alt Meta))
+
+(define-alias Modifiers java.util.EnumSet[Modifier])
+
+i wowczas prototyp bedzie mial postac
+
+(lambda (scancode character modifiers) ...)
+
+
+sprobujmy skompilowac dla Androida z java.awt.event.
+ok, juz wiemy, ze sie nie da.
+
+
+w takim razie decyzje sa nastepujace:
+1. interaction bedzie mialo - oprocz key-presses i key-released
+   - rowniez metode key-typed
+
+  pierwsze dwie otrzymaja scancode, modifiers oraz device,
+  a trzecia - znak unicode i modyfikatory
+
+2, w kliencie lanterny bedziemy generowac tylko key-typed
+  (dla normalnych znakow) oraz key-pressed (dla strzalek itd.)
+
+3. mapy klawiatury sa hierarchiczne, i moga byc skojarzone tak:
+   - globalne mapa klawiatury, domyslnie wspoldzielone
+     przez wszystkie edytory
+   - zmodyfikowana mapa klawiattury dla poszczegolnych instancji
+     edytora
+   - mapy klawiatury domyslnie wspoldzielone przez
+     poszczegolne instancje rozszerzen
+   - mapy klawiatury dla poszczegolnych instancji rozszerzen
+
+
+* 29.09.2022
+
+przypomnijmy sobue nasze zalozenia dotyczace obslugi
+klawiatury:
+
+mamy dwa swiaty. jeden jest zwykly, regularny. swiat
+pudelek i atomow.
+
+drugi jest czarodziejski i cudowny. magiczny.
+to swiat rozszerzen.
+
+wsrod rozszerzen mamy funkcje key-pressed i key-released,
+ktore powinny zwracac #true, jezeli udalo sie dokonac
+obslugi zdarzenia, i #false w przeciwnym przypadku.
+
+
+teraz tak: kiedy przychodzi do nas zdarzenie, to najpierw
+rekurencyjnie wyszukujemy obiektu (na sciezce kursora),
+ktory bylby Interactive, i dla ktorego odpowiednia metoda
+zwroocilaby #true, a jezeli do tego nie dojdzie, to
+wywolujemyglobalna funkcje?
+
+A moze raczej nie?
+Moze raczej niech to globalna funkcja sama sprawdza
+(jesli chce) - my tylko dostarczamy odpowiednich
+mechanizmow.
+
+Dodatkowo chcielibysmy miec zaszyta na sztywno funkcje
+klawisza 'escape'.
+
+
+* 27.09.2022
+
+No dobra, mamy juz mechanizm rysowania selekcji
+dla atomow w TextPainterze.
+
+Pytanie, jakie kolejne kroki powinnismy podjac,
+zeby nasza droga byla jak najsensowniejsza.
+
+Albo: jakie mamy pomysly na to, zeby w ogole byla
+jakakolwiek?
+
+Na razie pomysl jest taki, ze chcielibysmy moc
+poruszac kursorem w kliencie tesktopowym (terminalowym
+oczywiscie tez).
+
+Dlatego tym, co musimy zrobic koniecznie, jest
+po pierwsze wyswietlanie kursora, po drugie - poruszanie
+kursorem, a po trzecie - wyswietlanie selekcji w kliencie
+desktopotowym i terminalowym.
+
+(wczoraj przyszedl mi jeszcze do glowy pomysl, zeby
+przenoszone wyrazenie zachowywalo sie "galaretowato".
+
+No ale dobra, tutaj mamy przed soba jeszcze kilka wyzwan,
+a w szczegolnosci - obsluge klawiatury.
+
+* 26.09.2022
+
+Przypomnijmy sobie wczorajsze ustalenia: bedziemy wywolywac
+enter/exit-selection-drawing-mode! w tych 4 miejscach:
+
+1. w metodzie draw-atom! (czy posrednio draw-string!) Paintera
+2. w funkcji draw-sequence!
+3. w metodzie draw! klasy cons
+4. ewentualnie w metodzie "draw!" klasy Space
+
+Wydaje sie to dziwne, bo w niektorych miejscach to framework
+zarzadza wyswietlaniem selekcji, a w innych - implementacje
+poszczegolnych elementow.
+
+Nie boli nas to jednak o tyle, ze przynajmniej w przypadku
+rozszerzen, wiele z nich bedzie dziedziczyc po klasie Magic,
+ktora dziedziczy po klasie Simple - co oznacza, ze wewnatrz
+niej nie bedzie sie dalo niczego zaznaczac.
+
+OK, zatem zacznijmy od metody draw-atom!:
+
+Bedzie ona dzialac w taki sposob, ze najpierw sprawdzamy,
+czy w ogole mamy szanse na to, zeby w trakcie dzialania funkcji
+rysujacej dochodzilo do zmiany trybu rysowania selekcji.
+
+Jezeli tak, to dzielimy sobie atom na 3 czesci (z ktorych
+jedna moze byc pusta): przed selekcja, selekcje, i za selekcja.
+
+No dobra, niewazne. Zmiana w atomie zostala juz zaimplementowana.
+Pozostaja nam jeszcze:
+- spacja
+- sekwencje
+- "cons"
+nie wiem, czy teraz chcemy to robic, bo aktualnie i tak
+nie mamy zadnego sposobu na to, zeby przetestowac poprawnosc
+tego.
+
+
+* 25.09.2022
+
+Dzisiaj bysmy chcieli zrobic wyswietlanie
+selekcji przez TextPaintera.
+
+Plan jest taki, ze dodajemy "enter-selection-drawing-mode!"
+i "exit-selection-drawing-mode!" do paintera.
+
+Dalej: w implementacji TextPaintera dodajemy (do implementacji
+put!) takie cos, ze zawsze dodatkowo rysujemy znak ~
+pod kazdym wyrysowanym znakiem, o ile painter jest
+in-selection-drawing-mode?. Generalnie - choc to nie najpiekniejsze
+rozwiazanie - nie powinno ono nic psuc, bo rysujemy od gory
+do dolu.
+
+(w docelowych klientach, tj. TerminalPainterze i screen-rendererze
+wolelibysmy raczej uzywac do tego celu kolorow)
+
+No dobra, ale teraz pozostaje kwestia tego, w jakich okolicznosciach
+te nowe metody do wchodzenia i wychodzenia do trybu rysowania selekcji
+maja byc wywolywane?
+
+Wydaje sie, ze okolicznosci sa nastepujace:
+1. w metodzie draw-atom! (czy posrednio draw-string!) Paintera
+2. w funkcji draw-sequence!
+3. w metodzie draw! klasy cons
+4. ewentualnie w metodzie "draw!" klasy Space
+
+
+* 24.09.2022
+
+Co nam pozostaje z TODO-listy:
+
+- wyswietlanie kursora w TerminalPainterze
+- wyswietlanie kursora w screen-rendererze
+- poruszanie sie strzalkami (lewo/prawo) po kliencie 
+  tekstowym i desktopowym
+- obsluga map klawiatury (potrzebne do przetestowania
+poruszania kursorem)
+- test dla wyswietlania selekcji w TextPainterze
+- implementacja wyswietlania selekcji
+
+OK, no to ten test to juz jest :D
+
+Nasze postanowienie jest takie, ze nie mozemy zaznaczac
+samych spacji. Mozemy jedynie zaznaczac ciagi wyrazen,
+albo pojedyncze wyrazenia, albo ciagi znakow w jednym
+wyrazeniu.
+
+W kazdym razie od strony formalnej musi byc tak, ze
+(the-selection-anchor) ma taka sama dlugosc, jak
+(the-cursor) - pomijajac wyjatkowa sytuacje, gdy ma
+wartosc '(), co interpretujemy jako brak selekcji
+(inny taki przypadek, to gdy (equal? (the-cursor)
+(the-selection-anchor))).
+
+No dobra, ale jak mamy to zaimplementowac?
+Po pierwsze, musimy pamietac, ze TextPainter
+i TerminalPainter maja wspolnego przodka
+w postaci CharPaintera.
+
+Moze jednak warto powrocic do tego pomyslu zeby
+dodac metody enter-selection-drawing-mode!,
+exit-selection-drawing-mode! oraz
+in-selection-drawing-mode? do interfejsu Painter.
+
+Wowczas to by musialo mniej wiecej tak dzialac,
+ze jak renderujemy atom, to sprawdzamy:
+- czy mamy w ogole szanse, zeby na tym atomie
+sobie lezal poczatek albo koniec selekcji
+(a to sprawdzamy w taki sposob, ze sprawdzamy,
+czy context jest taki sam, jak ogon
+
+
+* 23.09.2022
+
+sprobujmy opracowac TODO-liste z wczorajszego wpisu:
+
+- test dla wyswietlania kursora w TextPainterze V
+- wyswietlanie kursora w TextPainterze V
+- weryfikacja testu V
+- wyswietlanie kursora w TerminalPainterze
+- wyswietlanie kursora w screen-rendererze
+- poruszanie sie strzalkami (lewo/prawo) po kliencie 
+  tekstowym i desktopowym
+- obsluga map klawiatury (potrzebne do przetestowania
+poruszania kursorem)
+
+XXX JESZCZE WYSWIETLANIE SELEKCJI!
+
+UWAGA TAKA: w TextPainterze chcemy oznaczac kursor
+i selekcje w inny sposob, niz w TerminalPainterze.
+
+Moze w zwiazku z tym przyjrzymy sie uzyciom "mark-cursor!".
+Sa wywolywane w:
+- primitive.scm (metoda draw! klasy cons, przy renderowaniu nawiasow)
+- space.scm (metoda draw! klasy Space)
+
+To sa jedyne miejsca. Stad mamy pomysl taki, zeby:
+- zastapic metody open-paren! i close-paren! jedna metoda,
+  draw-box!, ktora bedzie przyjmowala kontekst (i ona sobie
+  bedzie sama decydowac)
+- wywalic w ogole metode "mark-cursor!"? (czy moze nie?)
+
+Te ostatnia kwestie trzeba jeszcze jakos przemyslec.
+Ogolnie pytanie jest takie: w jaki sposob sprawic, zeby
+kursor pod spacja byl wyswietlany inaczej, niz kursor
+pod atomem?
+
+Moze zostawic "mark-cursor!", ale dodac do niego context?
+
+Albo po prostu zrobic tak, zeby implementacja mark-cursor!
+w TextPainter dzialala w taki sposob, ze sprawdza, czy
+(the-painter) to spacja, i jesli tak, to rysuje |,
+a w przeciwnym razie rysuje ^.
+
+
+
+
+* 22.09.2022
+
+Teraz zrobimy po prostu cos takiego, ze jak renderujemy
+atom z kursorem, to wyswietlamy ^ pod literka, za ktora
+znajduje sie kursor.
+
+Zmienilibysmy tez nazwy metod "remember-offset!",
+"remembered-left" i "remembered-top" na "mark-cursor!"
+oraz "cursor-position".
+
+OK, ale czy to wystarczy?
+
+Wydaje sie, ze mamy taki problem, ze metody klasy painter
+przyjmuja index -- zamiast context, i to zupelnie niepotrzebnie.
+
+Musimy zatem zmodyfikowac je tak, zeby przyjmowaly context.
+
+Mowiac konkretnie: interfejs painter, jego implementacje
+oraz uzycia.
+
+To sie jakos wydaje dzialac.
+
+I co dalej?
+
+No, teraz chcemy, zeby funkcja renderujaca atomy dodatkowo
+wyrysowywala ^, jezeli wyrazenie jest na "focusie",
+oraz zeby wyrysowywala ~~~~, jezeli wyrazenie (albo
+jego fragment) znajduje sie pod selekcja.
+
+Tak chcemy, zeby sie dzialo w TextPainterze.
+
+W TerminalPainterze chcemy raczej oznaczac selekcje za pomoca
+odwroconych kolorow (i uzywac moze zwyklego terminalowego
+markera to wyrazenia polozenia kursora), zas w screen-rendererze
+po pierwsze chcemy jakos oznaczyc polozenie kursora,
+(tzn. po prostu rysowac pionowa kreske), a po drugie
+wyrazac selekcje za pomoca jakiegos koloru tla i jakiegos
+koloru czcionki
+
+Dodatkowo bedziemy chcieli tak zmodyfikowac renderowanie,
+zeby nie rysowac z osobna lewego i prawego nawiasu, tylko
+zeby rysowac od razu cale pudelko (i wtedy bedzie mialo sens
+nadanie mu jakiegos tla podczas rysowania)
+
+I jeszcze bardziej dodatkowo bedziemy od razu chcieli
+zaimplementowac ruszanie kursorem w lewo i prawo w kliencie
+desktopowym i terminalowym, a takze selekcja poprzez klikanie.
+(Ale trzeba to bedzie jakos zrobic przez Panel, i przez mechanizm
+obslugi mapy klawiatury)
+
+* 21.09.2022
+
+wyswietlanie selekcji:
+
+powinno dzialac tak, ze jezeli context znajdzie
+sie na (argmin cursor< (the-cursor) (the-selection-anchor))),
+wywolujemy (painter:enter-selection-drawing-mode!), a gdy
+znajdzie sie na (argmax cursor (the-cursor) (the-selection-anchor)),
+to wywolujemy (painter:exit-selection-drawing-mode!).
+
+W tym celu zaciagnelibysmy argmin+argmax z (grand scheme)
+do (functions).
+
+Jednak to nic nie daje, bo cursor< nie odwzorowuje w real,
+tylko jest predykatem.
+
+Raczej nalezaloby wziac cursor< i uzyc go do sortowania.
+Albo po prostu uzyc ifa.
+
+Aha no i trzeba jeszcze zaimplementowac ruszanue kursorem
+do gory i na dol.
+
+
+Ale moze zacznijmy od tego, jak zaimplementowac
+enter/exit-selection-drawing-mode! dla poszczegolnych
+klientow, tj. dla:
+
+** TextPainter
+   - chcemy, zeby pod atomami znajdowaly sie
+     tyldy ~~
+   - natomiast nawiasy chcemy rysowac za pomoca
+
+   ⎛  ⎞
+   ⎜  ⎟
+   ⎝  ⎠
+  
+   dodatkowo chcemy uzywac znaku ^ albo |
+   do oznaczania kursora
      
-     i teraz caly szkopul w tym zeby okreslic
-     zakres odpowiedzialnosci tego interfejsu
+** TerminalPainter
+   - chcemy odwrocic kolory
+   
+** screen-renderer
+   - podobnie tutaj chcemy odwrocic kolory
 
-     (define-type (Point left: real top: real))
-  
-     (define-interface Screen ()
-       (clear!)::void
-       (translate! x::real y::real)::void
-       (open-paren! height::real)::void
-       (close-paren! height::real)::void
-       (width object)::real ; szerokosc w jednostkach ekranowych
-       (height object)::real ; wysokosc w jednostkach ekranowych
-       (draw! object cursor)::Point
-       ;;(draw-line! x0::real y0::real x1::real y1::real)::void
-       (draw-text! text::String)::void
-       (draw-rectangle! w::real h::real)::void
-       )
 
-  5. jedna implementacja bedzie dzialac w zwyklej sesji
-     Emacsa
+Ale chyba tak naprawde wcale nie potrzebujemy
+enter/exit-selection-drawing-mode! - wystarczy,
+ze kazda z implementacji metody 'draw!' bedzie
+sprawdzac, czy podczas renderowania context
+ma odpowiednia relacje do the-selection-anchor
+   
+* 20.09.2022
 
-     (define-simple-class Terminal (Screen)
-       (shift-left :: real)
-       (shift-top :: real)
-       (width :: int)
-       (height :: int)
-       (data :: char[])
+Mamy ta parametryzacje.
 
-       ((put! c::char row::real col::real)::void
-        (let ((x::int (as int (+ col shift-left)))
-	      (y::int (as int (+ row shift-top))))
-	  ;; mozna zrobic tak zeby rozszerzac bufor
-	  ;; kiedy wychodzimy poza zakres
-	  (when (and (< x width) (>= x 0)
-	             (< y height (>= y 0)))
-            (set! (data (+ (* width y) x)) c))))
-       
-       ((*init* w::int h::int)
-        (set! width w)
-        (set! height h)
-        (set! data (char[] length: (* w h)))
-        (clear))
-	 
-       ((clear!)::void
-        (for line from 0 below height
-           (for row from 0 below width
-               (set! (data (+ (* line width) row))
-                    #\space))))
-  
-       ((toString)::String
-        (with-output-to-string
-          (lambda ()
-            (for line from 0 below height
-               (for row from 0 below width
-                   (write-char (data (+ (* line width) row))))
-                   (write-char #\newline)))))
+Teraz bysmy chcieli miec:
+- powiekszanie selekcji
+- wyswietlanie selekcji
 
-       ((translate! x::real y::real)::void
-        (set! shift-left (+ shift-left x))
-	(set! shift-top (+ shift-top y)))
+Rzecz z powiekszaniem selekcji ma sie tak, ze ono moze wplywac
+nie tylko na (the-selection-anchor), ale rowniez na (the-cursor)
+(ale tylko w takim zakresie, ze moze pomijac poczatek kursora).
 
-       ((open-paren! height::real)::void
-        (put! #\/ 0 0)
-        (for i from 1 below (- height 2)
-	  (put! #\| i 0))
-        (put! #\\ (- height 1) 0))
-       
-       ((close-paren! height::real)::void
-        (put! #\\ 0 0)
-        (for i from 1 below (- height 2)
-	  (put! #\| i 0))
-        (put! #\/ (- height 1) 0))
-  
-       ((pair-width pair::Pair)::real
-        (+ 2
-	   (string-width (pre-head-space pair))
-           (if (null? (head pair))
-	       (+ paren-width
-	          (string-width (null-head-space pair))
-		  paren-width)
-	       (width (head pair)))
-	   
-           2))
 
-       ((string-width s::String)::real
-        (let ((line-length 0)
-	      (max-length 0))
-	  (for c in s
-	      (match c
-	        (#\newline
-		 (set! max-length (max max-length line-length))
-		 (set! line-length 0))
-		(_
-		 (set! line-length (+ line-length 1)))))
-          (max max-length line-length)))
-         
-       ((width object)::real
-        (cond ((pair? object)
-	       (pair-width object))
-	      ((string? object)
-	       (+ (string-width object) 2))
-	      ((symbol? object)
-	       (string-length (symbol->string object))))
 
-       ((string-width s::String)::real
-        (let ((total-lines 0))
-	  (for c in s
-	      (match c
-	        (#\newline
-		 (set! total-lines (+ total-lines 1)))
-		(_
-		 (begin))))
-          total-lines))
-  
-       ((height object)::real
-        (cond ((pair? object)
-	       (pair-height object))
-	      ((string? object)
-	       (string-height object))
-	      ((symbol? object)
-	       1)))
+* 19.09.2022
 
-       ((draw-string! s::String)::Point
-        (put! #\" 0 0)  ;")
-        (let ((row 0)
-              (col 1)
-              (width 1))
-          (for c in s
-             (match c
-               (#\newline
-	        (set! row (+ row 1))
-	        (set! col 1))
-	       (_
-	        (put! c row col)
-		(set! col (+ col 1))
-		(set! width (smax width col)))))
-	  (put! #\" row width) ;")
-	  (Point left: (+ width 1) top: (+ row 1))))
+Dalsze opcje dzialania:
+1. implementacja selekcji
+2. implementacja komentarzy
 
-       ((draw-symbol! symbol)::Point
-        (translate! 0 1)
-	(let ((width (draw-text! (symbol->string symbol)))
-	  (translate! 0 -1)
-          (Point left: width top: 3)))
-	       
-       ((draw-pair! pair width::real)::Point
-        (show-head p)
-  (display (post-head-space p))
-  (cond ((dotted? p)
-  (show-dotted-tail p))
-  ((pair? (tail p))
-  (show-pair (tail p)))))
-       
-        (draw-head! )
-        )
-       
-       ((draw! object)::Point
-        (cond ((pair? object)
-	       (translate! 2 0)
-	       (match (draw-pair! object)
-	         ((Point left: width top: height)
-                  (translate! -2 0)
-		  (open-paren! height)
-		  (translate! (+ 3 width) 0)
-		  (close-paren! height)
-		  (translate! (- (+ 3 width)) 0)
-		  (Point left: (+ width 4)
-		         top: height))
-                 (_ #!null)))		  
-		 
-	      ((string? object)
-	       (draw-string! object))
-	      ((symbol? object)
-	       (draw-symbol! object))
-	      (else
-	       #!null)))
-  
-       ;((draw-line! x0::real y0::real x1::real y1::real)::void ...)
+Z implementowaniem selekcji wiazalyby sie takie oto czynnosci:
+- nowy parametr, (the-selection-anchor)
+- nowe funkcje: (selection-left!) i (selection-right!), ktore
+  modyfikowalyby 
+
+Trzeba by tez zrobic forme parameterize!, ktora bedzie
+sie zachowywac jak "parameterize", tyle ze dodatkowo po
+wykonaniu bloku kodu bedzie ustawial wartosci zrodlowe
+na wartosci zmodyfikowanych parametrow, tj.
+
+(define-syntax (parametrize! (bindings ...) body + ...)
+  (parameterize (bindings ...)
+    (call-with-values (lambda () body + ...)
+      (lambda result (update-parameter-value-sources! bindings ...)
+        (apply values result)))))
+
+** komputer
 	
-       ((draw-text! text::String)::real
-        (for i from 0 below (string-length text)
-	    (put! (string-ref text i) 0 i))
-	(string-length text))
+Cos tam sobie pisalismy na telefonie - konkretnie,
+mielismy w planie stworzyc forme parameterize-up!
+ktora dziala tak, jak parameterize, ale dodatkowo
+aktualizuje pod koniec dzialania zrodla wartosci
+(o ile sa symbolami albo wywolaniami procedur,
+ktore maja settery)
 
-       ((draw-rectangle! w::real h::real)::void
-        (put! #\+ 0 0)
-	(put! #\+ 0 (- w 1))
-	(put! #\+ (- h 1) 0)
-	(put! #\+ (- w 1) (- h 1))
-	(for i in 1 below (- w 1)
-	  (put! #\- 0 i)
-	  (put! #\- (- h 1) i))
-	(for i in 1 below (- h 1)
-	  (put! #\| i 0)
-	  (put! #\| i (- w 1))))
-       )
+* 17.09.2022
+
+Chyba zbliza sie moment podejmowania istotnych decyzji
+architektonicznych.
+
+Trzeba bedzie stworzyc klase Application, ktora bedzie
+posredniczyc miedzy systemowymi operacjami wejscia/wyjscia
+(czyli z jednej strony mysz, klawiatura, dotyk, ...,
+a z drugiej - z implementacja Malarza), a poszczegolnymi
+klientami (AWT, Lanterna, Android)
+
+I to wlasnie owa klasa bedzie w posiadaniu:
+- glownego panelu
+- wartswy "overlay"
+- callbackow zwiazanych z drag&drop
+
+I teraz mamy dwie mozliwosci:
+- mozemy albo sie zajac drag & dropem oraz resize'owaniem
+- albo mozemy sie zajac renderowaniem komentarzy,
+a w szczegolnosci nalezaloby przemyslec, co mozna zrobic,
+zeby miec jakies ladniejsze kolory w terminalu
+
+Konkretniej, chcielibysmy wyswietlac komentarze na szaro
+i kursywa, a symbole - pogrubiona czcionka, z kolorem zaleznym od
+relacji pomiedzy wyrazeniem a interpreterem
+
+(czyli: definicje na bialo albo zielono albo zolto,
+quote'y na bialo, przyklady na zielono albo czerwono,
+zwykle wyrazenia na bialo)
+
+Do tego tez dochodzi u nas kwestia selekcji. Selekcja,
+to wszystko, co znajduje sie pomiedzy (the-cursor)
+a (the-selection-anchor), jezeli 
+(is (the-cursor) cursor< (the-selection-anchor)), natomiast
+w przeciwnym razie, tj. gdy
+(is (the-selection-anchor) cursor< (the-cursor)), to selekcja
+jest tym, co znajduje sie miedzy (the-selection-anchor)
+a (the-cursor).
+
+To tak brzmi dosc koslawo. Ale chodzi o to, ze jezeli dochodzimy
+do poczatku selekcji, to chcemy wywolac (start-selection!),
+zas gdy dochodzimy do konca selekcji, chcemy wywolac (end-selection!).
+
+
+W przypadku CharPaintera, start-selection! spowoduje, ze zawsze
+w ostatniej linijce danego wiersza rysujemy ~~~... (podczas rysowania
+atomow i spacji), a w przypadku TerminalPaintera i screen-renderera
+zamieniamy ze soba kolory (tekstu i tla).
+
+Pewnie trzeba bedzie troche zmienic interfejs "malarza", zeby
+podczas rysowania pudelek rowniez bylo rysowane tlo
+
+
+* 16.09.2022
+
+Plan na dzis (albo jutro) jest taki, zeby zaimplementowac
+metode "text-character-index-under" w screen-rendererze.
+
+Musi to dzialac w taki sposob, ze iterujemy sobie
+znak po znaku, i wywolujemy charWidth, sprawdzajac,
+czy y jest pomiedzy szczytem poprzedniej linii
+i wysokoscia linii, i czy x jest pomiedzy koncem aktualnego
+znaku a koncem aktualnego znaku + charWidth aktualnego znaku.
+
+No dobra, to juz jest zrobione - a przynajmniej tak sie wydaje,
+bo jeszcze tego nie przetestowalismy.
+
+Wiec pomysl na teraz jest taki, zeby do klienta AWT dodac
+wykrywanie kliknietego elementu - tzn. zeby klikniecie myszka
+wywolywalo cursor-under.
+
+To tez juz jest zrobione, tyle ze w miedzyczasie sie pojawily
+pewne niesnaski. Chodzi o to, ze docelowo wszystkie interakcje
+- z mysza, klawiatura itd. - musza byc w jakis sposob powiazane
+z obiektem "the-top-panel".
+
+* 15.09.2022
+
+Plan sie czesciowo udalo zrealizowac, ale sa jeszcze
+problemy ze spacjami.
+
+Pewnie te problemy w koncu rozwiazemy, ale tez
+fajnie jest sobie chwile pomarzyc. Tak wiec marze sobie,
+ze ten edytor dziala, i mozna w nim otwierac pliki,
+i jest pare rozszerzen, ktore dzialaja, i mamy mechanizm
+selekcji, ktory jest zintegrowany ze schowkiem
+systemowym, i opracowuje wersje na Androida, i ona
+tez dziala, i dla niej tworze edytor gestow, ktory
+mozna tez uzywac w pozostalych klientach, choc to
+troche niepotrzebne, ale skoro juz jest, to czemu nie.
+I teraz, majac do dyspozycji ten system, pisze ksiazke.
+Na poczatku to moze byc po prostu ksiazka o edytorze
+GRASP, ale tez bym chcial stworzyc ksiazke o komputerach,
+i o neuronach - a nawet o mamutach! (W sensie,
+"Jak To Dziala" w wydaniu interaktywnym).
+
+Ksiazki te moge wydac w specjalnym trybie jako osobne
+aplikacje w sklepie Play, a takze moge wydac specjalna
+wersje GRASP, ktora by umozliwiala ludziom generowanie
+APK z ich tresciami. (I ta specjalna wersja rowniez
+moglaby byc sprzedawana, np. po $20 od licencji)
+
+Ale wreszcie chcialbym sobie stworzys swoj wlasny
+sklep, poprzez ktory mozna by bylo sprzedawac
+ksiazki - a ktory bylby dostepny z mojej aplikacji.
+
+Musialoby to dzialac w taki sposob, ze kazdy
+uzytkownik mialby swoje konto, na ktorym moglby
+trzymac swoje pliki.
+
+Pliki bylyby widoczne tylko dla niego i dla osob,
+ktorym zostaly udostepnione. Kazdy uzytkownik
+mialby swoja liste udostepnien dla kazdego folderu.
+
+Zakup ksiazki polegalby na tym, ze - po otryzmaniu
+przelewu - uzytkownik dodawalby innego uzytkownika
+do listy udostepnien danego zasobu (owo dodawanie
+mogloby sie oczywiscie odbywac automatycznie,
+gdyby ktos wystawil swoje zasoby na sprzedaz)
+
+No ale dobrze, teraz musimy sie uporac z bledem,
+ktory mamy, w implementacji cursor-under*
+dla klasy Space. Wyobrazmy sobie taka sytuacje:
+
+╭        ╭     ╮+-+                   ╮
+│ define │ ! n │|x|                   │
+│+--------------+ |                   │
+│| +--------------+                 ╮ │
+│| |│ if │ <= n 0 │                 │ │
+│| |│    ╰        ╯                 │ │
+│| |│                               │ │
+│| |│       1                       │ │
+│| |│                               │ │
+│| |│       ╭     ╭   ╭       ╮ ╮ ╮ │ │
+│| |│       │ * n │ ! │ - n 1 │ │ │ │ │
+╰+-+╰       ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
+
+|   max-height  |
+|------...------|
+|               |
+
+
+                |t
+                |o
+                |p
+    left        V
+--------------->+-+ ---
+                |x|  |
+ +--------------+ |  |
+ | +--------------+ ---
+ | |
+ | |
+ | |
+ | |
+ | |
+ | |
+ | |
+ +-+
+
+Super. Wyglada na to, ze udalo sie naprawic dzialanie
+cursor-under dla spacji.
+
+Tym jednak, czego jeszcze brakuje, jest renderowanie
+polozenia spacji.
+
+No dobrze, tutaj tez sie udalo wcisnac pare poprawek.
+W takim razie kolejne zadanie to bedzie przywrocenie
+dzialania kilenta desktopowego (ktorego nie probowalismy
+odpalac, ale ktory raczej nie zadziala z powodu braku
+implementacji nowych metod Paintera w screen-rendererze)
+
+
+Jeszcze na koniec dnia pytanie: czy istnieje jakas
+szybka sciezka do realizacji powyzszego planu?
+
+Czy bylibysmy w stanie miec sprawny edytor za, dajmy
+na to, dwa miesiace?
+
+Na pewno potrzebne by bylo do tego duzo skupienia.
+Ale taka wymarzona sciezka bylaby taka:
+1. konczymy wszystkie niesnaski zwiazane z cursor-under
+2. implementujemy mechanizmy drag&drop oraz drag&resize
+3. implementujemy mechanizm selekcji
+4. implementujemy mechanizmy dzielenia widokow
+oraz scrollowania
+5. implementujemy obsluge komentarzy (3 rodzaje)
+6. implementujemy mechanizmy edycji (i historii)
+7. implementujemy mapy klawiatury
+8. implementujemy otwieranie i zapisywanie plikow
+
+9. implementujemy rozszerzenie - Envisulator
+10. edytor grafow i algorytm A*
+
+11. klient mobilny
+12. rozpoznawanie gestow
+
+* 14.09.2022
+
+plan:
+- dodac nowe metody do desktopowej implementacji paintera
+- zrobic tak, zeby testy przechodzily
+
+* 13.09.2022
+
+wszystko wyglada cacy jak na razie, tzn. interfejs Element
+udalo sie wzbogacic o metode cursor-under*, ktora jest
+uzywana przez funkcje cursor-under.
+
+teraz pozostaje nam to przetestowac (brrr)
+
+A no i trzeba bedzie jeszcze dodac do screen-renderera
+nowe metody Paintera (ale to na laptopie)
+
+
+
+* 12.09.2022
+
+Interfejs Painter rozszerzony, wraz z implementacja dla
+CharPaintera. Brakuje jednak kilku implementacji cursor-under*,
+i teraz trzeba ich dostarczyc, zanim sie znow uda odpalic kod.
+
+Trzeba tez dostarczyc implementaacji nowych metod Paintera
+do screen-renderera (ale to pewnie dopiero w okolicach srody)
+
+Mamy zatem implementacje cursor-under* dla:
+- Space
+- Atom
+- cons
+- Text
+- below, beside, over
+- HorizontalBar, VerticalBar, EmptyListProxy
+- Magic  
+zeby moc dodac cursor-under* do interfejsu Element.
+
+* 11.09.2022
+
+Plan jest teraz taki:
+
+- dodac metody atom-character-index-under, quoted-text-character-index-under
+  do interfejsu Painter
+- dodac ich implementacje dla CharPaintera
+
   
-  6. porzadek tekstowy: pomiar wyrazen, rysowanie oraz przekazywanie
-     zdarzen bedzie sie odbywac wedlug ujednoliconego schematu:
 
-     1. najpierw mamy lewy nawias
+* 10.09.2022
 
-     2. oraz przestrzen za lewym nawiasem (pre-head-space)
+udalo sie uzyc paintera w kliencie terminalowym,
+jak rowniez pocommitowac wszystkie zmiany - oprocz
+jednej, mianowicie implementacji cursor-under*
+dla spacji
+
+teraz jednak zajelibysymy sie wlasnie rozbudowywaniem
+cursor-under*
+
+na pewno trzeba:
+- napisac testy ze spacjami
+- dostarczyc implementacji cursor-under* dla wszystkich klas
+- zmienic implementacje cursor-under tak zeby zamiast warunku
+  uzywac cursor-under*
+
+No dobra, to teraz pytanie: jak powinno wygladac cursor-under*
+dla cons? Wydaje sie, ze powinno po prostu rekurencyjnie
+wywolywac cursor-under, z tym ze Traverse powinien tez
+dzialac dla nawiasa otwierajacego i zamykajacego
+
+Mozemy albo zrobic OpenParenProxy i CloseParenProxy
+(analogicznie do EmptyListProxy), albo ten kod powinien
+to uwzgledniac
+
+No, olewamy tworzenie nowych proxy. 
+
+Ale niezbedne jest napisanie w painterze metody, ktora
+bierze wspolrzedne (x, y) i zwraca indeks literki
+
+(index-under x y)
+
+
+* 09.09.2022
+
+plan jest taki:
+- commitujemy osratnie zmiany  
+- biierzemy sie za implementacje cursor-under* - tak aby
+  przechodzilo testy jednostkowe
+- tworzymy klienta terminalowego (na bazie desktopowego)
+
+* 08.09.2022
+
+pojawil sie pomysl, zeby define-cache przeprowadzalo
+currying swoich argumentow (i zeby obslugiwalo skladnie
+z (keyword-arguments))
+
+fajnie by bylo wszedzie uzywac naszej skladni, namiast
+#!optional i #!key, ale te zmiane lepiej zrobic
+na komputerze
+
+i to sie wlasnie udalo zaimplementowac!
+
+ale co dalej?
+
+na pewno trzeba przywrocic dzialanie na 'golym'
+PCcie (bez zmodyfikowanej Kawy), w tym (chyba)
+wywalic pliki "symbol" i "box"
+
+i powrocic do implementowania cursor-under
+
+* 07.09.2022
+
+z powodu awarii telefonu mielismy dosc dluga przerwe
+- na tyle, ze trzeba sobie przypomniec, co zostalo zrobione
+(a co nie)
+
+w szczegolnosci zastanawia trywialna implementacja
+cursor-under* dla klasy Atom - czy nie powinnismy raczej
+dostarczyc tam sensownej implementacji?
+
+i przy okazji: wywalmy cache, zastepujac go property+
+
+
+* 20.08.2022
+
+  wydaje sie, ze powinnismy hyz miec jako tako dzialajacy
+  wariant ‘cursor-under*' dla spacji.
+
+pozostaja nam jeszcze:
+  
+- Atom
+- Text
+- cons
+- below, beside, over
+- HorizontalBar, VerticalBar, EmptyListProxy
+- Magic
+
+dobrze byloby rowniez wyrzucic obiekt Symbol
+(ale to moze przy okazji prac nad edycja?)
+
+
+* 18.08.2022
+
+watpliwosci, jakie pojawily sie do tej pory:
+- podczas trawersowania linii nie znamy jeszcze
+  jej wysokosci.
+
+  dlatego - jezeli kursor znajduje sie pomiedzy
+  t:left a (+ t:left biezaca-szerokosc) - to
+  powinnismy go jakos zachowac
+
+  to znaczy, scisle rzecz biorac to moze byc tak,
+  ze jak klikniemy na spacje pod pudelkiem,
+  to zamiast na ktorys element pudelka bedziemy sie
+  focusowac na ostatniej spacji przed tym pudelkiem
+
+  (bo czemu nie)
+
+no dobra, czyli dla spacji algorytm bedzie wygladal
+tak:
+
+
+1. jezeli y jest powyzej traverse:top, zwracamy #f
+2. bierzemy nastepna spacje. zakladajac, ze to dlugosc linii:
+   jezeli x jest pomiedzy left a left+width,
+   to:
+   a. jezeli y jest ponizej top+max-line-height,
+   zwracamy odpowiefnia wspolrzexna
+   b. w przeciwnym razie zapamietujemy sobie
+      'tentative-result' i nastepnie:
+      i. jezeli to koniec, zwracamy #f
+      ii. jezeli to nowa linia
+   
+* 17.08.2022
+
+trzeba bedzie scommitowac zmiane EmptyList na LList
+
+poza tym jedyna zmiana byla w testach jednostkowych.
+mozemy zrobic tak, zeby cursor-under (oraz wszystkie
+pozostale trawersy) domyslnie brala (the-document)
+
+ok, i co teraz?
+
+teraz cisniemy dalej z tym cursor-under*
+
+jakie elementy beda musialy dostac swoja implementacje?
+- Space
+- Atom
+- Text
+- cons
+- below, beside, over
+- HorizontalBar, VerticalBar, EmptyListProxy
+- Magic
+
+Zaczniemy od implementacji cursor-under* dla spacji.
+
+
+* 16.08.2022
+
+mala rekapitulacja: chcemy, zeby klikanie bylo dobrze
+zrobione, i mamy juz napisanych troche testow jednostkowych.
+
+* 07.08.2022
+
+Teraz mozemy zajac sie jedna z dwoch rzeczy:
+1. klikaniem (wraz z testami jednostkowymi)
+2. renderowaniem 3 rodzajow komentarzy
+
+Wydaje sie, ze rozsadniejszym pomyslem jest
+najpierw naprawienie klikania w biezacej implementacji,
+a dopiero pozniej rozszerzenie trawersowania
+na komentarze -- a to dlatego, ze to juz
+wczesniej teoretycznie mielismy zrobione
+(chociaz nie dzialalo :P), natomiast renderowanie
+komentarzy bedzie wymagalo troche rozkminek.
+
+Plan jest zatem taki, zeby:
+- do interfejsu Indexable dodac metode
+(cursor-under* left::real top::real context::Cursor)::Cursor*
+ktora bedzie zwracac #f w sytuacji, kiedy dane wspolrzedne
+nie znajduja sie w odpowiednim miejscu, albo bedzie
+reconsowac odpowiednie indeksy (byc moze rekurencyjnie)
+
+* 06.08.2022
+
+Do nastepnego commita (13.08) chcielibysmy sie zajac
+takimi kwestiami, jak:
+1. ekstensywne testy jednostkowe dla "klikania"
+2. prawidlowa (i przetestowana) metoda cursor-under
+3. renderowanie i wyklikiwanie 3 rodzajow komentarzy
+4. poprawe dzialania testow w (test-painter) V
+
+I uwaga: prawdopodobnie bedzie trzeba "zreifikowac"
+nawias otwierajacy i zamykajacy (w taki sposob, w jaki
+to zrobilismy z pionowa i pozioma kreska)
+
+No, ale na razie zajmijmy sie lepiej niesnaskami zwiazanymi
+z wyswietlaniem poziomej kreski.
+
+OK, to zostalo juz naprawione.
+
+* 05.08.2022
+
+Jest problem z definicja funkcji cursor-under, mianowicie
+taki, ze wolamy "extent" na obiekcie "Space".
+
+Wydaje sie, ze ten problem bedzie trzeba rozwiazac, dodajac
+do Space metode "contains?".
+
+* 04.08.2022
+
+Plan jest taki:
+- dodac modul "traversal" i parametr (the-traversal) V
+  - Traversal powinien miec metode "advance!",
+    ale bez parametru "context" V
+  - Traversal nie powinien miec metody "skip-spaces!" V
+- do typu "Space" dodac metode "draw!" V
+- do typu "Space" dodac metode "advance!" V
+- zdefiniowac obiekty HorizonralBar, VerticalBar i EmptyList
+oraz ich cache V
+- zdefiniowac funkcje traverse V
+- zdefiniowac draw-sequence!, sequence-extent i cursor-under
+opierajac sie o traverse V
+
+* 03.08.2022
+
+Mamy taki problem, ze jak renderujemy sobie spacje,
+to mozemy zaczac renderowanie z parametrem "left"
+roznym od 0, i parametr "max-line-height" tez moze
+miec jakas wartosc nie-domyslna.
+
+Stad rodzi sie pomysl, zeby uczynic "Traversal"
+dodatkowym parametrem dla draw! - tak trzeba zrobic
+w przypadku spacji, ale chyba tez mozna to przekazac
+do pozostalych instancji Tile'a, zeby miec spojny
+interfejs?
+
+Lepiej zamiast tego dodac parametr (the-traversal),
+ktory bedzie dynamicznie ustawiany w funkcji "traverse",
+i z ktorego bedzie sobie korzystac draw! spacji.
+
+* 02.08.2022
+
+Trzeba rozwazyc, w jaki sposob mozna obsluzyc
+"kursor-w-spacjach" w Traversalu.
+
+Wydaje sie, ze mozliwosci sa dwie:
+- albo wyodrebnic metode Visible z interfejsu Box,
+i zamiast iterowac po Tile, iterowac po
+VisibleIndexable (co w praktyce oznaczaloby
+po prostu Element)
+- albo zrobic dwa osobne callbacki dla spacji
+i dla pozostalych elementow
+
+Jednak ta druga opcja wydaje sie lamerska.
+
+Teraz tak: Space nie bedzie Indexable, tylko
+Element.
+
+Dodatkowo, metody z Traversal (skip-spaces!
+i advance!) chcielibysmy przeniesc do Element
+(jako traverse!).
+
+Docelowo chcielibysmy jednak rowniez, zeby
+wykomentowane elementy takze byly uwzgledniane
+podczas trawersowania.
+
+(define (traverse sequence :: list
+                  doing: action::(maps (Element Traverse) to: void) := nothing
+                  returning: result::(maps (Traverse) to: ,result) := nothing)
+  ::,result
+  (let ((painter (the-painter))
+        (traversal (Traversal)))
+
+    (define (head* pair::cons)::Tile
+      (if (null? (head pair))
+         (empty-list-proxy (null-head-space pair))
+         (head pair)))
+
+    (define (tail* pair::cons)::Tile
+      (if (null? (tail pair))
+         (empty-list-proxy (null-tail-space pair))
+         (tail pair)))
+
+    (define (step-over-dotted-tail! pair::cons)::void
+      (let* ((horizontal? (should-the-bar-be-horizontal? pair))
+             (bar (if horizontal?
+                      (horizontal-bar traversal:max-width)
+                      (vertical-bar traversal:max-line-height)))
+             (pre-tail (if horizontal?
+                           (skip-first-line (pre-tail-space pair))
+                           (pre-tail-space pair)))
+             (item (tail* pair))
+	     (post-tail (post-tail-space pair)))
+        (action pre-tail traversal)
+        (advance! traversal pre-tail)
+        (action bar traversal)
+        (advance! traversal bar)
+        (action item traversal)
+        (advance! traversal item)
+        (action post-tail traversal)
+        (advance! traversal post-tail)))
+
+    (define (step! pair::cons)
+      (let ((item (head* pair))
+            (post-head (post-head-space pair)))
+        (action item traversal)
+        (advance! traversal item)
+        (action post-head traversal)
+        (advance! traversal post-head)
+        (cond ((dotted? pair)
+               (step-over-dotted-tail! pair)
+               (result traversal))
+              ((pair? (tail pair))
+               (step! (tail pair)))
+              (else
+               (result traversal)))))
+
+    (if (pair? sequence)
+      (let ((pre-head (pre-head-space sequence)))
+        (action pre-head traversal)
+        (advance! traversal pre-head)
+        (step! sequence))
+      (result traversal))
+  ))
+
+(define (advance! traversal::Traversal #;through element::Element)
+  (cond ((is element instance? Space)
+         (let ((space (as Space element)))
+           (space:advance! traversal)))
+        ((is element instance? Tile)
+         (traversal:advance! (extent (as Tile element))))))
+
+Trzeba zaimplementowac:
+
+- metode draw! w Space
+- horizontal-bar (jako Tile)
+- vertical-bar (jako Tile)
+- empty-list-proxy
+
+* 01.08.2022
+
+Trzeba bedzie stworzyc takie oto rodzaje obiektow:
+- EmptyList
+- HorizontalBar
+- VerticalBar
+
+ewentualnie moglibysmy jeszcze dodac
+- OpeningParen
+- ClosingParen
+
+Natomiast definicja cursor-under bedzie sobie korzystac
+z kontynujacji, mniej wiecej w taki sposob:
+
+(define (cursor-under x::real y::real #;in sequence 
+         #;within context := (recons 1 '()))
+  (call/cc
+   (lambda (return)
+    (traverse sequence
+     doing:
+     (lambda (item::Tile t::Traversal)
+       (when (and (is t:left <= x <= (+ t:left (width item)))
+                  (is t:top <= y <= (+ t:top (height item))))
+         (let ((context (recons t:index context)))
+           (if (pair? item)
+              (return (cursor-under (- x t:left) (- y t:top)
+                                    item context))
+              (return context)))))))))
+
+* 01.08-31.07.2022
+
+(define (traverse sequence 
+                  doing: action := nothing
+                  returning: result := nothing)
+  (let ((painter ::Painter (the-painter))
+        (traversal ::Traversal (Traversal)))
+
+    (define (head* pair::cons)::Tile
+      (if (null? (head pair))
+         (empty-list-proxy (null-head-space pair))
+         (head pair)))
+
+    (define (tail* pair::cons)::Tile
+      (if (null? (tail pair))
+         (empty-list-proxy (null-tail-space pair))
+         (tail pair)))
+
+    (define (step-over-dotted-tail! pair::cons)::void
+      (let* ((horizontal? (should-the-bar-be-horizontal? pair))
+             (bar (if horizontal?
+                     (horizontal-bar traversal:max-width)
+                     (vertical-bar traversal:max-line-height)))
+             (pre-tail (if horizontal?
+                           (skip-first-line (pre-tail-space pair))
+                           (pre-tail-space pair)))
+             (item (tail* pair)))
+	 (action bar traverse)
+         (traversal:advance! (extent bar))
+         (traversal:skip-spaces! pre-tail)
+         (action item traversal)
+         (traversal:advance! (extent item))
+         (traversal:skip-spaces! (post-tail-space pair))))
+
+    (define (step! pair::cons)
+      (let ((item (head* pair)))
+        (action item traversal)
+        (traversal:advance! (extent item))
+        (traversal:skip-spaces! (post-head-space pair))
+        (cond ((dotted? pair)
+               (step-over-dotted-tail! pair)
+               (result traversal))
+              ((pair? (tail pair))
+               (step! (tail pair)))
+              (else
+               (result traversal)))))
+
+    (unless (null? sequence)
+      (traversal:skip-spaces! (pre-head-space sequence))
+      (step! sequence))))
+
+* 30.07.2022
+
+Udalo sie odrobine zrefaktoryzowac draw-sequence!, tworzac
+obiekt Traverse i wyodrebniajac do niego metody skip-spaces!
+i advance!.
+
+Pewna mysl jest taka, zeby uzyc tego nowego obiektu
+do wyrefaktoryzowania sequence-extent oraz cursor-under.
+
+Inna jest taka, zeby sobie opisac dzialanie tych funkcji,
+i dopiero na tej podstawie opracowac ostateczny interfejs
+metody "traverse".
+
+Narracja o metodzie draw-sequence! wygladalaby tak:
+1. zwiekszamy wartosc (current-rendering-level)
+2. o ile sekwencja nie jest pusta:
+  - przeskakujemy pre-head-space
+  - wywolujemy funkcje iterujaca, ktora:
+    - rysuje glowe
+    - przeskakuje rozmiar glowy
+    - przeskakuje "post-head-space"
+    - a nastepnie:
+      - jezeli para jest kropkowana, rysuje "kropkowany ogonek"
+      - w przeciwnym razie, jezeli ogon jest para, wywolujemy
+       kroki jak w p. 2 na ogonie pary
+
+Niuanse:
+- rysowanie glowy sprawdza, czy glowa jest "null"
+- rysowanie ogona podobnie
+- dodatkowo przy rysowaniu ogona trzeba odpowiednio
+  obsluzyc "kreske przedzielajaca" (ktora moze byc pionowa
+  albo pozioma)
+- ponadto sa jeszcze niesnaski zwiazane ze sledzeniem
+  kontekstu, tzn. podczas renderowania chcemy miec mozliwosc
+  wyswietlenia kursora na bialych znakach
+
+Pomysl bylby zatem taki, zeby:
+- funkcja traverse wywolywala callback na kazdym "elemencie",
+przy czym "element" moglby byc takze rozumiany jako
+pionowa albo pozioma kreska
+- dodatkowo do callbacku byl przekazywany "extent" elementu,
+zeby moc w taki sposob obsluzyc null-head-space i null-head-tail  
+
+* 29.07.2022
+
+Nie mamy na razie cudzyslowow przy stringach,
+i co nam Pan zrobisz?
+
+Temat wydaje sie niezbyt pilny, i wydaje sie,
+ze sa wazniejsze rzeczy do zrobienia, takie jak:
+
+- uwzglednienie kursora w kliencie AWT
+- operacje edycji
+- scrollowanie i zoomowanie
+- dzielenie paneli
+- obsluga myszy
+- prawidlowa obsluga strzalek w gore/dol
+- klient terminalowy w Lanternie
+
+Ponadto wyglada na to, ze wyswietlanie spacji - pomimo, 
+ze obsluzone w parserze - jest w ogole nieobsluzone
+przy wyswietlaniu i przy "wymiarowaniu".
+
+Byc moze jednak warto byloby rozpoczac prace
+od ujednolicenia funkcji:
+
+- draw-sequence!
+- sequence-extent
+- cursor-under
+
+Tym, co te trzy funkcje - jak sie zdaje - maja ze soba
+wspolnego - jest schemat iteracji. To znaczy, za kazdym
+razem iterujemy po liscie, bazujac na wymiarach
+poszczegolnych elementow, oraz na rozmiarach spacji.
+
+(define (traverse sequence
+                  with: element-wise::procedure := noop
+                  until: terminating-condition? :: predicate
+		         := (lambda (element left top context) #f)
+	          within: context :: Cursor := (recons 1 '()))
+   ...)
+
+draw-sequence! bedzie przemierzac kazdy element
+i wyrysowywac go na plotnie
+
+sequence-extent bedzie dokonywac pomiaru i zwroci
+ostateczny rozmiar
+
+cursor-under bedzie przeszukiwac sobie wszystkie elementy,
+i jezeli znajdzie taki, ktory obejmuje zadane wspolrzedne,
+to (rekurencyjnie) zwroci odpowiadajacy im kursor
+
+
+(define-type (Traverse left: real
+                       top: real
+                       index: int))
+
+
+(define (sequence-extent sequence)
+  (traverse sequence
+            eventually-returning: (lambda (t::Traverse)
+                         (Extent width: t:left
+                                 height: t:top))))
+
+(define (draw-sequence! sequence context := (recons 1 '()))
+  (traverse sequence
+            with: (lambda (t::Traverse item)
+                    (with-translation (t:left t:top)
+                      (draw! item (recons index context))))))
+
+(define (cursor-under left top sequence context)
+  (traverse sequence
+            until: (lambda (t::Traverse item e::Extent)
+                     (and (is t:left <= left <= (+ t:left e:width))
+                          (is t:top <= top <= (+ t:top e:height))
+                          (if (pair? item)
+                             (cursor-under (- left t:left) (- top t:top)
+                                           item
+                                           (recons t:index context))
+                             (recons t:index context))))))
+            eventually-returning (lambda (t::Traverse)
+                                   context)))
+
+(define (nothing . _) (values))
+
+(define (never . _) #f)
+
+(define (always . _) #t)
+
+(define (traverse sequence::(list ,a)
+                  doing: operation ::(maps ,a to: void) := nothing
+                  eventually-returning: result ::(maps Traverse to: ,b) := nothing
+                  until: early-termination? ::(maps Traverse ,a Extent to: (maybe ,b)) := never)::,b
+  "The `traverse' abstraction may seem like a \
+generic operation, but it is designed specifically \
+to implement the three functions: `draw-sequence!', \
+`sequence-extent' and `cursor-under'.
+
+If each result of `early-termination?' is #f,
+then the value of the `traverse' function is the result \
+of applying the `result' function to the traverse state \
+after having traversed all the elements of the sequence.
+
+Otherwise the result is the first non-#f result of \
+`early-termination?'.
+
+For every element of the sequence, the `operation' \
+is performed (which is meant to be effectful). In practice, \
+this is only used for drawing items on the screen.
+"
+
+* 27.07.2022
+
+udalo sie (dosc latwo) odpalic podwojne buforowanie
+i naprawic rozmieszczenie elementow
+
+teraz co nam pozostaje to:
+- dodac cudzyslowy do stringow
+- dodac pudelka wokol atomow
+- zrobic odcienie nawiasow
+
+
+* 26.07.2022
+
+zaimplementowalem wszystkie wymienione wczesniej metody
+interfejsu Painter w grasp-desktop, ale okazalo sie, ze
+brakuje jeszcze metod z interfejsu Splittable:
+
+  (draw-horizontal-line! top::real)::void
+  (draw-vertical-line! left::real)::void
+  (horizontal-line-height)::real
+  (vertical-line-width)::real
+
+
+Ale rowniez to udalo sie zrobic.
+
+Mamy juz zatem dosc sensownie dzialajacego "malarza"
+dla AWT, ale bedzie potrzebnych jeszcze kilka szlifow:
+
+1. zapewnic uzycie podwojnego buforowania w AWT
+2. popracowac nad tym, zeby elementy byly lepiej
+rozmieszczone i zwymiarowane
+3. dodac cudzyslowy do stringow
+4. spacje pomiedzy atomami
+5. ramki wokol atomow (tak jak w wersji na Androida)
+6. ewentualnie dodac odcienie nawiasow na roznym
+poziomie zagniezdzenia (ale bysmy moze tak robili,
+ze im bardziej zewnetrzne, tym dyskretniejsze?)
+
+
+* 25.07.2022
+
+atom-extent i draw-atom! zostaly zmienione tak, zeby
+obslugiwaly wiele linii.
+
+Sprobujemy jeszcze zaimplementowac te 3 pozostale
+metody, i zobaczymy, czy uda sie wyrenderowac
+dokument na AWT.
+
+(no i pewniie bedzie trzeba nieco powalczyc,
+zeby zaimplementowac wyswietlanie kursora)
+
+* 22.07.2022
+
+Jako sie rzeklo wczoraj, do zaimplementowania pozostaja:
+  
+  (draw-quoted-text! s::CharSequence index::Index)::void
+  (draw-string! s::CharSequence index::Index)::void
+  (quoted-text-extent text::CharSequence)::Extent
+
+a udalo sie zaimplementowac:  
+
+  (atom-extent text::CharSequence)::Extent
+
+
+
+* 21.07.2022
+
+dzis/jutro bysmy przynajmniej sprobowali narysowac nawiasy
+i dalej pracowac nad tym, azeby screen-renderer implementowal
+interfejs Painter
+
+SPRAWOZDANIE: udalo sie zaimplementowac nastepujace
+metody interfejsu Painter:
+
+- wszystko z Translatable
+- wszystko z Clippable
+- (open-paren! height::real)::void
+- (close-paren! height::real)::void
+- (paren-width)::real
+- (min-line-height)::real
+- (draw-rounded-rectangle! width::real height::real)::void
+- (remember-offset! +left::real +top::real)::void
+- (remembered-left)::real
+- (remembered-top)::real
+- (clear!)::void
+- (draw-horizontal-bar! width::real)::void
+- (draw-vertical-bar! height::real)::void
+- (vertical-bar-width)::real
+- (horizontal-bar-height)::real
+- (draw-atom! text::CharSequence index::Index)::void
+
+Do zaimplementowania pozostaja:
+  
+  (draw-quoted-text! s::CharSequence index::Index)::void
+  (draw-string! s::CharSequence index::Index)::void
+  (quoted-text-extent text::CharSequence)::Extent
+  
+
+  (atom-extent text::CharSequence)::Extent
+
+  
+
+* 20.07.2022
+
+udalo sie zalaczyc modul (panel) do grasp-terminal
+i grasp-desktop.
+
+Klient terminalowy rowniez ustanawia rozmiar ekranu
+przed renderowaniem (a przynajmniej tak sie wydaje),
+i byloby niezle, gdyby z klientem AWT tez sie to udalo.
+
+No, to sie chyba udalo.
+
+I co dalej teraz?
+
+Pomysly sa takie:
+
+- zaimplementowac interfejs Painter dla Lanterny i AWT
+- i to chyba tyle na razie?
+
+Tak. Na razie sprobujemy sukcesywnie i konsekwentnie
+zaimplementowac interfejs Painter dla AWT, a po nim
+- dla Lanterny.
+
+Kiedy to bedzie gotowe, bedziemy musieli sie zajac
+takimi rzeczami, jak:
+- edycja (+ jej historia)
+- selekcja
+- operacje 2D (klikniecia mysza, strzalki gora i dol)
+
+a po nich sprobowalibysmy dopracowac guziki, grafy
+i suwaki
+
+a potem klient dla Androida i wykrywacz gestow
+
+No, ale poki co, skupmy sie raczej na implementacji
+naszego Malarza. Na pewno chcielibysmy rysowac nawiasy.
+
+
+* 19.07.2022
+
+wydaje sie, ze jest malenki progres w kwestii
+inkorporowania modulu "panel" do naszej bazy kodu.
+
+Musimy jednak byc ostrozni, poniewaz pojawiaja sie
+nowe parametry w przestrzeni globalnej:
+
+- the-screen-extent, co do ktorego oczekujemy,
+ze rozne wersje "grasp" beda go ustawiac
+
+- the-panel-extent, ktory ma raczej znaczenie
+instrumentalne
+
+- the-focus, za pomoca ktorego bedziemy sie odnosic
+do poszczegolnych paneli (tyle ze one musialyby sie
+stac Indexable)
+
+- the-top-panel, oznaczajacy glowny panel uzywany
+do rysowania ekranu
+
+
+Teraz bysmy moze sprobowali, w grasp-desktop i grasp-terminal:
+- zalaczyc modul (panel)
+- ustawiac odpowiednie wartosci (the-screen-extent)
+
+
+* 18.07.2022
+
+plan dzialania na najblizsze dni jest z grubsza taki:
+
+zasadniczo chcielibysmy juz uwzglednic system paneli
+podczas renderowania
+
+dlatego w kontekscie malarza chcielibysmy dodac mozliwosc
+przycinania ekranu (clipping) i odczytywania
+biezacego przesuniecia?
+
+Tak naprawde, na odczytywaniu biezacego przesuniecia
+srednio nam zalezy - idealem byloby po prostu miec API,
+ktore pozwalaloby w warstwowy sposob doodawac i usuwac
+przyciecia.
+
+* 17.07.2022
+
+Mamy z grubsza napisany zalazek implementacji
+HorizontalSplit, i mozemy z latwoscia opracowac
+analogiczny VerticalSplit.
+
+Nie rozwiazuje to jednak pewnego problemu,
+ktory mamy, mianowicie zwiazanego z focusem.
+
+(w prototypie androidowym taki problem w ogole
+sie nie pojawial, bo klawiatury uzywalismy
+tylko do edycji poszczegolnych atomow w osobnym
+okienku)
+
+Wydaje sie, ze mamy dwie drogi. Pierwsza to dodanie
+pola "focus" to Splitow, natomiast druga to uzycie
+istniejacego juz mechanizmu kursorow, przy czym
+te ostatnia mozna by realizowac dwojako:
+- rozszerzajac istniejacy kursor
+- dorabiajac dodatkowy "kursor" (nazywany odtad
+"focusem")
+
+Wydaje sie, ze ta druga opcja jest optymalna,
+bo z jednej strony wykorzystuje istniejace
+mechanizmy ("indexable"), ale z drugiej
+nie wprowadza niepotrzebnego "couplingu"
+
+Bedziemy zatem mieli jeden obiekt, 
+"the-focus", kontrolujacy wybor aktywnego
+panelu.
+
+Ale to bedzie mialo znaczenie dopiero wtedy,
+kiedy zaczniemy juz cos renderowac.
+
+Podczas gdy tymczasem nasza implementacja
+wymaga zdefiniowania:
+- with-clip
+- draw-vertical-bar!
+- vertical-bar-width
+oraz zapewne
+- draw-horizontal-bar!
+- horizontal-bar-height
+
+Albo czegos w tym rodzaju.
+
+Wiec moze zacznijmy od tego, zeby ustalic nazwy.
+Niestety, draw-horizontal-bar! i draw-vertical-bar!
+sa juz zajete.
+
+Wiec zamiast nich wolelibysmy cos w rodzaju
+"draw-horizontal-split!" oraz 
+"draw-vertical-split!", a takze
+horizontal-split-height
+i vertical-split-width
+
+OK, tutaj nazwy juz sa wymyslone.
+
+Teraz jednak pozostaje nam implementacja przycinania
+<tego, co rysujemy>.
+
+Jezeli idzie o API javy (ktore mimo wszystko w jakiejs
+mierze jest dla nas wyznacznikiem), to sprawa z przycinaniem
+ma sie tutaj tak, ze mamy jeden prostokat, ktory mozemy
+ustawiac za pomoca "setClip".
+
+Dokumentacja nie wydaje sie tu wyczerpujaca, ale wydaje sie,
+ze wielkosci podawane do setClip sa zawsze we wspolrzednych
+ekranowych.
+
+Natomiast nasze pytanie brzmi: jak powinien wygladac interfejs
+do przycinania w naszym Painterze?
+
+Konkretnie, chodzi nam o to, czy powinnismy - jak w Javie
+- podawac lewa gorna krawedz? Czy moze wystarczy nam
+wysokosc i szerokosc?
+
+Zakladajac, ze tak (tzn. ze lewa gorna krawedz jest domyslnie
+0 0), mozemy dostac problem z reprezentacja.
+
+* 16.07.2022
+
+Wprowadzenie paneli powoduje, ze nalezaloby zapytac,
+czy nazwa Screen jest rzeczywiscie adekwatna, i czy
+nie lepiej byloby ja zmienic np. na Painter.
+
+No OK, przemianowalem.
+
+Ale teraz: o co chodzi?
+
+No, rzecz w tym, ze jak mamy sobie panel w rodzaju
+"Split", to on musi bazowac na jakiejs "szerokosci
+panelu nadrzednego". No i chodzi o to, ze
+na najwyzszym poziomie owa szerokosc to bedzie
+"szerokosc ekranu".
+
+Jednak to, czym jest Panel, rozni sie zasadniczo
+od tego, czym jest Painter (czy tez dawniej Screen)
+i dlatego owo top-levelowe cos powinno byc rodzaju
+Panel, a nie Screen.
+
+No ale dobra, wydaje sie, ze Split musi jakos
+dzielic wysokosc albo szerokosc "czegos".
+
+I teraz mamy dwa spojerzenia: albo wysokosc/szerokosc
+splita to suma wysokosci/szerokosci jego komponentow
+(oraz paska przedzielajacego), albo wysokosc/szerokosc
+komponentow to pewna proporcja biezacego rozmiaru
+panelu.
+
+Ta druga opcja wydaje sie zasadniczo bardziej pozadana,
+ale wydaje sie, ze mamy pewien problem - tzn. oprocz
+panelu bedziemy musieli wprowadzic jakies dodatkowe
+byty.
+
+Chodzi o to, ze musimy znac na samym poczatku rozmiar
+okna. Dopiero na jego postawie mozemy okreslic rozmiary
+podzialow.
+
+Alternatywa bylaby taka, ze musielibysmy znac rozmiary
+wezlow, zeby to z nich wyliczyc rozmiar okna jako calosci
+- ale to sie niestety nie zgadza, bo jest na odwrot, tzn.
+my znamy rozmiar calego ekranu.
+
+W takim razie mamy dwie drogi:
+
+1. albo reprezentujemy relacje pomiedzy kontekstem/rodzicem
+w sposob jawny, za pomoca wskaznika
+
+2. albo reprezentujemy ja implicite, uzywajac parametrow
+
+Ta druga droga pozwala nam zadawac panelowi pytania o rozmiar
+tylko we wlasciwym kontekscie.
+
+Moze warto jednak sie zastanowic, w jakich kontekstach mozemy
+w ogole potrzebowac rozmiaru panelu?
+
+==============================================================
+
+OK, wydaje sie, ze kwestie wymiarowania/rysowania panelu
+mamy jako tako ogarnieta: trzeba wprowadzic parametr
+(the-panel-extent), inicjalizowany rozmiarem okna/ustawiany
+przy zmianie rozmiaru okna.
+
+
+
+
+* 15.07.2022
+
+** droga 1
+
+zaimplementowac interfejs Screen dla AWT i Lanterny
+
+** droga 2
+
+rozpoczac od zaprojektowania interfejsu Panel
+i jego dwoch implementacji: Split oraz Editor
+
+I jeszcze trzecia, nierozwiazana do tej pory
+zagadka, czyli te mapy klawiatury.
+
+Szczerze powiedziawszy, zagadnnienie wydaje sie
+nie az tak trudne, i chyba pozniejsza jego zmiana
+nie powinna byc jakas kosmiczna, ale niepokoj
+pozostaje
+
+** PLAN JEST ZATEM TAKI:
+
+1. Projektujemy interfejs Panel i jego dwie
+implementacje, tj. Split i Editor
+
+Bedzie to wymagalo wzbogacenia interfejsu
+Screen o nowe metody - do rysowania linii
+pionowych i poziomych, wycinania obszarow
+i ewentualnie transformowania (obroty,
+skalowania itd.)
+
+2. implementujemy owe interfejsy dla Lanterny
+i AWT. (raczej nie powinno to wymagac bardzo
+duzo pracy?)
+
+
+* 14.07.2022
+
+ostatni okres nie byl przesadnie produktywny.
+nowe warunki pracy i dojazd SKMka o 6:30 rano
+wydaja sie nie sprzyjac rozwojowi GRASPa
+
+tym niemniej, costam sie udaje pomalu posuwac
+do przodu.
+
+udalo sie zbudowac dwa "zalazki" edytorow:
+dla terminala i dla systemu graficznego.
+
+jak na razie owe "zalazki" nie sa jeszcze polaczone
+z prawie niczym, co zostalo do tej pory zrobione
+
+mamy bowiem kilka mozliwych sciezek dzialania,
+i trzeba sie zastanowic nad optymalna droga.
+
+* 11.07.2022
+
+plan to jest taki, azeby zaimplementowac
+interfejs Screen dla AWT (oraz dla lanterny)
+
+rowniez dla lanterny mozemy zajac sie projektem
+systemu obslugi klawiatury
+
+bo plan tutaj jest taki, ze:
+- kazdy widget moze sobie w dowolny sposob
+  obslugiwac klawiature
+- uzytkownik moze dowolnie zmieniac wiazania
+  klawiszy
+- widgety na najplytszym poziomie podejmuja
+  decyzje o przechwytywaniu badz przekazywaniu
+  (albo wrecz generowaniu!) zdarzen z klawiatury
+  (i innych tez!)
+
+* 08.07.2022
+
+** komputer:
+
+Najnowszy madafaka master plan:
+
+(the-screen) dla AWT bedzie obiektem, ktory
+zbiera polecenia rysowania, i w momencie, gdy
+wywolamy metode "paint", bedzie odwolywal sie
+do obiektu Graphics
+
+** telefon:
+
+wydaje sie, ze taki plan powinien dzialac:
+- nasza implementacja interfejsu Screen bedzie
+  zakladac, ze podczas renderowania mamy
+  dostepny kontekst (the-graphics-output)
+- funkcje wymiarujace moga sobie uzywac czcionki
+  itd, ale output graficzny nie bedzie im
+  potrzebny
+
+* 06.07.2022
+
+** komputer:
+
+Nowy dzien, nowa mysl.
+
+Zasadnicza trudnosc wydaje sie teraz byc w tym,
+zeby z jednej strony zaimplementowac interfejs Screen
+w nowych klientach, a z drugiej dodac mozliwosc
+podzialu paneli.
+
+Sprobujmy moze podsumowac, co wiemy o strukturze
+naszego programu:
+
+- Posiadamy globalny parametr (the-screen), ktory
+  przechowuje implementacje niezbednych funkcji renderujacych
+
+- Posiadamy parametr (the-document), ktory zawiera aktualnie
+  edytowany/wyswietlany dokument
+
+- Przy okazji warto nadmienic, ze mamy parametr (the-cursor),
+  zawierajacy kursor dla aktualnie edytowanego dokumentu
+
+No to to jest to, co mamy. A teraz jeszcze kwestia tego,
+co chcielibysmy miec (i jak klienty maja uzywac powyzszego).
+
+Chcielibysmy posiadac jeszcze parametr (the-panel),
+ktory odpowiadalby panelom z anroidowego GRASPa. Mowiac
+konkretniej, mielibysmy takie rodzaje paneli:
+- split (horizontal i vertical, ale moze inne, bo czemu nie?)
+- editor
+
+Podzial dzialalby w taki sposob, ze jego funkcja rysujaca
+wywolywalaby funkcje rysujaca to jednego, to drugiego
+panelu, zas jego procedury obslugi klawiszy, mysz, dotyku
+i czego tam jeszcze po prostu oddelegowywalyby prace
+do jego jednej albo drugiej czesci.
+
+(wyjatkiem jest rzecz jasna belka przedzielajaca podzialy,
+ktora rowniez powinna dzialac tak, jak w androidowym
+prototypie, tzn. jej przeciaganie powodowaloby zmiane
+proporcji podzialu)
+
+Editor natomiast pokazywalby nam pewien wycinek dokumentu,
+tzn. tak jak w starym GRASPie mielibysmy jakas liniowa transformacje,
+ktora wplywalaby na to, w jaki sposob obraz dokumentu
+bylby wyswietlany.
+
+Natomiast jezeli idzie o kwestie samego renderowania,
+to w aktualnym kliencie jest tak, ze w kazdym obiegu petli
+robimy
+
+((the-screen):clear!)
+(draw-sequence! (head (the-document)))
+
+Wydaje sie, ze w przypadku klienta AWT nie bedziemy potrzebowac
+czyszczenia ekranu, i ze nasz obiekt "canvas" bedzie musial
+wywolac (draw-document! (the-document))
+
+Z tym że to nieprawda!
+
+Nie będziemy wywoływać draw-document! bezpośrednio.
+
+Zamiast niego raczej wywolamy (invoke (the-panel) 'draw!).
+
+Jednak jest jeszcze jeden niuans, mianowicie - obiekt Graphics
+jest dostepny tylko w metodzie "paint"
+
+A przy tym to wlasnie obiekt "Graphics" jest dokladnie tym,
+czego potrzebujmey do zaimplementowania interfejsu Screen.
+
+Wyglada zatem na to, ze musimy "wyciekac" obiekt Graphics,
+zeby moc go uzywac jako ekranu, za pomoca przypisania.
+
+Jest to troche przykre, ale co zrobisz - nic nie zrobisz.
+
+** telefon:
+
+No dopsz.
+
+Teraz jeden pomysl jest taki, zeby interfejs Panel
+byl taki jak Extension, tylko zeby nie byl 'indexable'.
+
+Rodzi sie tez pytanie, w jaki sposob powinnismy zarzadzac
+kursorem: czy powinnismy miec jeden kursor, ktory indeksuje
+takze panele, czy raczej podzialy powinny miec swoje 'focusy'.
+
+Na razie kolacze sie taki pomysl, zeby kazda instancja klasy
+Editor miala wlasny kursor (i selekcje itd.)
+
+Konkretniej, bedziemy mieli liste otwartych dokumentow,
+
+* 05.07.2022
+
+Pisanie klienta AWT zaczelo sie wydarzac, i umiemy juz
+odpalic z poziomu Kawy funkcje graficzne.
+
+Co prawda nie mamy jeszcze obslugi wejscia, ale
+jest kilka kwestii, ktore chyba warto by bylo
+dobrze przemyslec
+
+Przede wszystkim, obsluga renderowania odbywa sie
+za pomoca dziedziczenia po klasie JComponent/JPanel 
+i nadpisania metody paintComponent.
+
+Po drugie, punktem wejscia do funkcji rysujacej jest
+klasa JFrame.
+
+Po trzecie, jezeli chcemy przechwytywac wejscie
+(tzn. klawiature i myszke), musimy wywolac (albo w "ramce",
+albo w "panelu") addKeyListener, addMouseListener,
+addMouseMotionListener, addMouseWheelListener itd.
+
+Hierarchie dziedziczenia tych swingowych klas sa przepastne,
+ale przywolajmy je tutaj:
+
+java.lang.Object
+  java.awt.Component
+    java.awt.Container
+      java.awt.Window
+        java.awt.Frame
+          javax.swing.JFrame
+
+java.lang.Object
+  java.awt.Component
+    java.awt.Container
+      javax.swing.JComponent
+        javax.swing.JPanel
+
+Co wiecej, dokumentacja twierdzi, ze uzywanie watkow
+w polaczeniu z biblioteka Swing jest niebezpieczne.
+
+POPRAWKA:
+
+zamiast javax.swing.JFrame i javax.swing.JPanel bedziemy uzywac
+java.awt.Frame i java.awt.Canvas.
+
+Nie ma informacji o tym, zeby byly jakies problemy z AWT
+i wielowatkowoscia.
+
+Pomysl jest zatem taki, zeby zdarzenia byly przetwarzane
+w osobnym watku niz rysowanie.
+
+Ale wydaje sie, ze szanse na to sa dosc marne, poniewaz
+to jest cos, czym AWT samo sie zajmuje: wywolanie
+metody "repaint" powoduje w jakis sposob zakolejkowanie
+wywolania metod "paint" w widgecie.
+
+Byc moze taka strategia jest zadowalajaca.
+
+Teraz pozostaje nam jeszcze jedna, bardzo istotna kwestia:
+chcemy zaimplementowac interfejs Screen dla klientow AWT
+oraz Lanterna, ktory bedzie w nich stanowil instancje
+(the-screen).
+
+
+
+* 04.07.2022
+
+No dobra, czyli plan na teraz jest mniej wiecej taki:
+1. wymyslic jakas reprezentacje "mapy klawiatury"
+2. napisac cos, co nam transformuje mape klawiatury
+z Lanterny (i moze z AWT rowniez) do naszej reprezentacji
+3. dodac mapy klawiatury do rozszerzen (czyli bedzie trzeba
+stworzyc "abstrakcyjna klase bazowa" dla rozszerzen)
+
+Byc moze jednak lepszym pomyslem na poczatek byloby
+sprobowac napisac klienta AWT, bo w ten sposob mielibysmy
+baze do porownania ze soba API Lanterny, Javy i Androida
+(ktorego jakos tam juz liznelismy)
+
+* 03.07.2022
+
+udalo sie jakos stworzyc prototyp z dwoma watkami.
+jednak zeby go rozwinac, trzeba bedzie stworzyc
+jakas warstwe abstrakcji pomiedzy klawiszami
+w Lanternie (oraz AWT/Java2D i Android API)
+a naszym systemem, przyjmujac w miare mozliwosci
+jakies proste zalozenia.
+
+Zasadniczo chodzi o to, ze chcemy - tak jak w emacsie
+i slayerze - moc w dosc dowolny sposob przypisywac funkcje
+poszczegolnym klawiszom i ich kombinacjom
+
+z drugiej strony, w przypadku naszej aplikacji mamy
+jeszcze takie cos, ze poszczegolne rozszerzenia moga
+miec swoje wlasne mapy klawiszy
+
+i teraz: autor rozszerzenia powinien dostarczyc wlasna
+mape domyslna, ale uzytkownik powinien moc ja dowolnie
+zmienic
+
+* 30.06.2022
+
+** komputer:
+  
+No i co teraz?
+
+Na razie mysl mamy taka:
+
+skoro Emacs uzywa czegos "jakby watek o niskim priorytecie"
+do renderowania, to moze my bysmy sobie tutaj uzyli 
+Prawdziwego Watku o niskim priorytecie.
+
+Plan bylby nastepujacy:
+
+- funkcja renderujaca czeka sobie, az flaga
+"synchronized" bedzie "false", i sama zaraz
+na poczatku renderowania ustawia ja na "true"
+
+- kazda operacja edycji ustawia flage "synchronized"
+na "false". Dzieki temu, jezeli w trakcie rysowania
+zostana wykonane jakies edycje, to zostanie wymuszone
+ponowne renderowanie (przy czym zmiane polozenia
+kursora rowniez traktujemy jako operacje edycji)
+
+Dodatkowo chcielibysmy skorzystac z podwojnego
+buforowania oferowanego przez biblioteke Lanterna,
+zeby zapobiec mruganiu ekranu (i ewentualnie
+nadmiernej wymianie danych po terminalu)
+
+** telefon:
+  
+  wyglada na to, ze mechanizm rozszerzen jest jakos
+  tam wszyty w architekture aplikacji, i choc niewatpliwie
+  bedzie wymagal jeszcze sporo milosci (no i przede
+  wszystkim implementowania rozszerzen!), to czuje
+  teraz nieco wieksza swobode w wyborze dalszych
+  dzialan
+
+  wydaje sie, ze tym, na czym warto sie skupic
+  teraz, jest stworzenie klienta z prawdziwego
+  zdarzenia
+
+  mysle zeby klientem androidowym zajac sie
+  dopiero po aktualnym invadersie.
+
+  klienta desktopowego bede mogl rozwijac
+  tylko na komputerze
+
+  dlatego na razie lepiej zajac sie po prostu
+  klientem terminalowym (rozwazajac przy tym
+  opcje np. rozszerzen dla KiTTY)
+
+* 29.06.2022
+
+** telefon
+
+Udalo sie jakos zintegrowac mechanizm rozszerzen,
+przy czym jeszcze nie dzialaja takie rzeczy,
+jak obsluga myszy/dotyku
+
+Dlatego priorytety na teraz:
+- usprawnienie edycji i nawigacji po drzewie
+- nawigacja pionowa (tzn. strzalki gora/dol)
+- oddzielenie procesu wyswietlania od edycji
+  (tak jak w Emacsie)
+
+  ten ostatni watek jest dosc ciekawy.
+
+  funkcja rysujaca powinna dzialac z mniejszym
+  priorytetem, niz obsluga wejscia/polecen edycyjnych
+
+  ale potencjalny problem jest taki, ze
+  to dopiero na podstawie funkcji rysujacej
+  wiemy (czy moze nie?) jaka jest przestrzenna
+  organizacja kodu?
+
+  w kazdym razie trzeba byc ostroznym.
+
+
+** wieczor (komputer)
+
+Mechanizm rozszerzen, choc jeszcze wymaga nieco doszlifowania,
+wydaje sie juz jako tako dzialac.
+
+Byc moze jakims pomyslem byloby ubranie calego edytora
+w emacs-owy  "org-mode".
+
+
+* 28.06.2022
+
+** telefon
+  
+teraz plan jest taki, zeby dodac do "cons"
+metody getCar i getCdr (i ewentualnie do ustawiania tez),
+ktore beda dodatkowo odwijaly atomy:
+
+(define-object (Atom)::Tile
+  (define source::string "")
+  (define cache #!null)
+  (define (value)
+    (or cache
+      (let ((result (parse-atom source)))
+        (set! cache result)
+	result))))
+
+ale potencjalny problem jest taki, ze sami utracimy
+dostep do atomu
+
+  
+** komputer
+  
+Idealny plan bylby taki, ze mamy klase "atom", i ze kawowa
+funkcja "eval" w jakis magiczny sposob, kedy widzi takiego atoma,
+zwraca wartosc bedaca efektem "czytania stringa" (byc moze
+zcache'owana)
+
+Ale czy to ma dzialac tylko dla eval?
+
+A moze zamiast tego bysmy zrobili parametr;
+
+(define-constant currently-editing?::parameter[boolean]
+  (make-parameter '()))
+
+i dalej w funkcji "cons" bysmy zrobili cos takiego:
+
+...
+(define (getCar)
+  (let ((element (invoke-special (parent) 'getCar)))
+    (if (and (currently-editing?)
+             (is element atom?))
+        (element:value)
+        element)))
+
+* 27.06.2022
+
+** komputer
+  
+Rozszerzenie Button juz prawie dziala.
+"Jedyne", co trzeba jeszcze zrobic, to sprawic, zeby
+atomy, ktore koncza sie znakiem ":", zamiast gnu.mapping.Symbol
+(badz tez gnu.mapping.SimpleSymbol) byly gnu.expr.Keyword.
+
+Tak naprawde jednak najlepiej by bylo obsluzyc jednoczesnie
+wszystkie atomy na raz.
+
+** telefon
+  
+wydaje sie, ze te najwazniejsze refaktoryzacje
+poszly bez problemu, i ze mozna kontynuowac prace
+nad guzikiem
+
+- tym bardziej, ze mamy juz funkcje do rysowania
+  prostokata, jakze potrzebna przy rysowaniu guzika.
+
+czyli co:
+- napiszemy sobie funkcje rysujaca guzik
+  (na podstawie etykiety)
+- podepniemy ja sobie do systemu
+
+i wtedy dopiero sie zacznie:
+- trzeba bedzie naprawic 'detekcje kolizji'
+- i pewnie zaimplementowac od nowa klienta
+  dla lanterny
+- oraz dla awt
+
+* 25.06.2022
+
+Wydaje sie, ze juz jestesmy dosc blisko stworzenia
+rozszerzenia "Button" - pozostaje nam (chyba?)
+zaimplementowanie funkcji draw! oraz extent
+
+Warto jednak przy tej okazji nieco zrefaktoryzowac
+interfejs Screen i jego implementacje TextScreen
+tak zeby korzystanie z niego bylo bardziej ergonomiczne.
+
+Przede wszystkim, teraz interfejs udostepnia takie metody:
+- draw-string!
+- draw-text!
+- draw-atom!
+- text-extent
+- atom-width
+
+
+O ile rola draw-atom! wydaje sie dosc zrozumiala,
+problemy sa takie, ze:
+- atom-width chyba raczej powinien byc atom-extentem
+- na podstawie samych nazw nie jest jasna roznica
+pomiedzy "draw-text!" i "draw-string!".
+Problem jest dodatkowo potegowany przez fakt, ze
+zdecydowalismy sie uzyc nazwy "text" na obiekt
+reprezentujacy Scheme'owy typ "string".
+- sposrod powyzszych funkcji, tylko draw-string! oraz
+text-extent! radza sobie ze znakiem nowej linii.
+
+Zatem plan jest taki, ze:
+- draw-string! otrzymuje nazwe draw-quoted-text!
+- text-extent otrzymuje nazwe quoted-text-extent
+- dodajemy metode string-extent, ktora bedzie dzialala
+ze znakiem nowej linii
+- atom-width zamieniamy na atom-extent, ktora bedzie
+po prostu wywolywac string-extent
+- draw-atom! bedzie wywolywac draw-string!
+- draw-quoted-string! tez bedzie tak wywolywac
+
+
+* 24.06.2022
+
+** komputer
+  
+Jeszcze kilka pomyslow chodzi dzis po glowie:
+- po pierwsze, zeby zaczac pisac prawdziwego klienta
+dla Lanterny
+- po drugie, zeby zaczac pisac klienta dla AWT
+(i moze na telefonie klienta dla Androida, choc
+to sie wydaje nieco ciezszym tematem ze wzgledu
+na koniecznosc kompilowania nowej Kawy do Androida)
+
+Na pewno bedzie trzeba rozszerzyc interfejs Screen
+w taki sposob, zeby dawal pewne mozliwosci, ktore
+teraz daje klasa Screen ze starego prototypu.
+
+Z drugiej strony, wydaje sie, ze to, co nazywalismy
+Screen w starym prototypie, a to, co nazywamy w ten
+sposob w nowym, jest niewspolmierne:
+
+- nowy Screen to interfejs dostarczajacy abstrakcji
+do rysowania
+- stary Screen to cos, co wyswietlalo panel
+(i mialo jeszcze jakies dodatkowe czarodziejstwa)
+
+Pytanie, czy w nowej architekturze cos takiego jak
+stary Screen jest w ogole potrzebne (czy nie lepiej
+po prostu miec parametry?)
+
+Niebawem bedzie trzeba wystartowac z nowymi "plikami
+wykonywalnymi" vel "punktami wejscia do naszego
+programu" - jednym dla lanterny, jednym dla AWT
+oraz jednym dla Androida (w przypadku Androida
+bedzie trzeba "budowac klasy". W przypadku
+pozostalych dwoch bedzie mozna to zrobic, ale
+- jak sie zdazylismy do tej pory przekonac
+- wcale nie ma takiej koniecznosci)
+
+No dobra, to wszystko swietnie (i z pewnoscia
+warto nad tym pracowac), ale czy naszym priorytetem
+nie powinno byc chcociaz pobiezne przetestowanie
+mechanizmu rozszerzen?
+
+** telefon
+
+rozkminke skmkowa zakonczylismy na wzmiance o roznicy
+pomiedzy interfejsem Screen a klasa Screen ze starego
+prototypu.
+
+Interfejs Screen jest abstrakcja nad poszczegolnymi
+systemami do wyswietlania.
+
+Natomiast klasa Screen jest uchwytem dla panelu,
+dodatkowo zawierajacym informacje o tym, ktore palce
+dotykaja ekranu - wydaje sie, ze to sa informacje,
+ktore lepiej bedzie przeniesc do 'parametrow' albo
+zmiennych globalnych.
+
+Stary prototyp opiera sie w duzej mierze (wszelako)
+na interakcji pomiedzy singletonem GRASP, a singletonem
+Screen (przy czym - szczerze powiedziawszy - podzial
+kompetencji miedzy nimi nie jest zbyt jasny)
+
+Wydaje sie zatem, ze bedziemy miec takie parametry, jak:
+- the-main-panel
+- the-overlays
+- current-panel
+
+
+* 23.06.2022
+
+** dzień (telefon)
+
+no dobra, czyli teraz bysmy chcieli sobie napisac
+jakies rozszerzenie.
+
+kilka pomyslow:
+1. albo robimy guzik
+2. albo rozszerzenie do pracy z formulami
+   matematycznymi
+3. albo wykres funkcji
+4. albo edytor grafow
+
+nie wiadomo :/
+
+wydaje sie, ze guzik bedzie jakos balansowal
+pomiedzy uzytecznoscia a prostota
+
+tylko jak zrobic guzik?
+
+ach, chcemy miec guzik, ale rowniez
+edytor grafow
+
+oraz wsparcie dla kursora myszy
+
+(Button label: "click me!"
+        action: (lambda () (WARN "dupa")))
+
+
+(define-class Button (Enchanted)
+  ((draw! context::Cursor)
+   ...)
+
+** wieczór (laptop)
+  
+Kilka drobnych uwag zwiazanych z projektem:
+
+- bedziemy musieli rozszerzyc nieco interfejs Screen,
+tak zeby obslugiwal:
+1. warstwy obrazu ("overlays")
+2. podzial ekranu na panele
+
+Z kolei na warstwach bedziemy chcieli umieszczac:
+- okna dialogowe
+- chmurki takie albo siakie
+- przeciagane obiekty
+
+(pytanie, czy panele tez powinny miec swoje warstwy.
+Na razie wydaje sie, ze nie)
+
+Dodatkowo ekran bedzie rowniez obslugiwal
+przeciaganie (wydaje sie, ze sporo sie tutaj mozemy
+nauczyc ze starego prototypu)
+
+W szczegolnosci warto rozwazyc interfejs Pad, ktory
+rozszerza interfejs Tile o procedury interakcji.
+
+W szczegolnosci sa tam
+
+Drag onPress(...)
+Drag onSecondPress(...)
+Drag onHold(...)
+
+oraz
+
+void onClick(...)
+void onDoubleClick(...)
+void onDragOver(...)
+void onDragOut(...)
+void onRelease(...)
+void onRemove(...)
+
+i
+
+boolean onKeyUp(...)
+boolean onKeyDown(...)
+
+Oto znane implementacje interfejsu Pad (nie wiem, czy kompletne,
+ale na szybko sobie wygrepowalem):
+- Panel
+- TextInput
+- PopUp
+- Below
+- Button
+- Scroll
+
+Dodatkowo czesc z nich implementuje rowniez interfejs Drag,
+ktory zawiera metody
+
+void move(...)
+void drop(...)
+
+oraz
+
+Drag outwards(Transform)
+Drag inwards(Transform)
+
+gdzie Transform to dosc koslawy interfejs do przeksztalcania
+
+
+No i OK, i fajnie.
+
+Ale teraz moze warto opowiedziec sobie co nieco o tych chmurkach.
+
+Otoz plan jest taki, ze jak sie narysuje chmurke nad danym
+wyrazeniem, to chmurka zaczyna sie unosic nad ekranem (trafia
+na szczyt warstwy "overlay".)
+
+I teraz: jeden paluch pozwala przesuwac te chmurke.
+Dwa paluchy pozwalaja ja zoomowac i obracac.
+
+Jak sie ja dwa razy kliknie, to sie maksymalizuje
+(ale wtedy przycisk "cofnij" powoduje przywrocenie)
+
+Jak sie ja "wywali", to wtedy znika.
+
+Jak sie ja raz kliknie, to sie nic nie dzieje,
 	
-     3. nastepnie mamy 'glowe', ktorej trescia moze byc
-	1. lista pusta, w ktorym to przypadku wypelniamy
-	   ja okreslona przestrzenia (null-head-space)
+* 22.06.2022
 
-	2. dowolny inny element, ktory po prodtu rysujemy
+tak sobie pracuje nad integracja mechanizmu rozszerzen.
 
-     4. nastepnie mamy post-head-space
+i przy tej okazji nachodzi mnie kilka mysli.
 
-     5. w dalszej kolejnosci mamy nastepujace mozliwosci:
-	1. lista jest kropkowana. w takim wypadku musimy
-	   okreslic, czy rysujemy kropke pionowo, czy poziomo
 
-	   (ponadto musimy stwierdzic, czy ogon to lista pusta,
-	   i jesli tak, wypelnic go (null-tail-space)
+po pierwsze, fajnie by bylo miec funkcje, ktore daja nam:
+- najbardziej zagniezdzone wyrazenie pod kursorem
+- najmniej zagniezdzone wyrazenie pod kursorem
 
-	   wowczas po narysowaniu kropki dajemy pre-tail-space,
-	   a po narysowaniu elementu - post-tail-space
+po drugie - juz troche wczesniej nad tym myslalem
+- pytanie, czy bylby sens, zeby zrobic setter
+dla (the-expression), w takim sensie, ze jak np.
+masz
+
+(1 3 5)
+
+i (the-expression) to 3, to
+
+(set! (the-expression) '(3)) dawaloby
+
+(1 (3) 5)
+
+a
+
+(set! (the-expression) head/tail-separator)
+
+dawaloby
+
+(1 . 5)
+
+
+Oczywiscie problem jest wtedy taki, ze na parzystych
+indeksach list powinnismy moc tylko ustawiac spacje, zas
+na nieparzystych - wyrazenia (nie bedace spacjami)
+
+Wiec moze na razie lepiej sobie odpuscic?
+
+* 19.06.2022
+
+zróbmy może takie rozszerzenie, że jak wykryjemy
+[<= x y ... z]
+to sie to nam zamieni w
+[x <= y <= ... <= z]
+
+(define-extension (<= x y ... z)
+  ((draw! 
+
+* 18.06.2022
+
+wyglada na to, ze sie udalo zaimplementowac metode
+`replace-expression!` i przechodzi testy (tylko trzeba
+jej uzywac z pewna doza ostroznosci, i najpewniej
+bedzie w przszlosci wymagac refaktoryzacji
+
+Mamy tez napisany (choc jeszcze niepodpiety do systemu)
+kawalek systemu rozszerzen.
+
+Na poczatek bysmy moze sprawdzili czy sie ten modul
+w ogole kompiluje.
+
+Wyglada na to, ze tak.
+
+W takim razie trzeba teraz zrobic dwie rzeczy:
+1. mechanizm zaczarowywania wyrazenia
+(np. gdy sie wcisnie shift+tab)
+2. jakies rozszerzenie (albo zestaw rozszerzen)
+
+* 16.06.2022
+
+No dobra, to juz by chyba wypadalo rozpoczac implementacje
+samego mechanizmu rozszerzen (czyli tego, co mniej wiecej
+opisalem wczoraj)
+
+
+* 15.06.2022
+
+Wydaje sie, ze kolejny krok coraz bardziej sie klaruje.
+
+Chcielibysmy zrobic jako rozszerzenie klase Button,
+ktora bedzie nam pozwalala podpinac rozne akcje.
+
+Klasa ta sama w sobie bedzie edytowalna tylko za pomoca
+menu dialogowych. Jedyna opcja interakcji z klawiatura
+to za pomoca przycisku "enter", ktory bedzie dzialal
+w taki sposob, ze bedzie odpalal "akcje" przycisku,
+natomiast ctrl+enter bedzie otwieral okno edycji
+
+
+No dobra, to taki ciut bardziej dalekosiezny plan
+jest taki:
+1. zaimplementowac mechanizm rozszerzen wraz z "buttonem"
+2. zaimplementowac cala edycje (tak zeby test-writing-map.scm
+dzialalo) - w tym selekcje i historie
+3. zaimplementowac dzialajacego klienta terminalowego
+(z kolorami i odcieniami) z obsluga myszy
+4. zaimplementowac rozszerzenie wyswietlajace grafy
+5. zaimplementowac kod ktory bedzie realizowal
+"podstawieniowy model obliczen" z tweeningiem
+6. no i jeszcze taki "pattern matcher", ktory bedzie
+w stanie operowac na rozszerzeniach
+7. algorytm A* i klient AWT
+
+8. klient Android
+
+Ale na razie skupmy sie na mechanizmie rozszerzen.
+Czyli tak:
+
+- wiadomo co zaimplementowac jako handler entera
+(przynajmniej mniej wiecej wiadomo)
+
+(Button label: "Press me!" 
+        action: (lambda ()
+	          (pop-up
+		   content: 
+		   (below
+		    (Caption "This is a pop-up!")
+		    (Button label: "close"
+		            action: remove-last-pop-up))))
+
+no dobra, mamy cos takiego napisane.
+A do tego wiemy, ze jest sobie rozszerzenie, ktore powinno sie
+aktywowac, gdy mamy cos, co sie zaczyna od slowa kluczowego Button.
+
+** W momencie, kiedy dokonujemy konwersji, musza sie wydarzyc rzeczy nastepujace:
+
+1. uzytkownik przytrzymuje wskaznik na wyrazeniu
+(Button label: ...)
+
+2. system sprawdza, czy wyrazenie jest komorka,
+i czy jej glowa to symbol. W tym przypadku tak jest
+- glowa to symbol Button
+
+3. sprawdzamy, czy symbol Button wystepuje w tablicy
+extension
+
+4. znalezlismy, ze wystepuje. W takim razie wydobywamy
+owo rozszerzenie, i wypytujemy, czy wyrazenie jest
+"suitable?"
+
+5. w naszym przypadku jest "suitable?". Na ekranie
+uzytkownika pojawia sie opcja "enchant"
+
+6. wywolujemy metode "create", przekazujac jej cale
+wyrazenie jako parametr. W rezultacie otrzymujemy
+nowy obiekt klasy "Extension"
+
+7. zastepujemy oryginalne wyrazenie nowym
+
+** Teraz trzeba nieco rozwinac punkty 5 i 6.
+*** Kiedy pytamy, czy wyrazenie moze zostac przekonwertowane
+
+funkcja musi sprawdzic:
+1. czy lista (Button ...) ma pola "label:" i "action:"
+na nieparzystych indeksach
+2. czy za kazdym z tych indeksow mozna znalezc jakies
+wyrazenie
+3. czy jezeli dokonamy ewaluacji wyrazenia "label:",
+to dostaniemy stringa
+4. czy jezeli dokonamy ewaluacji wyrazenia "action:",
+to dostaniemy procedure
+
+**** Drobna uwaga: ewaluacje powinnismy dokonac w taki sposob, zeby:
+
+- w wypadku wystapienia bledu dawalo sie ten blad
+przechwycic (i zwrocic wartosc #false)
+- byla uruchomiona w osobnym watku o ograniczonym czasie
+zycia (np. 1 sekunda), i gdyby ten czas mial zostac przekroczony
+powinien zostac zasygnalizowany blad
+
+*** Kiedy dokonujemy konwersji:
+
+1. mozemy chciec ponownie uzyc wczesniej ewaluowanych wartosci
+Moze do tego sluzyc klasa Extension, ale trudno zdefiniowac
+jednolity protokol, ktory by sie tym zajmowal
+(to moze byc niejawna zaleznosc pomiedzy metoda suitable?
+oraz create)
+
+2. stworzymy sobie nowy obiekt klasy Button, ktory w polu
+"action" bedzie mial wyewaluowana funkcje
+
+3. jezeli w trakcie wywolywania akcji dojdzie do jakiegos
+bledu, to tresc bledu zostanie wrzucona do loga i wyswietlona
+jako toast, zas caly guzik zostanie z powrotem przekonwertowana
+do postaci s-wyrazenia
+
+
+* 13.06.2022
+
+Wczoraj udalo sie dokonac zmiany w interfejsach kafelkow,
+co niesie ze soba pewna wartosc praktyczna.
+
+Teraz bysmy chcieli stworzyc:
+
+- TerminalScreen - implementacje interfejsu Screen
+bazujaca na bibliotece Lanterna
+
+- rozszerzenie Button i caly system rozszerzen
+(zwracajac szczegolna uwage na obsluge myszy/dotyku)
+
+- prototyp z dzialajacym mechanizmem rozszerzen
+
+- rozszerzenie obslugujace grafy
+
+- dzialajaca edycje
+
+* 12.06.2022
+
+decyzja podjela sie sama: opozniamy space invadera
+o kolejny tydzien.
+
+natomiast kolejna decyzja jest taka, zeby zaczac
+implementacje mechanizmu rozszerzen od guzika.
+
+Gwoli przypomnienia, bedziemy mieli w systemie
+nastepujace klasy i interfejsy:
+1. InteractiveIllustration (interfejs reprezentujacy
+instancje rozszerzenia, dziedziczacy po Tile)
+2. Extension (czyli interfejs tworzacy nowa instancje
+klas InteractiveIllustration)
+3. ButtonExtension - instancja klasy Extension
+tworzaca obiekt klasy Button
+4. Button - instancja klasy InteractiveIllustration,
+w ktorej wszystkie metody wywoluja odpowiednie pola
+(dostepne z poziomu Scheme'u)
+
+Pewien pomysl jest taki, zeby pousuwac w metodach
+Tile zaleznosc od parametru Screen, zeby funkcje
+raczej odnosily sie do parametru the-screen.
+
+I podobnie ma sie rzecz z kursorem.
+
+* 11.06.2022
+
+trzeba podjac decyzje: czy commitujemy cos juz dzisiaj,
+czy tez dajemy sobie jeszcze tydzien na rozpoczecie
+kolejnego space invadera.
+
+wydaje sie, ze mamy przed soba dwie drogi (tzn. pewnie
+jest ich wiecej, ale te dwie moj umysl zauwaza szczegolnie
+wyraziscie):
+
+1. dopracowac mechanizm rozszerzen
+2. zrealizowac sprawna edycje, i jako tako
+sprawny edytor terminalowy, zeby wypuscic
+cos, co bedzie uzyteczne, jeszcze zanim mechanizm
+rozszerzen bedzie gotowy
+
+rzecz w tym, ze mechanizm rozszerzen jest bardzo
+waznym komponentem edytora, i bez niego cale przedsiewziecie
+jakby traci sens (wydaje sie, ze wtedy lepiej po prostu
+uzywac emacsa)
+
+z drugiej strony, mozna wskazac na pewne mechanizmy,
+ktore wymagaja jeszcze troche dopracowania (takie jak
+selekcja), ktore moga miec wplyw na ksztalt mechanizmu
+rozszerzen (i na ktore mechanizm rozszerzen rowniez
+moze miec wplyw)
+
+natomiast opracowywanie mechanizmu rozszerzen
+nie moze sie dziac w prozni: mechanizm musi sie
+rozwijac wraz z konkretnymi rozszerzeniami.
+
+oczywiscie, do tej pory zajmowalismy sie przede wszystkim
+edytorem grafow, i w istocie wydaje sie to bardzo ambitne
+rozszerzenie
+
+drugie, zdecydowanie prostsze, ale nie mniej wazne
+rozszerzenie - to guziki (i ewentualnie suwaki)
+
+z jednej strony, chcialoby sie, zeby tworzenie rozszerzen
+bylo tak proste, jak to mozliwe. Z drugiej, chcielibysmy
+miec z automatu wszystkie podstawowe funkcjonalnosci,
+takie jak:
+- obsluga kursora
+- obsluga selekcji
+- synchronizacja wyswietlanego obrazu i pozycji ekranowej
+
+
+* 10.06.2022
+
+i co i co i co
+
+chcemy wyrysować te grafy c'nie?
+
+nie tylko wyrysować, ale też opisać interakcje
+
+i to w mniej więcej taki sposób:
+
+1. każdy węzeł renderujemy jako kółko
+2. strzałki renderujemy w taki sposób
+mniej więcej:
+
+
+(define (directed-graph neighbour-list)
+  (let* ((nodes (cached-map-preserving cell-display-properties
+                     (lambda (`(,label . ,neigbours))
+                       (graph-node label))
+                     neighbour-list)))
+    (fold-left (lambda (graph `(,label . ,neighbours))
+                 (fold-left (lambda (graph neighbour)
+                              (above graph (arrow from: (position label)
+                                                  to: (position neighbour))))
+                            graph
+                            neighbours))
+               ???
+               neighbour-list)))
+
+przy czym być może moglibyśmy jakoś rysować strzałki
+w taki sposób, żeby nie nachodziły na istniejące węzły
+
+
+No, ale w kazdym razie chodzi o to, zebysmy mieli taka strukture,
+oraz jej podglad:
+1. na samym dnie mamy wierzcholki
+2. dalej mamy krawedzie
+
+rysowanie odbywa sie tak, ze najpierw rysujemy
+wierzcholki, a pozniej krawedzie.
+
+a detekcja odbywa sie w druga strone: najpierw sprawdzamy
+czy nie ma kolizji z krawedziami, a nastepnie - czy sie udalo
+dotknac jakis wierzcholek
+
+Przyjmijmy sobie takie nazwy:
+- extension - cos, co posiada funkcje do tworzenia
+"interaktywnych ilustracji"
+- interactive-illustration - instancja stworzona
+przez rozszerzenie
+
+(define-extension (directed-graph . neighbour-list)
+;; moze sobie wymyslmy taki system:
+;; 1. definiujemy funkcje, ktora wczytuje nam dane wyrazenie
+;;    i zamienia je do postaci jakichs (mutowalnych) obiektow
+;; 2. definiujemy sobie funkcje, ktora bierze te mutowalne
+;;    obiekty, i serializuje je do postaci listy
+;; 3. minimalny warunek jest taki, ze jezeli skonstruujemy
+;;    obiekt, a nastepnie od razu go zserializujemy, to
+;;    efekt serializacji musi byc identyczny ze zrodlem
+;;    (z dokladnoscia do bialych znakow i komentarzy)
+;;    Rozszerzenia maja prawo zapisywac sobie rozne
+;;    rzeczy.
+;;    
+)
+
+
+(define-extension (directed-graph . neighbour-list)
+  ...)
+
+
+
+
   
-	2. jezeli ogon to jest niekropkowana lista pusta,
-	   to po prostu zamykamy nawias
+* 09.06.2022
 
-	3. jezeli ogon tez jest para, to rysujemy glowe
-	   jak w p. 3 powyzej
-	  
+No dobra, to teraz zajmujemy sie mechanizmem
+rozszerzen.
+
+Chcemy miec kilka nastepujacych "casusow":
+
+-guzik (ktoremu mozna przypisywac rozne
+funkcje)
+
+-edytor grafow
+
+-suwak?
+
+-edytor rysunkow
+
+Zacznijmy moze od tego, ze jak chcemy dodac
+do interfejsu Tile te wszystkie metody (ktore
+chcemy dodac), to musimy je zaimplementowac
+dla nastepujacych typow danych:
+- cons (primitive.scm)
+- Symbol (primitive.scm)
+- Text (text.scm)
+- Over (combinators.scm)
+- Below (combinators.scm)
+- Beside (combinators.scm)
+
+Wydaje sie jednak, ze rozsadniej byloby zrobic
+interfejs Interactive, ktory bedzie dodawal te wszystkie
+metody.
+
+* 08.06.2022
+
+Mamy jakies powijaki koncepcji animacji. Opieraja
+sie na tozsamosci komorek "cons" (i ich wzajemnej
+relacji), przy czym istotne zalozenie jest tutaj
+takie, ze zadne komorki nie sa wspoldzielone
+miedzy wyrazeniami.
+
+W takiej sytuacji, jezeli podczas renderowania
+zapisujemy sobie pozycje wzgledna glowy i ogona,
+to moga one wyznaczac pozycje poczatkowe i koncowe
+dla poszczegolnych elementow.
+
+Teoretycznie problem moze byc taki, ze jakas
+lista bedzie wspoldzielona pomiedzy elementami
+- ale wydaje sie, ze tutaj rozwiazanie moze byc
+takie, ze dla kazdego top-levelowego wyrazenia
+generujemy sobie odrebna mape (i na przyklad
+pozycje wszystkich elementow sa wyrazane globalnie)
+
+No to tak sobie zalozmy, ze kazde top-levelowe
+wyrazenie renderujemy jako
+
+(define-property+ (position-map expression)
+  (property+ (cell) (Position left: +NaN.0 top: +NaN.0)))
+
+(parameterize ((current-position-map (position-map element)))
+  ...
+  (let ((position (current-position-map child)))
+    (set! position:left xxx)
+    (set! position:top yyy))
+  ...)
+
+Wowczas bedzie nas interesowac 
+
+(position-map stare-wyrazenie)
+(position-map nowe-wyrazenie)
+
+itd.
+
+Wydaje sie, ze mozna tu bedzie dojsc do jakiejs ladnej
+ogolnosci (przynajmniej powinno sie dac)
+
+Ale na razie oczywiscie tego nie robimy. Wzamian wypadaloby
+sie zajac tym mechanizmem rozszerzen, oraz implementacja
+edycji i historii.
+
+
+
+* 07.06.2022
+
+wydaje sie, ze dosc istotnym aspektem wizualizacji
+jest mozliwosc animowania elementow.
+
+Mozliwosc ta bedzie raczej ograniczona w przypadku
+klienta tekstowego czy terminalowego, ale dla
+wariantow graficznych dobrze by bylo miec jakas
+ujednolicona reprezentacje animacji - o ile to
+w ogole mozliwe.
+
+Animacje (tweening) mozna scharakteryzowac poprzez
+podanie:
+- pozycji poczatkowej
+- pozycji koncowej
+- czasu trwania
+- funkcji przejscia
+- stopnia zaawansowania (wartosc miedzy 0 a 1 - czas
+od momentu uruchomienia animacji przez czas trwania
+animacji)
+
+Ale tez pytanie: jakiego rodzaju rzeczy chcielibysmy
+animowac?
+
+Pierwszym, co przychodzi do glowy, to podstawienia.
+
+Rozwazmy na przyklad takie cos:
+
+(define (factorial n)
+  (if (is n <= 1) ;>
+    1
+   (* n (factorial (- n 1)))))
+
+
+
+(factorial 5)
+
+;; symbol "factorial" sie rozszerza do lambda-wyrazenia
+;; i staje sie transparentny, natomiast lambda-wyrazenie
+;; staje sie widoczne
+
+((lambda (n)
+  (if (is n <= 1) ; >
+     1
+    (* n (factorial (- n 1))))) 5)
+
+;; w tym momencie lambda znika, natomiast
+;; liczba 5 "rozmnaza sie" do ilosci wystapien
+;; zmiennej "n" w wyrazeniu, i przesuwa sie tak,
+;; zeby zajac miejsce kazdego n-a
+
+(if (is 5 <= 1) ;>
+  1
+ (* 5 (factorial (- 5 1))))
+
+;; wyrazenie (is 5 <= 1) zostaje najpierw podswietlone,
+;; a nastepnie zamienia sie w wartosc #false (wyrazenie
+;; staje sie przezroczyste, zas wartosc #false robi
+;; sie nieprzezroczysta)
+
+(if #false
+   1
+  (* 5 (factorial (- 5 1))))
+
+;; alternarywa wyrazenia if przesuwa sie
+;; w miejsce tego wyrazenia. Pozostale jego
+;; fragmenty staja sie transparentne
+
+(* 5 (factorial (- 5 1)))
+
+;; wyrazenie (- 5 1) staje sie transparentne,
+;; i zostaje zastapione wartoscia 4.
+
+(* 5 (factorial 4))
+
+;; nastepnie z wyrazeniem (factorial 4) dzieje sie
+;; to, co wczesniej sie dzialo z wyrazeniem
+;; (factorial 5) (tylko w zagniezdzeniu (* 5 _)).
+
+I teraz pytanie: jak chcielibysmy cos takiego
+zaimplementowac?
+
+Pomysl moglby byc taki, ze dla kazdej komorki
+podczas tworzenia nowego wyrazenia, sledzimy sobie
+"origin" tej komorki.
+
+Renderowanie "wymieszanego wyrazenia" polegaloby
+wowczas na tym, ze docelowa pozycja bylaby osiagana
+jako mieszanina pozycji nowego wyrazenia oraz
+starego
+
+(define-type (Blend new-expression: object
+                    old-expression: object))
+
+(define (substitute variable
+             #;with value
+               #;in expression)
+  (match expression
+    ([head | tail]
+     (let ((result [(substitute variable 
+                         #;with value 
+                           #;in head)
+		    ______________________
+
+                    (substitute variable 
+                         #;with value 
+                           #;in tail)]))
+        (set! ((the-origin) result) expression)
+        result))
+    (,variable
+     value)
+    (_
+     expression)))
+
+the-space-before-head
+the-space-after-head
+the-space-before-tail
+the-space-after-tail
+the-space-of-null-head
+the-space-of-null-tail
+
+
+
+* 01.06.2022
+
+no i co tera
+
+mysli mi sie przegladarka systemu plikow (albo raczej
+modulow/projektu) 
+
+ale wydaje sie, ze trzeba tu przede wszystkim popracowac
+nad "swoim mysleniem" o tym, jak reprezentowac moduly
+
+bo zasadniczo nie chcemy miec w naszym systemie czegos
+takiego, jak "pliki".
+
+Chcemy miec "moduly" (modules) i "notesy" (notebooks)
+
+Moduly moga byc dwojakiego rodzaju: moga byc albo lokalne
+(czyli napisane przez uzytkownika), albo publiczne
+(czyli wrzucone do repozytorium)
+
+
+
+* 31.05.2022
+
+ok, wyglada na to, ze mamy pewien pomysl na to,
+zeby zbudowac w miare kompozycjonalny system widgetow.
+
+po prostu kazdy widget ma swoje callbacki.
+
+natomiast w przypadku widgetu "button" mogloby
+to wygladac tak:
+
+(define-syntax-rule (Procedure arg-types return-type) procedure)
+
+(define-type
+ (Button
+  content: Tile
+  tap: (Tile real real -> void) := start-drawing-gesture!
+  double-tap: (Tile real real -> void) := do-nothing
+  press: (Tile real real -> void) := do-nothing
+  second-press: (Tile real real -> void) := drag-copy!
+  release: (Tile real real -> void) := do-nothing
+  hold: (Tile real real -> void) := show-button-edit-dialog!
+  drag-over: (Tile real real Tile -> void) := do-nothing
+  drag-out: (Tile real real Tile -> void) := do-nothing
+  drop: (Tile real real Tile -> boolean) := (constantly #f))
+ implementing Tile
+ with
+ ((on-tap x::real y::real)::void
+  (tap (this) x y))
+
+ ((on-press x::real y::real)::void
+  (press (this) x y))
+
+ ((on-release x::real y::real)::void
+  (release (this) x y))
+  
+ ((on-drag-over x::real y::real item::Tile)::void
+  (drag-over (this) x y item))
+
+ ((on-drag-out x::real y::real item::Tile)::void
+  (drag-out (this) x y item))
+
+ ((on-drop x::real y::real item::Tile)::boolean
+  (drop (this) x y item))
+  
+ ((on-hold x::real y::real)::void
+  (hold (this) x y))
+ 
+ ((on-double-tap x::real y::real)::void
+  (double-tap (this) x y))
+
+ ((on-second-press x::real y::real)::void
+  (second-press (this) x y))
+ )
+
+Byc moze jawna zaleznosc od ekranu jest tutaj lekkim
+overkillem, ale chyba latwiej ja potem usunac, niz dodac.
+(EDIT: usunieto)
+
+Warto zauwazyc przy tej okazji, ze proba stworzenia
+systemu rozszerzen doprowadzila nas do sytuacji, w ktorej
+pododawalismy handlery do dotyku/myszki - co w tym prototypie
+bylo przez nas zaniedbywane.
+
+Rzuca to jednak pewne swiatlo na ewentualna architekture
+obslugi klawiszy.
+
+Zastanowmy sie nad czyms takim: z kazdym kafelkiem
+kojarzymy strukture "key-bindings" (bedaca hierarchiczna
+hasz-mapa czy czyms podobnym). Kazdy kafelek, kiedy otrzymuje
+zdarzenie, albo na nie reaguje, albo przesyla je dalej
+w glab hierarchi
+
+* 29.05.2022
+
+jednakowoz taka uwaga: nawet jezeli bedziemy
+stosowac porzadek tekstowy przy renderowaniu
+grafow, to nie rozwiaze to problemu z fantomowymi
+wezlami
+
+poza tym jeszcze kilka uwag, ktore moga nam troche
+rozszerzyc perspektywe:
+
+jednym z rozszerzen, ktore bysmy chcieli miec 
+zaimplementowane, sa guziki.
+
+guzik ma jakies swoje wnetrze (tresc), ktora
+zazwyczaj bedzie symbolem, choc moze oczywiscie
+tez byc obrazkiem itd.
+
+oraz ma funkcje:
+
+on-tap
+on-press
+on-release
+on-hold
+on-double-tap
+on-second-tap
+
+jezeli bedziemy mieli gest rysowania guzika,
+to domyslnie wiekszosc handlerow bedzie
+powodowala otwarcie dialoga edycyjnego
+dla tego guzika - poza 'on-drag', ktory bedzie
+dopuszczal rysowanie gestu, oraz 'on-second-tap',
+ktory bedzie powodowal zmiane lokalizacji
+przycisku
+
+czy cos takiego
+
+zas on-release moze akceptowac opcjonalnie
+jakis obiekt, i stosowac na nim jakas funkcje
+(przy czym mozemy zalozyc, ze funkcja zwroci
+#t gdy obiekt zostanie 'skonsumowany' oraz #f
+gdy zostanie odrzucony)
+
+natomiast w kwestii tych grafow, wydaje sie,
+ze wcale nie musimy dopuszczac wyciagania wezlow
+z grafu. tzn mozemy je przesuwac tylko w obrebie
+samego pudelka, i ewentualnie powiekszac to pudelko.
+
+* 28.05.2022
+
+kilka uwag dotyczacych designu systemu rozszerzen:
+
+1. wydaje sie, ze pierwotne podejscie (z RacketFest)
+bylo sluszne: rozszerzenie powinno po pierwsze mowic,
+jaki rozmiar obrazka dostaje, a po drugie, powinno
+moc sobie robic z tym obszarem co chce (w ramach
+udostepnionego API).
+
+Pomysl z tym, zeby uzywac porzadku tekstowego
+do renderowania grafow, wydaje sie chybiony.
+
+Z drugiej strony wydaje sie, ze byc moze obiecujacy
+kierunek bylby taki, zeby w jakis sposob zabronic
+tego (na poczatku moze w sposob nieformalny
+i w oparciu o wewnetrzna dyscypline) zeby
+kod rozszerzenia uzywal innej pamieci, niz
+listy "orign" (ktorej modyfikacje powinny
+sie odbywac za posrednictwem interfejsu,
+ktory bedzie nam zapewnial sledzenie historii).
+
+Warto by bylo tez wymyslic jakas abstrakcje,
+ktora by ujednolicala funkcje z modulu (primitive),
+mianowicie: cursor-under, sequence-extent i draw-sequence!
+
+To jest zagadnienie nad ktorym myslalem juz wczesniej,
+ale [pomimo zadania pytania na Twitterze] nie znalazlem
+satysfakcjonujacej odpowiedzi.
+
+Tym, co wydaje sie wymagac najwiecej uwagi, jest
+rozkminienie, jak mialoby wygladac API do formulowania
+rozszerzen.
+
+Zagadnienie grafu wydaje sie o tyle ciekawe, ze ma spora
+szanse stanowic paradygmat rozwiazywania tego rodzaju zagadnien.
+
+Ale wydaje sie tez, ze przed nami duuuuzo pracy...
+
+Chodzi o to, ze trzeba przemyslec sporo spraw. W szczegolnosci,
+trzeba rozwazyc, co bedzie sie dzialo (z perspektywy interakcji
+`z reszta systemu) kiedy zaczniemy przeciagac wezel w grafie:
+czy powinnismy "wydobyc go" na zewnatrz pudelka?
+jezeli tak, to co ma sie wtedy dziac ze wszystkimi
+strzalkami, ktore wczesniej prowadzily do tego wezla?
+czy jest szansa, zeby zbudowac graf za pomoca naszego
+frameworku "kombinatorow"?
+
+A moze nie odtracajmy tego "porzadku tekstowego" zbyt pochopnie?
+Moze zrobienie czegos w rodzaju
+
+(directed-graph
+        (A B C)
+   (B A D)    (C B D)
+         (D A)
+)
+
+mimo wszystko mialoby jakis sens?
+
+
+Do przemyslenia mamy jeszcze to, czy mozemy pozwolic na
+zrzucanie dowolnych wyrazen na nasz graf.
+
+
+I tak dalej.
+
+* 25.05.2022
+
+dzisiaj konczymy space invadera.
+nie ma sensu sie jakos spinac, bo wiekszosci
+kluczowych funkcjonalnosci i tak nie zaimplementujemy.
+
+z rzeczy uzytecznych, stworzylem modul 'run', ulatwiajacy
+testowanie wyrazen na telefonie [bo nie trzeba pisac
+nawiasow wokol wyrazen na najwyzszym poziomie]
+
+tymczasem reszte 'commita' bym dzis poswiecil
+na dodanie testow jednostkowych do SRFI-200
+i ewentualne zmiany w strukturze tekstu
+
+* 23.05.2022
+
+bysmy moze dzis zaczeli od tego, zeby ustawiac
+pozycje kursora podczas renderowania stringa
+
+ok, to mniej wiecej mamy zrobione
+
+teraz warto by sie zajac tym, zeby renderowac
+i obliczac rozmiar 3 rodzajow komentarzy
+
+
+zmiany musimy zrobic w nastepujacych metodach:
+- draw-sequence!
+- sequence-extent
+oraz ewentualnie
+- cursor-under
+
+trzeba tez przemyslec dzialanie kursora w kontekscie
+
+
+* 22.05.2022
+
+renderowanie stringow akurat juz jest (choc
+raczej do dopracowania)
+
+teraz moze zajmiemy sie wyswietlaniem 3 rodzajow
+komentarzy.
+
+szczegolnie komentarze wyrazeniowe beda wymagaly
+jakiegos sposobu, zeby parametryzowac znaki, ktorych
+uzywamy do rysowania nawiasow (zeby te zakomentowane
+byly rysowane linia przerywana)
+
+to by moglo tak wygladac:
+
+screen:enter-comment-mode!
+screen:exit-comment-mode!
+
+(with-comment-mode actions ...)
+
+* 21.05.2022
+
+co na pewno trzeba, to:
+- dodac renderowanie komentarzy
+- dodac renderowanie stringow
+- poruszanie sie po stringach i komentarzach
+(w szczegolnosci wymyslic jakis ladny sposob
+na poruszanie sie w gore i w dol)
+
+* 20.05.2022
+
+plan jest taki, zeby machnac taki prototyp,
+w ktorym iterujemy sobie po kursorze
+i wyswietlamy wybrane wyrazenie
+
+* 19.05.2022
+
+mamy juz parsowanie komentarzy. teraz pozostaje nam:
+- iterowanie kursorem po komentarzach
+- wyswietlanie komentarzy na ekranie
+  (i ich edycja!)
+
+ale oprocz tego mamy jeszcze:
+- wywalenie klasy Symbol i bezposrednia prace
+  na atomach
+- operacje edycji zgodne z test-writing-map
+  (przynajmniej do momentu pojawienia sie quote'a)
+
+* 17.05.2022
+
+troche teraz jestesmy w rozkroku. jedno z dwojga:
+- parsowanie komentarzy wyrazeniowych?
+- zmiana reprezentacji symboli
+
+parsowanie jest niedestruktywne, wiec moze
+od niego bysmy zaczeli
+
+no i przy okazji parsowanie komentarzy blokowych
+(trzeba zadbac o to, zeby dzialalo zagniezdzanie,
+i trzeba by bylo chyba tworzyc sekwencje ucieczki
+dla znakow # i |?)
+
+* 16.05.2022
+
+nowy plan, jaki powstaje: trzeba usunac zaleznosc od obiektu
+Symbol, zeby pracowac bezposrednio na (roznych) atomach.
+
+tzn. przy kazdej edycji kasujemy stary symbol i dodajemy
+nowy. A konkretniej: konwertujemy sobie obiekt z drzewa
+do stringa (->string), wklejamy to w StringBuildera,
+konwertujemy do stringa, i parsujemy jako nowy obiekt.
+
+
+
+
+* 15.05.2022
+
+┌───────────────────────────┐
+│ blokowe to jakos tak moze │
+│ (ewentualnie uzywajac     │
+│ "box─drawing characters") │
+└───────────────────────────┘
+
+┆ a liniowe po prostu tak?
+`
+
+#
+#
+#
+
+
+┌        ┌         ┐                  ┐
+┊ define ┊ map f l ┊                  ┊
+┊        └         ┘                  ┊
+┊ ┆ i w takim przypadku tez?          ┊ 
+┊ ┌                                 ┐ ┊
+┊ ┊ match l ┆ albo tutaj?           ┊ ┊
+┊ ┊                                 ┊ ┊
+┊ ┊ ┌ ┏  ┓ ┏  ┓ ┐                   ┊ ┊
+┊ ┊ ┊ ┋  ┋ ┋  ┋ ┊                   ┊ ┊
+┊ ┊ └ ┗| ┛ ┗  ┛ ┘                   ┊ ┊
+┊ ┊ ┌ ╓      ╖ ╓ ┌        ┐     ╖ ┐ ┊ ┊
+┊ ┊ ┊ ║ head ║ ║ ┊ f head ┊     ║ ┊ ┊ ┊
+┊ ┊ ┊ ║ ____ ║ ║ └_______ ┘____ ║ ┊ ┊ ┊
+┊ ┊ ┊ ║      ║ ║ ┌            ┐ ║ ┊ ┊ ┊
+┊ ┊ ┊ ║ tail ║ ║ ┊ map f tail ┊ ║ ┊ ┊ ┊
+└ └ └ ╙      ╜ ╙ └            ┘ ╜ ┘ ┘ ┘
+
+no dobra, to jest pomysl jak wyswietlic te komentarze,
+jest z grubsza idea, jak je reprezentowac - trzeba tylko
+miec na wzgledzie, ze komentarze blokowe moga zagniezdzac
+inne komentarze blokowe
+
+* 14.05.2022
+
+co sie udalo zrobic:
+- parsowanie stringow
+- parsowanie "liniowych" komentarzy
+
+co nam jeszcze pozostalo w parserze:
+- parsowanie komentarzy blokowych
+- parsowanie komentarzy wyrazeniowych
+
+a po stronie interfejsu:
+- iterowanie po komentarzach
+- wyswietlanie komentarzy
+
+
+musimy sobie wyobrazic w jaki sposob wyswietlac
+liniowe komentarze. Z wyrazeniowymi i blokowymi
+powinno byc raczej prosciej:
+
++---------------------------+
+| blokowe to jakos tak moze |
+| (ewentualnie uzywajac     |
+| "box-drawing characters") |
++---------------------------+
+
+a wyrazeniowe tak jak wyrazenia, ewentualnie
+robiac kropeczkowe paleczki
+
+
+* 12.05.2022
+
+wazny komponent systemu to tablica z wiazaniami
+
+ale oprocz tego musimy jeszcze zrobic parsowanie
+stringow i komentarzy (no i oczywiscie wyswietlanie,
+nawigowanie kursorem itd.)
+
+Ale wydaje sie, ze kolejnosc prac powinna byc taka:
+
+Najpierw piszemy wszystkie funkcje edytujace
+(i byc moze mechanizm wiazan)
+
+Nastepnie zrealizowalibysmy stringi i komentarze
+oraz mechanizm selekcji i obsluge liczb
+
+W dalszej kolejnosci sprobowalibysmy opracowac mechanizm
+rozszerzen, tak zeby dalo sie interpretowac (quote x)
+i (quasiquote x) za pomoca innych nawiasow
+
+`(expression-comment . ,expression)
+`(box-comment . ,string)
+`(line-comment . ,string)
+
+(comment-expression!)
+(uncomment-expression!)
+
+i jak to bedziemy mieli, to jeszcze obsluga myszy, widokow,
+ladowania plikow, scrollowania i ewaluacji, i mozna wydac
+grasp-for-terminal w swiat i zaczac prace nad grasp-for-desktop
+oraz grasp-for-android
+
+
+* 11.05.2022
+
+udalo sie zrobic test definiujacy klasyczna lispowa
+funkcje "map", a przy okazji - troche rzutem na tasme
+- program do odtwarzania testow
+
+Teraz wyglada na to, ze bedzie trzeba zaprojektowac
+zestaw komend do edycji.
+
+Pewien problem na razie jest taki, ze nazwa "insert-character!"
+jest dosc mylaca, bo nie zawsze bedzie powodowala wstawienie
+znaku - dlatego w szczegolnosci wydaje sie, ze
+
+(insert-character! #\[)
+
+nie powinno dzialac tak, jak na razie opisuje to test;
+do klawiszy alfanumerycznych powinnismy podpisac insert-character!,
+ale do klawiszy [ i ] juz niekoniecznie.
+
+To jest jedna sprawa.
+
+Druga jest taka, ze byc moze chcielibysmy sobie wprowadzic
+funkcje pomocnicze do odnoszenia sie do roznego rodzaju obiektow.
+
+Czyli tak: jak mamy zwykle klawisze alfanumeryczne, to robimy
+"insert-character!".
+
+Jak mamy #\[, to bedziemy raczej miec cos w rodzaju
+
+(lambda ()
+  (if (is (expression-under-cursor) instance? Space)
+      (create-list!)
+      (cursor-to-enclosing-opening-paren!)))
+
+Jednakowoz wydaje sie, ze waznym komponentem naszego edytora
+powinien byc system "wiazan" przyporzadkowujacych klawiszom
+poszczegolne funkcje - na przyklad, dla klawiszy alfanumerycznych
+bedziemy mieli domyslnie
+
+insert-character!
+
+OK, moze wobec tego warto by bylo opracowac opis srodowiska
+i nazwy funkcji do edycji.
+
+Mamy juz:
+
+(current-cursor)
+(current-document)
+
+chcielibysmy sie pozbyc funkcji 
+(expression-under-cursor cursor: cursor := (current-cursor))
+    
+Moze warto by bylo w zamian zmienic 
+
+(current-cursor)
+na
+(the-cursor)
+
+i
+(current-document)
+na
+(the-document)
+
+i zamiast (expression-under-cursor) miec
+
+(the-expression at: cursor := (the-cursor)
+   in: document := (the-document))
+
+i chcielibysmy, zeby the-expression to byla funkcja
+z setterem, taka, ze
+
+(set! (the-expression) value)
+
+powodowaloby zmiane wartosci wyrazenia
+- ale dwa pytania:
+ 1. czy dla funkcji ze slowami kluczowymi jest to w ogole mozliwe?
+ 2. czy dla naszej struktury edycji ma to jakis sens?
+
+
+w takim sensie, ze jezeli (the-expression) to spacja, to
+jaka konsekwencje mialoby miec wywolanie (set! (the-expression) 'x)?
+
+Czy powinno rowniez zmieniac wartosc parametru "the-cursor"?
+I dodatkowo - czy powinno dokonywac rejestracji historii?
+
+I jezeli mamy set!, to przydaloby sie tez jakies "delete!"?
+
+Natomiast jezeli idzie o poruszanie kursora,
+to chcielibysmy miec takie cuda, jak:
+
+cursor-next!, cursor-back!,
+cursor-up!, cursor-down!,
+cursor-to-end-of-line!
+cursor-to-start-of-line!
+cursor-to-opening-parent!
+cursor-to-closing-parent!
+
+delete-next!, delete-back!
+
+
+* 10.05.2022
+
+Patrzac na postepy w pisaniu testow, idzie raczej kiepsko.
+
+Stad taki pomysl, zeby zamiast robic jakies randomowe zmiany,
+postawic sobie cel: zdefiniowanie jakiejs funkcji.
+
+* 09.05.2022
+
+mamy teraz taki problem:
+
+jak mamy procedure insert-character!, to ona z pewnych
+wzgledow pobiera sobie obiekt "owner", zawierajacy komorke,
+ktorej glowka wskazuje na docelowy element (albo ktorej
+spacja moze byc dla nas interesujaca)
+
+I teraz: problem pojawia sie, gdy ownerem jest lista
+kropkowana.
+
+Ten owner jest uzywany wtedy, kiedy dokonujemy rozszczepienia
+symbolu.
+
+
+* 07.05.2022
+
+wyglada na to, ze zagadnienie kasowania spacji jest dosc
+klopotliwe, i w zwiazku z tym wymaga nieco glebszych przemyslen.
+
+spacje reprezentujemy jako listy:
+
+(n1 n2 ... nk)
+
+gdzie nX symbolizuje ciag pojedynczych spacji w danym wierszu,
+natomiast pojawienie sie kolejnej wartosci w ciagu symbolizuje
+nowa linie (stad w ciagu o dlugosci k bedziemy mieli k-1 nowych
+linii)
+
+i teraz trzeba sobie nieco powiedziec o indeksowaniu spacji.
+
+rozwazmy taka spacje:
+
+(1 2 3)
+
+ktora jako string bylaby reprezentowana w taki sposob:
+
+s
+ss
+sss
+
+mozna to sobie rozpisac jako indeksy:
+01
+vv
+sn
+
+234
+vvv
+ssn
+
+567
+vvv
+sss
+
+
+i teraz tak:
+
+(delete-space-fragment! (list 1 2 3) 0)
+
+powinno nam dawac
+
+(0 2 3)
+
+(delete-space-fragment! (list 1 2 3) 1)
+
+powinno nam dawac
+
+(3 3)
+
+(delete-space-fragment! (list 1 2 3) 2)
+
+itd.
+
+(zob. space.scm)
+
+* 04.05.2022
+
+jeszcze mi tutaj wylazlo kilka watkow:
+1. chyba dobrze by bylo wprowadzic takie parametry,
+jak (current-document) czy (current-cursor), ktore
+beda zmieniane kiedy bedziemy sie przelaczac pomiedzy
+widokami. Beda one domyslnymi wartosciami parametrow
+do takich funkcji, jak cursor-next, cursor-back,
+cursor-ref itd.
+2. trzeba poprawic rysowanie kursora w przypadku
+pustych dokumentow (moze nie jest to jakies hiper-pilne,
+ale docelowo trzeba to bedzie zrobic)
+
+Czyli plan na dzis jest mniej wiecej taki:
+1. wypisac sobie przypadki testowe dla opracowanej
+wczoraj specyfikacji
+2. przymierzyc sie jakos do implementacji
+(moze nawet, jesli sie uda, to zaimplementowac
+dzis juz jakas czesc specyfikacji - a moze nawet
+calosc?)
+
+Na razie stworzylismy parametry "current-cursor"
+oraz "current-document" i dodalismy je jako wartosc
+domyslne do edytora.
+
+Dzieki temu mamy mozliwosc "mutowania" kursora
+bez wprowadzania zmiennych globalnych.
+
+Teraz, chcielibysmy stworzyc nowy modul, "editor-operations",
+w ktorym zdefiniujemy sobie funkcje "delete-forward!",
+"delete-backward!" oraz "insert-character!"
+
+* 02-03.05.2022
+
+Trzeba nieco usystematyzowac podejscie do edycji.
+
+Mamy dwa zasadnicze rodzaje operacji z klawiatury:
+1. wpisywanie znaku (insert-character! char cursor document)
+2. kasowanie znaku wstecz (delete-forward!)
+3. kasowanie znaku wprzod (delete-backward!)
+
+Trzeba teraz sobie dookreslic, jak to sie ma zachowywac
+w roznych kontekstach:
+
+1. WPISYWANIE ZNAKU
+
+a. jezeli kursor znajduje sie ponad napisem (Caption),
+   to po prostu dopisujemy znak zgodnie z normalnymi
+   regulami pracy z napisami
+
+b. jezeli znakiem jest spacja albo nowa linia, to
+   - jezeli kursor znajduje sie na spacji, to powiekszamy
+     te nasza spacje zgodnie z regulami
+   - jezeli kursor znajduje sie na poczatku symbolu
+     albo na nawiasie otwierajacym, to powiekszamy
+     spacje poprzedzajaca ("na jej koncu")
+   - jezeli kursor znajduje sie na koncu symbolu
+     albo na nawiasie zamykajacym, to powiekszamy
+     spacje nastepujaca ("na jej poczatku")
+   - jezeli kursor znajduje sie w srodku symbolu,
+     to rozbijamy ten symbol na dwie czesci
+
+c. jezeli znakiem jest kropka albo | i jestesmy
+   na spacji pomiedzy przedostatnim a ostatnim
+   elementem listy, to konwertujemy te liste
+   do postaci listy kropkowanej
+   (chyba ze jest wcisniety klawisz ctrl:
+   wtedy -- o ile jestesmy pomiedzy dwoma
+   elementami albo za ostatnim elementem
+   -- po prostu ustawiamy wlasciwosc 
+   (dotted? <ostatnia-para>) na #true)
+
+d. jezeli znakiem jest #\[, #\( albo #\{, to
+   - jezeli jestesmy na spacji, to rozdzielamy 
+     te spacje nowa lista pusta
+   - jezeli jestesmy na symbolu, to owijamy
+     ten symbol w liste
+   - jezeli jestesmy na nawiasie zamykajacym,
+     to idziemy do odpowiadajacego nawiasu
+     otwierajacego
+   - jezeli jestesmy na nawiasie otwierajacym,
+     to owijamy dane wyrazenie w liste
+
+e. jezeli znakiem jest #], #\) albo #}, a nasz
+   kursor jest odpowiednio gleboki, to nawigujemy do
+   najblizszego nawiasu zamykajacego
+
+f. w przeciwnym przypadku (domyslnie)
+  - jezeli kursor znajduje sie na spacji,
+    to dodajemy nowy (jednoliterowy) symbol,
+    rozdzielajac spacje w pozycji kursora
+
+  - jezeli kursor jest na symbolu, to
+    dodajemy znak do symbolu w odpowiednim
+    miejscu
+
+  - jezeli jestesmy na nawiasie otwierajacym,
+    to dodajemy symbol na poczatku listy
+    (natomiast pierwsza spacja wyrazenia
+    - czyli pre-head-space albo null-head-space,
+    w zaleznosci od tego, czy lista jest pusta
+    - staje sie spacja za pierwszym elementem)
+
+  - jezeli jestesmy na nawiasie zamykajacym,
+    to dodajemy symbol na koncu listy
+    (natomiast ostatnia spacja wyrazenia
+    - czyli post-head-space albo null-head-space
+    - staje sie spacja za nowym elementem)
+
+2. KASOWANIE ELEMENTU WSTECZ
+
+a. jezeli jestesmy w srodku lub na koncu symbolu,
+   to kasujemy w odpowiedniej pozycji symbolu
+   (byc moze kasujac caly symbol, jezeli to byl
+   ostatni znak)
+
+b. jezeli jestesmy na poczatku symbolu, to kasujemy
+   poprzedzajaca spacje, natomiast gdyby spacja miala
+   zostac wyrugowana (tzn. (0)), to - jezeli przed spacja jest
+   jakis element, scalamy ze soba dwa symbole
+
+c. jezeli jestesmy na poczatku spacji przed ktora
+   jest jakis symbol, to kasujemy ostatni znak tego
+   symbolu (a gdyby to byl ostatni znak w tym symbolu,
+   kasujemy caly symbol i laczymy biezaca spacje
+   ze spacja poprzedzajaca symbol)
+
+d. jezeli jestesmy na poczatku spacji w liscie pustej,
+   tzn. zaraz za nawiasem otwierajacym, to kasujemy te liste.
+
+   Dzieki temu jezeli zrobimy:
+   |
+   (|)
+   (symbol| )
+   to wciskanie "backspace" powinno
+   (symbol| )
+   (|)
+   |
+
+e. jezeli jestesmy na nawiasie zamykajacym albo na poczatku
+   spacji nastepujacej po nawiasie zamykajacym, to kasujemy
+   cala liste poprzedzajaca
+
+Kazdemu skasowaniu elementu bedzie takze towarzyszyc
+przemieszczenie kursora.
+
+3. Kasowanie elementu wprzod
+
+a. jezeli jestesmy na poczatku albo w srodku symbolu,
+   to kasujemy nastepujacy znak, a jezeli to byl juz
+   ostatni znak, to kasujemy caly symbol
+
+b. jezeli jestesmy na koncu symbolu, to kasujemy
+   nastepujaca spacje, natomiast gdyby spacja miala
+   zostac wyrugowana, to - jezeli przed spacja jest jakis
+   element, to scalamy ze soba dwa symbole
+
+c. jezeli jestesmy na koncu spacji, za ktora jest jakis symbol,
+   to kasujemy pierwszy znak tego symbolu (a gdyby to byl ostatni
+   znak w tym symbolu, to kazujemy caly symbol i laczymy
+   biezaca spacje ze spacja znajdujaca sie za tym symbolem)
+
+d. jezeli jestesmy na koncu spacji w liscie pustej (tzn. zaraz
+   przed nawiasem zamykajacym), to kasujemy te liste, zeby
+   uzyskac zachowanie analogiczne do opisanego w p. 2d
+
+e. jezeli jestesmy na nawiasie otwierajacym albo na koncu spacji
+   poprzedzajacej nawias otwierajacy, to wklejamy zawartosc listy
+   pietro nizej
+
+
+Jeszcze kilka dodatkowych pomyslow:
+ctrl+x i ctrl+c beda oczywiscie dzialac na selekcjach.
+Ale w sytuacji, gdy selekcja jest pusta i jestesmy albo
+na spacji, albo na nawiasie (otwierajacym albo zamykajacym),
+to jako selekcje traktujemy wyrazenie zawierajace te spacje,
+albo zaczynajace sie/konczace na tym nawiasie.
+
+Jezeli zas jestesmy na symbolu bez selekcji, to ctrl+c/ctrl+x
+spowoduje skopiowanie/wyciecie tego symbolu. Podobnie zreszta
+rzecz sie ma oczywiscie z napisami
+
+To teraz plan dzialania jest taki, zeby z jednej strony przekuc
+powyzsze przypadki na testy, a z drugiej - na implementacje.
+
+
+* 30.04.2022
+
+plan w szerszej perspektywie:
+- opracowac funkcje do edycji
+- zrobic sledzenie historii
+- opracowac operacje odwrotne
+- stworzyc mechanizm rozszerzen
+
+
+* 29.04.2022
+
+teraz idea jest taka, zeby - w ramach uporzadkowania
+kodu - wprowadzic nowe definicje:
+
+- delete-backward!
+- delete-forward!
+
+To sie nawet udalo zrobic. Ale jest jeszcze taki problem,
+ze wstawianie symboli w nawiasy nie dziala, i dobrze by bylo
+rowniez to poprawic (a poza tym zrobic laczenie symboli
+przy kasowaniu spacji pomiedzy dwoma symbolami)
+
+Rowniez niezbyt dobrze dziala kasowanie list pustych.
+
+
+* 28.04.2022
+
+poprawilismy juz nieco zachowanie kursora;
+teraz moze mozna sie bedzie wreszcie zajac
+kasowaniem symboli (tak jak to opisywalem wczoraj)
+
+byc moze tez warto sie zastanowic nad refaktoryzacja
+funkcji "type-character!" w taki sposob, zeby
+- zamiast operowac bezposrednio na reprezentacji - stosowac
+"document operations"?
+
+
+NA PEWNO chcemy, zeby:
+1. jezeli jestesmy na poczatku spacji za symbolem
+albo zamykajacym nawiasem, to backspace powinien
+przeniesc kursor o dwa elementy do tylu, zamiast
+jednego
+
+2. jezeli spacja znajduje sie na nawiasie zamykajacym
+i robimy backspace, albo jezeli spacja znajduje sie
+na nawiasie otwierajacym i robimy delete, to chcemy
+skasowac cala liste
+
+3. chcemy poprawic iterowanie kursora po listach
+pustych (OK)
+
+4. aaa no i trzeba zrobic scalanie symboli
+(i to bedzie wymagalo doprecyzowania warunkow,
+ale tym sie chyba dopiero jutro zajmiemy)
+
+A tak na "bardziej grubych klockach", to chcielibysmy
+jeszcze obsluzyc:
+- myszke oraz strzalke gora/dol
+- stringi
+- komentarze (3 rodzaje)
+- liczby
+- listy kropkowane (w edycji)
+
+a po nich:
+- ladowanie plikow
+- dzielenie ekranu
+- scrollowanie widokow
+- historie operacji
+
+* 27.04.2022
+
+Sie udalo zrobic jakis zalazek sensownej
+edycji (choc na razie nie jestem pewien,
+czy udalo sie to w sensowny sposob).
+
+Na pewno do poprawy jest:
+- iterowanie po kursorze (w celu ustalenia
+ekranowej pozycji kursora)
+- obsluga backspace'a na pierwszej pozycji
+(bo teraz dziala jak delete)
+
+Ogolnie chcielibysmy zrobic tak, zeby ciagle
+trzymanie klawisza "backspace" w takiej sytuacji:
+(funkcja argument1 argument2 |)
+
+powodowalo:
+1. najpierw usuniecie spacji za argument2
+2. nastepnie skasowanie wszystkich znakow
+w symbolu argument2, co finalnie mialoby
+doprowadzic do skasowania samego symbolu
+(gdy stanie sie pusty)ni polaczenia spacji
+za argument1 ze spacja za argument2,
+co dawaloby nam taka sytuacje:
+(funkcja argument1 |)
+
+
+
+
+* 26.04.2022
+
+zamiast tego porozbijalem moduly na mniejsze.
+ale to tez fajnie.
+a dzis bysmy zrobili ten 'cursor-advance'
+i 'cursor-retreat'
+
+
+funkcje zostaly juz wyekstrahowane, ale trzeba
+wprowadzic do nich zmiany:
+
+1. jezeli znalezlismy sie na ostatniej pozycji
+   spacji, idac do przodu, to chcemy przeskoczyc
+   naprzod o jeszcze jedno pole
+2. analogicznie jezeli cofnelismy sie na pierwsza
+   pozycje symbolu, to chcemy zrobic jeszcze
+   jeden krok do tylu
+3. i podobnie, jezeli doszlismy do ostatniej
+   pozycji symbolu, to chcemy jeszcze zrobic
+   krok do przodu
+4. jak rowniez, ze jezeli chcemy cofnac sie
+   na pierwsza pozycje spacji, to wykonamy jeszcze
+   jeden krok do tylu
+
+
+* 25.04.2022
+
+sprobujmy sie uporac z tymi spacjami, a pozniej
+ewentualnie dodamy obsluge stringow i komentarzy
+do parsera
+
+cursor-advance!
+cursor-retreat!
+
+* 24.04.2022
+
+- utozsamienie ostatniego kursora spacji z pierwszym
+  kursorem symbolu, oraz ostatniego kursora symbolu
+  z pierwszym kursorem spacji (podczas 'trawersoeania')
+  
+- obsluga liczb (oprocz symboli)
+
+- obsluga stringow
+
+- obsluga komentarzy:
+  - blokowych #| |#
+  - wyrazeniowych #;
+  - liniowych ;
+
+* 23.04.2022
+
+- kasowanie pustych symboli
+
+* 22.04.2022
+
+1. wywalic operacje 'send-char-to!' z interfejsu;
+2. zaimplementowac dzielenie spacji
+3. utozsamic ze soba kursory
+
+* 21.04.2022
+
+poniewaz dotychczasowa implementacja operacji edycji
+jest beznadziejna, trzeba to zrobic od nowa, korzystajac
+z funkcji zawartych w "document-operations", ale do tego
+bedzie trzeba jeszcze dodac operacje insert-char! do
+symbolu
+
+* 20.04.2022
+
+dzis bysmy przynajmniej zrobili obsluge spacji
+w listach pustych, a jesli sie uda, to rowniez
+dodawanie nowych symboli
+
+* 19.04.2022
+
+Na razie moze tego az tak nie cyzelujmy. Szanse,
+zeby miec wiele obiektow '(), sa raczej marne, wiec
+te droge takze omijamy.
+
+
+Na razie z istotnych rzeczy
+- chcemy uwspolnic ostatni indeks spacji
+  z pierwszym indeksem symbolu
+- chcemy uwspolnic ostatni indeks symbolu
+  z pierwszym indeksem spacji
+- zaimplementowac dodawanie symboli
+- zaimplementowac dodawanie list
+- spacje i nowe linie wewnatrz symboli
+  rozbijaja symbole na dwie czesci
+- strzalki w gore i w dol
+- strzalki w lewo i w prawo powinny
+  dzialac przestrzennie
+
+
+No, ale pobieranie nullowych spacji
+tez bedzie trzeba poprawic
+
+* 18.04.2022
+
+rekapitulujac, chcemy, zeby
+(cursor-climb-front '(1) '(())) ===> ([ 1))
+
+Wydaje sie jednak, ze ta zmiana napotka na pewne
+problemy, z ktorymi nie wiemy, jak sobie poradzic.
+
+Mowiac konkretnie, chodzi o reprezentacje.
+Gdybysmy mogli miec dowolnie wiele obiektow '(),
+ktore bylyby sobie "eq", sprawa radykalnie by sie
+uproscila, bo nie potrzebowalibysmy wlasciwosci
+(null-head-space) i (null-tail-space), zas obiekt
+'() sam by sie mogl zajmowac swoimi indeksami.
+
+Alternatywa jest taka, zeby przemodelowac interfejs
+part-at tak, zeby zamiast indeksu bral kursor i poziom.
+
+* 15.04.2022
+
+Trzeba poprawic iterowanie po listach pustych,
+tak zeby miec cos w rodzaju:
+
+( ( ) )
+^^^^^^^ 
+[01112]
+vv[0]vv
+  vvv
+
+
+* 14.04.2022
+
+chyba w pierwszej kolejnosci trzeba sie zajac
+tymi pozycjami kursora (tzn. markowac kursor
+w trakcie renderowania pustych list oraz
+poprawic nawigowanie kursorem na pustych
+listach)
+
+jest tez taki pomysl - poniewaz na razie
+edycja zachowuje sie troche dziwacznie
+- zeby zmienic sposob iterowania kursora,
+tzn. chcielibysmy, zeby koniec symbolu
+i poczatek spacji byly miedzy soba
+nierozroznialne, i zeby wcisniecie spacji
+na koncu symbola powodowalo przyrost spacji,
+zas wcisniecie klawisza "symbolicznego"
+powodowalo dopisanie fragmentu 
+
+
+* 13.04.2022
+
+upierdliwe wydaja sie nastepujace bugi:
+1. cos jest nie tak z mierzeniem wysokosci 
+w sytuacji kiedy mamy wiecej niz jedna linie
+- ok, zrobione
+
+2. umieszczanie kursora w spacjach (zwlaszcza
+wielo-liniowych) wydaje sie skefione
+(no i pytanie o obsluge listy pustej)
+
+3. backspace za pierwszym elementem dziala
+wadliwie (kasuje drugi element), a delete
+przed pierwszym elementem w ogole nie dziala
+- OK, to juz dziala!
+
+(ale jeszcze backspace nie dziala w sposob
+ciagly)
+
+4. cos jest nie tak z pozycjami kursorow
+po operacjach edycji i trzeba to przemyslec
+i poprawic
+
+ponadto brakuje nastepujacych ficzerow:
+
+5. mozliwosc dodawania nowych symboli
+
+6. obsluga spacji i entera w symbolu
+
+7. obsluga strzalek do gory i w dol
+
+8. obsluga myszy
+
+* 12.04.2022
+
+to teraz moze obsluzymy klawisze #\space i #\newline
+w Spacji
+
+ok, to juz mniej wiecej dziala.
+
+* 11.04.2022
+
+no dobra, rozwazmy, w jaki sposob iterowac po spacjach.
+Jak mamy (0), to dopuszczamy tylko jeden indeks, 0
+Jak mamy (1), to dopuszczamy dwa indeksy: 0 i 1
+Jak mamy (0 0) to dopuszczamy dwa indeksy: 0 i 1
+
+itd.
+
+teraz rozwazmy jeszcze scenariusze kasowania:
+
+( define ... )
+ ^
+
+jak wcisniemy backspace, to nic sie dziac nie powinno,
+ale jak wcisniemy delete, to powinnismy skasowac
+nastepne wyrazenie
+
+a moze jakos inaczej?
+
+
+* 08.04.2022
+
+iterowanie po spacjach wprawdzie dziala, ale mocno
+jako tako. trzeba sie teraz zajac jeszcze taka kwestia:
+co sie ma dziac, gdy wciskamy #\backspace albo #\delete
+na spacji?
+
+* 07.04.2022
+
+tym, co idealnie chcielibysmy zrobic w najblizszym
+czasie, jest dodawanie nowych symboli i wyrazen,
+ale konieczna jeszcze bedzie indeksacja spacji
+
+* 06.04.2022
+
+w wiekszosci spacje udalo sie zrefaktorowac.
+nie dziala jeszcze obsluga dotykania, ale
+to juz wczesniej nie za bardzo dzialalo i
+bylo do poprawki, wiec nie ma czego zalowac.
+
+* 05.04.2022
+
+to co dzisiaj robimy?
+moze te spacje?
+to tutaj idea jest taka, ze mamy obiekt
+(Space fragments: list)
+gdzie lista zawiera albo liczby (oznaczajace
+ilosc spacji przed kolejnym obiektem), albo
+"pudelka" (oznaczajace wykomentowane wyrazenia).
+
+Jezeli mamy nastepujace po sobie dwie liczby,
+to interpretujemy je tak, ze pomiedzy nimi jest
+nowa linia
+
+* 04.04.2022
+
+na pewno trzeba tez zaimplementowac laczenie
+spacji w usuwanych symbolach
+
+no, to juz jest jako tako zrobione, ale okazuje
+sie, ze sa bledy przy wyliczaniu rozmiarow wyrazen
+
+byc moze tez wlasnie teraz jest najlepszy moment
+na zaimplementowanie spacji-jako-typu Indexable,
+oraz na przemyslenia zwiazane z tym, jak realizowac
+dodawanie i usuwanie elementow.
+
+Mamy bowiem dwie strategie: albo robimy jawna
+rekurencje, tak jak w przypadku take-cell-at!
+i put-cell-into!, albo opieramy sie na niejawnej
+rekurencji tak jak zrobilismy teraz ("send-char!").
+
+Zaleta tej drugiej strategii jest rozszerzalnosc,
+natomiast wada jest to, ze implementacja musi
+dodatkowo pamietac o zarejestrowaniu operacji,
+zeby mozna je bylo odwracac
+
+Z kolei wydaje sie, ze problemem z ta pierwsza
+opcja jest brak rozszerzalnosci, choc pewnie to by
+sie dalo jakos rozwiazac
+
+W kazdym razie na te chwile chyba nie bedziemy
+nic robic z tym 'problemem', i zajmiemy sie nim
+dopiero wtedy, kiedy bedziemy robic rozszerzenia.
+
+Czyli do zrobienia na teraz mamy:
+- poprawke bledu z wymiarowaniem nawiasow?
+- poprawke bledu z iterowaniem po pustych listach
+- dodawanie symboli i list
+
+
+* 02.04.2022
+
+skoro zaimplementowalismy usuwanie, to mamy jeszcze:
+-dodawanie symboli i list
+-poprawki
+
+* 01.04.2022
+
+Dobra, skoro usuwanie symboli wydaje sie dzialac,
+to teraz moze warto zajac sie dodawaniem:
+- symboli w pozycji 'glowy'
+- symboli w pozostalych pozycjach
+- list
+
+oraz usuwaniem list (gdy kursor jest #\[ i wcisniemy
+#\delete, albo gdy jest #\] i wcisniemy #\backspace)
+
+...
+
+usuwanie list zaimplementowane!
+
+* 31.03.2022
+
+Mamy juz kasowanie jednoliterowych symboli oprocz
+pozycji 0. Teraz zajmiemy sie wlasmie owa pozycja 0.
+
+Ok, to wydaje sie zrobione.
+
+Kolejne czynnosci do zrobienia:
+- wsparcie dla list kropkowanych
+- dodawanie nowych symboli na spacjach
+- dodawanie list pustych na spacjach
+- dodawanie symboli do list pustych
+- obsluga 'strzalki w dol' (i w gore!)
+- zmiana struktury dokumentu tak, zeby
+  pusty dokument to bylo (()) (bo to
+  najprostszy sposob zeby zapewnic mozliwosc
+  dodawania nowych wyrazen
+- wyswietlanie calego dokumentu (ale bez nawiasow)
+- scrollowanie
+- wczytywanie i zapisywanie plikow
+- selekcje
+- historia edycji
+- cofanie operacji
+- ewaluacja wyrazen
+  
+* 30.03.2022
+
+Kasowanie znakow w symbolu dziala, ale efekt jest taki,
+ze dostajemy puste symbole.
+
+Stad dwie rzeczy, ktore chcemy zrobic w najblizszym
+czasie:
+1. jezeli wciskamy #\backspace nad symbolem ktorego
+   dlugosc wynosi 1 i kursor jest na pozycji 1,
+   albo #\delete nad symbolem, ktorego dlugosc
+   wynosi 1 i kursor jest na pozycji 0, to
+   usuwamy cala komorke z symbolem
+
+2. jezeli wciskamy klawisz reprezentujacy znak mogacy
+   byc czescia symbolu gdy kursor jest na spacji,
+   to powinnismy stworzyc nowa komorke z nowym
+   jednoliterowym symbolem
+
+oczywiscie, trzeba rozwiazac pewne niuanse zwiazane z:
+- pustymi listami
+- listami kropkowanymi
+
+* 29.03.2022
+
+Pole "base" wyrugowane :D
+Dalszy plan dzialania:
+- klawisz #\backspace
+- klawisz #\delete
+- w tym: kasowanie calego symbolu (w kontekscie
+zawierajacego symbol rodzica)
+- tworzenie nowych symboli kiedy jestesmy
+na spacji (ale to pewnie bedzie wymagalo stworzenia
+Indexable Space? A moze nie? Jezeli spojrzymy na problem
+z perspektywy rodzica)
+
+* 28.03.2022
+
+Plan na reprezentacje symboli: kazdy symbol (albo nawet
+szerzej: atom) bedzie mial swoj obiekt StringBuilder.
+Otrzymanie klawisza bedzie powodowalo ustawienie
+aktualnego stringa jako name.
+
+Mozna ewentualnie rozwazyc wyrugowanie pola "base"
+z obiektu Symbol, co pociagneloby za soba koniecznosc
+zmian w interfejsie Screen
+
+Mozemy tak zrobic, choc to nie jest najwazniejsze.
+Na razie najistotniejsze jest dodanie pelnych mozliwosci
+edycyjnych do naszego edytora.
+
+* 27.03.2022
+
+Trzeba sie zdecydowac odnosnie tego, w jaki sposob bedziemy
+reprezentowac symbole (oraz inne atomy?)
+
+Na razie mamy taki problem, ze rzeczy, ktore RnRS uznaje
+za liczby, sa u nas wyrazane zawsze jako symbole.
+
+Zasadniczo chyba powinnismy sobie reprezentowac
+atomy w taki sposob, ze:
+- jezeli mamy symbol, ale zmienimy go w liczbe,
+to zastepujemy go liczba
+- jezeli mamy liczbe, ale zmienimy ja w symbol,
+to zastepujemy go symbolem
+
+Na razie to nie jest bardzo istotne, bo na razie
+zakladamy, ze bedziemy operowac tylko na symbolach,
+ale dobrze miec opcje zmiany.
+
+* 26.03.2022
+
+Wyobrazmy sobie na razie, ze wzbogacamy interfejs Indexable
+o metode
+
+(send-char! c::char cursor::Cursor level::int)::Cursor
+
+i on moglby byc zaimplementowany tak:
+
+- w klasie cons i w kombinatorach: jezeli (is level > 0)
+to do (part-at (cursor level)) wysylamy wiadomosc
+(send-char! c cursor (- level 1))
+
+- w klasie Symbol: spodziewamy sie, ze level bedzie
+albo 0, albo 1. Zakladajac, ze jest 1, dopisujemy
+znak na pozycji (head cursor). Zwracamy kursor o glowce
+zwiekszonej o 1
+
+No, chyba ze ten klawisz to #\backspace albo #\delete.
+- wtedy to trzeba 
+
+- w klasie Space (ktora oczywiscie powstanie) robimy tak,
+ze tworzymy nowy symbol, albo (jezeli klawisz to #\(
+albo #\[ albo #\{) liste
+
+No i chyba trzeba bedzie jeszcze zrobic tak, zeby nawigacja
+odbywala sie za posrednictwem send-char!, ale to moze
+pozniej
+
+
+* 24.03.2022
+
+Plan mamy teraz taki, zeby zajmowac sie edycja jeszcze przed
+selekcja. Zadne z tych zagadnien nie jest jakies super-latwe,
+ale do edycji juz co nieco mamy napisane (tzn. funkcje
+take-cell-at! i put-into-cell-at!)
+
+Na razie moze zrobmy sobie taka mala probe: jezeli kursor
+wskazuje na symbol i wcisniemy "drukowalny" klawisz, to
+wstawimy do tego symbola nowa litere.
+
+Zagadnienie to zmusi nas do zastanowienia sie nad kwestia,
+w jaki sposob reprezentowac symbole w naszym systemie
+(i czy bedzie to wymagalo edycji reprezentacji symbolu w
+Kawie)
+
+* 22.03.2022
+
+Poniewaz selekcja nie idzie jeszcze jakos bardzo,
+to postanawiamy na razie zastanowic sie nad edycja.
+Pomysl jest taki, zeby obiekt Indexable
+przyjmowal zdarzenia KeyUp oraz KeyDown,
+i zwracal co?
+
+Na pewno trzeba tez bedzie zrobic tak, zeby symbole
+byly mutowalne.
+
+Dodatkowo trzeba wziac pod rozwage dodawanie do pustej
+listy.
+
+Czyli zasadniczo rzecz wyglada tak, ze chcemy miec:
+1. spacje jako osobny rodzaj obiektu (ktory moze otrzymywac
+wcisniecia klawiszy)
+2. symbole mogace otrzymywac wcisniecia klawiszy
+3. listy mogace otrzymywac wcisniecia klawiszy
+
+Ogolniej, to by musialo dzialac tak, ze najpierw pobieramy
+rodzica albo dziadka i sobie z nim gadamy, a jak oni nam
+powiedza, ze mozemy gadac z lisciem, to mowimy do liscia
+
+* 17.03.2022
+
+Wydaje sie, ze teraz glownym problemem, z ktorym musimy
+sie zmagac, jest ustalenie, czego tak naprawde chcemy.
+
+A chcemy nastepujacych rzeczy:
+1. wyrozniania selekcji podczas rysowania
+2. powiekszania/zmniejszania selekcji w lewo i w prawo,
+   z zachowaniem "jednorodnosci" zakotwiczenia
+
+Jak ma dzialac to rysowanie? Wydaje sie, ze mozliwosci
+sa dwie:
+1. albo dla kazdego rysowanego elementu odpytujemy,
+czy jego kontekst znajduje sie pomiedzy kursorem
+i zakotwiczeniem, i jesli tak, to rysujemy go
+w szczegolny sposob
+2. albo w trakcie rysowania przelaczamy sie
+pomiedzy "trybem normalnym" a "trybem selekcji"
+
+Roznica jest taka, ze w tym ostatnim przypadku bedziemy
+dodawac nowe funkcje do interfejsu Screen
+(set-selection-mode!, set-normal-mode!). W tym pierwszym
+przypadku mamy juz wszystko, co potrzebne.
+
+set-selection-mode! wydaje sie o tyle spoko, ze jest
+naturalnie dostosowany do biblioteki "ncurses", a i wydaje sie
+przy tym, ze rowniez Android Graphics API nie powinien
+robic problemow z takim sposobem uzywania (bo i tak
+trzeba sie piescic z ta farba)
+
+* 16.03.2022
+
+Podczas renderowania musimy miec mozliwosc sprawdzania,
+czy biezacy kontekst znajduje sie pomiedzy kursorem
+a zakotwiczeniem; jezeli tak jest, to wlaczamy tryb
+selekcji.
+
+(a docelowo chcielibysmy chyba, zeby anchor i cursor
+byly czescia obiektu Screen)
+
+
+* 15.03.2022
+
+Podsumujmy wczorajsze ustalenia:
+
+( define ( factorial n ) ...)
+           ^
+           ^
+(expand-selection-right '(0 1 3 1) '(0 1 3 1) #:on document)
+===> (0 1 3 1) (1 1 3 1)
+
+( define ( factorial n ) ...)
+           ^^
+          
+(expand-selection-right '(0 1 3 1) '(1 1 3 1) #:on document)
+===> (0 1 3 1) (2 1 3 1)
+
+( define ( factorial n ) ...)
+           ^ ^
+
+(expand-selection-right '(0 1 3 1) '(2 1 3 1) #:on document)
+===> (0 1 3 1) (3 1 3 1)
+
+( define ( factorial n ) ...)
+           ^  ^
+...
+
+(expand-selection-right '(0 1 3 1) '(9 1 3 1) #:on document)
+===> (1 3 1) (2 3 1)
+
+( define ( factorial n ) ...)
+           ^        ^
+
+(expand-selection-right '(1 3 1) '(2 3 1) #:on document)
+===> (1 3 1) (3 3 1)
+
+( define ( factorial n ) ...)
+           \___ ___/#
+	       V    V
+
+(expand-selection-right '(1 3 1) '(2 3 1) #:on document)
+===> (1 3 1) (3 3 1)
+
+( define ( factorial n ) ...)
+           \___ ___/ #
+	       V     V
+
+(expand-selection-right '(1 3 1) '(3 3 1) #:on document)
+===> (1 3 1) (4 3 1)
+
+( define ( factorial n ) ...)
+           \___ ___/  #
+	       V      V
+
+(expand-selection-right '(0 3 1) '(4 3 1) #:on document)
+===> ([ 3 1) (] 3 1)
+
+( define ( factorial n ) ... )
+         ^             ^
+
+(expand-selection-right '([ 3 1) '(] 3 1) #:on document)
+===> (3 1) (4 1)
+
+( define ( factorial n ) ... )
+         \______ ______/#
+                V       V
+
+Czyli mowiac w skrocie: zakotwiczony kursor rozrasta sie
+tylko na tyle, na ile pozwala na to wspolny trzon kursora.
+
+Jedyne odstepstwo od tej reguly to przypadek, gdy czubek
+kursora staje sie ] - wowczas zakotwiczeniem musi byc [.
+
+(Trzeba sie zastanowic jak to powinno dzialac od strony
+interfejsu Indexable, i czy w nim nie trzeba bedzie czegos
+zmieniac)
+
+
+* 14.03.2022
+
+teraz zaczynamy prace nad selekcja.
+Od strony implementacji dojdzie nam 
+dodatkowy parametr do funkcji
+draw!, mianowicie "selection", oraz 
+grupa funkcji do operowania na selekcji:
+- sprawdzanie, czy dany kursor znajduje
+sie pomiedzy kursorami
+- powiekszanie selekcji
+
+Od strony interfejsu, chcielibysmy
+miec takie oto dodatkowe funkcjonalnosci:
+- shift + strzalka (w lewo albo prawo) - powiekszanie
+selekcji
+- ctrl+strzalka: jezeli nie ma selekcji, to przesuwamy
+kursor w lewo albo w prawo, ale na tym samym poziomie.
+jezeli natomiast jest selekcja, to przesuwamy selekcje
+w lewo albo w prawo na tym samym poziomie
+
+- [ - jezeli nie ma selekcji, tworzymy nowe puste pudelko.
+Jezeli jest selekcja, to tworzymy nowe pudelko w ktorym
+umieszczamy owa selekcje
+
+- ] - przesuwamy kursor pietro nizej
+
+- ctrl+[ - jezeli mamy selekcje, to wydobywamy zaznaczone
+wyrazenie przed zawierajace je pudelko. w przeciwnym razie
+przesuwamy tylko kursor przed zawierajace pudelko
+
+- ctrl+] - jezeli mamy selekcje, to wydobywamy zaznaczone
+wyrazenie za zawierajace pudelko. w przeciwnym razie
+tak jak ]
+
+Natomiast alt+strzalki powinny dzialac tak, ze przesuwamy
+sie po podzielonych oknach (zgodnie z "normalna" geometria),
+zas ctrl+alt+strzalki pozwalaja na przenoszenie wyrazen
+pomiedzy oknami
+
+shift+alt+strzalki teoretycznie mogloby zaznaczac okna
+(o ile znajdziemy sens dla takiej funkcjonalnosci)
+
+No dobrze, fajnie, ale chyba warto by bylo sobie
+wyobrazic przyklady opisujace zaznaczanie kursora
+
+Wezmy takie cos:
+
+#+BEGIN_SRC
+       (4 1 3 1)(5 1 3 1)
+      (3 1 3 1)||(6 1 3 1)
+     (2 1 3 1)||||(7 1 3 1)
+    (1 1 3 1)||||||(8 1 3 1)
+   (0 1 3 1)||||||||(9 1 3 1)/(0-1 2 3 1)
+    (0 3 1)||||||||||
+   ([ 3 1) ||||||||||  (] 3 1)
+         V ||||||||||  V  (0-1 3 3 1)
+/        / VVVVVVVVVV  \  |           \
+| define | factorial n |  |           |
+|        \           ^ /  |           |
+|   /    /        \  |    |         \ |
+|   | if | <= n 0 |  +----+         | |
+|   |    \        /                 | |
+|   |                               | |
+|   |       1                       | |
+|   |                               | |
+|   |       /     /   /       \ \ \ | |
+|   |       | * n | ! | - n 1 | | | | |
+\   \       \     \   \       / / / / /
+#+END_SRC
+
+Jak mamy kursor w pozycji, dajmy na to,
+(1 1 3 1), i wciskamy shift+prawo,
+to (1 1 3 1) staje sie naszym "zakotwiczeniem"
+selekcji, natomiast kursor przesuwa sie na
+(2 1 3 1). Ten sam ruch jest kontynuowany
+do czasu, az dojdziemy do (9 1 3 1).
+
+Kiedy jednak w tej pozycji ponownie wcisniemy
+shift+prawo, wjezdzajac na kursor (0 2 3 1),
+to nasze zakotwiczenie powinno sie zmienic
+- zamiast (1 1 3 1) albo (0 1 3 1) albo
+czegokolwiek, powinnismy sie zaktowiczyc
+w (0 3 1) - czyli otrzymujemy selekcje
+(0 3 1)-(2 3 1). W taki wlasnie sposob
+powinnismy moc od tej pory powiekszac
+nasza selekcje: nie o pojedyncze znaki, a
+o cale wyrazenia.
+
+Co wiecej, jezeli przekroczymy kursor (4 3 1)
+i wjedziemy na (] 3 1), to od zakotwiczenie
+powinno awansowac na ([ 3 1).
+
+
+* 13.03.2022
+
+kursor juz jako tako obsluzony, teraz jeszcze
+pozostaje nam:
+1. selekcja
+2. edycja
+3. scrollowanie dokumentu
+4. otwieranie i zapisywanie plikow
+
+i juz bedziemy miec uzyteczny edytor
+strukturalny
+
+dalsze kroki:
+5. ewaluacja lispa
+6. mechanizm rozszerzen
+
+7. klient graficzny
+8. klient androidowy
+9. system gestow
+
+
+
+
+* 12.03.2022
+
+najwazniejsze rzeczy do zrobienia:
+- umieszczanie kursora na poszczegolnych
+  literkach/spacjach
+- zaznaczanie wyrazen i podswietlanie
+  zaznaczenia
+
+Jak rozwiazac umieszczanie kursora?
+
+* 11.03.2022
+
+wydaje sie, ze powinnismy moc zrezygnowac
+z predykatu has-children?
+hmmm to sie chyba nie uda?
+raczej uda.
+
+jezeli first-index i last-index zwracalyby
+#!null, to to powinno rozwiazac problem.
+
+chcemy zatem miec:
+- spacje jako Indexable
+- indeksowanie po symbolach
+
+Wydaje sie, ze bedzie trzeba rozpoczac od spacji:
+- obsluga w parserze
+- obsluga w wyswietlaniu
+- obsluga podczas iterowania
+
+Uwaga! Implementacja take-cell-at! w naturalny
+sposob operuje na nieparzystych indeksach
+(ktore wskazuja na elementy), natomiast
+put-into-cell-at! w naturalny sposob operuje
+na parzystych indeksach (ktore wskazuja na
+spacje)
+
+
+* 10.03.2022
+
+trzeba troche popracowac koncepcyjnie nad
+fundamentami. ba razie rzecz wyglada tak, ze
+mamy interfejs Indexable o takiej postaci:
+(indexable.scm)
+
+(define-interface Indexable ()
+  (has-children?)::boolean
+  
+  (part-at index::Index)::Indexable*
+  
+  (first-index)::Index
+  (last-index)::Index
+  
+  (next-index index::Index)::Index
+  (previous-index index::Index)::Index
+)
+
+oraz jego dwie implementacje (primitive.scm): cons 
+i Symbol.
+
+Metoda has-children? jest uzywana przez
+cursor-climb-front oraz cursor-climb-back,
+podobnie jak first-index i last-index,
+odpowiednio.
+
+part-at jest dodatkowo uzywana w cursor-ref;
+next-index w cursor-next, a previous-index
+w cursor-back
+
+no dobrze, ale wyglada na to, ze chcemy
+obslugiwac kilka odrebnych czynnosci:
+- poruszanie kursora (poprzedni/nastepny)
+- wyodrebnianie elementu pod kursorem
+
+
+* 09.03.2022
+
+jeszcze chyba jakies bledy sa w tym zaznaczaniu.
+no ale niewazne.
+
+* 08.03.2022
+
+wydaje sie, ze odwzorowywanie klikniec w wyrazenia
+jako tako dziala, choc konieczne bedzie jeszcze
+przetestowanie na pc.
+
+tymczasem chcielibysmy sie skupic na kolejnym
+aspekcie, mianowicie na - z jednej strony
+- iterowaniu na pod-indeksach spacji i atomow,
+oraz - z drugiej strony - zmianie reprezentacji
+spacji
+
+reprezentacja spacji powinna byc taka, ze mamy
+sobie liste.
+i w tej liscie bedziemy mieli albo liczbe,
+albo "pudelko":
+liczba oznacza ilosc spacji (poziomych), przerwa
+miedzy liczbami - spacje pionowa, natomiast
+"pudelko" to wykomentowane wyrazene
+(przez "pudelko" rozumiem tutaj pare, ktorej ogon
+to lista pusta, albo inaczej - liste jednoelementowa)
+
+* 28.02.2022
+
+Dzis tak moze nieco skromniej: mamy napisany zarys funkcji
+"cursor-under". Teraz istotne jest, zeby te funkcje podlaczyc
+do kodu obslugujacego klikniecia mysza.
+
+A w dalszej kolejnosci bedziemy chcieli:
+- iterowac po spacjach i symbolach (zmienic reprezentacje spacji)
+- wydobywac wyrazenia za pomoca klikniec
+- zaznaczac wyrazenia
+- edytowac z klawiatury
+
+* 25.02.2022
+
+Byloby dobrze przemyslec interfejsy, zeby nie musiec po
+wielokroc dokonywac refaktoryzacji (choc wyglada na to,
+ze ta ostatnia nie poszla najgorzej)
+
+Bo chcemy miec mozliwosc poruszania sie strzalkami
+lewo/prawo po symbolach, ale takze po stringach, komentarzach,
+pudelkach...
+
+Po stringach cheilibysmy moc sie poruszac "gora/dol",
+i to w taki sposob, ze gora to jest poprzednia linia,
+zas dol to kolejna linia.
+
+Wydaje sie, ze wszystkie komponenty musza moc otrzymywac
+polecenia:
+
+(define-interface Editable ()
+  (type c::char)::bool
+  )
+
+(define-interface Navigable ()
+  (up)::Index
+  (down)::Index
+  (left)::Index
+  (right)::Index
+  )
+
+* 23.02.2022
+
+** rano:
+
+Kolejne rzeczy, ktore chcielibysmy zrobic:
+- iterowanie po kazdej literce symbolu, i po kazdej spacji
+  (przy okazji - zmiana reprezentacji spacji (1) w parserze,
+   (2) w funkcji show i (3) w funkcji draw!)
+- mapowanie polozenia myszy we wspolrzedne dokumentu
+- edycja dokumentu, czyli:
+  - dodawanie nowych symboli
+  - edycja symboli
+  - kasowanie symboli i list
+  - zaznaczanie wyrazen
+  - tworzenie nowych list
+- poruszanie sie w gore i w dol
+- obsluga komentarzy
+  - liniowych (jako panel obok oryginalnego wyrazenia)
+  - blokowych (jako "karteczka" z tekstem)
+  - wyrazeniowych (jako wyszarzone wyrazenia)
+
+No dopsz. To teraz rozwazmy to, w jaki sposob musi
+dzialac obsluga myszy. Na razie myslimy o takich
+scenariuszach
+- klikniecie i puszczenie myszy powoduje selekcje
+kursora w danym miejscu
+- klikniecie na lewy nawias powoduje wyodrebnienie
+pudelka (drag&drop)
+- klikniecie na prawy nawias powoduje zmiane rozmiaru
+itd.
+
+** Z OSTATNIEJ CHWILI!
+
+Zmieniamy interfejs Tile tak, zeby metoda draw!
+nie zwracala Extenta. Zamiast tego bedziemy mieli osobne
+metody width i height, ktore w dodatku bedziemy
+cache'owac dla poszczegolnych par, i inwalidowac
+cache po kazdej iteracji
+
+W kazdym razie plan refaktoryzacji jest taki,
+ze musimy stworzyc funkcje wyliczajae rozmiary
+poszczegolnych wyrazen (tzn. wysokosc i szerokosc),
+bo one beda potrzebne przy rysowaniu.
+
+Musimy tez zaktualizowac wszystkie kombinatory zeby
+obslugiwaly nowy interfejs.
+
+* 22.02.2022
+
+Wyglada na to, ze trzeba na powaznie przemyslec kwestie
+iterowania po kursorze w trakcie renderowania.
+
+Na razie udalo sie zrobic cos co jako tako dziala dla list,
+ale nie do konca sie wpisuje we framework "rzeczy indeksowalnych".
+
+Kuszace wydaje sie to, zeby juz podczas renderowania umieszczac
+kursor w odpowiednim miejscu w obiekcie Screen.
+
+Do tego dochodzi jeszcze kwestia poruszania sie po symbolach
+i spacjach, ktora tez trzeba bedzie rozwiazac, podobnie jak
+kwestie integracji z kursorem myszy itp.
+
+Ewentualnie te ostatnia mozna rozwiazac w taki sposob, ze obiekt
+Screen bedzie przechowywal wspolrzedna dotyku, i podczas
+"normalnego" rysowania bedziemy sprawdzac, czy akurat znajdujemy sie
+gdzies w jego zakresie.
+
+Hmm... wyglada nawet obiecujaco.
+
+* 20-21.02.2022
+
+mamy zaimplementowane operacje:
+
+take-cell-at!
+put-into-cell-at!
+
+pewnie beda wymagaly jeszcze dopracowania
+(np. obsluga list elementow, zamiast pojedynczych elementow),
+ale moze bedzie mozna ich uzyc do implementacji operacji
+na dokumencie.
+
+Ogolnie, nasz dokument jest reprezentowany przez "pudelko".
+czyli komorke, ktorej "car" jest wlasciwym dokumentem
+(ktory moze byc lista pusta, jezeli dokument jest pusty),
+a ktorej "cdr" nie ma znaczenia (ale zasada najmniejszego 
+zaskoczenia nakazuje nam oczekiwac, ze to bedzie '())
+ 
+Teraz chcielibysmy zrobic tak, zeby operacje, ktore sobie
+zdefiniowalismy w document-operations byly realizowane
+za posrednictwem naszych implementacyj.
+
+Ale do tego pozostaje jeszcze kwestia, w jaki sposob
+pogodzic ze soba te operacje oraz interfejs edytora.
+
+Wydaje sie, ze tutaj problem jest taki, ze nie wiemy,
+w ktorym miejscu na ekranie powinien sie znajdowac kursor.
+
+Stad moja "chamska" propozycja jest taka, zeby podczas
+renderowania sprawdzac, czy kursor danego elementu jest
+identyczny z aktualnym kursorem, i jezeli tak, to
+zapisywac aktualna pozycje rysowania w jakiejs zmiennej.
+
+(pozniej to oczywiscie zmienimy, hehe)
+
+* 16.02.2022
+
+strategua dzialania jest teraz taka:
+1. projektujemy warstwe interfejsow na dokumencie
+2. tworzymy generowana z lispowych par strukture posrednia
+3. implementujemy renderowanie, nawigacje itd. albo za pomoca
+struktury posredniej, albo - jezeli cos sie okaze nie tak
+- za pomoca dotychczasowego podejscia
+
+* 15.02.2022
+
+integracja map kursorowych z funkcja renderujaca wydaje sie
+na razie raczej trudna. stad rodzi sie nam Zupelnie Nowy Pomysl,
+zeby s-wyrazenia konwertowac do struktury posredniej, ktora
+z jednej strony bedzie mozna wyrenderowac na ekran, a z drugiej
+nawigowac za pomoca kursora
+
+Bedziemy zatem oprocz klasy Screen miec klase Sheet (albo Projection?),
+ktora bedzie mniej wiecej odpowiadac temu, co wymyslilismy w javowym
+prototypie albo w implementacji LinearCursorMap.
+
+No dobrze, to sie wydaje calkiem fajny pomysl. Ale jest jeszcze
+kilka "ale".
+
+
+(define-interface DocumentOperations ()
+  (add expression::SExpression cursor::Cursor)::void
+  (remove expression::SExpression cursor::Cursor)::void
+  (move source::Cursor target::Cursor))
+
+(define-interace PlanarProjection ()
+  (draw! screen::Screen)::void
+  (area-under left::real top::real)::Area)
+
+Tutaj mamy jakies czarodziejstwa z TODO-listy ze 'stages':
+
+(define-type document-operation
+  (extend in-document-context
+    (either
+      (move-expression :from source::track :to destination::track)
+      (copy-expression :from source::track :to destination::track)
+      (replace expression :at track::track :with another-expression)
+      (remove expression :at track::track)
+      (insert expression :at track::track)
+      (splice-box :spanning [x::real y::real w::real h::real]
+                  :at track::track)
+      (create-box :spanning [x::real y::real w::real h::real]
+                  :at track::track)
+      (improperize-box :at track::track)
+      (properize-box :at track::track)
+) ) )
+
+(declare reciprocal : document-operation -> document-operation)
+
+(define (reciprocal operation)
+  (parameterize ((current-document (:in operation)))
+    (match operation
+      [(move-expression :from source :to destination)
+       (move-expression :from destination :to source)]
+      [(copy-expression :from source :to destination)
+       ...]
+      [(replace expression :at track :with another-expression)
+       (replace another-expression :at track :with expression)]
+      [(remove expression :at track)
+       (insert expression :at (previous-track track))]
+      [(insert expression :at track)
+       (remove expression :at (subsequent-track track))]
+      [(splice-box :spanning [x y w h] :at track)
+       (create-box :spanning [x y w h] ...?)]
+      [(create-box :spanning [x y w h] :at track)
+       (splice-box :spanning [x y w h] ...?)]
+      [(improperize-box :at track)
+       (properize-box :at track)]
+      [(properize-box :at track)
+       (improperize-box :at track)]
+) ) )
+
+
+* 14.02.2022
+  
+pomysl: interpreter lispa, w ktorym funkcje ze skutkami ubocznymi
+ewaluuja sie gorliwie, a te bez skutkow ubocznych - leniwie.
+
+* 11.02.2022
+
+
+No dobra, trzeba sobie teraz jeszcze troche popisac, powymyslac.
+Otoz po pierwsze, Sekcje rekurencyjnie beda w sobie zawierac
+mapy kursorow. Po drugie, troche trzeba przemyslec strategie
+recyklingu.
+
+Na poczatek jednak olejmy sobie kwestie recyklingu kompletnie,
+a martwmy sie nia dopiero pod koniec.
+
+Na razie skupmy sie na wypelnianiu tablicy elementami.
+I otoz zasadniczo zmiay beda potrzebne w funkcji draw!
+z modulu "primitive".
+
+OK, super, i teraz jak to ma dzialac:  za kazdym razem, kiedy
+narysujemy jakis obiekt i znamy jego rozmiar, dodajemy do nasze
+mapy sekcje. Natomiast w przypadku kiedy zaczynamy rysowac spacje,
+to dodajemy nową sekcję, i jeżeli otrzymamy znak nowej linii,
+dodajemy nową linię.
+
+W przypadku gdy rysujemy sekwencję, to każde wywolanie
+draw! albo draw-empty-list! powinno moc potencjalnie
+dodac nowa mape kursora do biezacej sekcji, ale trzeba
+sobie dobrze przemyslec, w jaki sposob sie to powinno
+odbywac.
+
+Na pewno do kazdej funkcji rysujacej
+
+
+* 08.02.2022
+
+Dodanie opcji recyklingu do konstruowania obiektow, parametryzowanego
+typem. Mozemy sobie pisac
+
+(Recycled Line next: null height: real)
+
+i mamy wowczas mozliwosc otrzymania obiektu z odzysku (po wywolaniu
+(recycle Line)).
+
+No i pieknie. I teraz podczas rysowania bedziemy sobie tworzyc
+strukture, moze
+
+ArrayList<Line> lines;
+
+
+  
+  
+* 07.02.2022
+trzeba wreszcie zaimplementowac te klikania, przy czym mamy
+do wyboru dwie strategie implementacyjne:
+1. parametryzacja funkcji "draw!" w taki sposob, zeby otrzymywala
+opcjonalnie predykat decydujacy o tym, ze sie ma zakonczyc, 
+2. generowanie struktury pomocniczej
+
+Ogolnie jestem bardziej przychylny opcji 2, poniewaz wydaje sie
+prostsza implementacyjnie i wydajniejsza. (A przy tym problemem
+w opcji 1 jest to, ze nie znamy wysokosci linii do czasu, az
+nie dojdziemy do ostatniego elementu)
+
+Trzeba przy tym jednak pamietac, ze ta sama komorka ("cons-cell")
+moze byc wyswietlona kilkukrotnie, w zwiazku z tym raczej nie 
+powinna byc kluczem dla niczego zwiazanego z wyswietlaniem.
+
+Natomiast tym, co w naszym renderowaniu niewatpliwie jest unikatowe
+(choc na swoj sposob efemetyczne) sa kursory, ktore "wewnetrznie"
+sa alokowane za pomoca "hash-consingu" - acz jezeli zostanie
+uzyta w charakterze mocnej referencji, to jej efemeryczny charakter
+nie powinien byc problemem.
+
+Czyli na razie sobie wyobrazam, ze rysowanie na obiekt Screen
+bedzie jednoczesnie utrzymywac pomocnicza strukture postaci:
+
+Linia (Jej Wysokosc): Przedzial (Jego Szerokosc, Kursor, Linia?) ...
+
+(define-type (Line next: Line 
+                   height: real))
+
+(define-type (Section width: real 
+                      cursor: Cursor 
+                      inner: Line))
+
+I teraz tak: w momencie, gdy dokument zrodlowy sie zmieni,
+struktura pomocnicza przestanie byc aktualna i trzeba ja bedzie
+wygenerowac od nowa. Pytanie: czy mozliwe jest, zeby w jakis
+sposob minimalizowac ilosc generowanego smiecia?
+
+I co wiecej, w jaki sposob mozemy zapewnic, ze powtorne
+wyrenderowanie takiej samej struktury nie spowoduje nowej alokacji?
+
+No coz. Moglibysmy zrobic tak, ze zaalokowane elementy bedziemy
+sobie cache'owac w tablicy. Przy czym ta tablica moze byc albo
+slabym haszem indeksowanym kursorami (czyli np. property+),
+albo sekwencja indeksowana kolejnymi liczbami naturalnymi.
+
+
+* 06.02.2022
+
+interfejs do budowania struktury pomocniczej 
+przypisujacej wspolrzednym ekranowym kursory
+z oryginalnego wyrazenia:
+
+- dodaj element (szerokosc, wspolrzedna kursora)
+- zakoncz biezaca linie (wysokosc)
+
+Zalozenia implementacyjne:
+- kolejne przerysowywanie takiego samego dokumentu
+nie powinno powodowac dodatkowych alokacji
+
+- lokalne zmmiany nie powinny inwalidowac zbyt wielu
+elementow (a w kazdym razie powinny maksymalizowac
+uzywanie zaalokowanych zasobow)
+
+(define-interface CursorMap ()
+  (finish-line!)::void
+  (add-entry! width::real cursor::Cursor)::void
+
+  (cursor-at left::real top::real)::Cursor
+  (position cursor::Cursor)::Point)
+
+
+* 05.02.2022
+
+(cursor-ref document::Indexable cursor::Cursor) -> element
+(screen:cursor-at left::real top::real) -> Cursor
+(screen:position cursor::Cursor) -> Point
+(screen:extent cursor::Cursor) -> Extent
+
+Teraz pomysł jest taki, żeby wynikiem renderowania byla
+struktura podobna do tej ze starego prototypu, tzn.
+lista linii zawierajaca liste elementow, gdzie kazdy
+z elementow albo jest finalnym elementem, albo
+kontenerem zawierajacym liste
+
+* 04.02.2022
+
+wczoraj i przedwczoraj zajmowalem sie glownie analizatorem
+zaleznosci i refaktoryzacja modulow, majaca na celu znalezienie
+odpowiedniego miejsca do przechowywania spacji.
+
+Nowy typ "spacji" zostal juz co prawda zdefiniowany, ale jeszcze
+nie jest uzywany, i wymaga sporo dopracowania.
+
+Czyli plan wyglada na razie tak: wyodrebniamy typ spacji,
+okreslamy reguly indeksowania i zastepujemy aktualna reprezentacje
+spacji w parserze, funkcji wyswietlajacej oraz funkcji rysujacej
+
+Nastepnie chcielibysmy stworzyc odwzorowania dla elementow
+przestrzennych w ich polozenie i rozmiary
+
+* 02.02.2022 
+
+wczoraj narodzil sie taki pomysl, zeby utrzymywac mape
+z polozeniami tylko dla nieparzystych indeksow
+
+ogolnie wydaje sie tez, ze niezbedne bedzie wydzielenie
+spacji jako osobnego typu, przy czym moze byc tak, ze
+bedziemy owe spacje reprezentowac po prostu jako listy
+liczb calkowitych, gdzie liczba oznacza spacje, zas
+przejscie do nastepnego elementu oznacza nowa linie.
+
+
+* 01.02.2022 
+podczas rysowania chcemy tworzyc pomocnicza
+strukture, ktora po pierwsze bedzie nam odwzorowywac
+obszary ekranu w kursory widgetow, a po drugie bedzie
+umozliwiac odwzorowywanie kursorow w polozenia widgetow
+
+
+Wezmy takie cos:
+
+#+BEGIN_SRC
+/        /             \              \
+| define | factorial n |              |
+|        \             /              |
+|   /    /        \                 \ |
+|   | if | <= n 0 |                 | |
+|   |    \        /                 | |
+|   |                               | |
+|   |       1                       | |
+|   |                               | |
+|   |       /     /   /       \ \ \ | |
+|   |       | * n | ! | - n 1 | | | | |
+\   \       \     \   \       / / / / /
+#+END_SRC
+
+
+odpowiadajaca temu struktura moglaby wygladac z grubsza
+tak:
+
+#+BEGIN_SRC
+ _____________________________________
+# |    | # |       | # #              #
+# |    | # |       | # #              #
+#_|____|_#_|_______|_#_#______________#
+#   # || # || # # #                 # #
+#   # || # || # # #                 # #
+#   #_||_#_||_#_#_#_________________#_#
+#   #       #                       # #
+#   #       #                       # #
+#   #_______#_______________________#_#
+#   #       # # # # # # # # # # # # # #
+#   #       # # # # # # # # # # # # # #
+#___#_______#_#_#_#_#_#_#_#_#_#_#_#_#_#
+#+END_SRC
+
+albo, jesli ja dwukrotnie powiekszymy:
+
+#+BEGIN_SRC
+  __________________________________________________________________________
+||   |        |   ||   |              |   ||  ||                            ||
+||   |        |   ||   |              |   ||  ||                            ||
+||   |        |   ||   |              |   ||  ||                            ||
+||   |        |   ||   |              |   ||  ||                            ||
+||   |        |   ||   |              |   ||  ||                            ||
+||___|________|___||___|______________|___||__||____________________________||
+||      ||  |  |  ||  |  |  ||  ||  ||                                  ||  ||
+||      ||  |  |  ||  |  |  ||  ||  ||                                  ||  ||
+||      ||  |  |  ||  |  |  ||  ||  ||                                  ||  ||
+||      ||  |  |  ||  |  |  ||  ||  ||                                  ||  ||
+||      ||  |  |  ||  |  |  ||  ||  ||                                  ||  ||
+||      ||__|__|__||__|__|__||__||__||__________________________________||__||
+||      ||              ||                                              ||  ||
+||      ||              ||                                              ||  ||
+||      ||              ||                                              ||  ||
+||      ||              ||                                              ||  ||
+||      ||              ||                                              ||  ||
+||      ||______________||______________________________________________||__||
+||      ||              ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||
+||      ||              ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||
+||      ||              ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||
+||      ||              ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||
+||      ||              ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||  ||
+||______||______________||__||__||__||__||__||__||__||__||__||__||__||__||__||
+#+END_SRC
+
+A jesli dodatkowo uzupelnimy wspolrzednymi kursorow, to dostaniemy takie cos:
+
+#+BEGIN_SRC
+0
+  __________________________________________________________________________
+(|0  |1 define|2  (|0  |1 factorial   |2  3n4 )|*                           ||
+1|1  |1       |1  3|3  |3             |3  3|3 3|4                           ||
+||   |        |   1|1  |1             |1  1|1 1|1                           ||
+||   |        |   ||   |              |   ||  ||                            ||
+||   |        |   ||   |              |   ||  ||                            ||
+||___|________|___||___|______________|___||__||____________________________||
+||*     (|0 |1 |2 (|0 |1 |2 3|4 5|6 )|*                                 ||  ||
+||4     5|5 |5 |5 3|3 |3 |3 3|3 3|3 3|4                                 ||  ||
+||1     1|1 |1 |1 5|5 |5 |5 5|5 5|5 5|5                                 ||  ||
+||      ||  |if|  1|1 |1 |1 1|1 1|1 1|1                                 ||  ||
+||      ||  |  |  ||  |<=|  n|  ||  ||                                  ||  ||
+||      ||__|__|__||__|__|__||__||__||__________________________________||__||
+||      ||*             5|*                                             ||  ||
+||      ||4             5|6                                             ||  ||
+||      ||5             1|5                                             ||  ||
+||      ||1             ||1                                             ||  ||
+||      ||              1|                                              ||  ||
+||      ||______________||______________________________________________||__||
+||      ||*             (|0 1|2 3|4 (|0 1!2 (|0 1-2 3n4 516 )|4 )|6 )|8 )|6 )|
+||      ||6             7|7 7|7 7|7 5|5 5|5 3|3 3|3 3|3 3|3 3|5 5|7 7|5 5|1 1|
+||      ||5             5|5 5|5 5|5 7|7 7|7 5|5 5|5 5|5 5|5 5|7 7|5 5|1 1|  ||
+||      ||1             1|1 1|1 1|1 5|5 5|5 7|7 7|7 7|7 7|7 7|5 5|1 1|  ||  ||
+||      ||              ||  *|  n|  1|1 1|1 5|5 5|5 5|5 5|5 5|1 1|  ||  ||  ||
+||______||______________||__||__||__||__||__1|1_1|1_1|1_1|1_1|__||__||__||__||
+
+2
+#+END_SRC
+
+(1) (1 1)define (3 1) (1 3 1)factorial (3 3 1)n (5 1) (1 5 1)if (3 5 1)
+(1 3 5 1)<= (3 3 5 1)n (5 3 5 1)1 (7 5 1) (1 7 5 1)* (3 7 5 1)n
+
+No i super. I teraz chcielibysmy to sobie reprezentowac za pomoca jakiejs
+struktury danych.
+
+Wyobrażam sobie coś takiego:
+
+(define-alias Cursor/Line java.lang.Object)
+
+(define-type (Line height: real
+                   contents: Span
+                   next: Line))
+
+(define-type (Span width: real
+                   target: Cursor/Line
+                   next: Span))
+
+No i dopsz. I teraz mamy dwie misje: po pierwsze, chcemy odwzorowac
+wspolrzedne ekranowe w kursor, a po drugie chcemy odwzorować kursor
+w obszar na ekranie.
+
+Wezmy sobie definicje:
+#+BEGIN_SRC
+(define (factorial n)
+	 (if (= n 0)
+	     1
+	     (* n (factorial (- n 1)))))
+#+END_SRC
+Sklada sie z 20 komorek ("cons") oraz 21 "lisci", w sumie
+41 elementow. Nie uwzgledniajac pozycji na bialych znakach
+ani na symbolach, mozemy naliczyc 55 kursorow odnoszacych
+sie do tego wyrazenia.
+
+To chyba nie jest jakas szczegolna eksplozja kombinatoryczna;
+raczej przyrost liniowy.
+
+Atrakcyjnym aspektem kursora wydaje sie to, ze jest w nim
+ujeta hierarchia zawierania: ze relacja (potomek | przodkowie)
+zawsze ujmuje potomka wzgledem przodkow.
+
+Jednakze nie mozemy niestety zakladac, ze hierarchi "rodzicielstwa"
+odpowiadaja zawierajace sie prostokaty, poniewaz tak z cala pewnoscia
+nie jest w przypadku bialych znakow zawierajacych znak nowej
+linii.
+
+Zakladajac, ze mamy do dyspozycji strukutre taka jak ta narysowana
+powyzej, mozemy sobie w liniowy sposob wyszukac pozycje danego
+kursora.
+
+Ale 
+
+
+* 31.01.2022
+
+mamy juz nawigowanie strzalkami w lewo i prawo.
+
+i to jako tako dziala. co chcemy teraz?
+- chcemy, zeby edytor wyswietlal wyrazenia za pomoca naszej
+  funkcji renderujacej
+- i zeby mozna sie bylo poruszac strzalkami po tych wyrazeniach
+- i zeby mozna bylo uzywac klikniecia myszy do umiejscowienia
+  kursora w odpowiednim miejscu
+
+a w dalszej kolejnosci:
+
+- zaznaczanie wyrazen
+- drag&drop (lewy nawias) oraz zmiany rozmiaru (prawy nawias)
+- poruszanie sie strzalkami po liniach
+
+No dobra. To co sie musi tak naprawde dziac?
+
+* starsze
+
+Duzo decyzji projektowych przed nami!
+
+oto ficzery, ktore miec chcemy:
+- nawigowanie strzalkami kursora po wyrazeniach
+- zaznaczanie wyrazen (shift + szczalka)
+- wiele paneli (podzial pionowy i poziomy)
+- wycinanie (ctrl+x), kopiowanie (ctrl+c) i wklejanie (ctrl+v)
+- sledzenie historii, 'undo' (ctrl+z)
+
+No dopsz. To teraz jak to reprezentowac?
+
+
+#+BEGIN_SRC
+(define-interface Panel ()
+  ...)
+
+(define-type (Split first: Panel
+                    second: Panel
+		    first%: real)
+  implementing Panel
+  with
+  ...)
+
+(define-type (Editor document: Document
+                     cursor: Cursor
+		     selection-start: Cursor
+		     screen: Screen)
+  implementing Panel
+  with
+  ...)
+
+#+END_SRC
+

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+java -jar libs/kawa.jar --no-warn-unreachable -f src/test-painter.scm

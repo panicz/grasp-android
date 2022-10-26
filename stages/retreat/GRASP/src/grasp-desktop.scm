@@ -71,16 +71,6 @@
    java.awt.GraphicsEnvironment
    'getLocalGraphicsEnvironment))
 
-
-#;(define (load-font path::String #!key (size ::float 12.0))
-  (let* ((font-file ::File (File path))
-	 (font ::Font (Font:createFont
-		       Font:TRUETYPE_FONT
-		       font-file)))
-    (invoke (the-graphics-environment)
-	    'registerFont font)
-    (font:deriveFont size)))
-
 (define (load-font path::String #!key (size ::float 12.0))
   (let* ((font-source ::InputStream
 		      (ClassLoader:getResourceAsStream path))
@@ -93,19 +83,19 @@
 
 
 (define-constant Basic-Regular
-  (load-font "fonts/Basic-Regular.otf" size: 20))
+  (load-font "assets/Basic-Regular.otf" size: 20))
 
 (define-constant LobsterTwo-Regular
-  (load-font "fonts/LobsterTwo-Regular.otf" size: 28))
+  (load-font "assets/LobsterTwo-Regular.otf" size: 28))
 
 (define-constant Oswald-Regular
-  (load-font "fonts/Oswald-Regular.ttf" size: 22))
+  (load-font "assets/Oswald-Regular.ttf" size: 22))
 
 (define-constant GloriaHallelujah
-  (load-font "fonts/GloriaHallelujah.ttf" size: 16))
+  (load-font "assets/GloriaHallelujah.ttf" size: 16))
 
 (define-constant NotoSerif-Regular
-  (load-font "fonts/NotoSerif-Regular.ttf"))
+  (load-font "assets/NotoSerif-Regular.ttf"))
 
 (define-parameter (the-atom-font) ::Font
   #;Basic-Regular LobsterTwo-Regular)

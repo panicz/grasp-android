@@ -14,45 +14,45 @@
 (import (functions))
 
 (define-object (CharPainter)::Painter
-  (define shift-left ::real 0)
-  (define shift-top ::real 0)
+  (define shiftLeft ::real 0)
+  (define shiftTop ::real 0)
 
-  (define clip-left ::real 0)
-  (define clip-top ::real 0)
-  (define clip-width ::real +inf.0)
-  (define clip-height ::real +inf.0)
+  (define clipLeft ::real 0)
+  (define clipTop ::real 0)
+  (define clipWidth ::real +inf.0)
+  (define clipHeight ::real +inf.0)
 
   (define (clip! left::real  top::real
 		 width::real height::real)
     ::void
-    (set! clip-left left)
-    (set! clip-top top)
-    (set! clip-width width)
-    (set! clip-height height))
+    (set! clipLeft left)
+    (set! clipTop top)
+    (set! clipWidth width)
+    (set! clipHeight height))
 		 
   (define (current-clip-width)::real
-    clip-width)
+    clipWidth)
   
   (define (current-clip-height)::real
-    clip-height)
+    clipHeight)
   
   (define (current-clip-left)::real
-    clip-left)
+    clipLeft)
   
   (define (current-clip-top)::real
-    clip-top)
+    clipTop)
 
-  (define marked-cursor-position ::Position
+  (define markedCursorPosition ::Position
     (Position left: 0
 	      top: 0))
   
   (define (mark-cursor! +left::real +top::real)::void
-    (set! marked-cursor-position:left (+ shift-left +left))
-    (set! marked-cursor-position:top (+ shift-top +top))
+    (set! markedCursorPosition:left (+ shiftLeft +left))
+    (set! markedCursorPosition:top (+ shiftTop +top))
     )
 
   (define (cursor-position)::Position
-    marked-cursor-position)
+    markedCursorPosition)
   
   (define (space-width)::real 1)
   
@@ -65,23 +65,23 @@
   (define (horizontal-bar-height)::real 1)
   
   (define (translate! x::real y::real)::void
-    (set! shift-left (+ shift-left x))
-    (set! shift-top (+ shift-top y)))
+    (set! shiftLeft (+ shiftLeft x))
+    (set! shiftTop (+ shiftTop y)))
   
   (define (current-translation-left)::real
-    shift-left)
+    shiftLeft)
   
   (define (current-translation-top)::real
-    shift-top)
+    shiftTop)
 
   (define (draw-horizontal-line! top::real)::void
     (for i from (max 0 (current-clip-left))
-      below (min (current-width) (clip-width))
+      below (min (current-width) clipWidth)
       (put! #\─ top i)))
   
   (define (draw-vertical-line! left::real)::void
     (for i from (max 0 (current-clip-top))
-      below (min (current-height) (clip-height))
+      below (min (current-height) clipHeight)
       (put! #\│ i left)))
 
   (define (horizontal-line-height)::real
@@ -249,16 +249,16 @@
 
   (define (current-height)::real #!abstract)
 
-  (define selection-drawing-mode? ::boolean #f)
+  (define inSelectionDrawingMode ::boolean #f)
   
   (define (enter-selection-drawing-mode!)::void
-    (set! selection-drawing-mode? #t))
+    (set! inSelectionDrawingMode #t))
 
   (define (exit-selection-drawing-mode!)::void
-    (set! selection-drawing-mode? #f))
+    (set! inSelectionDrawingMode #f))
   
   (define (in-selection-drawing-mode?)::boolean
-    selection-drawing-mode?)
+    inSelectionDrawingMode)
   )
   
   
@@ -268,20 +268,20 @@
   (define data ::char[])
 
   (define (get row::real col::real)::char
-    (let ((x (+ col shift-left))
-          (y (+ row shift-top)))
+    (let ((x (+ col shiftLeft))
+          (y (+ row shiftTop)))
       (if (and (is 0 <= x < width)
                (is 0 <= y < height))
           (data (+ (* width y) x))
           #\space)))
   
   (define (put! c::char row::real col::real)::void
-    (let ((x (+ col shift-left))
-          (y (+ row shift-top))
-	  (left (max 0 clip-left))
-	  (top (max 0 clip-top)))
-      (when (and (is left <= x < (+ left clip-width))
-                 (is top <= y < (+ top clip-height)))
+    (let ((x (+ col shiftLeft))
+          (y (+ row shiftTop))
+	  (left (max 0 clipLeft))
+	  (top (max 0 clipTop)))
+      (when (and (is left <= x < (+ left clipWidth))
+                 (is top <= y < (+ top clipHeight)))
 	(when (or (is x >= width)
                   (is y >= height))
           (let* ((new-width (if (is x >= width)
@@ -305,7 +305,7 @@
             (set! height new-height)
             (set! data new-data)))
 	(set! (data (+ (* width y) x)) c)
-	(when (and selection-drawing-mode?
+	(when (and inSelectionDrawingMode
 		   (is (+ y 1) < height))
 	  (set! (data (+ (* width (+ y 1)) x)) #\~)))))
 
@@ -314,8 +314,8 @@
         (for column from 0 below width
              (set! (data (+ (* line width) column))
                    #\space)))
-   (set! shift-left 0)
-   (set! shift-top 0))
+   (set! shiftLeft 0)
+   (set! shiftTop 0))
 
   (define (mark-cursor! +left::real +top::real)::void
     (invoke-special CharPainter (this) 'mark-cursor! +left +top)

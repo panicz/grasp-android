@@ -37,8 +37,6 @@
 (import (input))
 (import (panel))
 
-
-
 (define-alias Thread java.lang.Thread)
 
 ;; OK, wyglada na to, ze klienta terminalowego
@@ -224,12 +222,12 @@
   (define background-color ::Color Color:ANSI:DEFAULT)
   
   (define (put! c::char row::real col::real)::void
-    (let ((x (+ col shift-left))
-          (y (+ row shift-top))
-	  (left (max 0 clip-left))
-	  (top (max 0 clip-top)))
-      (when (and (is left <= x < (+ left clip-width))
-                 (is top <= y < (+ top clip-height)))
+    (let ((x (+ col shiftLeft))
+          (y (+ row shiftTop))
+	  (left (max 0 clipLeft))
+	  (top (max 0 clipTop)))
+      (when (and (is left <= x < (+ left clipWidth))
+                 (is top <= y < (+ top clipHeight)))
 	(io:setCharacter x y (letter c color: text-color
 				     background: background-color)))))
 
@@ -237,8 +235,8 @@
     (invoke-special CharPainter (this)
 		    'mark-cursor! +left +top)
     (io:setCursorPosition
-     (TerminalPosition marked-cursor-position:left
-		       marked-cursor-position:top)))
+     (TerminalPosition markedCursorPosition:left
+		       markedCursorPosition:top)))
   
   (define (enter-selection-drawing-mode!)::void
     (invoke-special CharPainter (this)
