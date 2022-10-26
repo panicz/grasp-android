@@ -9,6 +9,12 @@ Dalszy plan:
   mozemy rysowac kreski)
 - zaimplementowac malarza na Androida
 
+Ale zanim do tego dojdzie, warto byloby troche
+uporzadkowac strukture folderow:
+- wywalic skrypty budujace pietro wyzej
+- uzywac kawa.jar do budowania
+
+
 * 19.10.2022
 
 wczorajszy dzien to byla walka z tym, zeby miec
