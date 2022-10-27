@@ -1,5 +1,3 @@
 #!/bin/sh
-# Docelowo bedziemy chcieli sobie zrobic sloik
-# z kawa. --debug-print-final-expr
-java -cp libs/kawa.jar kawa.repl --no-warn-unreachable \
+java -cp "libs/kawa.jar:." kawa.repl --no-warn-unreachable \
      -f src/grasp-desktop.scm

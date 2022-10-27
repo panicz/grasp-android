@@ -4,7 +4,8 @@ mkdir -p build/desktop
 cd src
 java -cp "../libs/kawa.jar" kawa.repl \
      -d ../build/desktop -C \
-     `java -jar ../libs/kawa.jar -f analdep.scm -- --list grasp-desktop.scm` \
+     `java -jar ../libs/kawa.jar --no-warn-unreachable \
+     	   -f analdep.scm -- --list grasp-desktop.scm` \
      grasp-desktop.scm
 cd ..
 
@@ -14,7 +15,7 @@ cd build/desktop
 unzip kawa.jar
 rm kawa.jar
 jar --verbose --create --file ../grasp-desktop.jar \
-    --main-class=grasp-desktop `find ./ -name '*.class'` \
+    --main-class=grasp\$Mndesktop `find ./ -name '*.class'` \
     assets
 cd ..
 rm -r desktop

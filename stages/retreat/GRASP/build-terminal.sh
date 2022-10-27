@@ -4,7 +4,8 @@ mkdir -p build/terminal
 cd src
 java -cp "../libs/lanterna-3.1.1.jar:../libs/kawa.jar" kawa.repl \
      -d ../build/terminal -C \
-     `java -jar ../libs/kawa.jar -f analdep.scm -- --list grasp-terminal.scm` \
+     `java -jar ../libs/kawa.jar --no-warn-unreachable \
+           -f analdep.scm -- --list grasp-terminal.scm` \
      grasp-terminal.scm
 cd ..
 cp libs/lanterna-3.1.1.jar build/terminal
