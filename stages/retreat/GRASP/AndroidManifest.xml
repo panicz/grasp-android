@@ -17,13 +17,14 @@
       android:name=
       "android.permission.WRITE_EXTERNAL_STORAGE"/>
   
-  
   <application
       android:label="GRASP"
       android:icon="@drawable/grasp">
     <activity
 	android:name="GRASP"
-        android:label="GRASP">
+        android:label="GRASP"
+	android:theme="@android:style/Theme.NoTitleBar"
+	android:configChanges="keyboard|keyboardHidden|orientation">
       <intent-filter>
         <action
 	    android:name="android.intent.action.MAIN" />
