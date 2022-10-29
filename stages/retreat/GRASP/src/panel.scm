@@ -27,7 +27,7 @@
 
 (define-interface Panel ()
   (draw! context::Cursor)::void
-  (touch! x::real y::real finger::byte)::void
+  (touch! x::real y::real finger::byte)::boolean
   (key-pressed! key-code)::boolean
   (key-released! key-code)::boolean
   (key-typed! unicode)::boolean
@@ -85,7 +85,7 @@
 			    height: extent:height)))
 	     (invoke right 'draw!
 		     (recons 'right context))))))))
-  ((touch! x::real y::real finger::byte)::void
+  ((touch! x::real y::real finger::byte)::boolean
    (let* ((painter (the-painter))
 	  (extent (the-panel-extent))
 	  (line-width (invoke painter 'vertical-line-width))
@@ -152,13 +152,14 @@ mutations of an n-element set.\"
 		   (the-selection-anchor selection-anchor))
       (draw-sequence! (head document))))
   
-  (define (touch! x::real y::real finger::byte)::void
+  (define (touch! x::real y::real finger::byte)::boolean
     (parameterize/update-sources ((the-document document))
       (set! cursor (cursor-under x y))
       (set! selection-anchor cursor)
       (display cursor)
       (display (the-expression at: cursor))
-      (newline)))
+      (newline)
+      #t))
 
   (define (key-pressed! key-code)::boolean
     (parameterize/update-sources ((the-document document)
