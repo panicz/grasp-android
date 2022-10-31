@@ -1,3 +1,47 @@
+* 30.10.2022
+
+po wczorajszych przebojach wiemy na pewno, ze
+chcemy dodac do naszego androidowego klienta
+logowanie (takie jak w starym prototypie)
+
+commity trzeba bedzie zrobic w poniedzialek, wtorek
+i sobote
+
+
+* 29.10.2022
+
+plan z grubsza taki:
+- implementujemy interfejs painter w obiekcie View
+- implementujemy event handlery
+
+Ten ostatni aspekt jest dosc niedookreslony
+
+wyglada jednak na to, ze - majac na wzgledzie
+bledy, ktore wywalaja nam aplikacje - bedzie trzeba
+zaimplementowac logowanie (tak jak w starym prototypie)
+i byc mozevpozzmieniac nazwy - z draw! na draw itd.
+
+
+* 28.10.2022
+
+podczas buildu androidowego, jezeli zalaczymy modul
+primitive.scm, dostajemy wyjatek w czasie budowania
+- to zostalo wymejlowane.
+
+natomiast kolejna sprawa -- to rysowanie
+
+czy ogolniej: architektura androidowego
+klienta.
+
+z pewnoscia bedzie trzeba w jakis sposob
+zaimplementowac paintera
+
+tylko jak to zrobic?
+
+tak jak klient desktopowy mial parametr
+the-graphics, tutaj bedziemy mieli
+parametr the-canvas
+
 * 27.10.2022
 
 udalo sie naprawic build&run dla grasp-desktop
