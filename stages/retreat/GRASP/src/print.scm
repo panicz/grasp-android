@@ -3,6 +3,7 @@
 (import (define-object))
 (import (for))
 (import (conversions))
+(import (functions))
 
 (define-constant current-display-procedure::parameter
   (make-parameter display))
@@ -17,6 +18,30 @@
   (clear-messages!)::void
   (add-message message::list)::void
   (display-messages output::Object)::void)
+
+(define-object (logger size::int)::MessageHandler
+  (define messages ::list '())
+
+  (define historyLength ::int)
+
+  (define (clear-messages!)::void
+    (set! messages '()))
+  
+  (define (add-message message::list)::void
+    (let ((message-string (with-output-to-string
+			    (lambda ()
+			      (display "\n")
+			      (for word in message
+				(display word))
+			      ))))
+      (set! messages `(,message-string . ,messages))
+      (drop-after! historyLength messages)))
+  
+  (define (display-messages output::Object)::void
+    #!abstract)
+
+  (set! historyLength size))
+
 
 (define-object (default-message-handler)::MessageHandler
   (define last-message::string)

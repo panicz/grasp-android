@@ -13,17 +13,13 @@
 (import (functions))
 (import (for))
 (import (while))
+
 (import (panel))
 (import (indexable))
 (import (painter))
 (import (print))
 (import (extent))
 
-(define-alias Bundle android.os.Bundle)
-
-(define-alias KeyEvent android.view.KeyEvent)
-
-(define-alias MotionEvent android.view.MotionEvent)
 
 #|
 (import (cursor))
@@ -31,10 +27,56 @@
 (import (primitive))
 |#
 
-(define-object (View activity::android.app.Activity)
-  (define (onDraw canvas::android.graphics.Canvas)::void
-    (canvas:drawRGB 255 255 255))
-  (android.view.View activity))
+(define-alias Bundle android.os.Bundle)
+(define-alias KeyEvent android.view.KeyEvent)
+(define-alias MotionEvent android.view.MotionEvent)
+(define-alias Canvas android.graphics.Canvas)
+(define-alias AndroidActivity android.app.Activity)
+(define-alias AndroidView android.view.View)
+(define-alias Paint android.graphics.Paint)
+(define-alias Font android.graphics.Typeface)
+
+(define-constant paint ::Paint (Paint))
+
+(define (INFO . messages)
+  (let ((result ::java.lang.StringBuilder
+		(java.lang.StringBuilder)))
+    (for message in messages
+	 (result:append message))
+  (android.util.Log:i "gradp-android" (result:toString))))
+
+(define-object (ScreenLogger size)::MessageHandler
+  
+  (define (display-messages output::Object)::void
+    (values)
+    #;(let* ((canvas ::Canvas (as Canvas output))
+	   (line-height ::float 12.0)
+	   (top ::float line-height))
+      ;;(paint:setTypeFace )
+      (paint:setTextSize line-height)
+      (for message in messages
+	   (canvas:drawText message 0 top paint)
+	   (set! top (+ top line-height)))))
+
+  (logger size))
+
+(define screen-logger ::MessageHandler (ScreenLogger 20))
+  
+(define-object (View activity::AndroidActivity);::Painter
+
+  (define canvas :: Canvas)
+  
+  (define (onDraw c::Canvas)::void
+      (set! canvas c)
+      ;;(set! (the-painter) (this))
+      ;;(invoke (the-top-panel) 'draw '())
+      (canvas:drawRGB 255 255 255)
+      (INFO "message handler: "current-message-handler)
+      (INFO "screen-logger:  "screen-logger)
+      ;;(invoke (current-message-handler) 'display-messages canvas)
+      )
+    
+  (AndroidView activity))
 
 (define-interface Polysensoric
     (android.view.View:OnKeyListener
@@ -43,8 +85,14 @@
      #;android.hardware.SensorListener))
 
 (define-object (GRASP)::Polysensoric
+  (define scheme :: gnu.expr.Language kawa.standard.Scheme:instance)
   (define (onCreate savedState::Bundle)::void
     (invoke-special android.app.Activity (this) 'onCreate savedState)
+    (unless scheme
+      (set! scheme (kawa.standard.Scheme)))
+    (kawa.standard.Scheme:registerEnvironment)
+    (gnu.mapping.Environment:setCurrent (scheme:getEnvironment))
+    ;;(set! (current-message-handler) (screen-logger 20))
     (setContentView (View (this))))
 
   #|
@@ -92,9 +140,9 @@
   (define (onTouchEvent event::MotionEvent)::boolean
     #f)
 
-  (define (onKey view::android.view.View keyCode::int
+  (define (onKey view::AndroidView keyCode::int
 		 event::KeyEvent)
     ::boolean
     #f)
   
-  (android.app.Activity))
+  (AndroidActivity))

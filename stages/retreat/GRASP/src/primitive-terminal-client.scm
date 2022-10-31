@@ -49,31 +49,14 @@ mutations of an n-element set.\"
 
 (define input-extent ::Extent (string-extent input))
 
-(define-object (editor-message-handler size::int)
-  ::MessageHandler
-  (define messages ::list '())
-
-  (define history-length ::int)
-
-  (define (clear-messages!)::void
-    (set! messages '()))
-  
-  (define (add-message message::list)::void
-    (let ((message-string (with-output-to-string
-			    (lambda ()
-			      (display "\n")
-			      (for word in message
-				(display word))
-			      ))))
-      (set! messages `(,message-string . ,messages))
-      (drop-after! history-length messages)))
+(define-object (editor-message-handler size::int)::MessageHandler
   
   (define (display-messages output::Object)::void
     (let ((io ::Terminal (as Terminal output)))
       (for message in messages
-	(io:putString message))))
-
-  (set! history-length size))
+	   (io:putString message))))
+  
+  (logger size))
 
 
 (define (stack-trace ex::java.lang.Throwable)
@@ -91,8 +74,7 @@ mutations of an n-element set.\"
 	    'setMouseCaptureMode
 	    MouseCaptureMode:CLICK_RELEASE_DRAG))
 
-  (parameterize ((current-message-handler
-		  (editor-message-handler 4))
+  (parameterize ((current-message-handler (editor-message-handler 4))
 		 (the-painter (TextPainter))
 		 (current-display-procedure
 		  (lambda (message)
