@@ -20,15 +20,15 @@ cd src
 java -cp "../libs/kawa.jar:../libs/android.jar" kawa.repl \
      -d ../build/android/obj -C \
      `java -jar ../libs/kawa.jar --no-warn-unreachable \
-      -f analdep.scm -- --list grasp-android.scm`
+      -f analdep.scm -- --list grasp-android.scm` || exit
 
 java -cp "../libs/kawa.jar:../libs/android.jar:../build/android/obj" \
      kawa.repl -d ../build/android/obj -P $PKGNAME. -T $PKGNAME.GRASP \
-     -C grasp-android.scm
+     -C grasp-android.scm || exit
 cd ..
 
 d8 --min-api 28 --lib libs/android.jar \
-   `find build/android/obj -name '*.class'` libs/kawa.jar
+   `find build/android/obj -name '*.class'` libs/kawa.jar || exit
 
 mv classes.dex build/android/bin/
 
