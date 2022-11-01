@@ -644,8 +644,10 @@
 	(and (eqv? a 0) (eqv? b #\]))))
 
   (define (extent)::Extent
-    (let ((traversal (Traversal))
-	  (painter (the-painter)))
+    (let* ((painter (the-painter))
+	   (traversal (Traversal
+		       max-line-height:
+		       (painter:min-line-height))))
       (space:advance! traversal)
       (Extent width: (+ (* 2 (painter:paren-width))
 			traversal:max-width)

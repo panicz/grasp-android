@@ -130,7 +130,7 @@
 (define on-key-type (mapping (code) never))
 
 (define-object (Editor)::Panel
-  (define document (with-input-from-string "\
+  (define document (cons '() '()) #;(with-input-from-string "\
 (define (! n)
 \"Computes the product 1*...*n.
 It represents the number of per-

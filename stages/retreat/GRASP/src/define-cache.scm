@@ -81,12 +81,12 @@
 (define-syntax define-cache
   (syntax-rules (::)
     ((define-cache (name . args)::type body)
-     (define name
+     (define-early-constant name
        (let ((cached (curried cache args body)))
 	 (lambda/kw args::type (curried-application cached . args)))))
 
     ((define-cache (name . args) body)
-     (define name
+     (define-early-constant name
        (let ((cached (curried cache args body)))
 	 (lambda/kw args (curried-application cached . args)))))
   ))

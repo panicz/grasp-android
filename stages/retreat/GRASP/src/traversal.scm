@@ -15,9 +15,7 @@
 			top: real := 0
 			index: int := 0
 			max-width: real := 0
-			max-line-height: real
-			:= (invoke (the-painter)
-				   'min-line-height))
+			max-line-height: real := 0)
   extending Base with
   ((advance/extent! extent::Extent)::void
    (set! left (+ left extent:width))

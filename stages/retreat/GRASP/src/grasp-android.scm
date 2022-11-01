@@ -36,7 +36,7 @@
 (define-alias Paint android.graphics.Paint)
 (define-alias Font android.graphics.Typeface)
 
-(define-constant paint ::Paint (Paint))
+(define-early-constant paint ::Paint (Paint))
 
 (define (INFO . messages)
   (let ((result ::java.lang.StringBuilder
@@ -48,8 +48,7 @@
 (define-object (ScreenLogger size)::MessageHandler
   
   (define (display-messages output::Object)::void
-    (values)
-    #;(let* ((canvas ::Canvas (as Canvas output))
+    (let* ((canvas ::Canvas (as Canvas output))
 	   (line-height ::float 12.0)
 	   (top ::float line-height))
       ;;(paint:setTypeFace )
@@ -59,8 +58,6 @@
 	   (set! top (+ top line-height)))))
 
   (logger size))
-
-(define screen-logger ::MessageHandler (ScreenLogger 20))
   
 (define-object (View activity::AndroidActivity);::Painter
 
@@ -69,10 +66,9 @@
   (define (onDraw c::Canvas)::void
       (set! canvas c)
       ;;(set! (the-painter) (this))
-      ;;(invoke (the-top-panel) 'draw '())
+      (invoke (the-top-panel) 'draw! '())
       (canvas:drawRGB 255 255 255)
-      (INFO "message handler: "current-message-handler)
-      (INFO "screen-logger:  "screen-logger)
+      ;;(INFO "screen-logger:  "screen-logger)
       ;;(invoke (current-message-handler) 'display-messages canvas)
       )
     
@@ -88,11 +84,13 @@
   (define scheme :: gnu.expr.Language kawa.standard.Scheme:instance)
   (define (onCreate savedState::Bundle)::void
     (invoke-special android.app.Activity (this) 'onCreate savedState)
+    #|
     (unless scheme
       (set! scheme (kawa.standard.Scheme)))
     (kawa.standard.Scheme:registerEnvironment)
     (gnu.mapping.Environment:setCurrent (scheme:getEnvironment))
-    ;;(set! (current-message-handler) (screen-logger 20))
+    |#
+    (set! (current-message-handler) (ScreenLogger 20))
     (setContentView (View (this))))
 
   #|

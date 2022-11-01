@@ -189,9 +189,9 @@
     #f)
   )
 
-(set! (default-value Painter) (NullPainter))
+;;(set! (default-value Painter) (NullPainter))
 
-(define-parameter (the-painter) ::Painter)
+(define-parameter (the-painter) ::Painter (NullPainter))
 
 (define-syntax-rule (with-translation (x y) . actions)
   (let ((painter (the-painter))

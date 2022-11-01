@@ -318,8 +318,10 @@
 		  #!key
 		  (doing nothing)
 		  (returning nothing))
-  (let ((painter (the-painter))
-        (traversal (Traversal)))
+  (let* ((painter (the-painter))
+         (traversal (Traversal
+		     max-line-height:
+		     (painter:min-line-height))))
 
     (parameterize ((the-traversal traversal))
       

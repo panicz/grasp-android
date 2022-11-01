@@ -63,7 +63,7 @@
     ((define-property (property-name object::key-type)
        ::value-type
        default)
-     (define property-name
+     (define-early-constant property-name
        (property (object::key-type)::value-type default)))
 
     ((define-property (property-name object::key-type) default)
@@ -87,7 +87,7 @@
     ((define-property+ (property-name object::key-type)
        ::value-type
        default)
-     (define property-name
+     (define-early-constant property-name
        (property+ (object::key-type)::value-type default)))
 
     ((define-property+ (property-name object::key-type) default)

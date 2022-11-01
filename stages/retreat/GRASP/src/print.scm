@@ -1,12 +1,13 @@
 (import (define-syntax-rule))
 (import (define-interface))
 (import (define-object))
+(import (define-parameter))
 (import (for))
 (import (conversions))
 (import (functions))
 
-(define-constant current-display-procedure::parameter
-  (make-parameter display))
+(define-parameter (current-display-procedure)::procedure
+  display)
 
 (define-syntax-rule (print elements ...)
   ((current-display-procedure) elements)
@@ -42,7 +43,6 @@
 
   (set! historyLength size))
 
-
 (define-object (default-message-handler)::MessageHandler
   (define last-message::string)
 
@@ -61,8 +61,8 @@
     (display last-message)
     (set! last-message #!null)))
 
-(define-constant current-message-handler::parameter[MessageHandler]
-  (make-parameter (default-message-handler)))
+(define-parameter (current-message-handler)::MessageHandler
+  (default-message-handler))
 
 (define (WARN . args)
   (invoke (current-message-handler) 'add-message args))
