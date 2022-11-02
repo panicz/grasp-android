@@ -17,5 +17,5 @@
     (invoke (as java.util.Map table) 'keySet)))
 
 (define-syntax-rule (define-mapping (mapping-name key) default-value)
-  (define mapping-name
-      (mapping (key) default-value)))
+  (define-early-constant mapping-name
+    (mapping (key) default-value)))

@@ -123,25 +123,14 @@
       (right:key-typed! key-code))))
   )
 
-(define on-key-press (mapping (code) never))
+(define-early-constant on-key-press (mapping (code) never))
 
-(define on-key-release (mapping (code) never))
+(define-early-constant on-key-release (mapping (code) never))
 
-(define on-key-type (mapping (code) never))
+(define-early-constant on-key-type (mapping (code) never))
 
 (define-object (Editor)::Panel
-  (define document (cons '() '()) #;(with-input-from-string "\
-(define (! n)
-\"Computes the product 1*...*n.
-It represents the number of per-
-mutations of an n-element set.\"
-  (if (<= n 0)
-      1
-      (* n (! (- n 1))))) 
-(e.g. (factorial 5) ===> 120)
-(Button action: (lambda () (WARN \"button pressed!\"))
-        label: \"Press me!\")
-" parse-document))
+  (define document (cons '() '()))
   (define cursor :: Cursor '())
 
   (define selection-anchor :: Cursor '())

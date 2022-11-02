@@ -11,8 +11,8 @@
 (import (define-parameter))
 (import (extent))
 (import (fundamental))
-;;(import (conversions))
-;;(import (indexable))
+(import (conversions))
+(import (indexable))
 ;;(import (space))
 (import (cursor))
 (import (primitive))
@@ -36,6 +36,7 @@
 ;;(import (button))
 (import (input))
 (import (panel))
+
 
 (define-alias Thread java.lang.Thread)
 
@@ -273,6 +274,21 @@
 	 (io :: LanternaScreen (make-terminal-screen)))
   :: void
   (parameterize ((the-painter (TerminalPainter io)))
+    (when (is (the-top-panel) instance? Editor)
+      (let ((editor ::Editor (as Editor (the-top-panel))))
+    (set! editor:document
+      (with-input-from-string "\
+(define (! n)
+\"Computes the product 1*...*n.
+It represents the number of per-
+mutations of an n-element set.\"
+  (if (<= n 0)
+      1
+      (* n (! (- n 1))))) 
+(e.g. (factorial 5) ===> 120)
+(Button action: (lambda () (WARN \"button pressed!\"))
+        label: \"Press me!\")
+" parse-document))))
     (io:startScreen)
     (let* ((editing (future (edit io)))
 	   (rendering (future (render io))))

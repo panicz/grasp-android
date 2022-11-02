@@ -667,4 +667,20 @@ automatically by the AWT framework."))
 (set! (on-key-press KeyEvent:VK_DOWN)
       move-cursor-down!)
 
+(when (is (the-top-panel) instance? Editor)
+      (let ((editor ::Editor (as Editor (the-top-panel))))
+    (set! editor:document
+      (with-input-from-string "\
+(define (! n)
+\"Computes the product 1*...*n.
+It represents the number of per-
+mutations of an n-element set.\"
+  (if (<= n 0)
+      1
+      (* n (! (- n 1))))) 
+(e.g. (factorial 5) ===> 120)
+(Button action: (lambda () (WARN \"button pressed!\"))
+        label: \"Press me!\")
+" parse-document))))
+
 (window-screen)
