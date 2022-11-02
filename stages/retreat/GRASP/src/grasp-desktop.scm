@@ -25,6 +25,9 @@
 (import (cursor))
 (import (input))
 (import (extent))
+(import (conversions))
+(import (parse))
+
 
 (define-alias Font java.awt.Font)
 (define-alias FontMetrics java.awt.FontMetrics)
@@ -97,13 +100,13 @@
 (define-constant NotoSerif-Regular
   (load-font "assets/NotoSerif-Regular.ttf"))
 
-(define-parameter (the-atom-font) ::Font
+(define-parameter+ (the-atom-font) ::Font
   #;Basic-Regular LobsterTwo-Regular)
 
-(define-parameter (the-string-font) ::Font
+(define-parameter+ (the-string-font) ::Font
   Basic-Regular #;LobsterTwo-Regular)
 
-(define-parameter (the-comment-font) ::Font
+(define-parameter+ (the-comment-font) ::Font
   GloriaHallelujah)
 
 (define-parameter (the-cursor-offset)::Position
