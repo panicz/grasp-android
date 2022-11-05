@@ -11,7 +11,7 @@ PKGNAME="$(grep -o "package=.*" AndroidManifest.xml | cut -d\" -f2)"
 aapt package -f -m \
      -M "AndroidManifest.xml" \
      -J "build/android/gen" \
-     -S "res"
+     -S "res" || exit
 
 # -P $PKGNAME. -T $PKGNAME.Grasp 
 
@@ -36,13 +36,13 @@ aapt package -f \
        	-M AndroidManifest.xml \
        	-S res \
        	-A assets \
-       	-F build/android/bin/"$PKGNAME.apk"
+       	-F build/android/bin/"$PKGNAME.apk" || exit
 
 cd build/android/bin
 
-aapt  add -f "$PKGNAME.apk" classes.dex
+aapt  add -f "$PKGNAME.apk" classes.dex || exit
 
-zipalign -p 4 "$PKGNAME.apk" "aligned-$PKGNAME.apk"
+zipalign -p 4 "$PKGNAME.apk" "aligned-$PKGNAME.apk" || exit
 mv "aligned-$PKGNAME.apk" "$PKGNAME.apk"
 
 if [ ! -s ~/pland.keystore ]; then
