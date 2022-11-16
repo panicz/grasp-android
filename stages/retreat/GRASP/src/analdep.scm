@@ -39,11 +39,16 @@
     (`(,command "--" "--list" . ,args)
      (set! list? #t)
      args)
-	   
     
     (`(,command "--" . ,args)
      args)))
 
+(define (module-name file)
+  (map string->symbol
+       (string-split (string-take file
+				  (- (length file) 4))
+		     "/")))
+  
 (define (dependency-graph files)
   (let ((dependencies (mapping (module) '())))
     (for file in files
@@ -62,15 +67,15 @@
 				      modules))
 				(_
 				 '()))) contents)))
-	     (source-module `(,(string->symbol
-				(string-take file
-					     (- (length file) 4))))))
+	     (source-module (module-name file)))
 	(set! (dependencies source-module) imports)))
     dependencies))
 
-(define files-dependency-graph (dependency-graph files))
+(define files-dependency-graph
+  (dependency-graph
+   (all-scm-files-from-current-directory)))
 
-(for module in (keys files-dependency-graph)
+(for module in (map module-name files)
   (let ((dependencies (reach files-dependency-graph module)))
     (when (is module in dependencies)
       (print "circular dependency from "module": "dependencies))))
@@ -85,10 +90,9 @@
 (define (module-file module)
   (string-append (string-join (map symbol->string module) "/") ".scm"))
 
-(and-let* ((list?))#;((list? (get-environment-variable "LIST"))
-	   ((string=? list? "yes")))
+(when list?
   (let ((dependencies '()))
-    (for module in (keys files-dependency-graph)
+    (for module in (map module-name files)
 	 (set! dependencies (union dependencies
 				   (only (isnt _ system-module?)
 					 (reach files-dependency-graph
