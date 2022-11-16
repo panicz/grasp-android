@@ -14,8 +14,19 @@
 (import (functions))
 
 (define-object (CharPainter)::Painter
+
   (define shiftLeft ::real 0)
   (define shiftTop ::real 0)
+
+  (define (translate! x::real y::real)::void
+    (set! shiftLeft (+ shiftLeft x))
+    (set! shiftTop (+ shiftTop y)))
+  
+  (define (current-translation-left)::real
+    shiftLeft)
+  
+  (define (current-translation-top)::real
+    shiftTop)
 
   (define clipLeft ::real 0)
   (define clipTop ::real 0)
@@ -63,16 +74,6 @@
   (define (vertical-bar-width)::real 1)
 
   (define (horizontal-bar-height)::real 1)
-  
-  (define (translate! x::real y::real)::void
-    (set! shiftLeft (+ shiftLeft x))
-    (set! shiftTop (+ shiftTop y)))
-  
-  (define (current-translation-left)::real
-    shiftLeft)
-  
-  (define (current-translation-top)::real
-    shiftTop)
 
   (define (draw-horizontal-line! top::real)::void
     (for i from (max 0 (current-clip-left))

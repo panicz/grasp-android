@@ -2,6 +2,13 @@
 (import (define-syntax-rule))
 (import (hash-table))
 
+(define-syntax-rule (with-procedure-properties ((name value) ...)
+					       procedure)
+  (let ((proc procedure))
+    (set-procedure-property! proc 'name value)
+    ...
+    proc))
+
 (define-syntax property
   (syntax-rules (::)
     ((property (object::key-type)::value-type default)
@@ -64,7 +71,9 @@
        ::value-type
        default)
      (define-early-constant property-name
-       (property (object::key-type)::value-type default)))
+       (with-procedure-properties
+	((name 'property-name))
+	(property (object::key-type)::value-type default))))
 
     ((define-property (property-name object::key-type) default)
      (define-property (property-name object::key-type)
@@ -88,7 +97,9 @@
        ::value-type
        default)
      (define-early-constant property-name
-       (property+ (object::key-type)::value-type default)))
+       (with-procedure-properties
+	((name 'property-name))
+	(property+ (object::key-type)::value-type default))))
 
     ((define-property+ (property-name object::key-type) default)
      (define-property+ (property-name object::key-type)

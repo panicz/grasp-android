@@ -23,7 +23,7 @@
 (define (read-atom-chars-into last-tail::pair)::void
   (let ((c (peek-char)))
     (unless (separator? c)
-      (set! (tail last-tail) (cons (read-char) '()))
+      (set-cdr! last-tail (cons (read-char) '()))
       (read-atom-chars-into (tail last-tail)))))
 
 (define (read-line-comment)::Text
@@ -144,17 +144,17 @@
 	  (match (read-char)
 	    (#\;
 	     (let ((line-comment (read-line-comment)))
-	       (set! (tail pair)
+	       (set-cdr! pair
 		     (cons (cons 'line-comment
 				 line-comment)
 			   (cons 0 (tail pair))))
 	       (read-spaces-into (tail (tail pair)))))
 	    (#\newline
-	     (set! (tail pair)
+	     (set-cdr! pair
 		   (cons 0 (tail pair)))
 	     (read-spaces-into (tail pair)))
 	    (#\space
-	     (set! (head pair)
+	     (set-car! pair
 		   (+ (head pair) 1))
 	     (read-spaces-into pair))
 	    (_
@@ -178,7 +178,7 @@
 	     (set! result (cons element '()))
 	     (set! growth-cone result))
 	    (else
-	     (set! (tail growth-cone) (cons element '()))
+	     (set-cdr! growth-cone (cons element '()))
 	     (set! growth-cone (tail growth-cone))))
       (update! (post-head-space growth-cone)
 	       following-space)
@@ -205,12 +205,12 @@
                     (when (null? result*)
                       (update! (null-tail-space growth-cone)
                                spaces*))
-                    (set! (tail growth-cone) result*)))
+                    (set-cdr! growth-cone result*)))
 
 		 (else ;;an atom
 		  (let ((output (cons c '())))
                     (read-atom-chars-into output)
-                    (set! (tail growth-cone)
+                    (set-cdr! growth-cone
 			  (Atom (list->string output))))))
 		(update! (dotted? growth-cone) #t)
 		(update! (pre-tail-space growth-cone)
@@ -243,7 +243,7 @@
 			  (next-space ::Space
 				      (post-head-space
 				       unexpr)))
-		      (set! (tail coda)
+		      (set-cdr! coda
 			(cons
 			 (cons* 'expression-comment
 				spaces
@@ -256,7 +256,7 @@
 			 (coda (last-pair
 				last-space:fragments))
 			 (next-space (read-spaces)))
-		    (set! (tail coda)
+		    (set-cdr! coda
 		      (cons
 		       (cons 'block-comment comment)
 		       next-space:fragments))

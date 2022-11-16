@@ -265,7 +265,8 @@
 			(is total <= tip <= (+ total
 					       width)))
 	       (painter:mark-cursor! (- t:left left
-					(- total tip))
+					(* space-width
+					   (- total tip)))
 				     (- t:top top -1)))
 	     (when (and enters-selection-drawing-mode?
 			(is total <= (head

@@ -75,7 +75,7 @@
 	    (let ((copy (type-name)))
 	      (invoke copy 'assign (as parent (this)))
 	      ;;(invoke-special parent copy 'assign (this))
-	      (set! (field copy 'slot-symbol) slot-symbol)
+	      (slot-set! copy 'slot-symbol slot-symbol)
 	      ...
 	      copy))
 
