@@ -59,8 +59,6 @@
 
 (define-alias Color java.awt.Color)
 
-(define-parameter (the-graphics-output) :: Graphics2D)
-
 (define-cache (color rgb) (Color rgb))
 
 (define-parameter (parenthesis-color) :: procedure
@@ -68,7 +66,7 @@
     ::Color
     (color #xcccccc)))
 
-(define-parameter (the-graphics-environment)
+(define-early-constant graphics-environment
   ::java.awt.GraphicsEnvironment
   (invoke-static
    java.awt.GraphicsEnvironment
@@ -80,8 +78,7 @@
 	 (font ::Font (Font:createFont
 		       Font:TRUETYPE_FONT
 		       font-source)))
-    (invoke (the-graphics-environment)
-	    'registerFont font)
+    (graphics-environment:registerFont font)
     (font:deriveFont size)))
 
 
@@ -165,59 +162,47 @@
 (define-constant bottom-right-bounds ::Rectangle
   (bottom-right-paren:getBounds))
 
-#;(let ((fonts (invoke (the-graphics-environment)
-		     'getAvailableFontFamilyNames)))
-  (for font in fonts
-    (display font)
-    (newline)))
-
 (define-constant transparent :: Color (Color 0.0 0.0 0.0 0.0))
 
 (define-object (screen-renderer)::Painter
+  (define graphics ::Graphics2D)
+  
   (define (clip! left::real  top::real
 		 width::real height::real)
     ::void
-    (invoke (the-graphics-output) 'setClip
-	    left top width height))
+    (graphics:setClip left top width height))
   
   (define (current-clip-width)::real
     (let ((clip-area ::Rectangle
-		     (invoke (the-graphics-output)
-			     'getClipBounds)))
+		     (graphics:getClipBounds)))
       clip-area:width))
     
   (define (current-clip-height)::real
     (let ((clip-area ::Rectangle
-		     (invoke (the-graphics-output)
-			     'getClipBounds)))
+		     (graphics:getClipBounds)))
       clip-area:height))
   
   (define (current-clip-left)::real
     (let ((clip-area ::Rectangle
-		     (invoke (the-graphics-output)
-			     'getClipBounds)))
+		     (graphics:getClipBounds)))
       clip-area:x))
   
   (define (current-clip-top)::real
     (let ((clip-area ::Rectangle
-		     (invoke (the-graphics-output)
-			     'getClipBounds)))
+		     (graphics:getClipBounds)))
       clip-area:y))
 
   (define (translate! x::real y::real)::void
-    (invoke (the-graphics-output)
-	    'translate (as double x) (as double y)))
+    (graphics:translate (as double x) (as double y)))
 	    
   (define (current-translation-left)::real
     (let ((transform ::AffineTransform
-		     (invoke (the-graphics-output)
-			     'getTransform)))
+		     (graphics:getTransform)))
       (transform:getTranslateX)))
     
   (define (current-translation-top)::real
     (let ((transform ::AffineTransform
-		     (invoke (the-graphics-output)
-			     'getTransform)))
+		     (graphics:getTransform)))
       (transform:getTranslateY)))
 
   (define rendering-hints ::RenderingHints
@@ -227,8 +212,7 @@
   (define (open-paren! height::real)::void
     (let ((line-height (max 0 (- height
 				 top-left-bounds:height
-				 bottom-left-bounds:height)))
-	  (graphics (the-graphics-output)))
+				 bottom-left-bounds:height))))
       (graphics:setColor ((parenthesis-color)))
       (graphics:fill top-left-paren)
       (graphics:fillRect 0 top-left-bounds:height
@@ -240,8 +224,7 @@
   (define (close-paren! height::real)::void
     (let ((line-height (max 0 (- height
 				 top-right-bounds:height
-				 bottom-right-bounds:height)))
-	  (graphics (the-graphics-output)))
+				 bottom-right-bounds:height))))
       (graphics:setColor ((parenthesis-color)))
       (graphics:fill top-right-paren)
       (graphics:fillRect (- top-right-bounds:width 5)
@@ -269,16 +252,14 @@
 	 (+ top-right-bounds:height bottom-right-bounds:height)))
 
   (define (draw-rounded-rectangle! width::real height::real)::void
-    (invoke (the-graphics-output) 'drawRoundRect
-	    0 0 (as int width) (as int height) 5 5))
+    (graphics:drawRoundRect 0 0 (as int width) (as int height) 5 5))
 
   (define marked-cursor-position ::Position
     (Position left: 0
 	      top: 0))
   
   (define (mark-cursor! +left::real +top::real)::void
-    (let ((graphics (the-graphics-output))
-	  (cursor-extent (the-cursor-extent))
+    (let ((cursor-extent (the-cursor-extent))
 	  (cursor-offset (the-cursor-offset)))
       (set! marked-cursor-position:left (+ (current-translation-left)
 					   +left))
@@ -318,12 +299,10 @@
     5)
   
   (define (draw-horizontal-bar! width::real)::void
-    (invoke (the-graphics-output) 'fillRect
-	    0 0 width (horizontal-bar-height)))
+    (graphics:fillRect 0 0 width (horizontal-bar-height)))
     
   (define (draw-vertical-bar! height::real)::void
-    (invoke (the-graphics-output) 'fillRect
-	    0 0 (vertical-bar-width) height))
+    (graphics:fillRect 0 0 (vertical-bar-width) height))
 
   (define (horizontal-line-height)::real
     20)
@@ -332,22 +311,19 @@
     20)
   
   (define (draw-horizontal-line! top::real)::void
-    (invoke (the-graphics-output) 'fillRect
-	    (max 0 (current-clip-left)) top
-	    (current-clip-width) (horizontal-line-height)))
+    (graphics:fillRect (max 0 (current-clip-left)) top
+		       (current-clip-width) (horizontal-line-height)))
     
   (define (draw-vertical-line! left::real)::void
-    (invoke (the-graphics-output) 'fillRect
-	    left (max 0 (current-clip-top)) 
-	    (vertical-line-width) (current-clip-height)))
+    (graphics:fillRect left (max 0 (current-clip-top)) 
+		       (vertical-line-width) (current-clip-height)))
     
   (define (draw-text! text::CharSequence
 		      font::Font
 		      context::Cursor)
     ::void
     (let-values (((selection-start selection-end) (the-selection)))
-      (let* ((graphics (the-graphics-output))
-	     (focused? (and (pair? (the-cursor))
+      (let* ((focused? (and (pair? (the-cursor))
 			    (equal? context (cursor-tail))))
 	     (enters-selection-drawing-mode?
 	      (and (pair? selection-start)
@@ -413,8 +389,7 @@
       (draw-string! text context)))
 
   (define (text-extent text::CharSequence font::Font)::Extent
-    (let* ((graphics (the-graphics-output))
-	   (metrics ::FontMetrics (graphics:getFontMetrics font))
+    (let* ((metrics ::FontMetrics (graphics:getFontMetrics font))
 	   (line-start 0)
 	   (lines 1)
 	   (line-height (metrics:getHeight))
@@ -439,8 +414,7 @@
 				      text::CharSequence
 				      font::Font)
     ::int
-    (let* ((graphics (the-graphics-output))
-	   (metrics ::FontMetrics (graphics:getFontMetrics font))
+    (let* ((metrics ::FontMetrics (graphics:getFontMetrics font))
 	   (line-height (metrics:getHeight))
 	   (string-end (text:length)))
       (let loop ((i 0)
@@ -471,8 +445,7 @@
   (define atom-frame-color ::Color (Color #xdddddd))
   
   (define (draw-atom! text::CharSequence context::Cursor)::void
-    (let* ((graphics (the-graphics-output))
-	   (extent (atom-extent text))
+    (let* ((extent (atom-extent text))
 	   (font (the-atom-font)))
       (graphics:setColor atom-frame-color)
       (graphics:fillRoundRect 0 14
@@ -500,14 +473,13 @@
 screen-renderer, because the screen is cleared 
 automatically by the AWT framework."))
   
-  (define (paint graphics::Graphics)::void
-    (invoke-special javax.swing.JComponent (this) 'paint graphics)
-    (let ((graphics-output ::Graphics2D (as Graphics2D graphics)))
-      (set! (the-graphics-output) graphics-output)
-      (set! (the-painter) (this))
-      ;; cf. https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
-      (graphics-output:setRenderingHints rendering-hints)
-      (invoke (the-top-panel) 'draw! '())))
+  (define (paint g::Graphics)::void
+    (invoke-special javax.swing.JComponent (this) 'paint g)
+    (set! graphics (as Graphics2D g))
+    (set! (the-painter) (this))
+    ;; cf. https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
+    (graphics:setRenderingHints rendering-hints)
+    (invoke (the-top-panel) 'draw! '()))
 
   (javax.swing.JComponent)
   (rendering-hints:put RenderingHints:KEY_ANTIALIASING
