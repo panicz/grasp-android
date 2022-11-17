@@ -27,7 +27,7 @@ java -cp "../libs/kawa.jar:../libs/android.jar:../build/android/obj" \
      -C grasp-android.scm || exit
 cd ..
 
-d8 --min-api 28 --lib libs/android.jar \
+d8 --min-api 23 --lib libs/android.jar \
    `find build/android/obj -name '*.class'` libs/kawa.jar || exit
 
 mv classes.dex build/android/bin/
