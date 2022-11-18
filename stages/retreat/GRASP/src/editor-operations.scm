@@ -1,3 +1,4 @@
+(import (define-parameter))
 (import (functions))
 (import (fundamental))
 (import (indexable))
@@ -8,6 +9,80 @@
 (import (infix))
 (import (match))
 (import (print))
+(import (extent))
+(import (painter))
+
+(define-enum Selection (resize discard))
+
+(define-parameter (cursor-column)::real 0)
+
+(define (move-cursor-right!
+	 #!key (selection::Selection Selection:discard))
+  (set! (the-cursor) (cursor-advance))
+  (let* ((painter (the-painter))
+	 (cursor-position ::Position (painter:cursor-position)))
+    (set! (cursor-column) cursor-position:left))
+  (match selection
+    (,Selection:discard
+     (set! (the-selection-anchor) (the-cursor)))
+    (,Selection:resize
+     (values))))
+
+(define (move-cursor-left!
+	 #!key (selection::Selection Selection:discard))
+  (set! (the-cursor) (cursor-retreat))
+  (let* ((painter (the-painter))
+	 (cursor-position ::Position (painter:cursor-position)))
+    (set! (cursor-column) cursor-position:left))
+  (match selection
+    (,Selection:discard
+     (set! (the-selection-anchor) (the-cursor)))
+    (,Selection:resize
+     (values))))
+
+(define (move-cursor-up!)
+  (let* ((painter (the-painter))
+	 (target (the-expression))
+	 (initial-position ::Position (painter:cursor-position))
+	 (cursor-height (painter:cursor-height))
+	 (initial-cursor (the-cursor)))
+    (let probe ((attempt 1))
+      (let* ((shift (* attempt cursor-height))
+	     (cursor (cursor-under (cursor-column)
+				  (- initial-position:top
+				     shift))))
+	(cond ((isnt cursor equal? initial-cursor)
+	       (set! (the-cursor) cursor)
+	       (set! (the-selection-anchor) cursor))
+	      ((is 0 < shift < initial-position:top)
+	       (probe (+ attempt 1))))))))
+
+(define (move-cursor-down!)
+  (let* ((painter (the-painter))
+	 (target (the-expression))
+	 (initial-position ::Position (painter:cursor-position))
+	 (cursor-height (painter:cursor-height))
+	 (document-extent ::Extent (sequence-extent))
+	 (initial-cursor (the-cursor)))
+    (let probe ((attempt 1))
+      (let* ((shift (* attempt cursor-height))
+	     (cursor (cursor-under (cursor-column)
+				  (+ initial-position:top
+				     shift))))
+	(cond ((isnt cursor equal? initial-cursor)
+	       (set! (the-cursor) cursor)
+	       (set! (the-selection-anchor) cursor))
+	      ((is 0 < shift < (+ initial-position:top shift)
+		   < document-extent:height)
+	       (probe (+ attempt 1)))
+	      )))))
+
+(define (expand-selection-left!)
+  (set! (the-cursor) (cursor-retreat)))
+
+(define (expand-selection-right!)
+  (set! (the-cursor) (cursor-advance)))
+
 
 (define (delete! position::Index)::void
   (let* ((target (the-expression)))

@@ -22,8 +22,8 @@
 (import (space))
 (import (parse))
 (import (conversions))
-
 (import (cursor))
+(import (editor-operations))
 ;;(import (input))
 ;;(import (primitive))
 
@@ -307,6 +307,11 @@
   (define (cursor-position)::Position
     marked-cursor-position)
 
+  (define (cursor-height)::real
+    (let ((offset ::Position (the-cursor-offset))
+	  (extent ::Extent (the-cursor-extent)))
+      (+ offset:top extent:height)))
+  
   (define selection-drawing-mode? ::boolean #f)
   
   (define (enter-selection-drawing-mode!)::void
@@ -558,8 +563,8 @@
   (set! activity source))
 
 (define-interface Polysensoric
-    (OnGestureListener
-     OnDoubleTapListener
+    (GestureDetector:OnGestureListener
+     GestureDetector:OnDoubleTapListener
      #;SensorListener))
 
 (define-object (GRASP)::Polysensoric
@@ -683,13 +688,12 @@ ue
 	 selection: (if (shift-pressed?)
 			Selection:resize
 			Selection:discard))))
-    #|
+
     (set! (on-key-press KeyEvent:KEYCODE_DPAD_UP)
       move-cursor-up!)
 
     (set! (on-key-press KeyEvent:KEYCODE_DPAD_DOWN)
       move-cursor-down!)
-    |#
 
     (when (is (the-top-panel) instance? Editor)
       (let ((editor ::Editor (as Editor (the-top-panel))))

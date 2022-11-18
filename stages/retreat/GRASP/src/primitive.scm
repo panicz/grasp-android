@@ -499,36 +499,3 @@
 		 (with-output-to-string
 		   (lambda () (write object)))))
 	))
-
-(define (move-cursor-up!)
-  (let* ((painter (the-painter))
-	 (target (the-expression))
-	 (initial-position ::Position(painter:cursor-position))
-	 (initial-cursor (the-cursor)))
-    (let probe ((attempt 1))
-      (let ((cursor (cursor-under initial-position:left
-				  (- initial-position:top
-				     attempt))))
-	(cond ((isnt cursor equal? initial-cursor)
-	       (set! (the-cursor) cursor)
-	       (set! (the-selection-anchor) cursor))
-	      ((is attempt < initial-position:top)
-	       (probe (+ attempt 1))))))))
-
-(define (move-cursor-down!)
-  (let* ((painter (the-painter))
-	 (target (the-expression))
-	 (initial-position ::Position (painter:cursor-position))
-	 (document-extent ::Extent (sequence-extent))
-	 (initial-cursor (the-cursor)))
-    (let probe ((attempt 1))
-      (let ((cursor (cursor-under initial-position:left
-				  (+ initial-position:top
-				     attempt))))
-	(cond ((isnt cursor equal? initial-cursor)
-	       (set! (the-cursor) cursor)
-	       (set! (the-selection-anchor) cursor))
-	      ((is (+ initial-position:top attempt)
-		   < document-extent:height)
-	       (probe (+ attempt 1)))
-	      )))))

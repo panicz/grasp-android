@@ -37,7 +37,6 @@
 (import (input))
 (import (panel))
 
-
 (define-alias Thread java.lang.Thread)
 
 ;; OK, wyglada na to, ze klienta terminalowego
@@ -189,8 +188,8 @@
 		 type))))
     
     (synchronized screen-up-to-date?
-		  (set! (screen-up-to-date?) #f)
-		  (invoke screen-up-to-date? 'notify))
+      (set! (screen-up-to-date?) #f)
+      (invoke screen-up-to-date? 'notify))
 
     (edit io)
     ))

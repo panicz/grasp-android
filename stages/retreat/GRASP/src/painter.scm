@@ -44,6 +44,7 @@
 
   (mark-cursor! +left::real +top::real)::void
   (cursor-position)::Position
+  (cursor-height)::real
   
   (space-width)::real
   
@@ -83,6 +84,8 @@
   
   (define (paren-width)::real 0)
 
+  (define (cursor-height)::real 0)
+  
   (define (min-line-height)::real 0)
   
   (define (vertical-bar-width)::real 0)

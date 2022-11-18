@@ -64,6 +64,8 @@
 
   (define (cursor-position)::Position
     markedCursorPosition)
+
+  (define (cursor-height)::real 1)
   
   (define (space-width)::real 1)
   

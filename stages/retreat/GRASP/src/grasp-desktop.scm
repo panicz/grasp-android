@@ -27,7 +27,7 @@
 (import (extent))
 (import (conversions))
 (import (parse))
-
+(import (editor-operations))
 
 (define-alias Font java.awt.Font)
 (define-alias FontMetrics java.awt.FontMetrics)
@@ -273,6 +273,11 @@
   (define (cursor-position)::Position
     marked-cursor-position)
 
+  (define (cursor-height)::real
+    (let ((offset ::Position (the-cursor-offset))
+	  (extent ::Extent (the-cursor-extent)))
+      (+ offset:top extent:height)))
+  
   (define text-color ::Color Color:DARK_GRAY)
 
   (define background-color ::Color transparent)
