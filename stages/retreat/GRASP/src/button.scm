@@ -27,8 +27,8 @@
 	 (painter:draw-string!
 	  label
 	  (and (pair? (the-cursor))
-	       (equal? (cursor-tail) context)
-	       (cursor-head))))))
+	       (equal? (cdr (the-cursor)) context)
+	       (car (the-cursor)))))))
   
   ((extent)::Extent
    (let ((inner ::Extent (string-extent label)))

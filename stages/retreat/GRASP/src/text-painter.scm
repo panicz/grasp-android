@@ -107,7 +107,7 @@
   (define (draw-box! width::real height::real context::Cursor)::void
     (let-values (((selection-start selection-end) (the-selection)))
 	(when (and (pair? (the-cursor))
-		   (equal? context (cursor-tail)))
+		   (equal? context (cdr (the-cursor))))
 	  (match (head (the-cursor))
 	    (#\[ (mark-cursor! 0 1))
 	    (#\] (mark-cursor! (- width 1) (- height 2)))
@@ -168,7 +168,7 @@
   (define (draw-string! text::CharSequence context::Cursor)::void
     (let-values (((selection-start selection-end) (the-selection)))
       (let ((focused? (and (pair? (the-cursor))
-			   (equal? context (cursor-tail))))
+			   (equal? context (cdr (the-cursor)))))
 	    (enters-selection-drawing-mode?
 	     (and (pair? selection-start)
 		  (equal? (tail selection-start) context)))
@@ -186,7 +186,7 @@
 	  (when (and exits-selection-drawing-mode?
 		     (eqv? n (head selection-end)))
 	    (exit-selection-drawing-mode!))
-	  (when (and focused? (eqv? n (cursor-head)))
+	  (when (and focused? (eqv? n (car (the-cursor))))
 	    (mark-cursor! col row)))
 	
 	(for c in text

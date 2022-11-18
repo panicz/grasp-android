@@ -329,7 +329,7 @@
     ::void
     (let-values (((selection-start selection-end) (the-selection)))
       (let* ((focused? (and (pair? (the-cursor))
-			    (equal? context (cursor-tail))))
+			    (equal? context (cdr (the-cursor)))))
 	     (enters-selection-drawing-mode?
 	      (and (pair? selection-start)
 		   (equal? (tail selection-start) context)))

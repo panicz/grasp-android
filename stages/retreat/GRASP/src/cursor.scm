@@ -15,12 +15,6 @@
 (import (functions))
 (import (print))
 
-(define (cursor-head)
-  (head (the-cursor)))
-
-(define (cursor-tail)
-  (tail (the-cursor)))
-
 (define (cell-index cell::pair index::int)::Indexable*
   (assert (is index >= 0))
   (cond ((= index 0)

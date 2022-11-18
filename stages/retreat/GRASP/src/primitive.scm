@@ -424,8 +424,8 @@
 		     (with-output-to-string
 		       (lambda () (write object)))
 		     (and (pair? (the-cursor))
-			  (equal? (cursor-tail) context)
-			  (cursor-head)))))))
+			  (equal? (cdr (the-cursor)) context)
+			  (car (the-cursor))))))))
 
 (define (cursor-under left::real top::real
 		      #!optional
