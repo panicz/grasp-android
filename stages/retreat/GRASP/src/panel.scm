@@ -24,6 +24,10 @@
 (import (print))
 (import (parameterize-up))
 
+(define-interface Drag ()
+  (move x::real y::real dx::real dy::real)::void
+  (drop x::real y::real vx::real dy::real)::void
+  )
 
 (define-interface Panel ()
   (draw! context::Cursor)::void

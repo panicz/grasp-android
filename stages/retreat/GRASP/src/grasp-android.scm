@@ -40,6 +40,11 @@
 (define-alias Path2D android.graphics.Path)
 (define-alias GestureDetector
   android.view.GestureDetector)
+(define-alias DisplayMetrics
+  android.util.DisplayMetrics)
+
+(define-alias AndroidResources
+  android.content.res.Resources)
 
 (define-alias SensorListener
   android.hardware.SensorListener)
@@ -196,12 +201,13 @@
   (define (display-messages output::Object)::void
     (let* ((canvas ::Canvas (as Canvas output))
 	   (font ::Font (the-log-font))
-	   (top ::float font:size))
+	   (screen-extent ::Extent (the-screen-extent))
+	   (top ::float  screen-extent:height))
       (paint:setTypeface font:face)
       (paint:setTextSize font:size)
       (for message in messages
 	   (canvas:drawText message 0 top paint)
-	   (set! top (+ top font:size)))))
+	   (set! top (- top font:size)))))
 
   (logger size))
   
@@ -624,25 +630,27 @@ ue
     #f)
   
   (define (onTouchEvent event::MotionEvent)::boolean
-    (or (gesture-detector:onTouchEvent event)
-	(match (event:getActionMasked)
-	  (,MotionEvent:ACTION_DOWN
-	   (view:showKeyboard)
-	   #f)
-	  (,MotionEvent:ACTION_POINTER_DOWN
-	   #f)
-	  (,MotionEvent:ACTION_UP
-	   #f)
-	  (,MotionEvent:ACTION_POINTER_UP
-	   #f)
-	  (,MotionEvent:ACTION_OUTSIDE
-	   #f)
-	  (,MotionEvent:ACTION_MOVE
-	   #f)
-	  (,MotionEvent:ACTION_CANCEL
-	   #f)
-	  (_
-	   #f))))
+    (invalidating
+     (or (gesture-detector:onTouchEvent event)
+	 (match (event:getActionMasked)
+	   (,MotionEvent:ACTION_DOWN
+	    ;;(view:showKeyboard)
+	    #f)
+	   (,MotionEvent:ACTION_POINTER_DOWN
+	    #f)
+	   (,MotionEvent:ACTION_UP
+	    #f)
+	   (,MotionEvent:ACTION_POINTER_UP
+	    #f)
+	   (,MotionEvent:ACTION_OUTSIDE
+	    #f)
+	   (,MotionEvent:ACTION_MOVE
+	    ;;(WARN "force: "(event:getPressure)", size: "(event:getSize))
+	    #t)
+	   (,MotionEvent:ACTION_CANCEL
+	    #f)
+	   (_
+	    #f)))))
 
   (define (onKeyUp keyCode::int event::KeyEvent)::boolean
     (parameterize ((ctrl-pressed? (event:ctrl-pressed?))
@@ -667,13 +675,24 @@ ue
 	     result)))))
   
   (define (onCreate savedState::Bundle)::void
-    (invoke-special android.app.Activity (this) 'onCreate savedState)
+    (invoke-special AndroidActivity (this) 'onCreate savedState)
     (initialize-activity (this))
     (set! gesture-detector (GestureDetector (this) (this)))
     (set! view (View (this)))
+
+    (let* ((screen-extent ::Extent (the-screen-extent))
+	   (resources ::AndroidResources (getResources))
+	   (metrics ::DisplayMetrics
+		    (resources:getDisplayMetrics)))
+      (set! screen-extent:width metrics:widthPixels)
+      (set! screen-extent:height metrics:heightPixels))
+
     (set! (current-message-handler) (ScreenLogger 100))
     (setContentView view)
     (set! (the-painter) view)
+
+    (WARN "hello,")
+    (WARN "world")
     
     (set! (on-key-press KeyEvent:KEYCODE_DPAD_LEFT)
       (lambda _
