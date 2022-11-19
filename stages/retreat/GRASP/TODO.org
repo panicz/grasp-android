@@ -1,3 +1,153 @@
+* 18.11.2022
+
+mamy za soba poprawki w dzialaniu pionowego ruchu.
+teraz bysmy sie zajeli usprawnieniem mechanizmu
+selekcji (i pewnie jeszcze bedzie trzeba zrobic
+poprawki w cursor-under)
+
+nie, stop,
+na razie olewamy poruszanie kursorem,
+a zamiast niego skupiamy sie na interakcjach
+myszkowo-dotykowych
+
+
+w interfejsie Panel zmieniamy touch! na press!
+dodajemy release!,
+
+
+* 17.11.2022
+
+- przeniesc poruszanie kursorem w pionie do editor-operations
+i dodac do klienta androidowego
+- juz cos zaczac myslec o poprawie dzialania pionowego ruchu
+kursora
+
+* 16.11.2022
+
+plan minimum: wyodrebnic modul (movement) zawierajacy
+operacje na kursorze
+
+(a na lapku refactor z usunieciem (the-graphics-output)
+juz mamy zrobiony)
+
+* 15.11.2022
+
+wczoraj troche od niechcenia zaimplementowalem obsluge
+dotyku w kliencie androidowym (i przy okazji poprawilem
+blad z rysowaniem kursora na spacjach), ale wydaje sie,
+ze owo wykrywanie dotyku nie do konca dziala
+
+stad pojawia sie taki pomysl, zeby moze zrobic
+chmure punktow i zobaczyc, w jakie lokacje sie
+owe punkty odwzorowuja
+
+* 14.11.2022
+
+znow na horyzoncie pojawia sie duzo wyborow:
+- dopracowac warstwe wizualna edytora (tzn czcionki, nawiasy itd)
+- dopracowac mechanizm selekcji i poruszanie kursorem
+- zaimplementowac mechanizm drag&drop oraz historie edycji
+- zaimplementowac funkcje edycji (tzn z klawiatury)
+- zintegrowac mechanizm rozszerzen z trzema klientami
+
+dopiero kiedy bedziemy mieli powyzsze, to zajelibysmy sie;
+- obsluga komenntarzy
+- otwieraniem i zapisywanuem plikow
+- scrollowaniem dokumentow
+- dzieleniem ekranu
+- rozpoznawaniem gestow
+
+warto tez rozwazyc:
+- warstwe kompatybilnosci pomiedzy klientami
+- uwspolnienie implementacji paintera w kliencie
+  androidowym i desktopowym
+  
+a na sam koniec zostawiamy sobie:
+- renderowanie grafow
+- wizualna ewaluacje
+
+
+* 04.11.2022
+
+pomysl: usunac parametr (the-graphics-output) i zastapic go
+polem 'graphics' w malarzu grasp-desktop (tak jak to zrobimy
+dla androida)
+
+* 03.11.2022
+
+i stalo sie: teraz zajmiemy sie implementacja paintera
+w kliencie androidowym
+
+  (translate! x::real y::real)::void
+  (current-translation-left)::real
+  (current-translation-top)::real
+  (rotate! angle::real)::void
+  (current-rotation-angle)::real
+  (clip! left::real  top::real width::real height::real)::void	 
+  (current-clip-width)::real
+  (current-clip-height)::real
+  (current-clip-left)::real
+  (current-clip-top)::real
+  (scale! factor::real)::void
+  (current-scale)::real
+  (draw-horizontal-line! top::real)::void
+  (draw-vertical-line! left::real)::void
+  (horizontal-line-height)::real
+  (vertical-line-width)::real
+  (mark-cursor! +left::real +top::real)::void
+  (cursor-position)::Position
+  (space-width)::real
+  (paren-width)::real
+  (min-line-height)::real
+  (clear!)::void
+  (draw-quoted-text! s::CharSequence context::Cursor)::void
+  (draw-string! s::CharSequence context::Cursor)::void
+  (quoted-text-extent text::CharSequence)::Extent
+  (draw-atom! text::CharSequence context::Cursor)::void
+  (atom-character-index-under x::real y::real text::CharSequence)::int
+  (quoted-text-character-index-under x::real y::real text::CharSequence)::int
+  (atom-extent text::CharSequence)::Extent
+  (draw-horizontal-bar! width::real)::void
+  (draw-vertical-bar! height::real)::void
+  (vertical-bar-width)::real
+  (horizontal-bar-height)::real
+  (draw-box! width::real height::real context::Cursor)::void
+  (draw-rounded-rectangle! width::real height::real)::void
+  (enter-selection-drawing-mode!)::void
+  (exit-selection-drawing-mode!)::void
+  (in-selection-drawing-mode?)::boolean
+
+na poczatek jednak moze cos bysmy pokombinowali
+z wczytywaniem czcionek
+  
+* 02.11.2022
+
+pomysl jest taki, zeby - ze wzgledu na jakies bugi w kawie
+- przeniesc zawartosc modulu (input) gdzies indziej
+
+sprobujmy tez przeniesc dotychczasowa inicjalizacje
+dokumentu z modulu (panel) do poszczegolnych edytorow
+
+
+* 01.11.2022
+
+mamy z grubsza dzialajacy prototyp, ktory nic
+nie robi.
+
+teraz chcemy zrobic logowanie rzeczy na ekranie,
+co wymaga zaladowania czcionek.
+
+no, ale teraz trzeba przemyslec dalsze plany odnosnie
+tego, w jaki sposob obslugiwac zdarzenia
+
+mozemy robic to albo tak, jak do tej pory,
+albo sprobowac wymyslic cos od nowa
+
+ale moze i tak zaczelibysmy od tego, zeby - w sposob
+analogiczny do tego z klientow pecetowych - obsluzyc
+zdarzenia klawiatury
+
+
 * 30.10.2022
 
 po wczorajszych przebojach wiemy na pewno, ze
