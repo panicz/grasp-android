@@ -1,3 +1,4 @@
+(import (hash-table))
 (import (define-interface))
 (import (define-property))
 (import (define-type))

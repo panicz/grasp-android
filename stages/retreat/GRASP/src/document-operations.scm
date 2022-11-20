@@ -1,6 +1,7 @@
 (import (srfi :11))
 (import (define-interface))
 (import (define-type))
+(import (hash-table))
 (import (define-property))
 (import (fundamental))
 (import (indexable))

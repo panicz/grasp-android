@@ -2,6 +2,7 @@
 (import (assert))
 (import (define-interface))
 (import (define-object))
+(import (hash-table))
 (import (define-property))
 (import (define-type))
 (import (srfi :11) (srfi :17))

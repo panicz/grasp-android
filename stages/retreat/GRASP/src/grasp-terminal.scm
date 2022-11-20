@@ -107,18 +107,18 @@
 
 (define (render io :: LanternaScreen)::void
   (synchronized screen-up-to-date?
-		(while (screen-up-to-date?)
-		  (invoke screen-up-to-date? 'wait))
-		;; if - during rendering - the state of
-		;; the panel changes (by the editing thread),
-		;; then this value will be set to #f, and
-		;; another iteration of the rendering loop
-		;; will be forced.
-		;; (This idea was inspired by Richard Stallman's
-		;; 1981 paper "EMACS: The Extensible,
-		;; Customizable Display Editor", section 13
-		;; "The Display Processor")
-		(set! (screen-up-to-date?) #t))
+    (while (screen-up-to-date?)
+	   (invoke screen-up-to-date? 'wait))
+    ;; if - during rendering - the state of
+    ;; the panel changes (by the editing thread),
+    ;; then this value will be set to #f, and
+    ;; another iteration of the rendering loop
+    ;; will be forced.
+    ;; (This idea was inspired by Richard Stallman's
+    ;; 1981 paper "EMACS: The Extensible,
+    ;; Customizable Display Editor", section 13
+    ;; "The Display Processor")
+    (set! (screen-up-to-date?) #t))
   ;; tutaj chcemy sobie wywolac funkcje rysujaca
   ;; aczkolwiek na poczatek wystarczy po prostu rysowac
   ;; pojedynczy znaczek, przesuwany za pomoca klawiszy strzalek,

@@ -2,25 +2,18 @@
 (import (define-syntax-rule))
 (import (hash-table))
 
-(define-syntax-rule (with-procedure-properties ((name value) ...)
-					       procedure)
-  (let ((proc procedure))
-    (set-procedure-property! proc 'name value)
-    ...
-    proc))
-
 (define-syntax property
   (syntax-rules (::)
     ((property (object::key-type)::value-type default)
-     (let* ((override (make-weak-key-hash-table[key-type
+     (let* ((table (make-weak-key-hash-table[key-type
 						value-type]))
             (getter (lambda (object::key-type)
-                      (hash-ref override object
+                      (hash-ref table object
 				(lambda () default)))))
        (set! (setter getter)
 	 (lambda (arg::key-type value::value-type)
-           (hash-set! override arg value)))
-       (set-procedure-property! getter 'override override)
+           (hash-set! table arg value)))
+       (set-procedure-property! getter 'table table)
        getter))
 
     ((property (object::key-type) default)
@@ -41,15 +34,15 @@
 (define-syntax property+
   (syntax-rules (::)
     ((property+ (object::key-type)::value-type default)
-     (let* ((override (make-weak-key-hash-table[key-type
+     (let* ((table (make-weak-key-hash-table[key-type
 						value-type]))
             (getter (lambda (object::key-type)
-                      (hash-ref+ override object
+                      (hash-ref+ table object
 				 (lambda () default)))))
        (set! (setter getter)
 	 (lambda (arg::key-type value::value-type)
-           (hash-set! override arg value)))
-       (set-procedure-property! getter 'override override)
+           (hash-set! table arg value)))
+       (set-procedure-property! getter 'table table)
        getter))
 
     ((property+ (object::key-type) default)
@@ -118,11 +111,3 @@
        default))
     ))
 
-(define-syntax-rule (unset! (property object))
-  (let ((override (procedure-property property 'override)))
-    (hash-remove! override object)))
-
-(define-syntax-rule (update! (property object) expression)
-  (let ((value expression))
-    (unless (equal? (property object) value)
-      (set! (property object) value))))

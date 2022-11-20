@@ -1,4 +1,3 @@
-
 (import (srfi :11))
 (import (define-syntax-rule))
 (import (assert))

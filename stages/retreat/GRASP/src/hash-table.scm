@@ -1,3 +1,4 @@
+(import (define-syntax-rule))
 (define-alias make-weak-key-hash-table java.util.WeakHashMap)
 (define-alias make-hash-table java.util.HashMap)
 (define-alias Map java.util.Map)
@@ -24,3 +25,12 @@
 	  (let ((value ((car default))))
 	    (table:put key value)
 	    value))))
+
+(define-syntax-rule (unset! (property object))
+  (let ((table (procedure-property property 'table)))
+    (hash-remove! table object)))
+
+(define-syntax-rule (update! (property object) expression)
+  (let ((value expression))
+    (unless (equal? (property object) value)
+      (set! (property object) value))))

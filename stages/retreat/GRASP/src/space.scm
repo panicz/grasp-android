@@ -1,6 +1,7 @@
 (import (srfi :11))
 (import (define-type))
 (import (define-interface))
+(import (hash-table))
 (import (define-property))
 (import (define-object))
 (import (define-cache))
@@ -473,6 +474,10 @@
     (_
      (Space fragments: '(0)))))
 
+;; In the following property definitions, we'd like
+;; the input to be of type "cons", rather than "pair",
+;; but at this point it isn't yet defined.
+
 ;; a cell is "dotted?" naturally when it is
 ;; a pair whose "tail" isn't a list (so for example,
 ;; if it's a symbol or a number).
@@ -486,7 +491,7 @@
 ;;
 ;; Instead, (unset! (dotted? pair)) should be used.
 
-(define-property (dotted? cell)
+(define-property (dotted? cell::pair)::boolean
   (not (or (null? (tail cell))
 	   (pair? (tail cell)))))
 
@@ -494,7 +499,7 @@
 ;; of a list, after the opening paren (therefore
 ;; it should be considered sparse).
 
-(define-property+ (pre-head-space cell)
+(define-property+ (pre-head-space cell::pair)::Space
   (Space fragments: (cons 0 '())))
 
 ;; `post-head-space` appears after each element
@@ -502,7 +507,7 @@
 ;; dense: expect as many `post-head-space`s as there
 ;; are cells visible in the document.
 
-(define-property+ (post-head-space cell)
+(define-property+ (post-head-space cell::pair)::Space
   (if (and (not (dotted? cell))
 	   (null? (tail cell)))
       (Space fragments: (cons 0 '()))
@@ -512,10 +517,10 @@
 ;; in the pairs that are `dotted?` (so they
 ;; can both be considered sparse)
 
-(define-property+ (pre-tail-space cell)
+(define-property+ (pre-tail-space cell::pair)::Space
   (Space fragments: (cons 1 '())))
 
-(define-property+ (post-tail-space cell)
+(define-property+ (post-tail-space cell::pair)::Space
   (Space fragments: (cons 0 '())))
 
 ;; `null-head-space` only concerns a situation
@@ -524,14 +529,14 @@
 ;; in Lisp, the only way to set the size
 ;; of a particular 
 
-(define-property+ (null-head-space cell)
+(define-property+ (null-head-space cell::pair)::Space
   (Space fragments: (cons 0 '())))
 
 ;; the `null-tail-space` property only concerns
 ;; a situation when a cell is stipulated to be
 ;; `dotted?` and its tail is `null?`.
 
-(define-property+ (null-tail-space cell)
+(define-property+ (null-tail-space cell::pair)::Space
   (Space fragments: (cons 0 '())))
 
 (define-object (HeadTailSeparator)::Indexable
