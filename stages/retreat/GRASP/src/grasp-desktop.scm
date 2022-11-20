@@ -81,7 +81,6 @@
     (graphics-environment:registerFont font)
     (font:deriveFont size)))
 
-
 (define-constant Basic-Regular
   (load-font "assets/Basic-Regular.otf" size: 20))
 
@@ -494,39 +493,107 @@ automatically by the AWT framework."))
 
 (set! (the-painter) (screen-renderer))
 
-(define-simple-class window-screen (javax.swing.JFrame
-				    java.awt.event.KeyListener
-				    java.awt.event.FocusListener
-				    java.awt.event.ComponentListener
-				    java.awt.event.WindowListener
-				    java.awt.event.MouseMotionListener
-				    java.awt.event.MouseListener)
-  ((mouseEntered event::MouseEvent)::void
-   (values))
+(define-interface InputListener
+  (java.awt.event.KeyListener
+   java.awt.event.FocusListener
+   java.awt.event.ComponentListener
+   java.awt.event.WindowListener
+   java.awt.event.MouseMotionListener
+   java.awt.event.MouseListener))
 
-  ((mouseExited event::MouseEvent)::void
-   (values))
+(define-object (InputHandler)::InputListener
+  (define (mouseEntered event::MouseEvent)::void
+    (values))
 
-  ((mouseClicked event::MouseEvent)::void
-   (values))
+  (define (mouseExited event::MouseEvent)::void
+    (values))
 
-  ((mousePressed event::MouseEvent)::void
-   (invoke (the-top-panel) 'touch!
-	   (event:getX)
-	   (- (event:getY) 26)
-	   0)
-   (invoke (as screen-renderer (the-painter)) 'repaint))
+  (define (mouseClicked event::MouseEvent)::void
+    (values))
 
-  ((mouseReleased event::MouseEvent)::void
-   (values))
+  (define (mousePressed event::MouseEvent)::void
+    (values))
 
-  ((mouseDragged event::MouseEvent)::void
-   (values))
+  (define (mouseReleased event::MouseEvent)::void
+    (values))
 
-  ((mouseMoved event::MouseEvent)::void
-   (values))
+  (define (mouseDragged event::MouseEvent)::void
+    (values))
+
+  (define (mouseMoved event::MouseEvent)::void
+    (values))
+
+  (define (focusGained event::FocusEvent)::void
+    (values))
+
+  (define (keyTyped event::KeyEvent)::void
+    (values))
+
+  (define (keyReleased event::KeyEvent)::void
+    (values))
+
+  (define (keyPressed event::KeyEvent)::void
+    (values))
+
+  (define (focusLost event::FocusEvent)::void
+    (invoke (invoke event 'getComponent) 'requestFocus))
+
+  (define (componentHidden event::ComponentEvent)::void
+    (values))
+
+  (define (componentShown event::ComponentEvent)::void
+    (values))
   
-  ((keyTyped event::KeyEvent)::void
+  (define (componentMoved event::ComponentEvent)::void
+    (values))
+
+  (define (windowActivated event::WindowEvent)::void
+    (values))
+
+  (define (windowClosed event::WindowEvent)::void
+    (values))
+
+  (define (windowClosing event::WindowEvent)::void
+    (dispose))
+
+  (define (windowDeactivated event::WindowEvent)::void
+    (values))
+
+  (define (windowDeiconified event::WindowEvent)::void
+    (values))
+
+  (define (windowIconified event::WindowEvent)::void
+    (values))
+
+  (define (windowOpened event::WindowEvent)::void
+    (values))
+
+  (define (componentResized event::ComponentEvent)::void
+    (values))
+
+  (javax.swing.JFrame)
+  (addWindowListener (this))
+  (addKeyListener (this))
+  (addFocusListener (this))
+  (addComponentListener (this))
+  (addMouseListener (this))
+  (addMouseMotionListener (this))
+  )
+  
+(define-object (window-screen)::InputListener
+
+  (define (mouseClicked event::MouseEvent)::void
+    (invoke (the-top-panel) 'touch!
+	    (event:getX)
+	    (- (event:getY) 26)
+	    0)
+    (invoke (as screen-renderer (the-painter)) 'repaint))
+
+  (define (mouseMoved event::MouseEvent)::void
+    (and-let* ((dragging (dragging event:finger)))
+      (drag (event:getX) (event:getY))))
+  
+  (define (keyTyped event::KeyEvent)::void
    ;;(display (event:toString))
    ;;(newline)
    ;;(flush-output-port)
@@ -539,7 +606,7 @@ automatically by the AWT framework."))
      (invoke (as screen-renderer (the-painter)) 'repaint)
      (repaint)))
 
-  ((keyReleased event::KeyEvent)::void
+  (define (keyReleased event::KeyEvent)::void
    ;;(display (event:toString))
    ;;(newline)
    ;;(flush-output-port)
@@ -552,7 +619,7 @@ automatically by the AWT framework."))
      (invoke (as screen-renderer (the-painter)) 'repaint)
      (repaint)))
 
-  ((keyPressed event::KeyEvent)::void
+  (define (keyPressed event::KeyEvent)::void
    ;;(display (event:toString))
    ;;(newline)
    ;;(flush-output-port)
@@ -564,68 +631,20 @@ automatically by the AWT framework."))
 	     (event:getKeyCode))
      (invoke (as screen-renderer (the-painter)) 'repaint)
      (repaint)))
-
-  ((focusGained event::FocusEvent)::void
-   (values))
   
-  ((focusLost event::FocusEvent)::void
-   (invoke (invoke event 'getComponent) 'requestFocus))
-
-  ((componentHidden event::ComponentEvent)::void
-   (values))
-
-  ((componentShown event::ComponentEvent)::void
-   (values))
-  
-  ((componentMoved event::ComponentEvent)::void
-   (values))
-
-  ((componentResized event::ComponentEvent)::void
+  (define (componentResized event::ComponentEvent)::void
    (slot-set! (the-screen-extent) 'width
 	      (invoke (this) 'getWidth))
    (slot-set! (the-screen-extent) 'height
 	      (invoke (this) 'getHeight)))
 
-  ((windowActivated event::WindowEvent)::void
-   (values))
-
-  ((windowClosed event::WindowEvent)::void
-   (values))
-
-  ((windowClosing event::WindowEvent)::void
-   (dispose))
-
-  ((windowDeactivated event::WindowEvent)::void
-   (values))
-
-  ((windowDeiconified event::WindowEvent)::void
-   (values))
-
-  ((windowIconified event::WindowEvent)::void
-   (values))
-
-  ((windowOpened event::WindowEvent)::void
-   (values))
+  (InputHandler)
+  (add (as screen-renderer (the-painter)))
   
-  ((*init*)
-   (add (as screen-renderer (the-painter)))
-   
-   (setTitle "GRASP")
-   (setSize 640 400)
-   (setVisible #t)
-   
-   (addWindowListener (this))
-   
-   (addKeyListener (this))
-
-   (addFocusListener (this))
-
-   (addComponentListener (this))
-
-   (addMouseListener (this))
-
-   (addMouseMotionListener (this))
-   ))
+  (setTitle "GRASP")
+  (setSize 640 400)
+  (setVisible #t)
+  )
 
 (set! (on-key-press KeyEvent:VK_LEFT)
       (lambda _
