@@ -10,7 +10,7 @@
     ((_ input-types to: output-type + ...)
      procedure)))
 
-
+#|
 (define-simple-class Struct ()
   interface: #t
   ((typename) :: String #!abstract)
@@ -19,7 +19,9 @@
   ((assign source :: Struct) :: Struct #!abstract)
   ((clone) :: Struct #!abstract))
 
-#|
+|#
+
+
 (define-interface Struct ()
   (typename) :: String
   (fields->string) :: String
@@ -29,9 +31,7 @@
   (clone) :: Struct
   ;;(deep-copy)::Struct
   )
-|#
 
-  
 (define-simple-class Base (Struct)
   ((typename)::String #!abstract)
   ((fields->string)::String "")

@@ -614,11 +614,10 @@ ue
     #f)
 
   (define (onSingleTapConfirmed event::MotionEvent)::boolean
+    (view:showKeyboard)
     (invalidating
-     (invoke (the-top-panel) 'touch!
-	     (event:getX)
-	     (- (event:getY) 60)
-	     0)))
+     (invoke (the-top-panel) 'tap! 0
+	     #;at (event:getX) (- (event:getY) 60))))
 
   (define (onDoubleTap event::MotionEvent)::boolean
     #f)
@@ -634,8 +633,8 @@ ue
      (or (gesture-detector:onTouchEvent event)
 	 (match (event:getActionMasked)
 	   (,MotionEvent:ACTION_DOWN
-	    ;;(view:showKeyboard)
-	    #f)
+	    (invoke (the-top-panel) 'press! 0
+		    #;at (event:getX) (- (event:getY) 60)))
 	   (,MotionEvent:ACTION_POINTER_DOWN
 	    #f)
 	   (,MotionEvent:ACTION_UP

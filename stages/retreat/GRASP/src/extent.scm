@@ -2,8 +2,8 @@
 (import (examples))
 (import (for))
 
-(define-type (Extent width: real
-                     height: real))
+(define-type (Extent width: real := 0
+                     height: real := 0))
 
 (define (string-extent s::java.lang.CharSequence)::Extent
   (let ((line-length 0)
@@ -25,5 +25,5 @@
 abc
 def") ===> [Extent width: 3 height: 2])
 
-(define-type (Position left: real
-		       top: real))
+(define-type (Position left: real := 0
+		       top: real := 0))

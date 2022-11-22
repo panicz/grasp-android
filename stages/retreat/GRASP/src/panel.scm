@@ -1,3 +1,5 @@
+(import (srfi :17))
+(import (hash-table))
 (import (define-syntax-rule))
 (import (assert))
 (import (define-interface))
@@ -25,17 +27,22 @@
 (import (parameterize-up))
 
 (define-interface Drag ()
-  (move x::real y::real dx::real dy::real)::void
-  (drop x::real y::real vx::real dy::real)::void
+  (move! x::real y::real dx::real dy::real)::void
+  (drop! x::real y::real vx::real dy::real)::void
   )
+
+(define-mapping (dragging finger::byte)::Drag #!null)
 
 (define-interface Panel ()
   (draw! context::Cursor)::void
-  (touch! x::real y::real finger::byte)::boolean
+  (tap! finger::byte #;at x::real y::real)::boolean
+  (press! finger::byte #;at x::real y::real)::boolean
+
   (key-pressed! key-code)::boolean
   (key-released! key-code)::boolean
   (key-typed! unicode)::boolean
   )
+
 
 ;; this parameter must be set by the
 ;; graphical framework (Lanterna, AWT, ...)
@@ -89,7 +96,7 @@
 			    height: extent:height)))
 	     (invoke right 'draw!
 		     (recons 'right context))))))))
-  ((touch! x::real y::real finger::byte)::boolean
+  ((tap! finger::byte #;at x::real y::real)::boolean
    (let* ((painter (the-painter))
 	  (extent (the-panel-extent))
 	  (line-width (invoke painter 'vertical-line-width))
@@ -99,11 +106,27 @@
           (right-width (- inner-width left-width)))
      (cond ((is x < left-width)
 	    (set! focus HorizontalSplitFocus:Left)
-	    (left:touch! x y finger))
+	    (left:tap! finger #;at x y))
 	   ((is (+ left-width line-width) < x)
 	    (set! focus HorizontalSplitFocus:Right)
-	    (right:touch! (- x left-width line-width) y
-			  finger)))))
+	    (right:tap! finger #;at (- x left-width line-width) y
+			)))))
+
+  ((press! finger::byte #;at x::real y::real)::boolean
+   (let* ((painter (the-painter))
+	  (extent (the-panel-extent))
+	  (line-width (invoke painter 'vertical-line-width))
+          (inner-width (- extent:width
+			  line-width))
+          (left-width (* at inner-width))
+          (right-width (- inner-width left-width)))
+     (cond ((is x < left-width)
+	    (set! focus HorizontalSplitFocus:Left)
+	    (left:press! finger #;at x y))
+	   ((is (+ left-width line-width) < x)
+	    (set! focus HorizontalSplitFocus:Right)
+	    (right:press! finger #;at (- x left-width line-width) y
+			  )))))
   
   ((key-pressed! key-code)::boolean
    (match focus
@@ -127,11 +150,14 @@
       (right:key-typed! key-code))))
   )
 
-(define-early-constant on-key-press (mapping (code) never))
+(define-mapping (on-key-press code)::(maps () to: boolean)
+  never)
 
-(define-early-constant on-key-release (mapping (code) never))
+(define-mapping (on-key-release code)::(maps () to: boolean)
+  never)
 
-(define-early-constant on-key-type (mapping (code) never))
+(define-mapping (on-key-type code)::(maps (Any) to: boolean)
+  never)
 
 (define-object (Editor)::Panel
   (define document (cons '() '()))
@@ -145,7 +171,7 @@
 		   (the-selection-anchor selection-anchor))
       (draw-sequence! (head document))))
   
-  (define (touch! x::real y::real finger::byte)::boolean
+  (define (tap! finger::byte #;at x::real y::real)::boolean
     (parameterize/update-sources ((the-document document))
       (set! cursor (cursor-under x y))
       (set! selection-anchor cursor)
@@ -154,6 +180,9 @@
       (newline)
       #t))
 
+  (define (press! finger::byte #;at x::real y::real)::boolean
+    #t)
+  
   (define (key-pressed! key-code)::boolean
     (parameterize/update-sources ((the-document document)
 				  (the-cursor cursor)

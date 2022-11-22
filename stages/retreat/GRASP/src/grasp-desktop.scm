@@ -11,6 +11,7 @@
 (import (define-cache))
 (import (define-parameter))
 (import (default-value))
+(import (mapping))
 (import (fundamental))
 (import (infix))
 (import (match))
@@ -579,20 +580,47 @@ automatically by the AWT framework."))
   (addMouseListener (this))
   (addMouseMotionListener (this))
   )
-  
+
+(define-mapping (dragging finger::int)::Drag
+  #!null)
+
 (define-object (window-screen)::InputListener
 
-  (define (mouseClicked event::MouseEvent)::void
-    (invoke (the-top-panel) 'touch!
-	    (event:getX)
-	    (- (event:getY) 26)
-	    0)
-    (invoke (as screen-renderer (the-painter)) 'repaint))
+  (define (x event::MouseEvent)::real
+    (event:getX))
 
-  (define (mouseMoved event::MouseEvent)::void
-    (and-let* ((dragging (dragging event:finger)))
-      (drag (event:getX) (event:getY))))
+  (define (y event::MouseEvent)::real
+    (- (event:getY) 26))
   
+  (define (mouseClicked event::MouseEvent)::void
+    (invoke (the-top-panel) 'tap! 0 #;at (x event) (y event))
+    (invoke (as screen-renderer (the-painter)) 'repaint))
+  
+  (define previous-x ::real 0)
+  (define previous-y ::real 0)
+  
+  (define (mousePressed event::MouseEvent)::void
+    (let ((x (x event))
+	  (y (y event)))
+      (invoke (the-top-panel) 'press! 0 #;at x y)
+      (set! previous-x x)
+      (set! previous-y y)))
+  
+  (define (mouseDragged event::MouseEvent)::void
+    (let ((x (x event))
+	  (y (y event)))
+      (and-let* ((drag ::Drag (dragging 0)))
+	(drag:move! x y (- x previous-x) (- y previous-y)))
+      (set! previous-x x)
+      (set! previous-y y)))
+
+  (define (mouseReleased event::MouseEvent)::void
+    (let ((x (x event))
+	  (y (y event)))
+      (and-let* ((drag ::Drag (dragging 0)))
+	(drag:drop! x y (- x previous-x) (- y previous-y)))
+      ))
+
   (define (keyTyped event::KeyEvent)::void
    ;;(display (event:toString))
    ;;(newline)
@@ -633,10 +661,10 @@ automatically by the AWT framework."))
      (repaint)))
   
   (define (componentResized event::ComponentEvent)::void
-   (slot-set! (the-screen-extent) 'width
-	      (invoke (this) 'getWidth))
-   (slot-set! (the-screen-extent) 'height
-	      (invoke (this) 'getHeight)))
+    (slot-set! (the-screen-extent) 'width
+	       (invoke (this) 'getWidth))
+    (slot-set! (the-screen-extent) 'height
+	       (invoke (this) 'getHeight)))
 
   (InputHandler)
   (add (as screen-renderer (the-painter)))

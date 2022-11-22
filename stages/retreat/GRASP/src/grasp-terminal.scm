@@ -9,6 +9,7 @@
 (import (define-cache))
 (import (default-value))
 (import (define-parameter))
+
 (import (extent))
 (import (fundamental))
 (import (conversions))
@@ -35,7 +36,9 @@
 ;;(import (extension))
 ;;(import (button))
 (import (input))
+(import (mapping))
 (import (panel))
+
 
 (define-alias Thread java.lang.Thread)
 
@@ -137,6 +140,8 @@
 		    LanternaScreen:RefreshType:DELTA))
     (render io)))
 
+(define previous-mouse ::Position (Position))
+
 (define (edit io :: LanternaScreen)::void
   (let* ((key ::KeyStroke (io:readInput))
 	 (type ::KeyType (key:getKeyType))
@@ -173,19 +178,31 @@
 		  
 		  (match (action:getButton)
 		    (,MouseButton:Left
-		     (values))
+		     (invoke (the-top-panel) 'press! 0 #;at left top)
+		     (set! previous-mouse:left left)
+		     (set! previous-mouse:top top))
 		    (,MouseButton:Right
 		     (values))
 		    (_
 		     (values))))
 		 ((action:isMouseDrag)
-		  (values))
+		  (and-let* ((drag ::Drag (dragging 0)))
+		    (drag:move! left top
+				(- left previous-mouse:left)
+				(- top previous-mouse:top))
+		    (set! previous-mouse:left left)
+		    (set! previous-mouse:top top)))
+
 		 ((action:isMouseUp)
-		  (values)))))
+		  (and-let* ((drag ::Drag (dragging 0)))
+		    (drag:drop! left top
+				(- left previous-mouse:left)
+				(- top previous-mouse:top)))
+		  (set! previous-mouse:left left)
+		  (set! previous-mouse:top top)))))
 	
 	(_
-	 (invoke (the-top-panel) 'key-pressed!
-		 type))))
+	 (invoke (the-top-panel) 'key-pressed! type))))
     
     (synchronized screen-up-to-date?
       (set! (screen-up-to-date?) #f)
