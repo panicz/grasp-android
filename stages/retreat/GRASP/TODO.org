@@ -1,3 +1,109 @@
+* 21.11.2022
+
+Na pewno musimy dodac metode "press!" do interfejsu Panel.
+No dobra, ale co ta metoda powinna robic?
+1. wyznaczyc (cursor-under)
+2. zobaczyc, czy (cursor-under) jest finalny
+3. sprawdzic, czy mamy jakas selekcje
+4. sprawdzic, czy (cusor-under) znajduje sie
+w obrebie selekcji
+5
+
+* 20.11.2022
+
+Teraz bedziemy sie zajmowac drag&dropem - na poczatku
+w kliencie desktopowym a pozniej terminalowym (i byc moze
+rownolegle w Androidowym)
+
+Potrzebujemy dwoch komponentow. Pierwszym jest overlay,
+ktory jest po prostu lista elementow, ktore mozna rysowac.
+
+Drugi to mapa od palcow do elementow Drag.
+
+Mechanizm dzialania jest raczej jasny (z grubsza
+tak jak w starym prototypie)
+
+Natomiast tym, co nie do konca jest jasne, jest
+to, w jaki sposob (i przez kogo) ma byc ten mechanizm
+zainicjalizowany.
+
+Od strony fenomenalnej:
+- jezeli nie ma selekcji, to lewy nawias, atom albo
+lewy cudzyslow tekstu powoduja wyodrebnienie elementu
+spod (cursor-under), prawy nawias oraz prawy cudzyslow
+tekstu powoduje zmiane rozmiaru (cursor-under),
+natomiast w przypadku rozszerzenia wywolujemy
+po prostu funkcje "pressed";
+
+- jezeli jest selekcja i klikniemy na ktorys element
+selekcji, to przenosimy cala selekcji
+
+I teraz: ogromnie wazna jest tutaj perspektywa.
+Mamy do wyboru: albo to poszczegolne elementy
+(tzn. atom, sekwencja albo tekst) podejmuja decyzje
+o tym, co robic, albo decyzje podejmuje bezposrednio
+funkcja obslugujaca zdarzenie wcisniecia.
+
+Przyjmijmy na razie - poniewaz jest to zgodne
+z wczesniejszym projektem - ze to zewnetrzna
+funkcja decyduje, jak obsluzyc wbudowane obiekty
+- natomiast obiekty "interaktywne" (czyli rozszerzenia)
+niech moga sie obslugiwac we wlasnym zakresie.
+
+Jest to moze nieco niespojne z dotychczasowym
+projektem, w mysl ktorego wszystkie elementy
+implementuja interfejs Indexable, ale jezeli
+kiedys natrafimy na powod do zmiany, to dopiero
+wtedy bedziemy sie martwic.
+
+* 19.11.2022
+
+plan na razie mamy taki:
+- przemianowac metode touch! interfejsu Panel na tap!
+- dodac metody press! i release!
+- dodac klase Overlay oraz jej instancje (the-overlay),
+przy czym chcemy, zeby:
+1. glowna funkcja rysujaca rysowala elementy
+ponad (the-top-panel)
+2. klasa Overlay zawierala wszystkie callbacki
+dla poszczegolnych palcow
+
+A moze to zbyteczne?
+Dlaczego to wlasnie Overlay?
+Dlaczego nie zrobic po prostu globalnego
+obiektu, np. 
+
+(define-mapping (dragging finger::byte)::(maps () to: Drag)
+  #!null)
+
+Trzeba tez napisac do Bothnera zapytanie, dlaczego
+(define-mapping (costam) costam)
+daje nam blad, podczas gdy jego ekspansja juz nie.
+
+(OK, to juz zrobione)
+
+No dobra, to tak wyglada, ze musimy uwzglednic to,
+ze w przypadku klienta desktopowego i terminalowego
+mamy tylko jeden "palec" (nie wiadomo jak duze
+mialoby to miec znaczenie)
+
+OK, ale jak by to mialo wygladac?
+
+Mamy 3 klienty:
+- desktop - wywolane zdarzenie mousePressed
+- terminal - mamy MouseEvent->isMouseDown
+- android - onTouchEvent->ACTION_DOWN
+
+we wszystkich tych przypadkach chcemy wywolac
+jakas funkcje, ktora przeanalizuje, co nalezy
+czynic
+
+tzn. na pewno trzeba wywolac "cursor-under".
+nastepnie wybieramy 
+
+
+
+
 * 18.11.2022
 
 mamy za soba poprawki w dzialaniu pionowego ruchu.
