@@ -581,9 +581,6 @@ automatically by the AWT framework."))
   (addMouseMotionListener (this))
   )
 
-(define-mapping (dragging finger::int)::Drag
-  #!null)
-
 (define-object (window-screen)::InputListener
 
   (define (x event::MouseEvent)::real
