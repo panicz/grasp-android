@@ -1,3 +1,61 @@
+* 23.11.2022
+
+mamy dzialajacy screen-position (byc moze tez bedziemy chcieli
+jeszcze kiedys miec document-position, bo sie bardziej
+przyda do tweeningu)
+
+ale teraz chcielibysmy raczej takie cos:
+- wcisniecie wskaznika powoduje, ze zabieramy
+  element wskazywany przez kursor (w kazdym razie
+  w przypadku wcisniecia atomu albo lewego nawiasu),
+  umieszczamy jego DragArounda w tablicy Overlay,
+  zas do tablicy dragging dodajemy funkcje, ktora
+  odpowiednio go animuje
+  
+- puszczenie wskaznika powoduje, ze w odpowiednim miejscu
+  umieszczamy dany element
+
+- nie zapominajmy tez o historii
+
+- oraz o uwzglednieniu kursora (chodzi o to,
+  ze jezeli przenosimy wyrazenie z kursorem,
+  to chcielibysmy tez odpowiednio przeniesc
+  kursor)
+
+  mozemy tez zrobic tak, ze kazdy kolejny kursor
+  na warstwie overlay bedzie mial indeks, ktorego
+  ostatni car to wartosc inna niz 1 (czyli np.
+  2 i 4, albo 3 i 5). Ewentualnie po prostu 'overlay.
+
+* 22.11.2022
+
+ok, to musimy chyba ulozyc plan:
+1. podczas renderowania chcielibysmy dodatkowo sobie
+zapisywac pozycje (ekranowe) wyrazen na poszczegolnych kursorach
+
+2. alternatywnie funkcja cursor-under powinna dodatkowo
+zwracac offset punktu od poczatku wyrazenia
+
+wydaje sie, ze (1) jest nie do unikniecia w sytuacji,
+kiedy bedziemy robic tweening, ale (2) wydaje sie
+nieco bardziej konserwatywne, dlatego to od niego
+bym sprobowal zaczac
+
+stad jednak pierwsze pytanie, czy jest jakis
+genertczny sposob na wyrazenie sygnatury typu
+mettody, ktora zwraca wiecej niz jedna wartosc.
+
+Ewentualnie mozemy zdefiniowac typ
+
+(define-type (Cursor+Offset cursor: Cursor
+                            offset: Position))
+
+i to jego mialaby zwracac nasza funkcja cursor-under.
+
+
+No dobra, dodalismy spbie mape absolute-position (choc
+screen-position byloby moze lepsze)
+
 * 21.11.2022
 
 Na pewno musimy dodac metode "press!" do interfejsu Panel.
@@ -100,9 +158,6 @@ czynic
 
 tzn. na pewno trzeba wywolac "cursor-under".
 nastepnie wybieramy 
-
-
-
 
 * 18.11.2022
 
