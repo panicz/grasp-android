@@ -492,8 +492,8 @@
 ;; Instead, (unset! (dotted? pair)) should be used.
 
 (define-property (dotted? cell::pair)::boolean
-  (not (or (null? (tail cell))
-	   (pair? (tail cell)))))
+  (not (or (null? (cdr cell))
+	   (pair? (cdr cell)))))
 
 ;; `pre-head-space` appears before the first element
 ;; of a list, after the opening paren (therefore
@@ -509,7 +509,7 @@
 
 (define-property+ (post-head-space cell::pair)::Space
   (if (and (not (dotted? cell))
-	   (null? (tail cell)))
+	   (null? (cdr cell)))
       (Space fragments: (cons 0 '()))
       (Space fragments: (cons 1 '()))))
 
@@ -610,6 +610,9 @@
 
 (define-object (EmptyListProxy inner::Space)::Tile  
   (define space :: Space)
+
+  (define (hashCode)::int
+    (java.lang.System:identityHashCode (this)))
   
   (define (part-at index::Index)::Indexable*
     (match index
