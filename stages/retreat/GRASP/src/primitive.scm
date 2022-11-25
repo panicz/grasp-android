@@ -49,6 +49,9 @@
 (define (editing?) ::boolean
   (not (evaluating?)))
 
+(define-property+ (screen-position element::Element)::Position
+  (Position))
+
 ;; The purpose of Atoms is to solve the problem that
 ;; the actual atomic Scheme values have different
 ;; types (e.g. the result of reading "1" is a number,
@@ -99,7 +102,7 @@
 
   (define (insert-char! c::char index::int)::void
     (builder:insert index c)
-    (set! cache #!null)
+      (set! cache #!null)
     (set! source ((builder:toString):intern)))
 
   (define (delete-char! index::int)::void
@@ -145,7 +148,6 @@
 
 (define (atom-subpart a::Atom start::int)::Atom
   (a:subpart start))
-
 
 (define-object (cons a d)::Tile
   (define (equals object)::boolean
@@ -391,6 +393,10 @@
        (lambda (item::Element traversal::Traversal)
 	 (with-translation (traversal:left
 			    traversal:top)
+	     (unless (is item instance? Space)
+	       (let ((position ::Position (screen-position item)))
+		 (set! position:left (painter:current-translation-left))
+		 (set! position:top (painter:current-translation-top))))
 	     (let ((context (recons traversal:index
 				    context)))
 	       (when (equal? context selection-start)
@@ -409,22 +415,22 @@
 (define (draw! object #!key
 	       (context::Cursor '()))
   ::void
-  (cond ((instance? object Element)
-	 (invoke (as Element object)
-		 'draw! context))
+  (let ((painter (the-painter)))
+    (cond ((instance? object Element)
+	   (let ((element (as Element object)))
+	     (element:draw! context)))
 
-	((null? object)
-	 (values))
+	  ((null? object)
+	   (values))
 
-	(else
-	 (with-translation (0 1)
-	     (invoke (the-painter)
-		     'draw-string!
-		     (with-output-to-string
-		       (lambda () (write object)))
-		     (and (pair? (the-cursor))
-			  (equal? (cdr (the-cursor)) context)
-			  (car (the-cursor))))))))
+	  (else
+	   (with-translation (0 1)
+	       (painter:draw-string!
+		(with-output-to-string
+		  (lambda () (write object)))
+		(and (pair? (the-cursor))
+		     (equal? (cdr (the-cursor)) context)
+		     (car (the-cursor)))))))))
 
 (define (cursor-under left::real top::real
 		      #!optional

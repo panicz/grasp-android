@@ -181,7 +181,16 @@
       #t))
 
   (define (press! finger::byte #;at x::real y::real)::boolean
-    #t)
+    (parameterize/update-sources ((the-document document)
+				  (the-cursor cursor)
+				  (the-selection-anchor
+				   selection-anchor))
+      (let-values (((selection-start selection-end) (the-selection)))
+	(let* ((path (cursor-under x y))
+	       (target ::Element (the-expression at: path))
+	       (position ::Position (screen-position target)))
+	  (WARN target" at "position" pressed at "x", "y)
+	  #t))))
   
   (define (key-pressed! key-code)::boolean
     (parameterize/update-sources ((the-document document)
