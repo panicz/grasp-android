@@ -76,3 +76,16 @@
 
 (define-syntax-rule (falsely actions ...)
   (begin actions ... #f))
+
+(define (stack-trace ex::java.lang.Throwable)
+  (let* ((sw ::java.io.StringWriter (java.io.StringWriter))
+	 (pw ::java.io.PrintWriter (java.io.PrintWriter sw)))
+    (ex:printStackTrace pw)
+    (sw:toString)))
+
+(define-syntax-rule (safely actions ...)
+  (try-catch
+   (begin actions ...)
+   (ex java.lang.Throwable
+       (for line in (take 4 (string-split (stack-trace ex) "\n"))
+	 (WARN line)))))

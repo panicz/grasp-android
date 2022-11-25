@@ -59,12 +59,6 @@ mutations of an n-element set.\"
   (logger size))
 
 
-(define (stack-trace ex::java.lang.Throwable)
-  (let* ((sw ::java.io.StringWriter (java.io.StringWriter))
-	 (pw ::java.io.PrintWriter (java.io.PrintWriter sw)))
-    (ex:printStackTrace pw)
-    (sw:toString)))
-
 (define (run-editor #!optional
 		    (io ::Terminal (make-terminal)))
   ::void
@@ -88,12 +82,7 @@ mutations of an n-element set.\"
       (let ((output-extent ::Extent
 			   (extent (head (the-document)))))
 	((the-painter):clear!)
-	(try-catch
-	 (begin
-	   (draw-document! (the-document)))
-	 (ex java.lang.Throwable
-	     (for-each WARN
-		       (take 4 (string-split (stack-trace ex) "\n")))))
+	(safely (draw-document! (the-document)))
 	(io:setCursorVisible #f)
 	(io:clearScreen)
 	(io:setCursorPosition 0 0)
@@ -101,14 +90,12 @@ mutations of an n-element set.\"
 	(io:setCursorPosition
 	 0
 	 (+ 2 output-extent:height))
-	(try-catch
+	(safely
 	 (io:putString (with-output-to-string
 			 (lambda ()
 			   (write (the-cursor))
 			   (write (the-selection-anchor))
-			   (write (the-expression)))))
-	 (ex java.lang.Throwable
-	     (WARN (ex:toString))))
+			   (write (the-expression))))))
 	(invoke (current-message-handler)
 		'display-messages io)
 	(io:flush)
@@ -121,22 +108,17 @@ mutations of an n-element set.\"
 	       (type ::KeyType (key:getKeyType)))
 	  (match type	
 	    (,KeyType:ArrowLeft
-	     (try-catch
+	     (safely
 	      (move-cursor-left! selection: (if (key:shift-down?)
 						Selection:resize
-						Selection:discard))
-	      (ex java.lang.Throwable
-		  (WARN (ex:toString))))
+						Selection:discard)))
 	     (continue))
 	    
 	    (,KeyType:ArrowRight
-	     (try-catch
+	     (safely
 	      (move-cursor-right! selection: (if (key:shift-down?)
 						Selection:resize
-						Selection:discard))
-	      (ex java.lang.Throwable
-		  (display (ex:toString) (current-error-port))
-		  (WARN (ex:toString))))
+						Selection:discard)))
 	     (continue))
 	    	    
 	    (,KeyType:EOF
@@ -157,17 +139,11 @@ mutations of an n-element set.\"
 	       (continue)))
 
 	    (,KeyType:Tab
-	     (try-catch
-	      (enchant-expression!)
-	      (ex java.lang.Throwable
-		  (WARN (ex:toString))))
+	     (safely (enchant-expression!))
 	     (continue))
 	    
 	    (,KeyType:Delete
-	     (try-catch
-	      (delete-forward!)
-	      (ex java.lang.Throwable
-		  (WARN (ex:toString))))
+	     (safely (delete-forward!))
 	     (continue))
 
 	    (,KeyType:Enter
@@ -176,10 +152,7 @@ mutations of an n-element set.\"
 	     (continue))
 	    
 	    (,KeyType:Backspace
-	     (try-catch
-	      (delete-backward!)
-	      (ex java.lang.Throwable
-		  (WARN (ex:toString))))
+	     (safely (delete-backward!))
 
 	     (continue))
 	    
