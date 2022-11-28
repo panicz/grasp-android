@@ -10,6 +10,9 @@
     ((_ input-types to: output-type + ...)
      procedure)))
 
+(define-syntax-rule (list-of type)
+  list)
+
 #|
 (define-simple-class Struct ()
   interface: #t

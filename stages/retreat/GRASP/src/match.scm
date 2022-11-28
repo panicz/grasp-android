@@ -257,11 +257,13 @@
 
       ((_ ((name :: type binding) . rest) . body)
        (identifier? #'name)
-       #'(let ((name ::type binding))
-           (and name
-                (and-let* rest
-                  . body))))
-
+       #'(let ((value binding))
+	   (and (instance? value type)
+		value
+		(let ((name ::type value))
+                  (and-let* rest
+		    . body)))))
+	   
       ((_ (((values . structure) binding) . rest) . body)
        #'(call-with-values (lambda () expression)
            (lambda args
