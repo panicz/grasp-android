@@ -12,32 +12,32 @@
 (import (extent))
 (import (painter))
 
-(define-enum Selection (resize discard))
+(define-enum SelectionAction (resize discard))
 
 (define-parameter (cursor-column)::real 0)
 
 (define (move-cursor-right!
-	 #!key (selection::Selection Selection:discard))
+	 #!key (selection::SelectionAction SelectionAction:discard))
   (set! (the-cursor) (cursor-advance))
   (let* ((painter (the-painter))
 	 (cursor-position ::Position (painter:cursor-position)))
     (set! (cursor-column) cursor-position:left))
   (match selection
-    (,Selection:discard
+    (,SelectionAction:discard
      (set! (the-selection-anchor) (the-cursor)))
-    (,Selection:resize
+    (,SelectionAction:resize
      (values))))
 
 (define (move-cursor-left!
-	 #!key (selection::Selection Selection:discard))
+	 #!key (selection::SelectionAction SelectionAction:discard))
   (set! (the-cursor) (cursor-retreat))
   (let* ((painter (the-painter))
 	 (cursor-position ::Position (painter:cursor-position)))
     (set! (cursor-column) cursor-position:left))
   (match selection
-    (,Selection:discard
+    (,SelectionAction:discard
      (set! (the-selection-anchor) (the-cursor)))
-    (,Selection:resize
+    (,SelectionAction:resize
      (values))))
 
 (define (move-cursor-up!)

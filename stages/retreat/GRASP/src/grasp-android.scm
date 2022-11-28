@@ -215,7 +215,7 @@
   
   (define canvas ::Canvas)
 
-  (define activity ::AndroidActivity)
+  (define activity ::AndroidActivity source)
   
   (define (showKeyboard)::void
     (when (requestFocus)
@@ -564,9 +564,8 @@
   (AndroidView source)
   (setFocusable #t)
   (setFocusableInTouchMode #t)
-  (paint:setFlags Paint:ANTI_ALIAS_FLAG)
   ;;(setClickable #t)
-  (set! activity source))
+  (paint:setFlags Paint:ANTI_ALIAS_FLAG))
 
 (define-interface Polysensoric
     (GestureDetector:OnGestureListener
@@ -697,15 +696,15 @@ ue
       (lambda _
 	(move-cursor-left!
 	 selection: (if (shift-pressed?)
-			Selection:resize
-			Selection:discard))))
+			SelectionAction:resize
+			SelectionAction:discard))))
 
     (set! (on-key-press KeyEvent:KEYCODE_DPAD_RIGHT)
       (lambda _
 	(move-cursor-right!
 	 selection: (if (shift-pressed?)
-			Selection:resize
-			Selection:discard))))
+			SelectionAction:resize
+			SelectionAction:discard))))
 
     (set! (on-key-press KeyEvent:KEYCODE_DPAD_UP)
       move-cursor-up!)

@@ -25,11 +25,59 @@
 (import (painter))
 (import (print))
 (import (parameterize-up))
+(import (document-operations))
+(import (space))
+
+(define-alias List java.util.List)
+(define-alias ArrayList java.util.ArrayList)
 
 (define-interface Drag ()
   (move! x::real y::real dx::real dy::real)::void
-  (drop! x::real y::real vx::real dy::real)::void
+  (drop! x::real y::real vx::real vy::real)::void
   )
+
+(define-interface Drawable ()
+  (draw!)::void
+  )
+
+(define-object (Overlay)::Drawable
+  (define elements :: List[Drawable] (ArrayList[Drawable]))
+  
+  (define (draw!)::void
+    (for element::Drawable in elements
+      (element:draw!)))
+  
+  (define (add! element::Drawable)::void
+    (elements:add element))
+  
+  (define (remove! element::Drawable)::void
+    (elements:remove element))
+  )
+
+(define overlay ::Overlay (Overlay))
+
+(define-object (Selected sequence::cons)::Drawable
+  (define items ::cons sequence)
+  (define (draw!)::void
+    (parameterize ((the-document items))
+      (let ((position ::Position (screen-position items)))
+	(with-translation (position:left position:top)
+	    (draw-sequence! items)))))
+  )
+
+(define-object (DragAround target::Selected)::Drag
+  (define selected ::Selected target)
+  
+  (define (move! x::real y::real dx::real dy::real)::void
+    (let ((position ::Position (screen-position selected:items)))
+      (set! position:left (+ position:left dx))
+      (set! position:top (+ position:top dy))))
+
+  (define (drop! x::real y::real vx::real vy::real)::void
+    (values))
+
+  (overlay:add! selected))
+
 
 (define-mapping (dragging finger::byte)::Drag #!null)
 
@@ -38,6 +86,14 @@
   (tap! finger::byte #;at x::real y::real)::boolean
   (press! finger::byte #;at x::real y::real)::boolean
 
+  (release! finger::byte #;at x::real y::real
+	    #;with vx::real vy::real)
+  ::boolean
+  
+  (move! finger::byte #;to x::real y::real
+	 #;by vx::real vy::real)
+  ::boolean
+  
   (key-pressed! key-code)::boolean
   (key-released! key-code)::boolean
   (key-typed! unicode)::boolean
@@ -127,6 +183,44 @@
 	    (set! focus HorizontalSplitFocus:Right)
 	    (right:press! finger #;at (- x left-width line-width) y
 			  )))))
+
+  ((release! finger::byte #;at x::real y::real
+	     #;with vx::real vy::real)
+   ::boolean
+   (let* ((painter (the-painter))
+	  (extent (the-panel-extent))
+	  (line-width (invoke painter 'vertical-line-width))
+          (inner-width (- extent:width
+			  line-width))
+          (left-width (* at inner-width))
+          (right-width (- inner-width left-width)))
+     (cond ((is x < left-width)
+	    (set! focus HorizontalSplitFocus:Left)
+	    (left:release! finger #;at x y #;with vx vy))
+	   ((is (+ left-width line-width) < x)
+	    (set! focus HorizontalSplitFocus:Right)
+	    (right:release! finger
+			    #;at (- x left-width line-width) y
+				 #;with vx vy)))))
+
+  ((move! finger::byte #;to x::real y::real
+	  #;by dx::real dy::real)
+   ::boolean
+   (let* ((painter (the-painter))
+	  (extent (the-panel-extent))
+	  (line-width (invoke painter 'vertical-line-width))
+          (inner-width (- extent:width
+			  line-width))
+          (left-width (* at inner-width))
+          (right-width (- inner-width left-width)))
+     (cond ((is x < left-width)
+	    (set! focus HorizontalSplitFocus:Left)
+	    (left:move! finger #;to x y #;by dx dy))
+	   ((is (+ left-width line-width) < x)
+	    (set! focus HorizontalSplitFocus:Right)
+	    (right:move! finger
+			 #;to (- x left-width line-width) y
+			      #;by dx dy)))))
   
   ((key-pressed! key-code)::boolean
    (match focus
@@ -186,12 +280,65 @@
 				  (the-selection-anchor
 				   selection-anchor))
       (let-values (((selection-start selection-end) (the-selection)))
-	(let* ((path (cursor-under x y))
-	       (target ::Element (the-expression at: path))
-	       (position ::Position (screen-position target)))
-	  (WARN target" at "position" pressed at "x", "y)
+	(and-let* ((path (cursor-under x y))
+		   (`(,tip . ,subpath) path)
+		   (parent ::Element (the-expression at: subpath))
+		   (target ::Element (parent:part-at tip))
+		   (position ::Position (screen-position target)))
+	  (cond
+	   ((isnt parent eq? target)
+	    (WARN "reached non-final item"))
+	   
+	   ((isnt dragging clean?)
+	    (WARN "should start scrolling or zooming"))
+	   
+	   ((is target Space?)
+	    (WARN "should start drawing a gesture"))
+	   
+	   ((is selection-start cursor< path cursor< selection-end)
+	    (WARN "should move selection"))
+	   
+	   ((or (is target Atom?)
+		(and (is target cons?)
+		     (eqv? tip (target:first-index))))
+	    ;; powinnismy powiekszyc spacje poprzedzajaca
+	    ;; wydobywany element o szerokosc tego elementu
+	    ;; podzielona przez (painter:space-width)
+	    (let* ((target (take-cell-at! subpath))
+		   (selection (Selected target)))
+	      (set! (dragging 0) (DragAround selection))
+	      ))
+
+	   ((and (is target cons?)
+		 (eqv? tip (target:last-index)))
+	    (WARN "should start resizing the object"))
+
+	   (else
+	    (WARN "really don't know what to do")))
 	  #t))))
-  
+
+  (define (release! finger::byte #;at x::real y::real
+		    #;with vx::real vy::real)
+    ::boolean
+    (parameterize/update-sources ((the-document document)
+				  (the-cursor cursor)
+				  (the-selection-anchor
+				   selection-anchor))
+      (and-let* ((drag ::Drag (dragging 0)))
+	(drag:drop! x y vx vy)
+	#t)))
+
+  (define (move! finger::byte #;to x::real y::real
+		 #;by dx::real dy::real)
+    ::boolean
+    (parameterize/update-sources ((the-document document)
+				  (the-cursor cursor)
+				  (the-selection-anchor
+				   selection-anchor))
+      (and-let* ((drag ::Drag (dragging 0)))
+	(drag:move! x y dx dy)
+	#t)))
+
   (define (key-pressed! key-code)::boolean
     (parameterize/update-sources ((the-document document)
 				  (the-cursor cursor)

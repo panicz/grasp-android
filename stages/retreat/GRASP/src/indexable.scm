@@ -37,6 +37,11 @@
 (define-interface Element (Indexable)
   (draw! context::Cursor)::void
   (cursor-under* x::real y::real path::Cursor)::Cursor*
+
+  #|
+  (cursor-above* path::Cursor)::Cursor*
+  (cursor-below* path::Cursor)::Cursor*
+|#
   )
 
 (define-object (Simple)::Element
@@ -53,7 +58,7 @@
 
   (define (cursor-under* x::real y::real path::Cursor)::Cursor*
     #!abstract)
-  
+
   (Base))
 
 (define-interface Tile (Element)
@@ -66,9 +71,9 @@ that provide the default values to some functions that
 operate on cursors.
 |#
 
-(define-parameter (the-cursor) :: Cursor '())
+(define-parameter (the-cursor) ::Cursor '())
 
-(define-parameter (the-document) :: pair
+(define-parameter (the-document) ::pair
   (cons (cons '() '()) '()))
 
 (define-parameter (the-selection-anchor) :: Cursor '())
@@ -108,9 +113,9 @@ operate on cursors.
   ;; (the-cursor) and (the-selection-anchor),
   ;; because cursor< is parameterized with (the-document)
   ;; and the remaining parameters are used directly
-  (if (is (the-selection-anchor) cursor< (the-cursor))
-      (values (the-selection-anchor) (the-cursor))
-      (values (the-cursor) (the-selection-anchor))))
+   (if (is (the-selection-anchor) cursor< (the-cursor))
+       (values (the-selection-anchor) (the-cursor))
+       (values (the-cursor) (the-selection-anchor))))
 
 (define (within-selection? context::Cursor)::boolean
   ;; implicitly parameterized with (the-document),

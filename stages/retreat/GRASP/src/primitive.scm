@@ -395,8 +395,10 @@
 			    traversal:top)
 	     (unless (is item instance? Space)
 	       (let ((position ::Position (screen-position item)))
-		 (set! position:left (painter:current-translation-left))
-		 (set! position:top (painter:current-translation-top))))
+		 (set! position:left
+		       (painter:current-translation-left))
+		 (set! position:top
+		       (painter:current-translation-top))))
 	     (let ((context (recons traversal:index
 				    context)))
 	       (when (equal? context selection-start)

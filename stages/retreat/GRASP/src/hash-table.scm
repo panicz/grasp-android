@@ -2,8 +2,9 @@
 (define-alias make-weak-key-hash-table java.util.WeakHashMap)
 (define-alias make-hash-table java.util.HashMap)
 (define-alias Map java.util.Map)
+(define-alias Set java.util.Set)
 
-(define (hash-set! table::Map key value)
+(define (hash-set! table::Map key value)::void
   (table:put key value))
 
 (define (hash-ref table::Map key . default)
@@ -12,7 +13,7 @@
       (if (not (null? default))
 	  ((car default)))))
 
-(define (hash-remove! table::Map key)
+(define (hash-remove! table::Map key)::void
   (table:remove key))
   
 ;; hash-ref+ is like hash-ref, but it stores
@@ -26,11 +27,23 @@
 	    (table:put key value)
 	    value))))
 
-(define-syntax-rule (unset! (property object))
-  (let ((table (procedure-property property 'table)))
+(define-syntax-rule (unset! (mapping object))
+  (let ((table ::Map (procedure-property mapping 'table)))
     (hash-remove! table object)))
 
-(define-syntax-rule (update! (property object) expression)
+(define-syntax-rule (update! (mapping object) expression)
   (let ((value expression))
-    (unless (equal? (property object) value)
-      (set! (property object) value))))
+    (unless (equal? (mapping object) value)
+      (set! (mapping object) value))))
+
+(define (reset! mapping)::void
+  (let ((table ::Map (procedure-property mapping 'table)))
+    (table:clear)))
+
+(define (clean? mapping)::boolean
+  (let ((table ::Map (procedure-property mapping 'table)))
+    (table:isEmpty)))
+  
+(define (overrides mapping)::Set
+  (let ((table ::Map (procedure-property mapping 'table)))
+    (table:keySet)))

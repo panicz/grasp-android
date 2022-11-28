@@ -109,16 +109,18 @@ mutations of an n-element set.\"
 	  (match type	
 	    (,KeyType:ArrowLeft
 	     (safely
-	      (move-cursor-left! selection: (if (key:shift-down?)
-						Selection:resize
-						Selection:discard)))
+	      (move-cursor-left!
+	       selection: (if (key:shift-down?)
+			      SelectionAction:resize
+			      SelectionAction:discard)))
 	     (continue))
 	    
 	    (,KeyType:ArrowRight
 	     (safely
-	      (move-cursor-right! selection: (if (key:shift-down?)
-						Selection:resize
-						Selection:discard)))
+	      (move-cursor-right!
+	       selection: (if (key:shift-down?)
+			      SelectionAction:resize
+			      SelectionAction:discard)))
 	     (continue))
 	    	    
 	    (,KeyType:EOF

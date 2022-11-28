@@ -75,14 +75,15 @@
 (define-syntax define-box
   (syntax-rules (::)
     ((_ (name)::type initial-value)
-     (define-constant name 
+     (define-early-constant name 
        (let* ((state ::type initial-value)
 	      (getter (lambda () state)))
-	 (set! (setter getter) (lambda (value::type) (set! state value)))
+	 (set! (setter getter)
+	       (lambda (value::type) (set! state value)))
 	 getter)))
        
     ((_ (name) initial-value)
-     (define-constant name 
+     (define-early-constant name 
        (let* ((state initial-value)
 	      (getter (lambda () state)))
 	 (set! (setter getter) (lambda (value) (set! state value)))
@@ -214,14 +215,14 @@
 (set! (on-key-press KeyType:ArrowLeft)
   (lambda ()
     (move-cursor-left! selection: (if (shift-pressed?)
-				      Selection:resize
-				      Selection:discard))))
+				      SelectionAction:resize
+				      SelectionAction:discard))))
 
 (set! (on-key-press KeyType:ArrowRight)
   (lambda ()
     (move-cursor-right! selection: (if (shift-pressed?)
-				       Selection:resize
-				       Selection:discard))))
+				       SelectionAction:resize
+				       SelectionAction:discard))))
 
 (set! (on-key-press KeyType:ArrowUp)
       move-cursor-up!)
@@ -233,7 +234,7 @@
 
 (define-object (TerminalPainter screen::LanternaScreen)::Painter
   
-  (define io::LanternaScreen #!null)
+  (define io::LanternaScreen screen)
 
   (define text-color ::Color Color:ANSI:DEFAULT)
   (define background-color ::Color Color:ANSI:DEFAULT)
@@ -282,8 +283,7 @@
     (let ((size (io:getTerminalSize)))
       (size:getRows)))
   
-  (CharPainter)
-  (set! io screen))
+  (CharPainter))
 
 (define (run
 	 #!optional

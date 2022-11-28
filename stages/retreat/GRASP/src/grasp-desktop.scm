@@ -484,7 +484,8 @@ automatically by the AWT framework."))
     (set! (the-painter) (this))
     ;; cf. https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
     (graphics:setRenderingHints rendering-hints)
-    (invoke (the-top-panel) 'draw! '()))
+    (invoke (the-top-panel) 'draw! '())
+    (overlay:draw!))
 
   (javax.swing.JComponent)
   (rendering-hints:put RenderingHints:KEY_ANTIALIASING
@@ -590,8 +591,9 @@ automatically by the AWT framework."))
     (- (event:getY) 26))
   
   (define (mouseClicked event::MouseEvent)::void
-    (invoke (the-top-panel) 'tap! 0 #;at (x event) (y event))
-    (invoke (as screen-renderer (the-painter)) 'repaint))
+    (when (invoke (the-top-panel) 'tap! 0 #;at (x event) (y event))
+      (invoke (as screen-renderer (the-painter)) 'repaint)
+      (repaint)))
   
   (define previous-x ::real 0)
   (define previous-y ::real 0)
@@ -599,24 +601,29 @@ automatically by the AWT framework."))
   (define (mousePressed event::MouseEvent)::void
     (let ((x (x event))
 	  (y (y event)))
-      (invoke (the-top-panel) 'press! 0 #;at x y)
+      (when (invoke (the-top-panel) 'press! 0 #;at x y)
+	(invoke (as screen-renderer (the-painter)) 'repaint)
+	(repaint))
       (set! previous-x x)
       (set! previous-y y)))
   
   (define (mouseDragged event::MouseEvent)::void
     (let ((x (x event))
 	  (y (y event)))
-      (and-let* ((drag ::Drag (dragging 0)))
-	(drag:move! x y (- x previous-x) (- y previous-y)))
+      (when (invoke (the-top-panel) 'move!
+		    0 x y (- x previous-x) (- y previous-y))
+	(invoke (as screen-renderer (the-painter)) 'repaint)
+	(repaint))
       (set! previous-x x)
       (set! previous-y y)))
 
   (define (mouseReleased event::MouseEvent)::void
     (let ((x (x event))
 	  (y (y event)))
-      (and-let* ((drag ::Drag (dragging 0)))
-	(drag:drop! x y (- x previous-x) (- y previous-y)))
-      ))
+      (when (invoke (the-top-panel) 'release!
+		    0 x y (- x previous-x) (- y previous-y))
+	(invoke (as screen-renderer (the-painter)) 'repaint)
+	(repaint))))
 
   (define (keyTyped event::KeyEvent)::void
    ;;(display (event:toString))
@@ -675,15 +682,15 @@ automatically by the AWT framework."))
       (lambda _
 	(move-cursor-left!
 	 selection: (if (shift-pressed?)
-			Selection:resize
-			Selection:discard))))
+			SelectionAction:resize
+			SelectionAction:discard))))
 
 (set! (on-key-press KeyEvent:VK_RIGHT)
       (lambda _
 	(move-cursor-right!
 	 selection: (if (shift-pressed?)
-			Selection:resize
-			Selection:discard))))
+			SelectionAction:resize
+			SelectionAction:discard))))
 
 (set! (on-key-press KeyEvent:VK_UP)
       move-cursor-up!)
