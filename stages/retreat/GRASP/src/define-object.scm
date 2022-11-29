@@ -9,13 +9,46 @@
 		 $lookup$
 		 let
 		 let*)
+    
     ((object-definition (object-name . args)
+			(arg :: type . rest)
+			supers
+			(slots ...)
+			methods
+			(initializers ...)
+			spec)
+     (object-definition (object-name . args)
+			rest
+			supers
+			(slots ... (arg :: type))
+			methods
+			(initializers ... (slot-set! (this) 'arg arg))
+			spec))
+
+    ((object-definition (object-name . args)
+			(arg . rest)
+			supers
+			(slots ...)
+			methods
+			(initializers ...)
+			spec)
+     (object-definition (object-name . args)
+			rest
+			supers
+			(slots ... (arg))
+			methods
+			(initializers ... (slot-set! (this) 'arg arg))
+			spec))
+    
+    ((object-definition (object-name . args)
+			()
 			(supers ...)
 			slots
 			methods
 			initializers
 			(:: type . spec))
      (object-definition (object-name . args)
+			()
 			(supers ... type)
 			slots
 			methods
@@ -23,6 +56,7 @@
 			spec))
 
     ((object-definition (object-name . args)
+			()
 			supers
 			slots
 			(methods ...)
@@ -31,6 +65,7 @@
 			   . body)
 			 . spec))
      (object-definition (object-name . args)
+			()
 			supers
 			slots
 			(methods
@@ -40,12 +75,14 @@
 			spec))
 
     ((object-definition (object-name . args)
+			()
 			supers
 			slots
 			(methods ...)
 			initializers
 			((define (method . params) . body) . spec))
      (object-definition (object-name . args)
+			()
 			supers
 			slots
 			(methods ... ((method . params) . body))
@@ -53,12 +90,14 @@
 			spec))
 
     ((object-definition (object-name . args)
+			()
 			supers
 			(slots ...)
 			methods
 			(initializers ...)
 			((define slot :: type value) . spec))
      (object-definition (object-name . args)
+			()
 			supers
 			(slots
 			 ...
@@ -70,12 +109,14 @@
 			spec))
 
     ((object-definition (object-name . args)
+			()
 			supers
 			(slots ...)
 			methods
 			initializers
 			((define slot :: type) . spec))
      (object-definition (object-name . args)
+			()
 			supers
 			(slots ... (slot :: type))
 			methods
@@ -83,12 +124,14 @@
 			spec))
     
     ((object-definition (object-name . args)
+			()
 			supers
 			(slots ...)
 			methods
 			(initializers ...)
 			((define slot value) . spec))
      (object-definition (object-name . args)
+			()
 			supers
 			(slots ... (slot))
 			methods
@@ -98,6 +141,7 @@
 			spec))
 
     ((object-definition (object-name)
+			()
 			(supers ...)
 			(slots ...)
 			(methods ...)
@@ -107,12 +151,14 @@
        slots ... methods ...))
 
     ((object-definition (object-name . args)
+			()
 			(supers ...)
 			slots
 			(methods ...)
 			(initializers ...)
 			())
      (object-definition (object-name)
+			()
 			(supers ...)
 			slots
 			(methods
@@ -123,12 +169,14 @@
 			()))
     
     ((object-definition (object-name . args)
+			()
 			(supers ...)
 			slots
 			(methods ...)
 			(initializers ...)
 			((set! property value) . init))
      (object-definition (object-name)
+			()
 			(supers ...)
 			slots
 			(methods
@@ -140,12 +188,14 @@
 			()))
 
     ((object-definition (object-name . args)
+			()
 			(supers ...)
 			slots
 			(methods ...)
 			(initializers ...)
 			((invoke . some-method) . init))
      (object-definition (object-name)
+			()
 			(supers ...)
 			slots
 			(methods
@@ -157,12 +207,14 @@
 			()))
 
     ((object-definition (object-name . args)
+			()
 			(supers ...)
 			slots
 			(methods ...)
 			(initializers ...)
 			((($lookup$ . some) . thing) . init))
      (object-definition (object-name)
+			()
 			(supers ...)
 			slots
 			(methods
@@ -174,12 +226,14 @@
 			()))
 
     ((object-definition (object-name . args)
+			()
 			(supers ...)
 			slots
 			(methods ...)
 			(initializers ...)
 			((let . something) . init))
      (object-definition (object-name)
+			()
 			(supers ...)
 			slots
 			(methods
@@ -191,12 +245,14 @@
 			()))
 
     ((object-definition (object-name . args)
+			()
 			(supers ...)
 			slots
 			(methods ...)
 			(initializers ...)
 			((let* . something) . init))
      (object-definition (object-name)
+			()
 			(supers ...)
 			slots
 			(methods
@@ -208,12 +264,14 @@
 			()))
     
     ((object-definition (object-name . args)
+			()
 			(supers ...)
 			slots
 			(methods ...)
 			(initializers ...)
 			((super . args*) . init))
      (object-definition (object-name)
+			()
 			(supers ... super)
 			slots
 			(methods
@@ -230,6 +288,8 @@
 
 (define-syntax-rule (define-object (object-name . args) . spec)
   (object-definition (object-name . args)
+		     #;args
+		     args
 		     #;supers
 		     ()
 		     #;slots
