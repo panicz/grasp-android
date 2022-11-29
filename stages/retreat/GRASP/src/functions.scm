@@ -13,12 +13,17 @@
 (define tail cdr)
 
 (define (drop k::integer #;elements-from s::list)::list
-  (if (is k <= 0)
-      s
-      (drop (- k 1) #;elements-from (cdr s))))
+  (if (and (pair? s)
+	   (> k 0))
+      (let loop ((result (cdr s))
+		 (k (- k 1)))
+	(if (or (<= k 0) (null? result))
+	    result
+	    (loop (cdr result) (- k 1))))
+      s))
 
 (e.g.
- (drop 2 '(1 2 3))
+ (drop 2 (list 1 2 3))
  ===> (3))
 
 (define (drop-after! k::integer #;elements-in s::list)::list
@@ -59,9 +64,18 @@
  ===> (a b c))
 
 (define (take k::integer #;elements-from s::list)::list
-  (if (is k <= 0)
-      '()
-      (cons (car s) (take (- k 1) #;elements-from (cdr s)))))
+  (if (and (pair? s)
+	   (> k 0))
+      (let ((result (cons (car s) '())))
+	(let loop ((input (cdr s))
+		   (tip result)
+		   (k (- k 1)))
+	  (if (or (<= k 0) (null? input))
+	      result
+	      (begin
+		(set! (cdr tip) (cons (car input) (cdr tip)))
+		(loop (cdr input) (cdr tip) (- k 1))))))
+      s))
 
 (e.g.
  (take 3 #;elements-from '(1 2 3 4 5))
@@ -77,36 +91,7 @@
 (e.g.
  (is '(4 5) suffix? '(1 2 3 4 5)))
 
-(define (fold-left f x0 xs)
-  (match xs
-    ('() x0)
-    (`(,h . ,t) (fold-left f (f x0 h) t))))
-
-(e.g.
- (fold-left (lambda (a b) `(,a + ,b)) 'e '(a b c d))
- ===> ((((e + a) + b) + c) + d))
-
-(define (fold-right f x0 xs)
-  (match xs
-    ('() x0)
-    (`(,h . ,t) (f h (fold-right f x0 t)))))
-
-(e.g.
- (fold-right (lambda (a b) `(,a + ,b)) 'e '(a b c d))
- ===> (a + (b + (c + (d + e)))))
-
-(define (only cool? stuff)
-  (match stuff
-    ('()
-     '())
-    (`(,first . ,rest)
-     (if (cool? first)
-	 `(,first . ,(only cool? rest))
-	 (only cool? rest)))))
-
-(e.g.
- (only even? '(1 2 3 4 5 6))
- ===> (2 4 6))
+(define predicate procedure)
 
 (define (any satisfying? elements)
   (and-let* ((`(,first . ,rest) elements))
@@ -124,6 +109,82 @@
 
 (e.g.
  (every even? '(2 4 6)))
+
+(define (fold-left f x0 . xs*)
+  (define (fold-left1 f x0 xs)
+    (if (null? xs)
+	x0
+	(fold-left1 f (f x0 (car xs)) (cdr xs))))
+
+  (define (fold-left2 f x0 xs xs2)
+    (if (or (null? xs) (null? xs2))
+	x0
+	(fold-left2 f (f x0 (car xs) (car xs2)) (cdr xs) (cdr xs2))))
+
+  (define (fold-left3 f x0 xs xs2 xs3)
+    (if (or (null? xs) (null? xs2) (null? xs3))
+	x0
+	(fold-left3 f (f x0 (car xs) (car xs2) (car xs3)) (cdr xs) (cdr xs2) (cdr xs3))))
+
+  (define (fold-left* f x0 . xs*)
+    (if (any null? xs*)
+	x0
+	(apply fold-left* f (apply f x0 (map car xs*)) (map cdr xs*))))
+  (cond
+   ((null? xs*) x0)
+   ((null? (cdr xs*)) (fold-left1 f x0 (car xs*)))
+   ((null? (cddr xs*)) (fold-left2 f x0 (car xs*) (cadr xs*)))
+   ((null? (cdddr xs*)) (fold-left3 f x0 (car xs*) (cadr xs*) (caddr xs*)))
+   (else (apply fold-left* f x0 xs*))))
+
+(define (fold-right f x0 . xs*)
+  (define (fold-right1 f x0 xs)
+    (if (null? xs)
+	x0
+	(f (car xs) (fold-right1 f x0 (cdr xs)))))
+
+  (define (fold-right2 f x0 xs xs2)
+    (if (or (null? xs) (null? xs2))
+	x0
+	(f (car xs) (car xs2) (fold-right2 f x0 (cdr xs) (cdr xs2)))))
+
+  (define (fold-right3 f x0 xs xs2 xs3)
+    (if (or (null? xs) (null? xs2) (null? xs3))
+	x0
+	(f (car xs) (car xs2) (car xs3)
+	   (fold-right3 f x0 (cdr xs) (cdr xs2) (cdr xs3)))))
+
+  (define (fold-right* f x0 . xs*)
+    (if (any null? xs*)
+	x0
+	(apply f (fold-right1
+		  (lambda (x y)
+		    (cons (car x) y))
+		  (list (apply fold-right* f x0 (map cdr xs*)))
+		  xs*))))
+  (cond
+   ((null? xs*) x0)
+   ((null? (cdr xs*)) (fold-right1 f x0 (car xs*)))
+   ((null? (cddr xs*)) (fold-right2 f x0 (car xs*) (cadr xs*)))
+   ((null? (cdddr xs*)) (fold-right3 f x0 (car xs*) (cadr xs*) (caddr xs*)))
+   (else (apply fold-right* f x0 xs*))))
+
+(e.g.
+ (fold-right (lambda (a b) `(,a + ,b)) 'e '(a b c d))
+ ===> (a + (b + (c + (d + e)))))
+
+(define (only cool? stuff)
+  (match stuff
+    ('()
+     '())
+    (`(,first . ,rest)
+     (if (cool? first)
+	 `(,first . ,(only cool? rest))
+	 (only cool? rest)))))
+
+(e.g.
+ (only even? '(1 2 3 4 5 6))
+ ===> (2 4 6))
 
 (define (in element list)
   (any (is _ equal? element) list))
@@ -262,6 +323,10 @@
 
 (define (always . _) ::boolean #t)
 
+(define (negation proc)
+  (lambda args
+    (not (apply proc args))))
+
 (define-alias hypotenuse java.lang.Math:hypot)
 
 (define (min+max first . args)
@@ -309,3 +374,149 @@
 (e.g.
  (argmin+argmax length '(1 2) '(3) '(4 5 6))
  ===> (3) (4 5 6))
+
+(define (numbers #!key
+		 (from::real 0)
+		 (to::real 0)
+		 (by::real (if (> from to) -1 1)))  
+  (if (or (and (> from to) (>= by 0))
+	  (and (< from to) (<= by 0)))
+      '()
+      (let ((result (cons from '())))
+	(let loop ((tip result)
+		   (from (+ from by)))
+	  (if (or (and (> from to) (>= by 0))
+		  (and (< from to) (<= by 0)))
+	      result
+	      (begin
+		(set! (cdr tip) (cons from (cdr tip)))
+		(loop (cdr tip) (+ from by))))))))
+
+(define (concatenate! list-of-lists)
+  (if (null? list-of-lists)
+      '()
+      (if (null? (car list-of-lists))
+	  (concatenate! (cdr list-of-lists))
+	  (let* ((result (car list-of-lists)))
+	    (let loop ((last-segment result)
+		       (rest (cdr list-of-lists)))
+	      (cond ((null? rest)
+		     result)
+		    ((null? (car rest))
+		     (loop last-segment (cdr rest)))
+		    (else
+		     (set! (cdr (last-pair last-segment)) (car rest))
+		     (loop (car rest) (cdr rest)))))))))
+
+(define (append! . lists)
+  (concatenate! lists))
+
+(define (split! list #!key (at::int 1))
+  (let loop ((input list)
+	     (pivot at))
+    (if (<= pivot 0)
+	'()
+	(if (= pivot 1)
+	    (let ((suffix (cdr input)))
+	      (set! (cdr input) '())
+	      suffix)
+	    (loop (cdr input) (- pivot 1))))))
+
+(e.g.
+ (let* ((l (list 1 2 3 4 5))
+	(s (split! l at: 3)))
+   (and (equal? l '(1 2 3))
+	(equal? s '(4 5)))))
+
+(define (splice! sublist::list
+		 #!key
+		 (into::list '())
+		 (at::int 0))
+  ::list
+  (let ((suffix (split! into at: at)))
+    (append! into sublist suffix)))
+
+(e.g.
+ (splice! (list 'a 'b 'c) into: (list 1 2 3 4) at: 2)
+ ===> (1 2 a b c 3 4))
+
+(define (sublist satisfying?::predicate elements::list)
+  (and (not (null? elements))
+       (if (satisfying? elements)
+	   elements
+	   (sublist satisfying? (cdr elements)))))
+
+(e.g.
+ (sublist (lambda (cell)
+	    (= (car cell) 3))
+	  '(1 2 3 4 5))
+ ===> (3 4 5))
+
+(define (map! f inout . in*)
+  (cond
+   ((null? in*)
+    (let loop ((tip inout))
+      (if (pair? tip)
+	  (begin
+	    (set! (car tip) (f (car tip)))
+	    (loop (cdr tip)))
+	  inout)))
+   ((null? (cdr in*))
+    (let loop ((tip1 inout)
+	       (tip2 (car in*)))
+      (if (and (pair? tip1) (pair? tip2))
+	  (begin
+	    (set! (car tip1) (f (car tip1) (car tip2)))
+	    (loop (cdr tip1) (cdr tip2)))
+	  inout)))
+   ((null? (cddr in*))
+    (let loop ((tip1 inout)
+		  (tip2 (car in*))
+		  (tip3 (cadr in*)))
+	 (if (and (pair? tip1) (pair? tip2) (pair? tip3))
+	     (begin
+	       (set! (car tip1) (f (car tip1) (car tip2) (car tip3)))
+	       (loop (cdr tip1) (cdr tip2) (cdr tip3))
+	       inout))))
+   (else
+    (let loop ((tip inout)
+		  (tips in*))
+	 (if (and (pair? tip) (every pair? tips))
+	     (begin
+	       (set! (car tip) (apply f (car tip) (map car tips)))
+	       (loop (cdr tip) (map! cdr tips)))
+	     inout)))))
+
+(define (remove! satisfying?::predicate elements::list)
+  ::list
+  (define (remove-prefix! prefix::list)
+    (match prefix
+      (`(,head . ,tail)
+       (if (satisfying? head)
+	   (cond ((pair? tail)
+		  (set-car! prefix (car tail))
+		  (set-cdr! prefix (cdr tail))
+		  (remove-prefix! prefix))
+		 (else
+		  '()))
+	   (let remove-tail! ((cell prefix))
+	     (match (cdr cell)
+	       (`(,head . ,tail)
+		(cond ((satisfying? head)
+		       (set-cdr! cell tail)
+		       (remove-tail! cell))
+		      (else
+		       (remove-tail! (cdr cell)))))
+	       (_ prefix)))))
+      (_ prefix)))
+  (remove-prefix! elements))
+
+(e.g.
+ (let ((l (list 2 3 4 5 6 7)))
+   (remove! even? l)
+   l) ===> (3 5 7))
+
+(e.g.
+ (let ((l (list 1 2 3 4 5 6 7 8)))
+   (remove! even? l)
+   l) ===> (1 3 5 7))

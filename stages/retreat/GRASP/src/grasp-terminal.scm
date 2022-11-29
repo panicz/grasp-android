@@ -135,6 +135,7 @@
     (set! extent:height (size:getRows))
     (painter:clear!)
     (invoke (the-top-panel) 'draw! ())
+    (overlay:draw!)
     ;; swap front- and back-buffer
     (io:refresh (if resize
 		    LanternaScreen:RefreshType:COMPLETE
@@ -187,18 +188,18 @@
 		    (_
 		     (values))))
 		 ((action:isMouseDrag)
-		  (and-let* ((drag ::Drag (dragging 0)))
-		    (drag:move! left top
-				(- left previous-mouse:left)
-				(- top previous-mouse:top))
-		    (set! previous-mouse:left left)
-		    (set! previous-mouse:top top)))
+		  (invoke (the-top-panel)
+			  'move! 0 left top
+			  (- left previous-mouse:left)
+			  (- top previous-mouse:top))
+		  (set! previous-mouse:left left)
+		  (set! previous-mouse:top top))
 
 		 ((action:isMouseUp)
-		  (and-let* ((drag ::Drag (dragging 0)))
-		    (drag:drop! left top
-				(- left previous-mouse:left)
-				(- top previous-mouse:top)))
+		  (invoke (the-top-panel)
+			  'release! 0 left top
+			  (- left previous-mouse:left)
+			  (- top previous-mouse:top))
 		  (set! previous-mouse:left left)
 		  (set! previous-mouse:top top)))))
 	

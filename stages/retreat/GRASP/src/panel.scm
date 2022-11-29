@@ -56,28 +56,71 @@
 
 (define overlay ::Overlay (Overlay))
 
-(define-object (Selected sequence::cons)::Drawable
-  (define items ::cons sequence)
+(define-object (Selected items::cons position::Position)::Drawable
+  
   (define (draw!)::void
     (parameterize ((the-document items))
-      (let ((position ::Position (screen-position items)))
-	(with-translation (position:left position:top)
-	    (draw-sequence! items)))))
-  )
+      (with-translation (position:left position:top)
+	  (draw-sequence! items)))))
 
-(define-object (DragAround target::Selected)::Drag
-  (define selected ::Selected target)
+(define-object (DragAround selected::Selected)::Drag
   
   (define (move! x::real y::real dx::real dy::real)::void
-    (let ((position ::Position (screen-position selected:items)))
+    (let ((position ::Position selected:position))
       (set! position:left (+ position:left dx))
       (set! position:top (+ position:top dy))))
 
   (define (drop! x::real y::real vx::real vy::real)::void
-    (values))
+    (and-let* ((cursor (cursor-under x y))
+	       (`(,tip . ,precursor) cursor)
+	       (parent ::Element (the-expression at: precursor))
+	       (location ::Element (parent:part-at tip)))
+      (cond
+       ((isnt parent eq? location)
+	(WARN "reached "location" in "parent" at "cursor))
+
+       ((is parent Space?)
+	(let* ((last-space (split-space! parent tip))
+	       (last-cell (last-pair selected:items)))
+	  (if (dotted? last-cell)
+	      (set! (post-tail-space last-cell) last-space)
+	      (set! (post-head-space last-cell) last-space))
+	  (put-into-cell-at! precursor selected:items)))
+
+       ((is parent cons?)
+	(match tip
+	  (,(parent:first-index)
+	   (put-into-cell-at! (recons 0 precursor) selected:items))
+	  (,(parent:last-index)
+	   (put-into-cell-at! (recons (last-cell-index parent)
+				      precursor)
+			      selected:items))
+	  (_
+	   (WARN "how to put "selected:items
+		 " into "parent" at "cursor)))))
+      (overlay:remove! selected)))
 
   (overlay:add! selected))
 
+#|
+(define (Resize box::cons anchor::real)::Drag
+  
+  (define edited-space ::Space
+    (last-space-in-line-embracing anchor #;from box))
+  
+  (define (move! x::real y::real dx::real dy::real)::void
+    (let* ((current-extent ::Extent (extent box)))
+      ;; no, i tutaj to tak tego:
+      ;; 1. musimy sprawdzic, jaki rozmiar chcemy
+      ;; uzyskac
+      ;; 2. musimy wyliczyc - bazujac na space-width
+      ;;   oraz min-line-height - jaka powinna byc
+      ;;   szerokosc
+      ))
+
+  (define (drop! x::real y::real vx::real vy::real)::void
+    (values)))
+|#
 
 (define-mapping (dragging finger::byte)::Drag #!null)
 
@@ -287,7 +330,7 @@
 		   (position ::Position (screen-position target)))
 	  (cond
 	   ((isnt parent eq? target)
-	    (WARN "reached non-final item"))
+	    (WARN "reached non-final item on press"))
 	   
 	   ((isnt dragging clean?)
 	    (WARN "should start scrolling or zooming"))
@@ -305,7 +348,9 @@
 	    ;; wydobywany element o szerokosc tego elementu
 	    ;; podzielona przez (painter:space-width)
 	    (let* ((target (take-cell-at! subpath))
-		   (selection (Selected target)))
+		   (selection (Selected target
+					(screen-position
+					 (head target)))))
 	      (set! (dragging 0) (DragAround selection))
 	      ))
 
@@ -326,6 +371,7 @@
 				   selection-anchor))
       (and-let* ((drag ::Drag (dragging 0)))
 	(drag:drop! x y vx vy)
+	(unset! (dragging 0))
 	#t)))
 
   (define (move! finger::byte #;to x::real y::real

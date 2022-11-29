@@ -51,10 +51,14 @@
 (define MouseButton:WheelUp ::int 4)
 (define MouseButton:WheelDown ::int 5)
 
-(define defaultTerminalFactory
-  ::DefaultTerminalFactory (DefaultTerminalFactory))
+(define defaultTerminalFactory ::DefaultTerminalFactory
+  (DefaultTerminalFactory))
 
-(define (make-terminal)::Terminal
+(define (make-terminal
+	 #!key (mouse-capture-mode::MouseCaptureMode
+		MouseCaptureMode:CLICK_RELEASE_DRAG))
+  ::Terminal
+  (defaultTerminalFactory:setMouseCaptureMode mouse-capture-mode)
   (defaultTerminalFactory:createTerminal))
 
 (define (make-terminal-screen)::LanternaScreen

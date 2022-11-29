@@ -43,7 +43,22 @@
 
   (set! historyLength size))
 
-(define-object (default-message-handler)::MessageHandler
+(define-object (direct-message-handler)::MessageHandler
+  (define (add-message message::list)::void
+    (for word in message
+      (display word))
+    (newline)
+    (flush-output-port))
+  
+  (define last-message::string "")
+
+  (define (clear-messages!)::void
+    (values))
+
+  (define (display-messages output::Object)::void
+    (values)))
+  
+(define-object (recording-message-handler)::MessageHandler
   (define last-message::string)
 
   (define (clear-messages!)::void
@@ -62,7 +77,7 @@
     (set! last-message #!null)))
 
 (define-parameter (current-message-handler)::MessageHandler
-  (default-message-handler))
+  (direct-message-handler))
 
 (define (WARN . args)
   (invoke (current-message-handler) 'add-message args))

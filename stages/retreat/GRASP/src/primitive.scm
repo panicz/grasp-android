@@ -453,6 +453,30 @@
       returning: (lambda (t::Traversal)
 		   context)))))
 
+(define (last-space-in-line-embracing position::real
+				      #;from box::cons)
+  ::Space
+  (call/cc
+   (lambda (return)
+     (traverse
+      box
+      doing:
+      (lambda (item::Element current::Traversal)
+	(and-let* ((space ::Space item)
+		   ((sublist (lambda (cell)
+			       (and-let* ((`(,,integer?
+					     ,,integer?
+					     . ,_) cell))))
+			     space:fragments))
+		   (next ::Traversal (space:advance!
+				      (current:clone)))
+		   ((is current:top <= position < next:top)))
+	  (return space)))
+      returning:
+      (lambda (t::Traversal)
+	(last-space box))))))
+
+
 #|
 (define (cursor-above cursor::Cursor
 		      #!optional

@@ -366,7 +366,7 @@
        (_
 	(values)))))
 
-  ((advance! t::Traversal)::void
+  ((advance! t::Traversal)::Traversal
    (let* ((painter (the-painter))
 	  (space-width (painter:space-width)))
      (let skip ((input fragments)
@@ -378,7 +378,8 @@
 	  (skip (tail input) (+ total (head input) 1)))
 	 (`(,,@integer?)
 	  (t:advance-by! (* space-width (head input))))))
-     (set! t:index (+ t:index 1))))
+     (set! t:index (+ t:index 1))
+     t))
   )
 
 
@@ -505,7 +506,7 @@
 ;; `post-head-space` appears after each element
 ;; in a list (and should therefore be considered
 ;; dense: expect as many `post-head-space`s as there
-;; are cells visible in the document.
+;; are cells visible in the document).
 
 (define-property+ (post-head-space cell::pair)::Space
   (if (and (not (dotted? cell))
@@ -538,6 +539,12 @@
 
 (define-property+ (null-tail-space cell::pair)::Space
   (Space fragments: (cons 0 '())))
+
+(define (last-space sequence::pair)::Space
+  (let ((cell ::pair (last-pair sequence)))
+    (if (dotted? cell)
+	(post-tail-space cell)
+	(post-head-space cell))))
 
 (define-object (HeadTailSeparator)::Indexable
   (define (part-at index::Index)::Indexable* (this))
