@@ -1,3 +1,79 @@
+* 29.11.2022 (telefon)
+
+moze dzis zajelibysmy sie takimi
+rzeczami, jak:
+- zmiana rozmiaru pudelek
+  (prawy nawias)
+- obsluga przeciagania pustych list
+
+a po nich bysmy wzieli na warsztat:
+1. historie edycji
+2. edycje z klawiarury
+3. pelna obsluge selekcji
+4. pionowe poruszanie kursorem
+   ("done right")
+
+i jak to bedzie to wtedy;
+- menu i obsluga plikow
+- dzielenie ekranu
+- mechanizm rozszerzen we wszystkich
+  3 edytorach
+- scrollowanie i zoomowanie
+- gesty
+- wizualna ewaluacja
+- edycja grafow i algorytm A*
+
+
+
+* 28.11.2022 (wieczor)
+
+mamy dosc sprawnie dzialajace "drag",
+i nieco mniej sprawne "drop".
+
+teraz musimy dopracowac obydwa
+przypadki
+
+przede wszystkim dobrze by bylo
+korygowac dzialanie spacji.
+
+trzeba tez zrobic tak, ze jezeli
+upuszczamy wyrazenie na otwierajacym
+albo zamykajacym nawiasie, to
+dodajemy je odpowiednio przed
+albo za nawiasem
+
+trzeba tez bedzie zrobic drag&drop
+w kliencie terminalowym i androidowym
+i pomyslec cos o testach
+
+byc moze zmusi to nas do tego,
+zeby zmodyfikowac nieco tego
+overlaya, tak zeby przyklady
+lepiej wygladaly
+
+* 25.11.2022
+
+na razie chcemy zrobic rysowanie na warstwach "overlay",
+co chyba wymagaloby czegos w rodzaju
+
+(define-syntax initialize
+  ((initialize field (field::type . rest))
+
+(define-object (Lag target::Element path::Cursor)
+  (define element ::Element target)
+  (define cursor ::Cursor path)
+
+  (define (draw!)::void
+    (with-translation (...)
+      (element:draw! cursor))))
+
+* 24.11.2022
+
+dzis bysmy sie sprobowali zajac:
+- wyodrebnianiem wyrazenia
+- wyrysowywaniem wyrazenia na warstwie overlay
+- wstawianiem wyrazenia do dokumentu
+  
 * 23.11.2022
 
 mamy dzialajacy screen-position (byc moze tez bedziemy chcieli
@@ -25,7 +101,7 @@ ale teraz chcielibysmy raczej takie cos:
   mozemy tez zrobic tak, ze kazdy kolejny kursor
   na warstwie overlay bedzie mial indeks, ktorego
   ostatni car to wartosc inna niz 1 (czyli np.
-  2 i 4, albo 3 i 5). Ewentualnie po prostu 'overlay.
+  2 i 4, albo 3 i 5). Ewentualnie po prostu 'overlay.xb
 
 * 22.11.2022
 
