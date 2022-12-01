@@ -123,6 +123,7 @@
 (e.g. (is '(3 3 1 1) cursor< '(1 5 1 1)))
 (e.g. (isnt '(1 5 1 1) cursor< '(3 3 1 1)))	
 
+(e.g. (is '(1 3 1 1) cursor< '(3 1 1)))
 
 (e.g. (grasped "\
 (define (! n)

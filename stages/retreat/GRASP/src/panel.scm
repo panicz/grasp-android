@@ -54,7 +54,7 @@
     (elements:remove element))
   )
 
-(define overlay ::Overlay (Overlay))
+(define-early-constant overlay ::Overlay (Overlay))
 
 (define-object (Selected items::cons position::Position)::Drawable
   

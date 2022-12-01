@@ -36,12 +36,12 @@
 
 (define (space-fragment-index fragments index)
   (if (or (isnt fragments pair?)
-	  (is (fragment-size (head fragments)) >= index))
+	  (is (fragment-size (car fragments)) >= index))
       (values fragments index)
-      (space-fragment-index (tail fragments)
+      (space-fragment-index (cdr fragments)
 			    (- index
 			       (fragment-size
-				(head fragments))
+				(car fragments))
 			       1))))
 
 (e.g.
@@ -117,11 +117,11 @@
 			      position)))
     (match cell
       (`(,,index ,next . ,rest)
-       (set! (head cell) (+ index next))
-       (set! (tail cell) rest)
+       (set! (car cell) (+ index next))
+       (set! (cdr cell) rest)
        fragments)
       (`(,,@(is _ > 0) . ,_)
-       (set! (head cell) (- (head cell) 1))
+       (set! (car cell) (- (car cell) 1))
        fragments)
       (_
        fragments
@@ -182,9 +182,9 @@
    (let-values (((fragments* index*) (space-fragment-index
 				      fragments index)))
      (if (or (isnt fragments* pair?)
-	     (number? (head fragments*)))
+	     (number? (car fragments*)))
 	 (this)
-	 (match (head fragments*)
+	 (match (car fragments*)
 	   (`(line-comment . ,text)
 	    (assert (= index* 0))
 	    text)
@@ -215,7 +215,7 @@
 		      (`(block-comment . ,text)
 		       0))))
 
-		(length (tail fragments))
+		(length (cdr fragments))
 	      fragments))
   
   ((next-index index::Index)::Index
@@ -234,25 +234,25 @@
    (let-values (((cell index) (space-fragment-index
 			       fragments
 			       position)))
-     (set! (head cell) (+ (head cell) 1))))
+     (set! (car cell) (+ (car cell) 1))))
 
   ((insert-break! position::int)::void
    (let-values (((cell index) (space-fragment-index
 			       fragments
 			       position)))
-     (set! (tail cell) (cons 0 (tail cell)))))
+     (set! (cdr cell) (cons 0 (cdr cell)))))
 
   ((draw! context::Cursor)::void
    (let-values (((selection-start selection-end) (the-selection)))
      (let* ((painter (the-painter))
 	    (enters-selection-drawing-mode?
 	     (and (pair? selection-start)
-		  (equal? (tail selection-start) context)
-		  (integer? (head selection-start))))
+		  (equal? (cdr selection-start) context)
+		  (integer? (car selection-start))))
 	    (exits-selection-drawing-mode?
 	     (and (pair? selection-end)
-		  (equal? (tail selection-end) context)
-		  (integer? (head selection-end))))
+		  (equal? (cdr selection-end) context)
+		  (integer? (car selection-end))))
 	    (space-width (painter:space-width))
 	    (t (invoke (the-traversal) 'clone))
 	    (left t:left)
@@ -270,12 +270,12 @@
 					   (- total tip)))
 				     (- t:top top -1)))
 	     (when (and enters-selection-drawing-mode?
-			(is total <= (head
+			(is total <= (car
 				      selection-start) <= (+ total
 							     width)))
 	       (painter:enter-selection-drawing-mode!))
 	     (when (and exits-selection-drawing-mode?
-			(is total <= (head
+			(is total <= (car
 				      selection-end) <= (+ total
 							   width)))
 	       (painter:exit-selection-drawing-mode!)))
@@ -283,11 +283,11 @@
 	 
 	 (match input
 	   (`(,,@integer? ,,@integer? . ,_)
-	    (advance-with-cursor! (head input))
+	    (advance-with-cursor! (car input))
 	    (t:new-line!)
-	    (skip (tail input) (+ total (head input) 1)))
+	    (skip (cdr input) (+ total (car input) 1)))
 	   (`(,,@integer)
-	    (advance-with-cursor! (head input))))))))
+	    (advance-with-cursor! (car input))))))))
 
   ((cursor-under* x::real y::real path::Cursor)::Cursor*
    (and-let* ((painter (the-painter))
@@ -304,19 +304,19 @@
 	  (cond
 	   ((is 0 <= (- y t:top) < t:max-line-height)
 	    (hash-cons (+ total
-			   (min (head input)
+			   (min (car input)
 				(quotient (- x t:left)
 					  space-width)))
 			path))
 	   (else
-	    (t:advance-by! (* space-width (head input)))
+	    (t:advance-by! (* space-width (car input)))
 	    (t:new-line!)
-	    (skip (tail input)
-		  (+ total (head input))))))
+	    (skip (cdr input)
+		  (+ total (car input))))))
 	 (`(,,@integer?)
 	  (and (is 0 <= (- y t:top) < t:max-line-height)
 	       (is x < (+ t:left (* space-width
-				    (head input))))
+				    (car input))))
 	       (hash-cons (+ total
 			     (quotient (- x t:left)
 				       space-width))
@@ -326,13 +326,13 @@
    (let process ((input fragments))
      (match input
        (`(,,@integer? ,,@integer? . ,_)
-	(for n from 0 below (head input)
+	(for n from 0 below (car input)
 	     (out:append #\space))
 	(out:append #\newline)
-	(process (tail input)))
+	(process (cdr input)))
 
        (`(,,@integer? . ,rest)
-	(for n from 0 below (head input)
+	(for n from 0 below (car input)
 	     (out:append #\space))
 	(process rest))
 
@@ -373,11 +373,11 @@
 		(total 0))
        (match input
 	 (`(,,@integer? ,,@integer? . ,_)
-	  (t:advance-by! (* space-width (head input)))
+	  (t:advance-by! (* space-width (car input)))
 	  (t:new-line!)
-	  (skip (tail input) (+ total (head input) 1)))
+	  (skip (cdr input) (+ total (car input) 1)))
 	 (`(,,@integer?)
-	  (t:advance-by! (* space-width (head input))))))
+	  (t:advance-by! (* space-width (car input))))))
      (set! t:index (+ t:index 1))
      t))
   )
@@ -401,9 +401,9 @@
 
 (define (join-spaces! a::Space b::Space)::Space
   (let ((suffix (last-pair a:fragments)))
-    (set! (head suffix)
-      (+ (head suffix) (head b:fragments)))
-    (set! (tail suffix) (tail b:fragments))
+    (set! (car suffix)
+      (+ (car suffix) (car b:fragments)))
+    (set! (cdr suffix) (cdr b:fragments))
     (set! b:fragments (cons 0 '()))
     a))
 
@@ -413,16 +413,16 @@
 			    index::int)
     ::Space
     (cond
-     ((is index <= (head fragments))
-      (let ((reminent (cons (- (head fragments) index)
-			    (tail fragments))))
-	(set! (head fragments) index)
-	(set! (tail fragments) '())
+     ((is index <= (car fragments))
+      (let ((reminent (cons (- (car fragments) index)
+			    (cdr fragments))))
+	(set! (car fragments) index)
+	(set! (cdr fragments) '())
 	(Space fragments: reminent)))
      (else
       (split-fragments!
-       (tail fragments)
-       (- index (head fragments) 1)))))
+       (cdr fragments)
+       (- index (car fragments) 1)))))
   (split-fragments! space:fragments index))
 
 (e.g.
@@ -471,7 +471,7 @@
 (define (skip-first-line s::Space)::Space
   (match s:fragments
     (`(,_ ,_ . ,_)
-     (Space fragments: (tail s:fragments)))
+     (Space fragments: (cdr s:fragments)))
     (_
      (Space fragments: '(0)))))
 
@@ -719,8 +719,8 @@
        properties
        l
        (cons
-	(tree-map/preserve properties f (head l))
-	(tree-map/preserve properties f (tail l))))
+	(tree-map/preserve properties f (car l))
+	(tree-map/preserve properties f (cdr l))))
       (f l)))
 
 (define (null-space-ref grandparent::pair
@@ -736,7 +736,7 @@
 	   (4 (pre-tail-space grandparent))
 	   (5 (null-tail-space grandparent))
 	   (6 (post-tail-space grandparent)))
-	 (null-space-ref (tail grandparent)
+	 (null-space-ref (cdr grandparent)
 			 (- parent-index 2))))))
 
 (define (print-space space::Space
@@ -752,14 +752,14 @@
 (define (show-head p::pair)::void
   (if (null? (head p))
       (show-empty-list (null-head-space p))
-      (show (head p))))
+      (show (car p))))
 
 (define (show-dotted-tail p::pair)::void
   (write-char #\.)
   (print-space (pre-tail-space p))
-  (if (null? (tail p))
+  (if (null? (cdr p))
       (show-empty-list (null-tail-space p))
-      (show (tail p)))
+      (show (cdr p)))
   (print-space (post-tail-space p)))
 
 (define (show-pair p::pair)::void
@@ -767,8 +767,8 @@
   (print-space (post-head-space p))
   (cond ((dotted? p)
 	 (show-dotted-tail p))
-	((pair? (tail p))
-	 (show-pair (tail p)))))
+	((pair? (cdr p))
+	 (show-pair (cdr p)))))
 
 (define (show p)::void
   (cond
@@ -781,11 +781,11 @@
     (write p))))
 
 (define (show-document d::pair)
-  (cond ((null? (head d))
+  (cond ((null? (car d))
 	 (print-space (null-head-space d)))
-	((pair? (head d))
-	 (print-space (pre-head-space (head d)))
-	 (show-pair (head d)))))
+	((pair? (car d))
+	 (print-space (pre-head-space (car d)))
+	 (show-pair (car d)))))
 
 (define (show->string p)::string
   (with-output-to-string

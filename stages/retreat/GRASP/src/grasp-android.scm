@@ -558,6 +558,7 @@
     (set! canvas c)
     (clear!)
     (invoke (the-top-panel) 'draw! '())
+    (overlay:draw!)
     (invoke (current-message-handler)
 	    'display-messages canvas))
 
@@ -577,6 +578,9 @@
   (define view :: View)
   (define gesture-detector ::GestureDetector)
   
+  (define x ::float[] (float[] 0 1 2 3 4 5 6 7 8 9))
+  (define y ::float[] (float[] 0 1 2 3 4 5 6 7 8 9))
+
   (define (invalidating result::boolean)::boolean
     (when result
       (view:invalidate))
@@ -632,19 +636,38 @@ ue
      (or (gesture-detector:onTouchEvent event)
 	 (match (event:getActionMasked)
 	   (,MotionEvent:ACTION_DOWN
-	    (invoke (the-top-panel) 'press! 0
-		    #;at (event:getX) (- (event:getY) 60)))
+	    (let* ((x* (event:getX))
+		   (y* (- (event:getY) 60))
+		   (result (invoke (the-top-panel) 'press!
+				   0 x* y*)))
+	      (set! (x 0) x*)
+	      (set! (y 0) y*)
+	      result))
 	   (,MotionEvent:ACTION_POINTER_DOWN
 	    #f)
 	   (,MotionEvent:ACTION_UP
-	    #f)
+	    (let* ((x* (event:getX))
+		   (y* (- (event:getY) 60))
+		   (result (invoke (the-top-panel) 'release!
+				   0 x* y* 0 0)))
+	      (set! (x 0) x*)
+	      (set! (y 0) y*)
+	      result))
 	   (,MotionEvent:ACTION_POINTER_UP
 	    #f)
 	   (,MotionEvent:ACTION_OUTSIDE
 	    #f)
 	   (,MotionEvent:ACTION_MOVE
 	    ;;(WARN "force: "(event:getPressure)", size: "(event:getSize))
-	    #t)
+	    (let* ((x* (event:getX))
+		   (y* (- (event:getY) 60))
+		   (result (invoke (the-top-panel) 'move!
+				   0 x* y* (- x* (x 0)) (- y* (y 0)))))
+	      (set! (x 0) x*)
+	      (set! (y 0) y*)
+	      result))
+	   (,MotionEvent:ACTION_POINTER_UP
+	    #f)
 	   (,MotionEvent:ACTION_CANCEL
 	    #f)
 	   (_
@@ -688,9 +711,6 @@ ue
     (set! (current-message-handler) (ScreenLogger 100))
     (setContentView view)
     (set! (the-painter) view)
-
-    (WARN "hello,")
-    (WARN "world")
     
     (set! (on-key-press KeyEvent:KEYCODE_DPAD_LEFT)
       (lambda _
@@ -726,8 +746,6 @@ mutations of an n-element set.\"
 (e.g. (factorial 5) ===> 120)
 (Button action: (lambda () (WARN \"button pressed!\"))
         label: \"Press me!\")
-" parse-document))))
-
-    )
+" parse-document)))))
   
   (AndroidActivity))

@@ -31,14 +31,14 @@
 				     root))
 	    (cell (drop (quotient parent-index 2)
 			grandparent))
-	    (removed (head cell)))
+	    (removed (car cell)))
        (if (dotted? removed)
-	   (let ((new (cons (tail removed) '())))
+	   (let ((new (cons (cdr removed) '())))
 	     (tail-space-to-head removed new)
-	     (set! (head cell) new)
+	     (set! (car cell) new)
 	     (unset! (dotted? removed)))
-	   (set! (head cell) (tail removed)))
-       (set! (tail removed) '())
+	   (set! (car cell) (cdr removed)))
+       (set! (cdr removed) '())
        removed))
     
     (`(,index . ,root)
@@ -47,11 +47,11 @@
 	    (index (quotient index 2))
 	    (irrelevant (- index 1)))
        (define (remove-tail! preceding)
-	 (let ((removed (tail preceding)))
+	 (let ((removed (cdr preceding)))
 	   (join-spaces! (post-head-space preceding)
 			 (post-head-space removed))
-	   (set! (tail preceding) (tail removed))
-	   (set! (tail removed) '())
+	   (set! (cdr preceding) (cdr removed))
+	   (set! (cdr removed) '())
 	   removed))
 	 
        (if (is irrelevant > 0)
@@ -61,22 +61,22 @@
 	     (if (dotted? preceding)
 		 (let* ((removed (tail-space-to-head
 				  preceding
-				  (cons (tail
+				  (cons (cdr
 					 preceding)
 					'()))))
-		   (set! (tail preceding) '())
+		   (set! (cdr preceding) '())
 		   (unset! (dotted? preceding))
 		   removed)
-		 (remove-tail! (tail preceding))))
+		 (remove-tail! (cdr preceding))))
 	   (let ((preceding (drop irrelevant
 				  parent)))
 	     (if (dotted? preceding)
-		 (let* ((added (cons (tail
+		 (let* ((added (cons (cdr
 				      preceding)
 				     '())))
 		   (tail-space-to-head preceding
 				       added)
-		   (set! (tail preceding) added)
+		   (set! (cdr preceding) added)
 		   (unset! (dotted? preceding))
 		   head/tail-separator)
 		 (remove-tail! preceding))))))
@@ -140,7 +140,7 @@
 			   (document (the-document)))
   ::boolean
   (assert (or (and (pair? element)
-		   (list? (tail element)))
+		   (list? (cdr element)))
 	      (head/tail-separator? element)))
   (match cursor
     (`(,,@(isnt _ integer?) . ,root)
@@ -152,8 +152,8 @@
 				 document root))
 	    (parent (drop (quotient parent-index 2)
 			  grandparent)))
-       (set! (last-tail element) (head parent))
-       (set! (head parent) element)
+       (set! (last-tail element) (car parent))
+       (set! (car parent) element)
        #t))
 
     (`(,index . ,root)
@@ -162,15 +162,15 @@
 	    (preceding (drop irrelevant parent)))
        (cond ((pair? element)
 	      (set! (last-tail element)
-		(tail preceding))
-	      (set! (tail preceding) element)
+		(cdr preceding))
+	      (set! (cdr preceding) element)
 	      #t)
 	     
-	     ((null? (tail (tail preceding)))
+	     ((null? (cdr (cdr preceding)))
 	      (assert (head/tail-separator?
 		       element))
-	      (set! (tail preceding)
-		(head (tail preceding)))
+	      (set! (cdr preceding)
+		(car (cdr preceding)))
 	      (update! (dotted? preceding) #t)
 	      #t)
 

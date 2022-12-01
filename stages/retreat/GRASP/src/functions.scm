@@ -8,9 +8,9 @@
     (apply action args)
     (apply times (- n 1) action args)))
 
-(define head car)
+(define-early-constant head car)
 
-(define tail cdr)
+(define-early-constant tail cdr)
 
 (define (drop k::integer #;elements-from s::list)::list
   (if (and (pair? s)
@@ -263,17 +263,18 @@
 (e.g.
  (last-pair '(1 2 3)) ===> (3 . ()))
 
-(define (set-last-tail! p::pair value)
-  (if (pair? (cdr p))
-      (set-last-tail! (cdr p) value)
-      (set! (cdr p) value)))
-
-(define (last-tail p::pair)
-  (if (pair? (cdr p))
-      (last-tail (cdr p))
-      (cdr p)))
-
-(set! (setter last-tail) set-last-tail!)
+(define-early-constant last-tail
+  (let ()
+    (define (set-last-tail! p::pair value)
+      (if (pair? (cdr p))
+	  (set-last-tail! (cdr p) value)
+	  (set! (cdr p) value)))
+    (define (last-tail p::pair)
+      (if (pair? (cdr p))
+	  (last-tail (cdr p))
+	  (cdr p)))
+    (set! (setter last-tail) set-last-tail!)
+    last-tail))
 
 (define (read-all #!optional (port (current-input-port)))
   (let ((first-expression (read port)))
