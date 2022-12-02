@@ -1,3 +1,36 @@
+* 01.12.2022
+
+udalo sie zintegrowac drag&dropa z aplikacja
+androidowa
+
+wyslalismy tez maila do Bothnera opisujacego
+nasze problemy z implementacja Bundle
+
+a dlaczego? poniewaz wydawalo sie nam, ze
+funkcja last-space-in-line-embracing powinna
+zamiast elementu Space zwracac
+(Bundled left: real space: Space)
+
+I wtedy nazwe na line-ending-embracing.
+
+Na razie zreszta mozemy sobie zdefiniowac typ
+(LineEnding reach: real space: Space)
+i to jego po prostu zwracac
+
+* 30.11.2022
+
+Zmiany rozmiaru ciag dalszy. Jest sobie zdanie:
+"musimy sprawdzic, jaki rozmiar chcemy uzyskac"
+
+Ale w jaki sposob to robimy?
+
+Na etapie konstrukcji powinnismy miec jakas
+poczatkowa szerokosc i poczatkowa wysokosc.
+
+Powinnismy tez wiedziec, w jakim stopniu
+edytowana spacja kontrybuuje do rozmiaru.
+
+
 * 29.11.2022 (telefon)
 
 moze dzis zajelibysmy sie takimi
@@ -24,6 +57,44 @@ i jak to bedzie to wtedy;
 - edycja grafow i algorytm A*
 
 
+* 29.11.2022
+
+Mamy juz nawet troche dzialajacy drag&drop w trybie terminalowym! :D
+
+Teraz byloby dobrze zajac sie zmiana rozmiaru na prawym nawiasie.
+I tutaj idea jest taka, ze musimy przy kliknieciu wydobyc 
+odpowiednia spacje.
+
+No dobra, czyli plan jest z grubsza taki:
+
+potrzebujemy funkcji, ktora pobiera pudelko oraz odleglosc od gory,
+i zwraca nam taka spacje (z wnetrza pudelka), ktora:
+- znajduje sie na koncu linii (czyli ktorej fragmenty
+  zawieraja dwie nastepujace po sobie liczby, albo ktora
+  jest ostatnia spacja w pudelku)
+
+- znajduje sie w linii mieszczacej w sobie podana odleglosc
+  od gory
+
+Kiedy juz bedziemy mieli takie cos, bedziemy chcieli
+przekazac to do funkcji (ktora powinna zostac dodana do
+dragged), ktora bedzie robic jedna z nastepujacych rzeczy:
+- zwiekszac dlugosc ostatniej linii (do takiej, ktora bedzie
+  wynikac z nowego polozenia kursora myszy, wzgl. ze zmiany
+  polozenia myszy)
+- dodawac przed ostatnia linia jedna linie pusta
+- usuwac linie znajdujaca sie przed ostatnia linia
+
+No dobra, to teraz nazwa.
+
+Moze
+
+(define (last-space-in-line-embracing position::real #;from box::cons)
+   ::Space
+
+Niech tak bedzie.
+
+To teraz trzeba zdefiniowac klase Resize.
 
 * 28.11.2022 (wieczor)
 
@@ -51,6 +122,51 @@ zeby zmodyfikowac nieco tego
 overlaya, tak zeby przyklady
 lepiej wygladaly
 
+* 28.11.2022
+
+Plan (poniekad) zrealizowany. Teraz mamy kilka nowych
+pomyslow, takich jak:
+- dodac pozycje do klasy Selected
+- zrobic tak, zeby - gdy robimy "define-object"
+  - dla wszystkich argumentow konstruktora pojawialy
+  odpowiednie pola
+- dodac odpowiednia obsluge "drop!"
+
+Pierwsza czesc zadania niejako zrealizowana.
+Ale druga czesc wydaje sie nieco klopotliwa.
+
+Dlatego teraz bedzie trzeba sporo przemyslec.
+
+
+* 27.11.2022
+
+Ogolnie drag&drop zaczyna pomalu dzialac, ale mamy
+problem z referecja do dokumentu - dlatego metody
+drag:move! i drag:drop! powinnismy raczej wywolac
+w kontekscie ze zdefiniowanymi (the-document),
+(the-document) i (the selection-anchor).
+
+Dlatego na razie plan jest taki, zeby dodac
+metody move! i release! do interfejsu Panel.
+
+
+* 26.11.2022
+
+Zamysl jest taki, ze przy kliknieciu elementu
+dodajemy do "dragging" 
+
+* 25.11.2022 (komputer)
+
+Telefon zatopiony, troche pracy stracone.
+Trzeba bedzie robic od nowa, ale na razie na laptoku.
+
+Z takich wiekszych prac, ale niezwiazanych bezposrednio
+z zadaniem, mamy rozbudowanie formy "define-object"
+o inicjalizacje wartosci argumentami konstruktora.
+
+Teraz kiedy juz to mamy, chcielibysmy sprobowac
+odtworzyc wczorajszy kod do obslugi klikniec
+
 * 25.11.2022
 
 na razie chcemy zrobic rysowanie na warstwach "overlay",
@@ -67,13 +183,13 @@ co chyba wymagaloby czegos w rodzaju
     (with-translation (...)
       (element:draw! cursor))))
 
+
 * 24.11.2022
 
 dzis bysmy sie sprobowali zajac:
 - wyodrebnianiem wyrazenia
 - wyrysowywaniem wyrazenia na warstwie overlay
 - wstawianiem wyrazenia do dokumentu
-  
 * 23.11.2022
 
 mamy dzialajacy screen-position (byc moze tez bedziemy chcieli
