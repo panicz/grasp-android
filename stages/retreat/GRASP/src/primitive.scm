@@ -453,29 +453,42 @@
       returning: (lambda (t::Traversal)
 		   context)))))
 
-(define (last-space-in-line-embracing position::real
-				      #;from box::cons)
-  ::Space
-  (call/cc
-   (lambda (return)
-     (traverse
-      box
-      doing:
-      (lambda (item::Element current::Traversal)
-	(and-let* ((space ::Space item)
-		   ((sublist (lambda (cell)
-			       (and-let* ((`(,,integer?
-					     ,,integer?
-					     . ,_) cell))))
-			     space:fragments))
-		   (next ::Traversal (space:advance!
-				      (current:clone)))
-		   ((is current:top <= position < next:top)))
-	  (return space)))
-      returning:
-      (lambda (t::Traversal)
-	(last-space box))))))
+(define-type (LineEnding reach: real
+			 space: Space))
 
+(define (line-ending-embracing position::real
+			       #;from box::cons)
+  ::LineEnding
+  (let ((last-space ::Space (pre-head-space box))
+	(previous-left ::real 0)
+	(next ::Traversal (Traversal)))
+    (call/cc
+     (lambda (return)
+       (traverse
+	box
+	doing:
+	(lambda (item::Element current::Traversal)
+	  (and-let* ((space ::Space item)
+		     ((sublist (lambda (cell)
+				 (and-let* ((`(,,@integer?
+					       ,,@integer?
+					       . ,_) cell))))
+			       space:fragments))
+		     (next ::Traversal (space:advance!
+					next))
+		     ((is current:top <= position < next:top)))
+	    (return (LineEnding reach: current:left
+				space: space)))
+	  (cond
+	   ((is item Space?)
+	    (set! last-space item)
+	    (next:assign current))
+	   (else
+	    (set! previous-left next:left))))
+	returning:
+	(lambda (t::Traversal)
+	  (LineEnding reach: previous-left
+		      space: last-space)))))))
 
 #|
 (define (cursor-above cursor::Cursor

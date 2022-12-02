@@ -25,7 +25,7 @@
 |#
 
 
-(define-interface Struct ()
+(define-interface Struct (java.lang.Cloneable)
   (typename) :: String
   (fields->string) :: String
   (toString) :: String
@@ -34,6 +34,9 @@
   (clone) :: Struct
   ;;(deep-copy)::Struct
   )
+
+(define (clone struct::Struct)::Struct
+  (struct:clone))
 
 (define-simple-class Base (Struct)
   ((typename)::String #!abstract)

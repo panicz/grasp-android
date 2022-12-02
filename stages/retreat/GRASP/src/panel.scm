@@ -102,25 +102,47 @@
 
   (overlay:add! selected))
 
-#|
-(define (Resize box::cons anchor::real)::Drag
+(define-object (Resize box::cons anchor::Position)::Drag
+
+  (define position ::Position (screen-position box))
+
+  (define initial ::Extent (invoke (extent box) 'clone))
   
-  (define edited-space ::Space
-    (last-space-in-line-embracing anchor #;from box))
+  (define ending ::LineEnding
+    (line-ending-embracing anchor:top #;from box))
+
+  (define (set-width! width::real)::void
+    (and-let* ((break (sublist (lambda (cell)
+				 (or (and-let* ((`(,,@integer?
+						   ,,@integer?
+						   . ,_)
+						 cell)))
+				     (and-let* ((`(,,@integer?)
+						 cell)))))
+			       ending:space:fragments))
+	       (painter (the-painter))
+	       (new-value (as int (quotient (- width initial:width)
+					    (painter:space-width)))))
+      (set! (head break) (max 0 new-value))))
+
+  (define (set-height! height::real)::void
+    (values))
   
   (define (move! x::real y::real dx::real dy::real)::void
-    (let* ((current-extent ::Extent (extent box)))
-      ;; no, i tutaj to tak tego:
-      ;; 1. musimy sprawdzic, jaki rozmiar chcemy
-      ;; uzyskac
-      ;; 2. musimy wyliczyc - bazujac na space-width
-      ;;   oraz min-line-height - jaka powinna byc
-      ;;   szerokosc
-      ))
+    (let* ((target-width ::real (- x position:left))
+	   (target-height ::real (+ initial:height
+				    (- y position:top anchor:top))))
+      (set-width! target-width)
+      (set-height! target-height)))
 
   (define (drop! x::real y::real vx::real vy::real)::void
-    (values)))
-|#
+    ;; jezeli predkosc byla odpowiednio duza, to powinnismy
+    ;; wysplice'owac wszystkie elementy w liscie nadrzednej
+    ;; (ewentualnie - gdyby ten element byl wlasnie przeciagany
+    ;; - powinnismy raczej zamienic go w selekcje. Ale nie
+    ;; wiadomo, czy zechcemy obsluzyc ten kejs)
+    (values))
+  )
 
 (define-mapping (dragging finger::byte)::Drag #!null)
 
@@ -329,7 +351,7 @@
 		   (target ::Element (parent:part-at tip))
 		   (position ::Position (screen-position target)))
 	  (cond
-	   ((isnt parent eq? target)
+	   #;((isnt parent eq? target)
 	    (WARN "reached non-final item on press"))
 	   
 	   ((isnt dragging clean?)
@@ -356,10 +378,13 @@
 
 	   ((and (is target cons?)
 		 (eqv? tip (target:last-index)))
-	    (WARN "should start resizing the object"))
-
-	   (else
-	    (WARN "really don't know what to do")))
+	    (let ((extent ::Extent (extent target)))
+	      (set! (dragging 0)
+		    (Resize target
+			    (Position left: extent:width
+				      top: (- y position:top))))))
+	    (else
+	     (WARN "really don't know what to do")))
 	  #t))))
 
   (define (release! finger::byte #;at x::real y::real
