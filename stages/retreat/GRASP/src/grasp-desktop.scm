@@ -1,5 +1,5 @@
-(module-name grasp-desktop)
-(module-compile-options main: #t)
+;;(module-name grasp-desktop)
+;;(module-compile-options main: #t)
 
 (import (srfi :11))
 (import (define-syntax-rule))
@@ -60,7 +60,17 @@
 
 (define-alias Color java.awt.Color)
 
-(define-cache (color rgb) (Color rgb))
+(define-cache (color aRGB::int)::Color
+  (let* ((alpha ::int (- 255
+			 (bitwise-and #xff
+				      (bitwise-arithmetic-shift
+				       aRGB -24))))
+	 (red ::int (bitwise-and #xff (bitwise-arithmetic-shift
+				       aRGB -16)))
+	 (green ::int (bitwise-and #xff (bitwise-arithmetic-shift
+					 aRGB -8)))
+	 (blue ::int (bitwise-and #xff aRGB)))
+    (Color red green blue alpha)))
 
 (define-parameter (parenthesis-color) :: procedure
   (lambda ()
@@ -472,9 +482,17 @@
 					     text::CharSequence)
     ::int
     (text-character-index-under x y text (the-string-font)))
-  
+
+  (define (draw-point! left::real top::real aRGB::int)::void
+    (graphics:setColor (color aRGB))
+    (graphics:fillOval (as int (- left 4))
+		       (as int (- top 4))
+		       (as int 9)
+		       (as int 9)))
+
   (define (clear!)::void
-    (error "The `clear!' method is not implemented for the AWT
+    (error "\
+The `clear!' method is not implemented for the AWT
 screen-renderer, because the screen is cleared 
 automatically by the AWT framework."))
   
@@ -678,30 +696,32 @@ automatically by the AWT framework."))
   (setVisible #t)
   )
 
-(set! (on-key-press KeyEvent:VK_LEFT)
-      (lambda _
-	(move-cursor-left!
-	 selection: (if (shift-pressed?)
-			SelectionAction:resize
-			SelectionAction:discard))))
 
-(set! (on-key-press KeyEvent:VK_RIGHT)
-      (lambda _
-	(move-cursor-right!
-	 selection: (if (shift-pressed?)
-			SelectionAction:resize
-			SelectionAction:discard))))
+(define (run-in-AWT-window)::void
+  (set! (on-key-press KeyEvent:VK_LEFT)
+	(lambda _
+	  (move-cursor-left!
+	   selection: (if (shift-pressed?)
+			  SelectionAction:resize
+			  SelectionAction:discard))))
 
-(set! (on-key-press KeyEvent:VK_UP)
-      move-cursor-up!)
+  (set! (on-key-press KeyEvent:VK_RIGHT)
+	(lambda _
+	  (move-cursor-right!
+	   selection: (if (shift-pressed?)
+			  SelectionAction:resize
+			  SelectionAction:discard))))
 
-(set! (on-key-press KeyEvent:VK_DOWN)
-      move-cursor-down!)
+  (set! (on-key-press KeyEvent:VK_UP)
+	move-cursor-up!)
 
-(when (is (the-top-panel) instance? Editor)
-      (let ((editor ::Editor (as Editor (the-top-panel))))
-    (set! editor:document
-      (with-input-from-string "\
+  (set! (on-key-press KeyEvent:VK_DOWN)
+	move-cursor-down!)
+
+  (when (is (the-top-panel) instance? Editor)
+    (let ((editor ::Editor (as Editor (the-top-panel))))
+      (set! editor:document
+	    (with-input-from-string "\
 (define (! n)
 \"Computes the product 1*...*n.
 It represents the number of per-
@@ -714,4 +734,6 @@ mutations of an n-element set.\"
         label: \"Press me!\")
 " parse-document))))
 
-(window-screen)
+  (window-screen))
+
+;;(run-in-AWT-window)

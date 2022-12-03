@@ -1,5 +1,5 @@
-(module-name grasp-terminal)
-(module-compile-options main: #t)
+;;(module-name grasp-terminal)
+;;(module-compile-options main: #t)
 
 (import (define-syntax-rule))
 (import (define-interface))
@@ -107,7 +107,7 @@
 		      := (the-background-color)
 		      style: style::TextStyle := (the-text-style))
   ::Letter
-   (Letter character color background style))
+  (Letter character color background style))
 
 (define (render io :: LanternaScreen)::void
   (synchronized screen-up-to-date?
@@ -213,26 +213,6 @@
     (edit io)
     ))
 
-(set! (on-key-press KeyType:ArrowLeft)
-  (lambda ()
-    (move-cursor-left! selection: (if (shift-pressed?)
-				      SelectionAction:resize
-				      SelectionAction:discard))))
-
-(set! (on-key-press KeyType:ArrowRight)
-  (lambda ()
-    (move-cursor-right! selection: (if (shift-pressed?)
-				       SelectionAction:resize
-				       SelectionAction:discard))))
-
-(set! (on-key-press KeyType:ArrowUp)
-      move-cursor-up!)
-
-(set! (on-key-press KeyType:ArrowDown)
-      move-cursor-down!)
-
-(set! (on-key-type #\x) exit)
-
 (define-object (TerminalPainter screen::LanternaScreen)::Painter
   
   (define io::LanternaScreen screen)
@@ -283,18 +263,55 @@
   (define (current-height)::real
     (let ((size (io:getTerminalSize)))
       (size:getRows)))
-  
+
+  (define (draw-point! left::real top::real color-rgb::int)::void
+    (let* ((red ::int (bitwise-and #xff (bitwise-arithmetic-shift
+					color-rgb -16)))
+	   (green ::int (bitwise-and #xff (bitwise-arithmetic-shift
+					   color-rgb -8)))
+	   (blue ::int (bitwise-and #xff color-rgb))
+	   (color ::Color (Color:Indexed:fromRGB red green blue))
+	   (foreground ::Color (if (is (+ red green blue) > 384)
+				   Color:ANSI:BLACK
+				   Color:ANSI:WHITE)))
+      (io:setCharacter left top
+		       (letter #\⦿
+			       color: foreground
+			       background: color))))
   (CharPainter))
 
-(define (run
+(define (run-in-terminal
 	 #!optional
 	 (io :: LanternaScreen (make-terminal-screen)))
   :: void
+
+  (set! (on-key-press KeyType:ArrowLeft)
+	(lambda ()
+	  (move-cursor-left!
+	   selection: (if (shift-pressed?)
+			  SelectionAction:resize
+			  SelectionAction:discard))))
+
+  (set! (on-key-press KeyType:ArrowRight)
+	(lambda ()
+	  (move-cursor-right!
+	   selection: (if (shift-pressed?)
+			  SelectionAction:resize
+			  SelectionAction:discard))))
+
+  (set! (on-key-press KeyType:ArrowUp)
+	move-cursor-up!)
+
+  (set! (on-key-press KeyType:ArrowDown)
+	move-cursor-down!)
+
+  (set! (on-key-type #\x) exit)
+  
   (parameterize ((the-painter (TerminalPainter io)))
     (when (is (the-top-panel) instance? Editor)
       (let ((editor ::Editor (as Editor (the-top-panel))))
-    (set! editor:document
-      (with-input-from-string "\
+	(set! editor:document
+	      (with-input-from-string "\
 (define (! n)
 \"Computes the product 1*...*n.
 It represents the number of per-
@@ -314,4 +331,4 @@ mutations of an n-element set.\"
       (invoke rendering 'setPriority Thread:MIN_PRIORITY)
       (force editing))))
 
-(run)
+;;(run-in-terminal)

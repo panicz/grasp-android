@@ -77,6 +77,9 @@
   (enter-selection-drawing-mode!)::void
   (exit-selection-drawing-mode!)::void
   (in-selection-drawing-mode?)::boolean
+
+  (draw-point! left::real top::real color-rgba::int)::void
+  
   )
 
 (define-object (NullPainter)::Painter
@@ -190,6 +193,9 @@
   
   (define (in-selection-drawing-mode?)::boolean
     #f)
+
+  (define (draw-point! left::real top::real color-rgba::int)::void
+    (void))
   )
 
 ;;(set! (default-value Painter) (NullPainter))

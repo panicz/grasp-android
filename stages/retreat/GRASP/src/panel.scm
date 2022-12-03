@@ -106,7 +106,9 @@
 
   (define position ::Position (screen-position box))
 
-  (define initial ::Extent (invoke (extent box) 'clone))
+  (define initial ::Extent
+    (let ((extent ::Extent (extent box)))
+      (extent:clone)))
   
   (define ending ::LineEnding
     (line-ending-embracing anchor:top #;from box))

@@ -262,6 +262,10 @@
   
   (define (in-selection-drawing-mode?)::boolean
     inSelectionDrawingMode)
+
+  (define (draw-point! left::real top::real color-rgba::int)::void
+    #!abstract)
+
   )
   
   
@@ -343,5 +347,8 @@
   (define (current-width)::real width)
 
   (define (current-height)::real height)
+
+  (define (draw-point! left::real top::real color-rgba::int)::void
+    (put! #\⦿ top left))
   
   (CharPainter))
