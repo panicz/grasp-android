@@ -1,3 +1,4 @@
 #!/bin/sh
 java -cp "./libs/kawa.jar:." kawa.repl --no-warn-unreachable \
-     -f src/grasp-desktop.scm
+     -f src/grasp-desktop.scm \
+     -e "(run-in-AWT-window)"

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+java -cp "./libs/kawa.jar:./libs/lanterna-3.1.1.jar:." kawa.repl \
+     --debug-print-final-expr --no-warn-unreachable -f src/grasp.scm
