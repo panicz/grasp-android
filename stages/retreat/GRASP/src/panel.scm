@@ -40,6 +40,11 @@
   (draw!)::void
   )
 
+(define-object (Point x y)::Drawable
+  (define (draw!)
+    (let ((painter (the-painter)))
+      (painter:draw-point! x y #xff0000))))
+
 (define-object (Overlay)::Drawable
   (define elements :: List[Drawable] (ArrayList[Drawable]))
   
@@ -144,6 +149,9 @@
     ;; - powinnismy raczej zamienic go w selekcje. Ale nie
     ;; wiadomo, czy zechcemy obsluzyc ten kejs)
     (values))
+
+  (overlay:add! (Point (+ position:left ending:reach)
+		       (+ position:top anchor:top)))
   )
 
 (define-mapping (dragging finger::byte)::Drag #!null)
