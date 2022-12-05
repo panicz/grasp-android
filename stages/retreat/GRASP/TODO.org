@@ -1,3 +1,17 @@
+* 02.12.2022
+
+jak na razie mamy kilka problemow:
+1. zmiana rozmiaru w poziomie dziala, ale z bledami,
+ktore sa niezrozumiale
+2. zmiana rozmiaru w pionie nie dziala w ogole
+3. uruchamianie projektu na laptopie zajmuje
+duzo czasu
+
+W zwiazku z tym kilka pomyslow, ktore gdzies tam
+chodza po glowie:
+- dodac "rysunki diagnostyczne" do warstwy overlay
+- ewentualnie usprawnic skrypty do budowania
+
 * 01.12.2022
 
 udalo sie zintegrowac drag&dropa z aplikacja
