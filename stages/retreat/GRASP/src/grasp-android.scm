@@ -554,6 +554,25 @@
     ::int
     (text-character-index-under x y text (the-string-font)))
 
+  (define (draw-point! left::real top::real aRGB::int)::void
+    (let* ((alpha ::int (- 255
+			   (bitwise-and
+			    #xff
+			    (bitwise-arithmetic-shift aRGB -24))))
+	   (red ::int (bitwise-and
+		       #xff
+		       (bitwise-arithmetic-shift aRGB -16)))
+	   (green ::int (bitwise-and
+			 #xff
+			 (bitwise-arithmetic-shift aRGB -8)))
+	   (blue ::int (bitwise-and #xff aRGB)))
+      (paint:setColor (as int (bitwise-ior
+			       (bitwise-arithmetic-shift alpha 24)
+			       (bitwise-arithmetic-shift red 16)
+			       (bitwise-arithmetic-shift green 8)
+			       blue)))
+      (canvas:drawCircle left top 10.0 paint)))
+  
   (define (onDraw c::Canvas)::void
     (set! canvas c)
     (clear!)
