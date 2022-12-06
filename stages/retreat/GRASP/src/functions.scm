@@ -453,6 +453,44 @@
 	  '(1 2 3 4 5))
  ===> (3 4 5))
 
+
+(define (sublist+index satisfying?::predicate elements::list
+		       #!key (start-index 0))
+  (if (null? elements)
+      (values #f start-index)
+      (if (satisfying? elements start-index)
+	  (values elements start-index)
+	  (sublist+index satisfying? (cdr elements)
+			 start-index: (+ start-index 1)))))
+
+(e.g.
+ (sublist+index (lambda (cell index)
+		  (= (car cell) index))
+	  '(4 3 2 1 0))
+ ===> (2 1 0) 2)
+
+(define (for-each-cell action sequence::list)::void
+  (when (pair? sequence)
+    (action sequence)
+    (for-each-cell action (cdr sequence))))
+
+(define (count-sublists satisfying?::predicate sequence::list)::int
+  (let ((result ::int 0))
+    (for-each-cell (lambda (cell::pair)
+		     (when (satisfying? cell)
+		       (set! result (+ result 1))))
+		   sequence)
+    result))
+
+(define (last-pair-before index::int pairs::list)::list
+  (let try ((n ::int 0)
+	    (items ::list pairs))
+    (if (and (is items pair?)
+	     (is n < index)
+	     (is (cdr items) pair?))
+	(try (+ n 1) (cdr items))
+	pairs)))
+
 (define (map! f inout . in*)
   (cond
    ((null? in*)

@@ -18,6 +18,7 @@
 (import (indexable))
 (import (cursor))
 (import (interactive))
+(import (traversal))
 (import (primitive))
 (import (extent))
 (import (parse))
@@ -119,20 +120,30 @@
     (line-ending-embracing anchor:top #;from box))
 
   (define (set-width! width::real)::void
-    (and-let* ((break (sublist (lambda (cell)
-				 (or (and-let* ((`(,,@integer?
-						   ,,@integer?
-						   . ,_)
-						 cell)))
-				     (and-let* ((`(,,@integer?)
-						 cell)))))
-			       ending:space:fragments))
-	       (painter (the-painter))
-	       (new-value (as int (quotient (- width initial:width)
-					    (painter:space-width)))))
+    (traverse
+     box
+     doing:
+     (lambda (item::Element t::Traversal)
+       (and-let* ((space ::Space item))
+	 (for-each-cell (lambda (cell::pair)
+			  (and-let* ((`(,,@integer?
+					,,@integer?
+					. ,_) cell))
+			    (set-car! cell 0)))
+			space:fragments))))
+    (let* ((break (last-pair-before ending:index
+				    ending:space:fragments))
+	   (last-space (last-space box))
+	   (coda (last-pair last-space:fragments))
+	   (painter (the-painter))
+	   (new-value (as int (quotient (- width ending:reach)
+					(painter:space-width)))))
+      (when (is (car coda) integer?)
+	(set! (car coda) 0))
       (set! (head break) (max 0 new-value))))
 
   (define (set-height! height::real)::void
+    
     (values))
   
   (define (move! x::real y::real dx::real dy::real)::void
@@ -142,16 +153,19 @@
       (set-width! target-width)
       (set-height! target-height)))
 
+  (define p ::Point (Point (+ position:left ending:reach
+			      (invoke (the-painter) 'paren-width))
+			   (+ position:top anchor:top)))
+  
   (define (drop! x::real y::real vx::real vy::real)::void
     ;; jezeli predkosc byla odpowiednio duza, to powinnismy
     ;; wysplice'owac wszystkie elementy w liscie nadrzednej
     ;; (ewentualnie - gdyby ten element byl wlasnie przeciagany
     ;; - powinnismy raczej zamienic go w selekcje. Ale nie
     ;; wiadomo, czy zechcemy obsluzyc ten kejs)
-    (values))
+    (overlay:remove! p))
 
-  (overlay:add! (Point (+ position:left ending:reach)
-		       (+ position:top anchor:top)))
+  (overlay:add! p)
   )
 
 (define-mapping (dragging finger::byte)::Drag #!null)

@@ -454,41 +454,55 @@
 		   context)))))
 
 (define-type (LineEnding reach: real
-			 space: Space))
+			 space: Space
+			 index: int))
 
 (define (line-ending-embracing position::real
 			       #;from box::cons)
   ::LineEnding
-  (let ((last-space ::Space (pre-head-space box))
-	(previous-left ::real 0)
-	(next ::Traversal (Traversal)))
+  (let* ((last-space ::Space (pre-head-space box))
+	 (previous-left ::real 0)
+	 (next ::Traversal (Traversal))
+	 (painter ::Painter (the-painter))
+	 (space-width ::real (painter:space-width)))
     (call/cc
      (lambda (return)
        (traverse
 	box
 	doing:
 	(lambda (item::Element current::Traversal)
-	  (and-let* ((space ::Space item)
-		     ((sublist (lambda (cell)
-				 (and-let* ((`(,,@integer?
-					       ,,@integer?
-					       . ,_) cell))))
-			       space:fragments))
-		     (next ::Traversal (space:advance!
-					next))
-		     ((is current:top <= position < next:top)))
-	    (return (LineEnding reach: current:left
-				space: space)))
-	  (cond
-	   ((is item Space?)
-	    (set! last-space item)
-	    (next:assign current))
-	   (else
-	    (set! previous-left next:left))))
+	  (and-let* ((space ::Space item))
+	    (let ((fragment-index ::int 0))
+	      (set! last-space space)
+	      (next:assign current)
+	      (sublist (lambda (cell)
+			 (match cell
+			   (`(,,@integer? ,,@integer? . ,_)
+			    (cond ((is next:top <= position
+				       < (+ next:top
+					    next:max-line-height))
+				   (return
+				    (LineEnding
+				     space: space
+				     reach: next:left
+				     index: (+ fragment-index 1))))
+				  (else
+				   (next:advance-by! (* (car cell)
+							space-width))
+				   (next:new-line!)
+				   (set! fragment-index
+					 (+ fragment-index 1)))))
+			   (`(,,@integer?)
+			    (next:advance-by! (* space-width
+						 (car cell)))))
+			 #f)
+		       space:fragments)
+	      (set! previous-left next:left))))
 	returning:
 	(lambda (t::Traversal)
 	  (LineEnding reach: previous-left
-		      space: last-space)))))))
+		      space: last-space
+		      index: (last-space:last-index))))))))
 
 #|
 (define (cursor-above cursor::Cursor
