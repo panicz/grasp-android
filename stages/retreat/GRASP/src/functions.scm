@@ -469,14 +469,14 @@
 	  '(4 3 2 1 0))
  ===> (2 1 0) 2)
 
-(define (for-each-cell action sequence::list)::void
+(define (for-each-pair action sequence::list)::void
   (when (pair? sequence)
     (action sequence)
-    (for-each-cell action (cdr sequence))))
+    (for-each-pair action (cdr sequence))))
 
 (define (count-sublists satisfying?::predicate sequence::list)::int
   (let ((result ::int 0))
-    (for-each-cell (lambda (cell::pair)
+    (for-each-pair (lambda (cell::pair)
 		     (when (satisfying? cell)
 		       (set! result (+ result 1))))
 		   sequence)
