@@ -120,6 +120,16 @@
     (line-ending-embracing anchor:top #;from box))
 
   (define (set-width! width::real)::void
+    (traverse
+     box doing:
+     (lambda (item::Element t::Traversal)
+       (and-let* ((space ::Space item))
+	 (for-each-pair (lambda (cell::pair)
+			  (and-let* ((`(,,@integer?
+					,,@integer?
+					. ,_) cell))
+			    (set-car! cell 0)))
+			space:fragments))))
     (let* ((break (last-pair-before ending:index
 				    ending:space:fragments))
 	   (last-space ::Space (last-space box))
@@ -127,24 +137,15 @@
 	   (painter (the-painter))
 	   (new-value (as int (quotient (- width ending:reach)
 					(painter:space-width)))))
-      (traverse
-       box doing:
-       (lambda (item::Element t::Traversal)
-	 (and-let* ((space ::Space item))
-	   (for-each-pair (lambda (cell::pair)
-			    (and-let* (((isnt cell eq? break))
-				       (`(,,@integer?
-					  ,,@integer?
-					  . ,_) cell))
-			      (set-car! cell 0)))
-			  space:fragments))))
       (when (is (car coda) integer?)
 	(set! (car coda) 0))
+      
       (set! (head break) (max 0 new-value))))
 
   (define (set-height! height::real)::void
     (let* ((painter ::Painter (the-painter))
 	   (min-line-height ::real (painter:min-line-height))
+	   (last-space ::Space (last-space box))
 	   (prior ::Extent (extent box))
 	   (increment (- height prior:height)))
       (if (is increment > 0)
@@ -152,7 +153,8 @@
 					min-line-height)))
 	    (set-cdr! ending:space:fragments
 		      (let ((tip (cdr ending:space:fragments)))
-			(times lines (lambda () (set! tip (cons 0 tip))))
+			(times lines (lambda ()
+				       (set! tip (cons 0 tip))))
 			tip)))
 	  (let ((lines ::int (quotient (- increment)
 				       min-line-height)))
@@ -166,10 +168,17 @@
 		      (if (is lines <= 0)
 			  (return)
 			  (match fragments
-			    (`(,,@integer? ,,@integer? ,,@integer? . ,_)
+			    (`(,,@integer?
+			       ,,@integer?
+			       ,,@integer? . ,_)
 			     (set-cdr! fragments (cddr fragments))
 			     (set! lines (- lines 1))
 			     (remove-line fragments))
+			    (`(,,@integer?
+			       ,,@integer?)
+			     (if (eq? space last-space)
+				 (set-cdr! fragments '())
+				 (values)))
 			    (`(,head . ,tail)
 			     (remove-line tail))
 			    (_
@@ -196,9 +205,7 @@
     ;; wiadomo, czy zechcemy obsluzyc ten kejs)
     (overlay:remove! p))
 
-  (overlay:add! p)
-  
-  )
+  (overlay:add! p))
 
 (define-mapping (dragging finger::byte)::Drag #!null)
 

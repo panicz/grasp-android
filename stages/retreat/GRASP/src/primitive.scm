@@ -484,8 +484,8 @@
 				   (return
 				    (LineEnding
 				     space: space
-				     reach: next:left
-				     index: (+ fragment-index 1))))
+				     reach: current:left
+				     index: fragment-index)))
 				  (else
 				   (next:advance-by! (* (car cell)
 							space-width))
@@ -497,7 +497,7 @@
 						 (car cell)))))
 			 #f)
 		       space:fragments)
-	      (set! previous-left next:left))))
+	      (set! previous-left current:left))))
 	returning:
 	(lambda (t::Traversal)
 	  (LineEnding reach: previous-left
