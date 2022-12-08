@@ -1,11 +1,112 @@
+* 08.12.2022
+
+no to teraz chcemy, zeby:
+- wydobycie elementu z dokumentu dodawalo
+  do historii operacje usuniecia
+- upuszczenie tego elementu do tego samego
+  dokumentu podmienialo te operacje na operacje
+  przeniesienia wyrazenia
+- upuszczenie tego elementu do innego
+  dokumentu dodawalo operacje dodania
+  wyrazenia (ale poprzez wykonanie jego kopii)
+- zmiana rozmiaru pudelka powodowala
+  odpowiednia edycje obiektu spacji
+- wszystkie operacje musza byc odwracalne
+  (poprzez wykonywanie undo na dokumencie)
+
+Zaczniemy od teko, ze zdefiniujemy sobie klase
+Document i byc moze dodamy do niej klase History
+
+* 07.12.2022
+
+stary projekt operacji edycji: [[* 15.02.2022]]
+
+plan z grubsza taki:
+
+(define-interface Reversible ()
+  (inverse)::Reversible)
+
+(define-type (Remove element: Element
+                     at: cursor)
+ implementing Operation
+ with
+ (define (inverse)::Operation
+  (Insert element: ...)))
+
+na poczatku trzeba ustaluc, jakie w ogole
+mamy kategorie wyrazen
+
+po pierwsze mamy operacje edycji, w sklad ktorych
+wchodza:
+- edycje strukturalne dokumentu
+- edycje spacji
+- wykomentowywamie wyrazen
+
+Kolejne formy edycji, ktore trzeba rozwazyc, to:
+operacje na panelu:
+- dzielenie i laczenie ekranu
+- przelaczanie dokumentu
+- scrollowanie i zoomowanie dokumentu
+- poruszanie kursorem
+
+
+Ok, na razie to olewamy. W przyszlosci
+z pewnoscia bedziemy chcieli dodac opcje
+skakania po kodzie - w tym byc moze rowniez
+cofania sie po przebytej przez nas drodze.
+
+Ale jesli nawet tak, to zrobimy to w ramach
+osobnego trybu.
+
+
+* 06.12.2022
+
+ok, to musimy sobie teraz rozkminic jak ma dzialac pionowa
+zmiana rozmiaru:
+
+najpierw sprawdzamy, ile w ogole mamy nowych linii
+(w calym pudelku).
+
+wyliczamy rowniez rozmiar naszego calego pudelka.
+
+nastepnie okreslamy, ile spacji musimy dodac albo usunac
+
+jezeli chcemy usunac linie, to robimy tak, ze najpierw
+usuwamy linie z biezacej spacji - a jezeli to sie nie uda,
+to usuwamy linie ze spacji poprzedzajacych
+
+linii za spacji nastepujacych juz nie usuwamy
+
+no dobra. zatem beda nam potrzebne:
+- count-empty-lines
+
 * 05.12.2022 (laptop)
 
 Zmiana rozmiaru w poziomie musi sie odbywac w taki sposob,
 ze do pola "fragments" bedziemy dopisywac albo usuwac wpisy
 postaci "0" - pomiedzy pierwszym a ostatnim elementem.
 
+* 05.12.2022
 
+plan na dzis jest taki zeby:
+- naprawic zmmiane rozmiaru
+- naprawic upuszczanie na prawym nawiasie (bo to podobna koncepcja)
+- analogicznie na lewym nawiasie
+- zmiana rozmiaru listy pustej
+- wyodrebnianie listy pustej
+- umieszczanie elementow na liscie pustej
 
+jak to sie uda zrobic, to mozemy jeszcze:
+- zdiagnozowac dlaczego drag&drop dziala koslawo
+  (tzn rysowac punkty diagnostyczne przy kliknieciu)
+- cos rozkminic zeby te strzalki gora-dol lepiej dzialaly
+- poprawic selekcje
+- zrobic drag&drop na selekcjach?
+
+ok, a jak to bedzie, to wtedy:
+- edycja z klawiatury (i historia)
+- mechanizm rozszerzen
+- ewaluator wizualny
 
 * 02.12.2022
 
@@ -20,6 +121,20 @@ W zwiazku z tym kilka pomyslow, ktore gdzies tam
 chodza po glowie:
 - dodac "rysunki diagnostyczne" do warstwy overlay
 - ewentualnie usprawnic skrypty do budowania
+
+* 02.12.2022 (telefon)
+
+nisko wiszacy owoc: scalic klienta terminalowego
+i desktopowego w jednego jara
+(moze to jutro?)
+
+dzis tez byloby dobrze skonczyc implementacje
+"resize"
+
+w kolejnym tygodniu moglibysmy sie zajac tym, zeby:
+1. zaimplementowac mechanizm "undo"
+2. poprawic zachowanie spacji przy drag&dropie
+3. zaimplementowac edycje z klawiatury
 
 * 01.12.2022
 
@@ -40,6 +155,13 @@ Na razie zreszta mozemy sobie zdefiniowac typ
 (LineEnding reach: real space: Space)
 i to jego po prostu zwracac
 
+* 01.12.2022 (telefon)
+
+na laptopie chcielibysmy oczywiscie zaimplementowac Resize,
+ale sobie wymyslilismy, ze warto do tego celu miec Bundle,
+nad ktora sie teraz glowimy
+
+
 * 30.11.2022
 
 Zmiany rozmiaru ciag dalszy. Jest sobie zdanie:
@@ -52,7 +174,6 @@ poczatkowa szerokosc i poczatkowa wysokosc.
 
 Powinnismy tez wiedziec, w jakim stopniu
 edytowana spacja kontrybuuje do rozmiaru.
-
 
 * 29.11.2022 (telefon)
 
