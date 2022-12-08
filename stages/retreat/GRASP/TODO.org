@@ -1,3 +1,12 @@
+* 05.12.2022 (laptop)
+
+Zmiana rozmiaru w poziomie musi sie odbywac w taki sposob,
+ze do pola "fragments" bedziemy dopisywac albo usuwac wpisy
+postaci "0" - pomiedzy pierwszym a ostatnim elementem.
+
+
+
+
 * 02.12.2022
 
 jak na razie mamy kilka problemow:
