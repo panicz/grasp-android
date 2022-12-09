@@ -18,12 +18,13 @@ aapt package -f -m \
 cd src
 
 java -cp "../libs/kawa.jar:../libs/android.jar" kawa.repl \
-     -d ../build/android/obj -C \
+     --no-warn-unreachable -d ../build/android/obj -C \
      `java -jar ../libs/kawa.jar --no-warn-unreachable \
       -f analdep.scm -- --list grasp-android.scm` || exit
 
 java -cp "../libs/kawa.jar:../libs/android.jar:../build/android/obj" \
-     kawa.repl -d ../build/android/obj -P $PKGNAME. -T $PKGNAME.GRASP \
+     kawa.repl --no-warn-unreachable -d ../build/android/obj \
+     -P $PKGNAME. -T $PKGNAME.GRASP \
      -C grasp-android.scm || exit
 cd ..
 
@@ -40,7 +41,7 @@ aapt package -f \
 
 cd build/android/bin
 
-aapt  add -f "$PKGNAME.apk" classes.dex || exit
+aapt add -f "$PKGNAME.apk" classes.dex || exit
 
 zipalign -p 4 "$PKGNAME.apk" "aligned-$PKGNAME.apk" || exit
 mv "aligned-$PKGNAME.apk" "$PKGNAME.apk"
