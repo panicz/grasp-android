@@ -19,6 +19,7 @@
 (import (painter))
 (import (traversal))
 (import (extent))
+(import (print))
 
 (define (fragment-size fragment)
   (match fragment
@@ -615,9 +616,7 @@
 (define-property (head-tail-separator cell)
   head/tail-separator)
 
-(define-object (EmptyListProxy inner::Space)::Tile  
-  (define space :: Space)
-
+(define-object (EmptyListProxy space::Space)::Tile  
   (define (hashCode)::int
     (java.lang.System:identityHashCode (this)))
   
@@ -672,10 +671,11 @@
   (define (draw! context::Cursor)::void
     (let ((outer (extent))
 	  (painter (the-painter)))
-      (painter:draw-box! outer:width outer:height context)))
+      (painter:draw-box! outer:width outer:height context)
+      (with-translation ((painter:paren-width) 0)
+	  (space:draw! (recons 0 context)))))
   
-  (gnu.lists.LList)
-  (set! space inner))
+  (gnu.lists.LList))
 
 (define-cache (empty-list-proxy space::Space)
   (EmptyListProxy space))
