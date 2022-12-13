@@ -429,7 +429,7 @@
    (and (equal? l '(1 2 3))
 	(equal? s '(4 5)))))
 
-(define (splice! sublist::list
+(define (insert! sublist::list
 		 #!key
 		 (into::list '())
 		 (at::int 0))
@@ -438,8 +438,9 @@
     (append! into sublist suffix)))
 
 (e.g.
- (splice! (list 'a 'b 'c) into: (list 1 2 3 4) at: 2)
+ (insert! (list 'a 'b 'c) into: (list 1 2 3 4) at: 2)
  ===> (1 2 a b c 3 4))
+
 
 (define (sublist satisfying?::predicate elements::list)
   (and (not (null? elements))

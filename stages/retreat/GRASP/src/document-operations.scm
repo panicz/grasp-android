@@ -12,22 +12,22 @@
 (import (examples))
 (import (infix))
 (import (functions))
+(import (keyword-arguments))
 
-;; take-cell-at! returns either a cons-cell whose
+;; take-cell! returns either a cons-cell whose
 ;; car is the desired object, or a head/tail-separator
 ;; (consider: what to do when cursor points to a space?
 ;; we can safely return #!null, because it's different
 ;; than returning (#!null))
-(define (take-cell-at! #!optional
-		       (cursor::Cursor (the-cursor))
-		       (expression::pair (the-document)))
+(define/kw (take-cell! at: cursor::Cursor := (the-cursor)
+		       from: document::pair := (the-document))
   (match cursor
     (`(,,@(isnt _ integer?) . ,root)
-     (take-cell-at! root expression))
+     (take-cell! at: root from: document))
     
     (`(,,@(is _ <= 1) ,parent-index . ,root)
      (let* ((grandparent ::pair
-			 (cursor-ref expression
+			 (cursor-ref document
 				     root))
 	    (cell (drop (quotient parent-index 2)
 			grandparent))
@@ -42,7 +42,7 @@
        removed))
     
     (`(,index . ,root)
-     (let* ((parent ::pair (cursor-ref expression
+     (let* ((parent ::pair (cursor-ref document
 				       root))
 	    (index (quotient index 2))
 	    (irrelevant (- index 1)))
@@ -81,70 +81,54 @@
 		   head/tail-separator)
 		 (remove-tail! preceding))))))
     (_
-     expression)))
-
-(define (take-part-at! #!optional
-		       (cursor::Cursor (the-cursor))
-		       (object (the-document)))
-  (cond #;((Indexable? object)
-	 (invoke (as Indexable object) 
-'take-part-at! cursor))
-
-   ((pair? object)
-    (take-cell-at! cursor object))
-
-   (else
-    (error "Don't know how to take "cursor
-	   " from "object))))
+     document)))
 
 (e.g.
  (let* ((document `(,1 ,3 ,5))
-	(taken (take-cell-at! '(3) document)))
+	(taken (take-cell! at: '(3) from: document)))
    (and (equal? document '(1 5))
 	(equal? taken '(3)))))
 
 (e.g.
  (let* ((document `(,1 ,3 ,5))
-	(taken (take-cell-at! '(5) document)))
+	(taken (take-cell! at: '(5) from: document)))
    (and (equal? document '(1 3))
 	(equal? taken '(5)))))
 
 (e.g.
  (let* ((document `((,1 ,3 ,5)))
-	(taken (take-cell-at! '(1 1) document)))
+	(taken (take-cell! at: '(1 1) from: document)))
    (and (equal? document '((3 5)))
 	(equal? taken '(1)))))
 
 (e.g.
  (let* ((document `((,1 . ,5)))
-	(taken (take-cell-at! '(3 1) document)))
+	(taken (take-cell! at: '(3 1) from: document)))
    (and (equal? document '((1 5)))
 	(head/tail-separator? taken))))
 
 (e.g.
  (let* ((document `((,1 . ,5)))
-	(taken (take-cell-at! '(1 1) document)))
+	(taken (take-cell! at: '(1 1) from: document)))
    (and (equal? document '((5)))
 	(equal? taken '(1)))))
 
 (e.g.
  (let* ((document `((,1 . ,5)))
-	(taken (take-cell-at! '(5 1) document)))
+	(taken (take-cell! at: '(5 1) from: document)))
    (and (equal? document '((1)))
 	(equal? taken '(5)))))
 
-(define (put-into-cell-at! cursor::Cursor
-			   element
-			   #;in
-			   #!optional
-			   (document (the-document)))
+(define/kw (splice! element
+		    into: document::pair := (the-document)
+		    at: cursor::Cursor := (the-cursor))
   ::boolean
   (assert (or (and (pair? element)
 		   (list? (cdr element)))
 	      (head/tail-separator? element)))
   (match cursor
     (`(,,@(isnt _ integer?) . ,root)
-     (put-into-cell-at! root element document))
+     (splice! element into: document at: root))
 
     (`(,,@(is _ <= 1) ,parent-index . ,root)
      (assert (pair? element))
@@ -182,29 +166,28 @@
 
 (e.g.
  (let ((document `((,1 ,5))))
-   (put-into-cell-at! '(2 1) `(,3) document)
+   (splice! `(,3) into: document at: '(2 1))
    document) ===> ((1 3 5)))
 
 (e.g.
  (let ((document `((,1 ,7))))
-   (put-into-cell-at! '(2 1) `(,3 ,5) document)
+   (splice! `(,3 ,5) into: document at: '(2 1))
    document) ===> ((1 3 5 7)))
 
 (e.g.
  (let ((document `((,1 ,5))))
-   (put-into-cell-at! '(2 1)
-		      head/tail-separator
-		      document)
+   (splice! head/tail-separator
+	    into: document at: '(2 1))
    document) ===> ((1 . 5)))
 
 (e.g.
  (let ((document `((,3 ,5))))
-   (put-into-cell-at! '(0 1) `(,1) document)
+   (splice! `(,1) into: document at: '(0 1))
    document) ===> ((1 3 5)))
 
 (e.g.
  (let ((document `((,5 ,7))))
-   (put-into-cell-at! '(0 1) `(,1 ,3) document)
+   (splice! `(,1 ,3) into: document at: '(0 1))
    document) ===> ((1 3 5 7)))
 
 (define (replace-expression! #!key

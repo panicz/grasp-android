@@ -106,7 +106,7 @@
   (pair a d))
 
 (define-cache (hash-cons head tail)
-  (cons head tail))
+  (immutable-pair head tail))
 
 (define-syntax hash-cons*
   (syntax-rules ()

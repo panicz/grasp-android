@@ -15,27 +15,29 @@
 (import (while))
 (import (indexable))
 (import (primitive))
+(import (document-operations))
+(import (editor-operations))
 
 (define-interface DocumentOperation ()
   (apply! document::pair)::void
   (inverse)::DocumentOperation
-  (merge previous-operation ::DocumentOperation)::DocumentOperation)
+  ;;(merge previous-operation ::DocumentOperation)::DocumentOperation
+  )
 
 (define-type (Move source: Cursor
 		   target: Cursor)
   implementing DocumentOperation
   with
   ((apply! document::pair)::void
-   (let ((item (take-cell-at! source
-			      document)))
-     (put-into-cell-at! target
-			item
-			document)))
+   (let ((item (take-cell! at: source
+			   from: document)))
+     (splice! item into: document at: target)))
 
   ((inverse)
    (Move source: target
 	 target: source)))
 
+#|
 (define-type (Remove element: Element
 		     from: Cursor)
   implementing DocumentOperation
@@ -55,9 +57,11 @@
   ((inverse)::void
    (Remove element: element
 	   from: at)))
-  
+|#
+
+
 (define-object (History document::pair)
-  (define fronts ::(list-of (list-of DocumentOperation) '()))
+  (define fronts ::(list-of (list-of DocumentOperation)) '())
 
   (define undo-step ::int 0)
   

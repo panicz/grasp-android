@@ -673,7 +673,7 @@
 	  (painter (the-painter)))
       (painter:draw-box! outer:width outer:height context)
       (with-translation ((painter:paren-width) 0)
-	  (space:draw! (recons 0 context)))))
+	  (space:draw! (hash-cons 0 context)))))
   
   (gnu.lists.LList))
 

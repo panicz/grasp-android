@@ -91,16 +91,16 @@
 	  (if (dotted? last-cell)
 	      (set! (post-tail-space last-cell) last-space)
 	      (set! (post-head-space last-cell) last-space))
-	  (put-into-cell-at! precursor selected:items)))
+	  (splice! selected:items at: precursor)))
 
        ((is parent cons?)
 	(match tip
 	  (,(parent:first-index)
-	   (put-into-cell-at! (recons 0 precursor) selected:items))
+	   (splice! selected:items at: (recons 0 precursor)))
 	  (,(parent:last-index)
-	   (put-into-cell-at! (recons (last-cell-index parent)
-				      precursor)
-			      selected:items))
+	   (splice! selected:items
+		    at: (recons (last-cell-index parent)
+				precursor)))
 	  (_
 	   (WARN "how to put "selected:items
 		 " into "parent" at "cursor)))))
@@ -432,7 +432,7 @@
 	    ;; powinnismy powiekszyc spacje poprzedzajaca
 	    ;; wydobywany element o szerokosc tego elementu
 	    ;; podzielona przez (painter:space-width)
-	    (let* ((target (take-cell-at! subpath))
+	    (let* ((target (take-cell! at: subpath))
 		   (selection (Selected target
 					(screen-position
 					 (head target)))))

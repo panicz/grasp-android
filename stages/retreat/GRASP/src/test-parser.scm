@@ -1,13 +1,18 @@
 (import
- (indexable)
- (primitive)
- (space)
- (parse)
- (examples)
- (conversions)
- (srfi :11)
- (assert)
- )
+  (define-interface)
+  (define-type)
+  (define-object)
+  (conversions)
+
+  (indexable)
+  (primitive)
+  (space)
+  (parse)
+  (examples)
+  (conversions)
+  (srfi :11)
+  (assert)
+  )
 
 (define factorial-definition (with-input-from-string "\
 (define (factorial n)

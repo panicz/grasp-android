@@ -1,4 +1,5 @@
 (import (define-parameter))
+(import (keyword-arguments))
 (import (functions))
 (import (fundamental))
 (import (indexable))
@@ -91,7 +92,7 @@
       (cond ((is 0 <= position < (atom-length target))
 	     (delete-char! target position)
 	     (when (= (atom-length target) 0)
-	       (take-cell-at! (cdr (the-cursor)))
+	       (take-cell! at: (cdr (the-cursor)))
 	       (set! (the-cursor)
 		     (cursor-climb-back
 		      (recons (- (car (cdr (the-cursor)))
@@ -110,7 +111,7 @@
 		(pair? (the-cursor))
 		(eqv? (car (the-cursor)) (first-index target)))
 	   (let ((new-cursor (cursor-retreat)))
-	     (take-cell-at!)
+	     (take-cell!)
 	     (set! (the-cursor) new-cursor)))
 	  (else
 	   (delete! (car (the-cursor)))))))
@@ -121,7 +122,7 @@
 		(eqv? (car (the-cursor)) (last-index target)))
 	   (let ((new-cursor (cursor-climb-back
 			      (cursor-back (cdr (the-cursor))))))
-	     (take-cell-at!)
+	     (take-cell!)
 	     (set! (the-cursor) new-cursor)))
 	  (else
 	   (set! (the-cursor)
@@ -137,7 +138,7 @@
      ((is c memq '(#\[ #\( #\{))
       (cond
        ((is target instance? Space)
-	(put-into-cell-at! root #;(cdr (the-cursor)) (cons '() '()))
+	(splice! (cons '() '()) at: root #;(cdr (the-cursor)))
 	(set! (the-cursor)
 	      (recons* 0 0 (+ (car (cdr (the-cursor))) 1)
 		       (cdr (cdr (the-cursor))))))
@@ -146,8 +147,8 @@
 	      (recons #\[ (cdr (the-cursor)))))
 
        (else
-	(let ((target (take-cell-at! (cdr (the-cursor)))))
-	  (put-into-cell-at! (cdr (the-cursor)) (cons target '()))
+	(let ((target (take-cell! at: (cdr (the-cursor)))))
+	  (splice! (cons target '()) at: (cdr (the-cursor)))
 	  (set! (the-cursor)
 		(recons #\[ (cdr (the-cursor))))))))
 
@@ -205,19 +206,15 @@
 	)
 
        ((is c memq '(#\. #\|))
-	(put-into-cell-at! (cdr (the-cursor))
-			   head/tail-separator
-			   (the-document))
+	(splice! head/tail-separator at: (cdr (the-cursor)))
 	(times 2 move-cursor-right!))
        
        (else
 	(let* ((space-after (split-space!
 			     target
 			     (car (the-cursor)))))
-	  (put-into-cell-at!
-	   (cdr (the-cursor))
-	   (cons (Atom (list->string (list c)))
-		 '()))
+	  (splice! (cons (Atom (list->string (list c))) '())
+		   at: (cdr (the-cursor)))
 	  (set! (the-cursor)
 	    (recons* 1 (+ (car (cdr (the-cursor))) 1)
 		     (cdr (cdr (the-cursor)))))))))
