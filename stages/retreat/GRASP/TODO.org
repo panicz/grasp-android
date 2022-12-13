@@ -1,3 +1,80 @@
+* 13.12.2022
+
+Mamy do zrealizowania kilka operacji:
+- przeciagniecie wyrazenia w obrebie dokumentu
+powinmo wyhenerowac operacje Move
+- przeciagniecie wyrazenia z jednego dokumentu
+  do drugiego powinno wygenerowac Remove
+  w jednym dokumencie oraz Splice w drugim
+  dokumencie (nie trzeba wykonywac kopii
+  wyrazenia)
+- potrzebujemy osobnej klasy operacji do tego,
+  zeby zmieniac rozmiar pudelka. Moze to bedzie
+  (ResizeBox at: Cursor
+             grabbing-row: int
+             by-rows: int
+	     by-columns: int)
+
+Ok, czyli zaczynamy od tego, ze implementujemy
+Move, Resize i Remove, a dopiero pozniej Split
+(bo zasadnicza trudnosc ze Split jest taka,
+ze bedzie trzeba jakos przemyslec kwestie
+appendowania elementow do atomu - i wlasciwie
+do wszystkiego innego tez)
+
+
+* 12.12.2022
+
+teraz taki pomysl, zeby take-cell-at! przemianowac
+na (take-cell! at: cursor from: document)
+
+ok, to juz zrobione. Docelowo jednak bedziemy
+chcieli miec "take!" z dodatkowym argumentem
+upto:, tak zeby moc zabierac selekcje
+
+i co dalej?
+
+dalej chcemy przemianowac put-into-cell-at!
+na splice!
+
+to tez mamy.
+
+a teraz?
+
+teraz chcemy:
+- zdefiniowac operacje Splice
+- zdefiniowac odwrotnosc dla tej operacji
+- zdefiniowac operacje move (wraz z jej odwrotnoscia)
+- wykonac operacje "na lewym nawiasie" za pomoca operacji
+  Move
+- dodac operacje do zmiany rozmiaru spacji (oraz jej
+  odwrotnosc)
+- wykonac operacje drag&drop za posrednictwem historii
+  i zaimplementowac mechanizm undo
+
+No, ale zacznijmy od operacji Splice.
+
+Zasadniczo chodzi o to, ze ta operacja powinna nie tylko
+wywolywac splice!, ale - w przypadku atomow - powinna
+w odpowiednie miejsca doklejac stringi.
+
+
+* 10.12.2022
+
+pomysl jest taki, zeby wyrugowac zaleznosci od
+(editor-operations)
+
+ale nie mozemy tego zrobic, bo przeciez sa tam
+funkcje do poruszania kursorem
+  
+
+* 09.12.2022
+
+co robimy dalej:
+- chcemy zaimplementowac wszystkie operacje historyczne
+- i napisac dla nich testy jednostkowe
+- i zintegrowac z interfejsem uzytkownika
+
 * 08.12.2022
 
 no to teraz chcemy, zeby:
