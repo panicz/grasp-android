@@ -1,3 +1,10 @@
+* 15.12.2022
+
+plan z grubsza taki:
+1. piszemy test jednostkowy zawierajacy Move
+2. implementujemy operacje Move
+3. implementujemy odwrotnosc operacji Move
+
 * 13.12.2022
 
 Mamy do zrealizowania kilka operacji:
