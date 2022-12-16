@@ -13,6 +13,7 @@
 (import (infix))
 (import (functions))
 (import (keyword-arguments))
+(import (print))
 
 ;; take-cell! returns either a cons-cell whose
 ;; car is the desired object, or a head/tail-separator
@@ -119,75 +120,73 @@
    (and (equal? document '((1)))
 	(equal? taken '(5)))))
 
+
+
 (define/kw (splice! element
 		    into: document::pair := (the-document)
 		    at: cursor::Cursor := (the-cursor))
   ::boolean
-  (assert (or (and (pair? element)
-		   (list? (cdr element)))
-	      (head/tail-separator? element)))
   (match cursor
-    (`(,,@(isnt _ integer?) . ,root)
-     (splice! element into: document at: root))
+    (`(,tip ,top . ,root)
+     (let* ((grandpa (cursor-ref document root))
+	    (parent (part-at top grandpa))
+	    (target (part-at tip parent)))
+       (cond
+	((and (Space? target)
+	      (pair? grandpa)
+	      (eq? parent target))
+	 (if (is top <= 1)
+	     (and-let* ((`(,heir . ,origin) root)
+			(predecesor ::pair (cursor-ref document origin))
+			(parent (drop (quotient heir 2) predecesor)))
+	       (set! (last-tail element) (car parent))
+	       (set! (car parent) element) #t)
 
-    (`(,,@(is _ <= 1) ,parent-index . ,root)
-     (assert (pair? element))
-     (let* ((grandparent ::pair (cursor-ref
-				 document root))
-	    (parent (drop (quotient parent-index 2)
-			  grandparent)))
-       (set! (last-tail element) (car parent))
-       (set! (car parent) element)
-       #t))
+	     (let* ((irrelevant (- (quotient top 2) 1))
+		    (before (drop irrelevant grandpa)))
+	       (cond ((pair? element)
+		      (set! (last-tail element) (cdr before))
+		      (set! (cdr before) element) #t)
+		     
+		     ((null? (cdr (cdr before)))
+		      (assert (head/tail-separator? element))
+		      (set! (cdr before) (car (cdr before)))
+		      (update! (dotted? before) #t) #t)
 
-    (`(,index . ,root)
-     (let* ((parent (cursor-ref document root))
-	    (irrelevant (- (quotient index 2) 1))
-	    (preceding (drop irrelevant parent)))
-       (cond ((pair? element)
-	      (set! (last-tail element)
-		(cdr preceding))
-	      (set! (cdr preceding) element)
-	      #t)
-	     
-	     ((null? (cdr (cdr preceding)))
-	      (assert (head/tail-separator?
-		       element))
-	      (set! (cdr preceding)
-		(car (cdr preceding)))
-	      (update! (dotted? preceding) #t)
-	      #t)
+		     (else
+		      (WARN "Attempt to splice "element
+			    " in non-tail position") #f))
 
-	     (else
-	      #f))))
-    (_
-     #f)
-  ))
+	       )))
+	(else
+	 (WARN "unhandled case: "
+	       `(splice! ,element into: ,document at: ,cursor)) #f)
+	)))))
 
 (e.g.
  (let ((document `((,1 ,5))))
-   (splice! `(,3) into: document at: '(2 1))
+   (splice! `(,3) into: document at: '(0 2 1))
    document) ===> ((1 3 5)))
 
 (e.g.
  (let ((document `((,1 ,7))))
-   (splice! `(,3 ,5) into: document at: '(2 1))
+   (splice! `(,3 ,5) into: document at: '(0 2 1))
    document) ===> ((1 3 5 7)))
 
 (e.g.
  (let ((document `((,1 ,5))))
    (splice! head/tail-separator
-	    into: document at: '(2 1))
+	    into: document at: '(0 2 1))
    document) ===> ((1 . 5)))
 
 (e.g.
  (let ((document `((,3 ,5))))
-   (splice! `(,1) into: document at: '(0 1))
+   (splice! `(,1) into: document at: '(0 0 1))
    document) ===> ((1 3 5)))
 
 (e.g.
  (let ((document `((,5 ,7))))
-   (splice! `(,1 ,3) into: document at: '(0 1))
+   (splice! `(,1 ,3) into: document at: '(0 0 1))
    document) ===> ((1 3 5 7)))
 
 (define (replace-expression! #!key

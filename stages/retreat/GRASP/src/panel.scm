@@ -91,19 +91,11 @@
 	  (if (dotted? last-cell)
 	      (set! (post-tail-space last-cell) last-space)
 	      (set! (post-head-space last-cell) last-space))
-	  (splice! selected:items at: precursor)))
+	  (splice! selected:items at: cursor)))
 
        ((is parent cons?)
-	(match tip
-	  (,(parent:first-index)
-	   (splice! selected:items at: (recons 0 precursor)))
-	  (,(parent:last-index)
-	   (splice! selected:items
-		    at: (recons (last-cell-index parent)
-				precursor)))
-	  (_
-	   (WARN "how to put "selected:items
-		 " into "parent" at "cursor)))))
+	(splice! selected:items at: cursor)))
+      
       (overlay:remove! selected)))
 
   (overlay:add! selected))

@@ -61,7 +61,7 @@
 ")
 
 (let ((taken (take-cell! at: (cursor 3 3 1 1))))
-  (splice! taken at: (cursor 4 1 1)))
+  (splice! taken at: (cursor 0 4 1 1)))
 
 ;; this behaviour is wrong (but it's a start)
 
@@ -81,4 +81,3 @@
 │    │    │ * n │ ! │ - n 1 │ │ │ │ │
 ╰    ╰    ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
 ")
- 

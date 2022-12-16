@@ -13,6 +13,9 @@
 (define-syntax-rule (list-of type)
   list)
 
+(define-syntax-rule (either type ...)
+  java.lang.Object)
+
 #|
 (define-simple-class Struct ()
   interface: #t
