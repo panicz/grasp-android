@@ -5,6 +5,52 @@ plan z grubsza taki:
 2. implementujemy operacje Move
 3. implementujemy odwrotnosc operacji Move
 
+Jednakze jak na razie sytuacja wyglada tak,
+ze operacja splice! wydaje sie nieco blednie
+zaimplementowana.
+
+Chodzi zasadniczo o to, ze wklejanie obiektu
+do spacji nie dziala tak, jak powinno - a mowiac
+konkretniej, jezeli p jes sciezka do spacji
+i `(,n . ,p) jest sciezka do pozycji w tej spacji,
+to wklejenie pod dany indeks nie spowoduje
+przelamania spacji, tylko umieszczenie na kolejnej
+pozycji, tj. o ile
+
+(splice! `(,n) into:
+`((define (!)
+  (if (<= n 1)
+    1
+   (* n (! (- n 1)))))))
+   at: (cursor 4 1 1))
+
+daje nam
+
+((define (!)
+ n (if (<= n 1)
+    1
+   (* n (! (- n 1)))))))
+
+to
+
+(splice! `(,n) into:
+`((define (!)
+  (if (<= n 1)
+    1
+   (* n (! (- n 1)))))))
+   at: (cursor - 4 1 1))
+
+daje nam
+
+((define (!)
+ (n if (<= n 1)
+    1
+   (* n (! (- n 1)))))))
+
+co wydaje sie bardzo dziwne.
+
+
+
 * 13.12.2022
 
 Mamy do zrealizowania kilka operacji:
