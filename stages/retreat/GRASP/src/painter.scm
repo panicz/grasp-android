@@ -83,17 +83,17 @@
   )
 
 (define-object (NullPainter)::Painter
-  (define (space-width)::real 0)
+  (define (space-width)::real 1)
   
-  (define (paren-width)::real 0)
+  (define (paren-width)::real 1)
 
-  (define (cursor-height)::real 0)
+  (define (cursor-height)::real 1)
   
-  (define (min-line-height)::real 0)
+  (define (min-line-height)::real 1)
   
-  (define (vertical-bar-width)::real 0)
+  (define (vertical-bar-width)::real 1)
 
-  (define (horizontal-bar-height)::real 0)
+  (define (horizontal-bar-height)::real 1)
   
   (define (clear!)::void
     (values))
@@ -162,7 +162,7 @@
     0)
   
   (define (atom-extent text::CharSequence)::Extent
-    (Extent width: 0 height: 0))
+    (Extent width: 1 height: 1))
   
   (define (draw-horizontal-bar! width::real)::void
    (values))
