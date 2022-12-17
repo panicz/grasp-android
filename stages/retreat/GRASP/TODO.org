@@ -1,3 +1,60 @@
+* 17.12.2022
+
+chcielibysmy naprawic obsluge spacji w sytuacjach, gdy
+pobieramy:
+- head/tail-separator
+- pierwszy element z listy
+- element przed kropka
+- elementbza kropka
+
+ok, to jest mniej wiecej naprawione.
+
+teraz bysmy chcieli nastepujace rzeczy:
+- zmienic testy dla take-cell! tak zeby wejscie i wyjscie
+zwracalo stringi
+- napisac test przywracajacy oryginalny stan
+  dokumentu
+- potrzebna bedzie tez funkcja kopiujaca drzewo,
+  zeby mozna bylo pisac testy
+
+ok, ogolnie wydaje sie, ze o ike obsluga spacji
+przy wyciaganiu elementow dziala, o tyle trzeba by jeszcze
+bylo zadbac o to, zeby umieszczanie elementow powodowalo
+usuwanie spacji - a kiedy to bedzie juz zrobione, to bysmy
+zaczeli kombinowac jak by tu odwracac operacje edycji
+- tzn na poczatku zaczniemy od przenoszenia elementow,
+a dopiero pozniej dodamy dodawanie i usuwanie
+
+* 16.12.2022
+
+chcielibysmy napisac funkcje 'splice!' ponownie,
+tym razem jednak dodajac do interfejsu Indexable
+metode splice-at!
+
+Ale w jakich klasach?
+
+Na pewno:
+
+- cons
+- Atom
+- beside, below, over
+- text
+
+No ale ale.
+
+Wydaje sie, ze to nie moze dzialac, poniewaz:
+- potrzebujemy zarowno informacji o indeksie
+  wewnatrz listy, jak i o indeksie wewnatrz spacji
+- ale przekazujemy tylo jeden indeks
+
+Stad tez wywalamy na razie splice-at!, i ewentualnie
+dodamy go do interfehsu Enchanted albo Interacrive
+
+Jedna uwaga jest taka, ze chcielibysmy, zeby:
+- post-head-space od spacji zostalo przyciete
+- post-head-space od ostatniej pary elementu
+  bylo ustawione na przycieta wartosc
+
 * 15.12.2022
 
 plan z grubsza taki:
@@ -38,7 +95,7 @@ to
   (if (<= n 1)
     1
    (* n (! (- n 1)))))))
-   at: (cursor - 4 1 1))
+   at: (cursor 1 4 1 1))
 
 daje nam
 
@@ -48,6 +105,9 @@ daje nam
    (* n (! (- n 1)))))))
 
 co wydaje sie bardzo dziwne.
+
+Jest to jednak poniekad zrozumiale,
+
 
 
 
