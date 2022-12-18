@@ -24,17 +24,18 @@
 ;; (consider: what to do when cursor points to a space?
 ;; we can safely return #!null, because it's different
 ;; than returning (#!null))
+
+(define (cell-width taken::pair)::real
+  (let* ((extent ::Extent (sequence-extent taken))
+	 (painter ::Painter (the-painter)))
+    (quotient extent:width (painter:space-width))))
+
 (define/kw (take-cell! at: cursor::Cursor := (the-cursor)
 		       from: document::pair := (the-document))
   (define (increase-space! space::Space width::real)
     (let ((last-fragment (last-pair space:fragments)))
       (set! (car last-fragment)
 	(+ (car last-fragment) width))))
-
-  (define (width taken::pair)::real
-    (let* ((extent ::Extent (sequence-extent taken))
-	   (painter ::Painter (the-painter)))
-      (quotient extent:width (painter:space-width))))
   
   (match cursor
     (`(,,@(isnt _ integer?) . ,root)
@@ -52,7 +53,7 @@
 	     (unset! (dotted? removed)))
 	   (set! (car cell) (cdr removed)))
        (set! (cdr removed) '())
-       (increase-space! (pre-head-space (car cell)) (width removed))
+       (increase-space! (pre-head-space (car cell)) (cell-width removed))
        (unset! (post-head-space (last-pair removed)))
        removed))
     
@@ -68,7 +69,7 @@
 	   (set! (cdr removed) '())
 	   (unset! (post-head-space removed))
 	   (increase-space! (post-head-space preceding)
-			    (width removed))
+			    (cell-width removed))
 	   (join-spaces! (post-head-space preceding)
 			 removed-space)
 	   removed))
@@ -83,20 +84,21 @@
 		   (set! (cdr preceding) '())
 		   (unset! (dotted? preceding))
 		   (increase-space! (post-head-space preceding)
-				    (+ 1 (width removed)))
+				    (+ 1 (cell-width removed)))
 		   (unset! (post-head-space (last-pair removed)))
 		   removed)
 		 (remove-tail! (cdr preceding))))
 	  
 	   (let ((preceding (drop skip parent)))
 	     (if (dotted? preceding)
-		 (let* ((added (cons (cdr preceding) '())))
+		 (let* ((separator (head-tail-separator preceding))
+			(added (cons (cdr preceding) '())))
 		   (increase-space! (post-head-space preceding) 1)
 		   (join-spaces! (post-head-space preceding)
 				 (pre-tail-space preceding))
 		   (set! (cdr preceding) added)
 		   (unset! (dotted? preceding))
-		   head/tail-separator)
+		   separator)
 		 (remove-tail! preceding))))))
     (_
      document)))
@@ -175,22 +177,37 @@
 	 (if (is top <= 1)
 	     (and-let* ((`(,heir . ,origin) root)
 			(predecesor ::pair (cursor-ref document origin))
-			(parent (drop (quotient heir 2) predecesor)))
+			(parent (drop (quotient heir 2) predecesor))
+			(following-space (split-space! target tip)))
+	       (set! (car following-space:fragments)
+		 (max (if (null? (car parent)) 0 1)
+		      (- (car following-space:fragments)
+			 (cell-width element))))
 	       (set! (post-head-space (last-pair element))
-		 (split-space! target tip))
+		 following-space)
 	       (set! (last-tail element) (car parent))
 	       (set! (car parent) element) #t)
 
 	     (let* ((irrelevant (- (quotient top 2) 1))
 		    (before (drop irrelevant grandpa)))
 	       (cond ((pair? element)
-		      (set! (post-head-space (last-pair element))
-			(split-space! target tip))
+		      (let ((following-space (split-space! target tip)))
+			(set! (car following-space:fragments)
+			  (max (if (null? (cdr before)) 0 1)
+			       (- (car following-space:fragments)
+				  (cell-width element))))
+			(set! (post-head-space (last-pair element))
+			  following-space))
 		      (set! (last-tail element) (cdr before))
 		      (set! (cdr before) element) #t)
 		     
 		     ((null? (cdr (cdr before)))
 		      (assert (head/tail-separator? element))
+		      (let* ((following-space (split-space! target tip)))
+			(set! (car following-space:fragments)
+			  (max 1 (- (car following-space:fragments) 1)))
+			(set! (pre-tail-space before)
+			  following-space))
 		      (set! (cdr before) (car (cdr before)))
 		      (update! (dotted? before) #t) #t)
 
@@ -205,30 +222,30 @@
 	)))))
 
 (e.g.
- (let ((document `((,1 ,5))))
-   (splice! `(,3) into: document at: '(0 2 1))
-   document) ===> ((1 3 5)))
+ (let ((document (string->document "1   5")))
+   (splice! (parse-string "3") into: document at: '(1 2 1))
+   (document->string document)) ===> "1 3 5")
 
 (e.g.
- (let ((document `((,1 ,7))))
-   (splice! `(,3 ,5) into: document at: '(0 2 1))
-   document) ===> ((1 3 5 7)))
+ (let ((document (string->document "1     7")))
+   (splice! (parse-string "3 5") into: document at: '(1 2 1))
+   (document->string document)) ===> "1 3 5 7")
 
 (e.g.
- (let ((document `((,1 ,5))))
+ (let ((document (string->document "3 5")))
+   (splice! (parse-string "1") into: document at: '(0 0 1))
+   (document->string document)) ===> "1 3 5")
+
+(e.g.
+ (let ((document (string->document "5 7")))
+   (splice! (parse-string "1 3") into: document at: '(0 0 1))
+   (document->string document)) ===> "1 3 5 7")
+
+(e.g.
+ (let ((document (string->document "1   5")))
    (splice! head/tail-separator
-	    into: document at: '(0 2 1))
-   document) ===> ((1 . 5)))
-
-(e.g.
- (let ((document `((,3 ,5))))
-   (splice! `(,1) into: document at: '(0 0 1))
-   document) ===> ((1 3 5)))
-
-(e.g.
- (let ((document `((,5 ,7))))
-   (splice! `(,1 ,3) into: document at: '(0 0 1))
-   document) ===> ((1 3 5 7)))
+	    into: document at: '(1 2 1))
+   (document->string document)) ===> "1 . 5")
 
 (define/kw (replace-expression! at: cursor ::Cursor := (the-cursor)
 				with: replacement
