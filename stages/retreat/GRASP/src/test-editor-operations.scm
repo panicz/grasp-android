@@ -79,3 +79,8 @@
 │   │    │ * n │ ! │ - n 1 │ │ │ │ │
 ╰   ╰    ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
 ")
+
+(let ((taken (take-cell! at: (cursor 5 1 1))))
+  (splice! taken at: (cursor 1 2 3 1 1)))
+
+(snapshot)

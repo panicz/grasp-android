@@ -26,15 +26,15 @@
 ;; than returning (#!null))
 (define/kw (take-cell! at: cursor::Cursor := (the-cursor)
 		       from: document::pair := (the-document))
-  (define (fill-preceding-space! preceding-cell::pair taken::pair)
-    (and-let* ((extent ::Extent (sequence-extent taken))
-	       (painter ::Painter (the-painter))
-	       ((Space fragments: fragments) (post-head-space
-					      preceding-cell))
-	       (last (last-pair fragments)))
-      (set! (car last)
-	(+ (car last)
-	   (quotient extent:width (painter:space-width))))))
+  (define (increase-space! space::Space width::real)
+    (let ((last-fragment (last-pair space:fragments)))
+      (set! (car last-fragment)
+	(+ (car last-fragment) width))))
+
+  (define (width taken::pair)::real
+    (let* ((extent ::Extent (sequence-extent taken))
+	   (painter ::Painter (the-painter)))
+      (quotient extent:width (painter:space-width))))
   
   (match cursor
     (`(,,@(isnt _ integer?) . ,root)
@@ -48,50 +48,52 @@
 	   (let* ((new (cons (cdr removed) '())))
 	     (tail-space-to-head removed new)
 	     (set! (car cell) new)
+	     (increase-space! (pre-head-space (car cell)) 1)
 	     (unset! (dotted? removed)))
 	   (set! (car cell) (cdr removed)))
        (set! (cdr removed) '())
-       (fill-preceding-space! cell removed)
+       (increase-space! (pre-head-space (car cell)) (width removed))
+       (unset! (post-head-space (last-pair removed)))
        removed))
     
     (`(,index . ,root)
-     (let* ((parent ::pair (cursor-ref document
-				       root))
+     (let* ((parent ::pair (cursor-ref document root))
 	    (index (quotient index 2))
-	    (irrelevant (- index 1)))
+	    (skip (- index 1)))
+       
        (define (remove-tail! preceding)
-	 (let ((removed (cdr preceding)))
+	 (let* ((removed (cdr preceding))
+		(removed-space (post-head-space removed)))
 	   (set! (cdr preceding) (cdr removed))
 	   (set! (cdr removed) '())
-	   (fill-preceding-space! preceding removed)
+	   (unset! (post-head-space removed))
+	   (increase-space! (post-head-space preceding)
+			    (width removed))
 	   (join-spaces! (post-head-space preceding)
-			 (post-head-space removed))
+			 removed-space)
 	   removed))
 	 
-       (if (is irrelevant > 0)
-	   (let* ((irrelevant (- irrelevant 1))
-		  (preceding (drop irrelevant
-				   parent)))
+       (if (is skip > 0)
+	   (let* ((skip (- skip 1))
+		  (preceding (drop skip parent)))
 	     (if (dotted? preceding)
 		 (let* ((removed (tail-space-to-head
 				  preceding
-				  (cons (cdr
-					 preceding)
-					'()))))
+				  (cons (cdr preceding) '()))))
 		   (set! (cdr preceding) '())
 		   (unset! (dotted? preceding))
-		   (fill-preceding-space! preceding removed)
+		   (increase-space! (post-head-space preceding)
+				    (+ 1 (width removed)))
+		   (unset! (post-head-space (last-pair removed)))
 		   removed)
 		 (remove-tail! (cdr preceding))))
 	  
-	   (let ((preceding (drop irrelevant
-				  parent)))
+	   (let ((preceding (drop skip parent)))
 	     (if (dotted? preceding)
-		 (let* ((added (cons (cdr
-				      preceding)
-				     '())))
-		   (tail-space-to-head preceding
-				       added)
+		 (let* ((added (cons (cdr preceding) '())))
+		   (increase-space! (post-head-space preceding) 1)
+		   (join-spaces! (post-head-space preceding)
+				 (pre-tail-space preceding))
 		   (set! (cdr preceding) added)
 		   (unset! (dotted? preceding))
 		   head/tail-separator)
@@ -99,66 +101,63 @@
     (_
      document)))
 
-
 (e.g.
- (let* ((document (call-with-input-string "1 3 5"
-		    parse-document))
+ (let* ((document (string->document "1 3 5"))
 	(taken (take-cell! at: '(3 1) from: document)))
-   (parameterize ((evaluating? #t))
-     (show document)
-     (show taken)
-      (and (equal? document '((1 5)))
-	   (equal? taken '(3))))))
+   (values (document->string document)
+	   (pair->string taken)))
+   ===>
+   "1   5"
+   "3")
 
 (e.g.
  (let* ((document (call-with-input-string "1 3 5"
 		    parse-document))
 	(taken (take-cell! at: '(5 1) from: document)))
-   (parameterize ((evaluating? #t))
-     (show document)
-     (show taken)
-     (and (equal? document '((1 3)))
-	  (equal? taken '(5))))))
+
+   (values (document->string document)
+	   (pair->string taken)))
+   ===>
+   "1 3  "
+   "5")
 
 (e.g.
  (let* ((document (call-with-input-string "(1 3 5)"
 		    parse-document))
 	(taken (take-cell! at: '(1 1 1) from: document)))
-   (parameterize ((evaluating? #t))
-     (show document)
-     (show taken)
-     (and (equal? document '(((3 5))))
-	  (equal? taken '(1))))))
+   (values (document->string document)
+	   (pair->string taken)))
+   ===>
+   "(  3 5)"
+   "1")
 
 (e.g.
  (let* ((document (call-with-input-string "(1 . 5)"
 		    parse-document))
 	(taken (take-cell! at: '(3 1 1) from: document)))
-   (parameterize ((evaluating? #t))
-     (show document)
-     (show taken)
-     (and (equal? document '(((1 5))))
-	  (head/tail-separator? taken)))))
+   (assert (head/tail-separator? taken))
+   (document->string document))
+ ===> "(1   5)")
 
 (e.g.
  (let* ((document (call-with-input-string "(1 . 5)"
 		    parse-document))
 	(taken (take-cell! at: '(1 1 1) from: document)))
-   (parameterize ((evaluating? #t))
-     (show document)
-     (show taken)
-     (and (equal? document '(((5))))
-	  (equal? taken '(1))))))
+   (values (document->string document)
+	   (pair->string taken)))
+ ===>
+ "(    5)"
+ "1")
 
 (e.g.
  (let* ((document (call-with-input-string "(1 . 5)"
 		    parse-document))
 	(taken (take-cell! at: '(5 1 1) from: document)))
-   (parameterize ((evaluating? #t))
-     (show document)
-     (show taken)
-     (and (equal? document '(((1))))
-	  (equal? taken '(5))))))
+   (values (document->string document)
+	   (pair->string taken)))
+ ===>
+ "(1    )"
+ "5")
 
 (define/kw (splice! element
 		    into: document::pair := (the-document)

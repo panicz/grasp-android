@@ -294,3 +294,13 @@
 	(when (null? result)
 	  (set! (null-head-space document) spaces))
 	document))))
+
+(define (string->document s::string)::list
+  (call-with-input-string s parse-document))
+
+(define (document->string doc::list)
+  (with-output-to-string (lambda () (show-document doc))))
+
+(define (pair->string p::list)
+  (with-output-to-string (lambda () (show-pair p))))
+
