@@ -60,27 +60,14 @@
 ╰   ╰    ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
 ")
 
-(let ((taken (take-cell! at: (cursor 3 3 1 1))))
-  (splice! taken at: (cursor 0 4 1 1)))
-
 (e.g.
- (snapshot)
- ===> "
-╭        ╭     ╮                   ╮
-│ define │ !   │n                  │
-│        ╰     ╯                   │
-│   ╭    ╭        ╮              ╮ │
-│   │ if │ <= n 1 │              │ │
-│   │    ╰        ╯              │ │
-│   │                            │ │
-│   │     1                      │ │
-│   │                            │ │
-│   │    ╭     ╭   ╭       ╮ ╮ ╮ │ │
-│   │    │ * n │ ! │ - n 1 │ │ │ │ │
-╰   ╰    ╰     ╰   ╰       ╯ ╯ ╯ ╯ ╯
-")
-
-(let ((taken (take-cell! at: (cursor 5 1 1))))
-  (splice! taken at: (cursor 1 2 3 1 1)))
-
-(snapshot)
+ (let* ((initial (snapshot))
+	(removed ::Remove (remove-element! at: (cursor 3 3 1 1)
+					   from: (the-document)))
+	(modified (snapshot))
+	(bring-back ::Edit (removed:inverse))
+	(final (begin
+		 (bring-back:apply! (the-document))
+		 (snapshot))))
+   (and (equal? initial final)
+	(isnt initial equal? modified))))

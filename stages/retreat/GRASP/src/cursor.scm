@@ -6,6 +6,7 @@
 (import (define-property))
 (import (default-value))
 (import (define-parameter))
+(import (keyword-arguments))
 (import (infix))
 (import (fundamental))
 (import (indexable))
@@ -335,3 +336,21 @@
 		   ((eqv? (head updated) limit)))
 	  (next updated))
 	updated)))
+
+(define/kw (space-preceding cursor::Cursor
+			    in: document := (the-document))
+  ::Space
+  (match cursor
+    (`(,tip ,top . ,root)
+     (let* ((grandpa (cursor-ref document root))
+	    (parent (part-at top grandpa))
+	    (target (part-at tip parent)))
+       (cond ((Space? target)
+	      target)
+	     ((and (eq? target parent)
+		   (integer? top)
+		   (pair? grandpa))
+	      (part-at (- top 1) grandpa))
+	     ((and (pair? parent)
+		   (integer? tip))
+	      (part-at (- tip 1) parent)))))))
