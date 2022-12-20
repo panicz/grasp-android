@@ -1,3 +1,81 @@
+* 19.12.2022
+
+na podstawie testu mamy
+  
+(e.g.
+  (let ((action ::Edit (Move from: (cursor 3 3 1 1)
+			     to: (cursor 0 4 1 1)
+			     with-shift: 1)))
+    (action inverse)) ===>
+    (Move from: (cursor 5 1 1)
+	  to: (cursor 1 2 3 1 1)
+	  with-shift: 0))
+
+czy ogolniej
+
+(define+ (inverse)
+  (match (this)
+    ((Move from: `(,s0 . ,source)
+           to: `(,d0 ,d1 . ,destination)
+	   with-shift: s)
+     (Move from: (recons (+ d1 1) destination)
+           to: (recons* s (- s0 1) source)
+	   with-shift: d0))))
+
+No i fajnie.
+
+Teraz jednak musimy rozwazyc w jaki sposob wplesc nasze
+zreifikowane operacje do edytora.
+
+Chodzi o to, ze jak wyciagamy wyrazenie z dokumentu,
+to powinnismy dodac do historii
+
+(Remove expression: x
+        from: cursor
+	with-shift: int)
+	
+ale jezeli umiescimy je z powrotem w tym samym dokumencie, tj
+
+(Insert expression: x at: cursor)
+
+to powinnismy podmienic historie na
+
+(Move from: source to: destination with-shift: int)
+
+* 18.12.2022
+
+dzis bysmy w pierwszej kolejnosci zrobili tak, ze
+bysmy sie zajeli redukowaniem spacji poprzedzajacej
+miejsce, na ktore wklejamy dany element, o rozmiar
+tego elementu
+
+ogolnie dziala, tylko trzeba jeszcze poprawic
+wklejanie kropek w listy kropkowane
+
+i teraz: jak to musi dzialac?
+
+mamy
+
+(1   5)
+
+i nagle chcemy miec
+
+(1 . 5)
+
+to tak: powinnismy podzielic post-head-space na tipie,
+koncowke ustawic jako pre-tail-space i odjac od niej 1
+
+OK, wyglada na to ze jako tako dziala.
+
+I co dalej?
+
+Dalej chcemy zaimplementowac operacje odwrotna.
+
+Czyli plan na jutro i pojutrze jest z grubsza taki,
+zeby najpierw zmodyfikowac test w taki sposob, zeby
+odwolywal sie do operacji (Move), a nastepnie
+mapisac interpreter dla tej operacji
+
 * 17.12.2022
 
 chcielibysmy naprawic obsluge spacji w sytuacjach, gdy
