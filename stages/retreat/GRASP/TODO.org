@@ -1,3 +1,17 @@
+* 21.12.2022
+
+teraz bysmy chcieli te operacje zintegrowac
+- najpierw z mechanizmem drag&drop, a nastepnie
+z operacjami edycji z klawiatury
+
+jednak wydaje sie, ze w obu przypadkach najlepiej
+byloby dokonywac edycji na komputerze
+
+
+* 20.12.2022
+
+Mamy juz cos co wyglada jak jakies operacje edycji
+  
 * 19.12.2022
 
 na podstawie testu mamy
