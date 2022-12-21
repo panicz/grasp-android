@@ -1,5 +1,5 @@
-;;(module-name grasp-desktop)
-;;(module-compile-options main: #t)
+(module-name grasp-desktop)
+(module-compile-options main: #t)
 
 (import (srfi :11))
 (import (define-syntax-rule))
@@ -29,6 +29,7 @@
 (import (conversions))
 (import (parse))
 (import (editor-operations))
+(import (history))
 
 (define-alias Font java.awt.Font)
 (define-alias FontMetrics java.awt.FontMetrics)
@@ -681,7 +682,7 @@ automatically by the AWT framework."))
 	     (event:getKeyCode))
      (invoke (as screen-renderer (the-painter)) 'repaint)
      (repaint)))
-  
+
   (define (componentResized event::ComponentEvent)::void
     (slot-set! (the-screen-extent) 'width
 	       (invoke (this) 'getWidth))
@@ -718,6 +719,18 @@ automatically by the AWT framework."))
   (set! (on-key-press KeyEvent:VK_DOWN)
 	move-cursor-down!)
 
+  (set! (on-key-press KeyEvent:VK_Z)
+	(lambda ()
+	  (if (ctrl-pressed?)
+	      (let ((history ::History (history (the-document))))
+		(history:undo!)))))
+
+  (set! (on-key-press KeyEvent:VK_Y)
+	(lambda ()
+	  (if (ctrl-pressed?)
+	      (let ((history ::History (history (the-document))))
+		(history:redo!)))))
+  
   (when (is (the-top-panel) instance? Editor)
     (let ((editor ::Editor (as Editor (the-top-panel))))
       (set! editor:document

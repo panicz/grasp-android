@@ -72,15 +72,6 @@
 	      from: (recons (+ top 1) root)
 	      with-shift: tip)))))
 
-(define/kw (remove-element! at: cursor::Cursor
-			    from: document := (the-document))
-  ::Remove
-  (let* ((shift (last-index (space-preceding cursor in: document)))
-	 (element (take-cell! at: cursor from: document)))
-    (Remove element: element
-	    from: cursor
-	    with-shift: shift)))
-
 (define-object (History document::pair)
   (define fronts ::(list-of (list-of Edit)) '())
 
@@ -141,3 +132,26 @@
 
 (define-property+ (history document::pair)::History
   (History document))
+
+(define/kw (remove-element! at: cursor::Cursor
+			    from: document := (the-document))
+  ::Remove
+  (let* ((shift (last-index (space-preceding cursor in: document)))
+	 (element (take-cell! at: cursor from: document))
+	 (history ::History (history document))
+	 (action ::Remove (Remove element: element
+				  from: cursor
+				  with-shift: shift)))
+    (history:record! action)
+    action))
+
+(define/kw (insert! element
+		    into: document := (the-document)
+		    at: cursor::Cursor)
+  ::Insert
+  (let ((action ::Insert (Insert element: element
+				 at: cursor))
+	(history ::History (history document)))
+    (action:apply! document)
+    (history:record! action)
+    action))

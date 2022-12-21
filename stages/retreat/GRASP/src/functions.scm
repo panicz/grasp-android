@@ -429,16 +429,16 @@
    (and (equal? l '(1 2 3))
 	(equal? s '(4 5)))))
 
-(define (insert! sublist::list
-		 #!key
-		 (into::list '())
-		 (at::int 0))
+(define (paste! sublist::list
+		#!key
+		(into::list '())
+		(at::int 0))
   ::list
   (let ((suffix (split! into at: at)))
     (append! into sublist suffix)))
 
 (e.g.
- (insert! (list 'a 'b 'c) into: (list 1 2 3 4) at: 2)
+ (paste! (list 'a 'b 'c) into: (list 1 2 3 4) at: 2)
  ===> (1 2 a b c 3 4))
 
 

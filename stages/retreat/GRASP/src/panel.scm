@@ -28,6 +28,7 @@
 (import (parameterize-up))
 (import (document-operations))
 (import (space))
+(import (history))
 
 (define-alias List java.util.List)
 (define-alias ArrayList java.util.ArrayList)
@@ -88,13 +89,24 @@
        ((is parent Space?)
 	(let* ((last-space (split-space! parent tip))
 	       (last-cell (last-pair selected:items)))
-	  (if (dotted? last-cell)
+	  #;(if (dotted? last-cell)
 	      (set! (post-tail-space last-cell) last-space)
 	      (set! (post-head-space last-cell) last-space))
-	  (splice! selected:items at: cursor)))
+	  (insert! selected:items at: cursor)))
 
        ((is parent cons?)
-	(splice! selected:items at: cursor)))
+	(cond
+	 ((eqv? tip (parent:first-index))
+	  (splice! selected:items
+		   at: (recons (parent:next-index tip)
+			       cursor)))
+	 ((eqv? tip (parent:last-index))
+	  (splice! selected:items
+		   at: (recons
+			(parent:previous-index tip)
+			cursor)))
+	 (else
+	  (WARN "unhandled "tip" in "parent)))))
       
       (overlay:remove! selected)))
 
@@ -424,12 +436,11 @@
 	    ;; powinnismy powiekszyc spacje poprzedzajaca
 	    ;; wydobywany element o szerokosc tego elementu
 	    ;; podzielona przez (painter:space-width)
-	    (let* ((target (take-cell! at: subpath))
-		   (selection (Selected target
+	    (let* ((removed ::Remove (remove-element! at: subpath))
+		   (selection (Selected removed:element
 					(screen-position
-					 (head target)))))
-	      (set! (dragging 0) (DragAround selection))
-	      ))
+					 (head removed:element)))))
+	      (set! (dragging 0) (DragAround selection))))
 
 	   ((and (is target cons?)
 		 (eqv? tip (target:last-index)))
