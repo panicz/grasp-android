@@ -7,6 +7,22 @@ z operacjami edycji z klawiatury
 jednak wydaje sie, ze w obu przypadkach najlepiej
 byloby dokonywac edycji na komputerze
 
+OK, zatem komputer it is.
+
+I co daley?
+
+Po pierwsze, wyglada na to, ze te nasze ostatnie
+grzebaniny troche zepsuly, bo nowa linia w spacji
+za dodanym elementem jest usuwana. Trzeba to bedzie
+naprawic.
+
+Po drugie, chcielibysmy rejestrowac (i moc cofac)
+rowniez zdarzenia zmiany rozmiaru pudelka
+
+(ResizeBox from: Extent to: Extent)
+
+Po trzecie, chcielibysmy dodac operacje pisania
+i dodawania nowych symboli.
 
 * 20.12.2022
 
