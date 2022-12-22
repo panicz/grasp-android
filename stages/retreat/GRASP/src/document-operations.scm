@@ -53,8 +53,12 @@
 	     (unset! (dotted? removed)))
 	   (set! (car cell) (cdr removed)))
        (set! (cdr removed) '())
-       (increase-space! (pre-head-space (car cell)) (cell-width removed))
-       (unset! (post-head-space (last-pair removed)))
+       (let ((removed-space (post-head-space removed)))
+	 (unset! (post-head-space removed))
+	 (increase-space! (pre-head-space (car cell))
+			  (cell-width removed))
+	 (join-spaces! (pre-head-space (car cell))
+		       removed-space))
        removed))
     
     (`(,index . ,root)
@@ -176,7 +180,8 @@
 	      (eq? parent target))
 	 (if (is top <= 1)
 	     (and-let* ((`(,heir . ,origin) root)
-			(predecesor ::pair (cursor-ref document origin))
+			(predecesor ::pair (cursor-ref document
+						       origin))
 			(parent (drop (quotient heir 2) predecesor))
 			(following-space ::Space (split-space! target
 							       tip)))
@@ -184,7 +189,7 @@
 		 (max (if (null? (car parent)) 0 1)
 		      (- (car following-space:fragments)
 			 (cell-width element))))
-	       (set! (post-head-space (last-pair element))
+	       (set! (post-head-space element)
 		 following-space)
 	       (set! (last-tail element) (car parent))
 	       (set! (car parent) element) #t)
@@ -192,23 +197,26 @@
 	     (let* ((irrelevant (- (quotient top 2) 1))
 		    (before (drop irrelevant grandpa)))
 	       (cond ((pair? element)
-		      (let ((following-space ::Space (split-space! target
-								   tip)))
+		      (let ((following-space ::Space
+					     (split-space! target
+							   tip)))
 			(set! (car following-space:fragments)
 			  (max (if (null? (cdr before)) 0 1)
 			       (- (car following-space:fragments)
 				  (cell-width element))))
-			(set! (post-head-space (last-pair element))
+			(set! (post-head-space element)
 			  following-space))
 		      (set! (last-tail element) (cdr before))
 		      (set! (cdr before) element) #t)
 		     
 		     ((null? (cdr (cdr before)))
 		      (assert (head/tail-separator? element))
-		      (let ((following-space ::Space (split-space! target
-								   tip)))
+		      (let ((following-space ::Space
+					     (split-space! target
+							   tip)))
 			(set! (car following-space:fragments)
-			  (max 1 (- (car following-space:fragments) 1)))
+			      (max 1 (- (car following-space:fragments)
+					1)))
 			(set! (pre-tail-space before)
 			  following-space))
 		      (set! (cdr before) (car (cdr before)))

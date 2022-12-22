@@ -87,12 +87,7 @@
 	(WARN "reached "location" in "parent" at "cursor))
 
        ((is parent Space?)
-	(let* ((last-space (split-space! parent tip))
-	       (last-cell (last-pair selected:items)))
-	  #;(if (dotted? last-cell)
-	      (set! (post-tail-space last-cell) last-space)
-	      (set! (post-head-space last-cell) last-space))
-	  (insert! selected:items at: cursor)))
+	(insert! selected:items at: cursor))
 
        ((is parent cons?)
 	(cond
@@ -207,9 +202,10 @@
     ;; (ewentualnie - gdyby ten element byl wlasnie przeciagany
     ;; - powinnismy raczej zamienic go w selekcje. Ale nie
     ;; wiadomo, czy zechcemy obsluzyc ten kejs)
-    (overlay:remove! p))
+    (values)
+    #;(overlay:remove! p))
 
-  (overlay:add! p))
+  #;(overlay:add! p))
 
 (define-mapping (dragging finger::byte)::Drag #!null)
 
