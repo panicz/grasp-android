@@ -1,3 +1,31 @@
+* 22.12.2022
+
+dzis (i ew. jutro) sprobowalibysmy dodac
+opetacje Resize do historii
+
+Operacje nazwiemy ResizeBox - po pierwsze
+zeby lepiej brzmialo, ale po drugie tez zeby
+odroznic od Resize
+
+(ResizeBox at: Cursor
+           from-width: real
+	   to-width: real
+	   from-height: real
+	   to-height: real
+	   anchored-at: LineEnding)
+
+ok, fajnie i co dalej?
+
+powinno to dzialac tak, ze:
+- mamy funkcje zmieniajace rozmiar pudelka
+  poza obiektem Resize
+- metoda move! w Resize wywoluje te funkcje
+- metoda drop! w Resize dodaje do historii
+  obiekt ResizeBox
+- metoda apply! w ResizeBox rowniez robi
+  to samo
+
+	   
 * 21.12.2022
 
 teraz bysmy chcieli te operacje zintegrowac
