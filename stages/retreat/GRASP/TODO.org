@@ -1,3 +1,40 @@
+* 27.12.2022
+
+Udalo sie dodac edycje ResizeBox.
+
+Mamy tez dosc brzydkawego buga przy przenoszeniu
+elementow (jezeli dany element to pierwszy element
+listy, sam bedacy lista).
+
+Tym bysmy sie jeszcze dzis zajeli i jutro walneli
+commita.
+
+Ponadto mamy taki problem, ze na pustych nawiasach
+nie dziala ani Remove, ani ResizeBox, i to takze
+dobrze by bylo naprawic.
+
+Natomiast kolejne rzeczy, ktore chcemy zrobic, to:
+- edycja dokumentu z klawiatury (wraz z historia edycji)
+- obsluga komentarzy
+- dzielenie ekranu
+- scrollowanie widoku
+- otwieranie i zapisywanie dokumentu
+
+WALKA Z DZIWNYM BLEDEM:
+
+przede wszystkim musimy zrozumiec, skad sie ow blad bierze.
+
+(prawdopodobnie stad, ze renderowanie ustawia screen-position)
+
+OK,
+
+ale teraz (przy okazji proby zmiany rozmiaru)
+pojawila sie jeszcze jedna koncepcja, mianowicie
+- zeby usunac "null-head-space" oraz "null-tail-space",
+i tak jak mamy "dublerowanie" metod getCar i getCdr
+w cons dla typu Atom, tak chcielibysmy zrobic to samo
+dla typu EmptyListProxy
+
 * 22.12.2022
 
 dzis (i ew. jutro) sprobowalibysmy dodac
