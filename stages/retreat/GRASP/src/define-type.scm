@@ -38,7 +38,7 @@
   ;;(deep-copy)::Struct
   )
 
-(define (clone struct::Struct)::Struct
+(define (copy struct::Struct)::Struct
   (struct:clone))
 
 (define-simple-class Base (Struct)

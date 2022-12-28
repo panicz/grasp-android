@@ -59,6 +59,7 @@
 			  (cell-width removed))
 	 (join-spaces! (pre-head-space (car cell))
 		       removed-space))
+       (unset! (pre-head-space removed))
        removed))
     
     (`(,index . ,root)

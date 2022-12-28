@@ -14,8 +14,12 @@
 (import (functions))
 (import (for))
 (import (while))
+(import (painter))
+(import (extent))
 (import (indexable))
+(import (traversal))
 (import (primitive))
+(import (space))
 (import (cursor))
 (import (document-operations))
 (import (editor-operations))
@@ -44,7 +48,9 @@
             to: (recons* s (- s0 1) source)
 	    with-shift: d0)))))
 
-(define-type (Remove element: (either pair HeadTailSeparator)
+(define-type (Remove element: (either pair
+				      HeadTailSeparator
+				      EmptyListProxy)
 		     from: Cursor
 		     with-shift: int)
   implementing Edit
@@ -65,12 +71,100 @@
   with
   ((apply! document::pair)::void
    (splice! element into: document at: at))
-  ((inverse)::void
+  ((inverse)::Edit
    (match at
      (`(,tip ,top . ,root)
       (Remove element: element
 	      from: (recons (+ top 1) root)
 	      with-shift: tip)))))
+
+(define-type (ResizeBox at: Cursor
+			from: Extent
+			to: Extent
+			with-anchor: real)
+  implementing Edit
+  with
+  ((apply! document::pair)::void
+   (let* ((box (the-expression at: at in: document))
+	  (ending (line-ending-embracing with-anchor box)))
+     (resize! box to:width to:height ending)))
+      
+  ((inverse)::Edit
+   (ResizeBox at: at
+	      from: to
+	      to: from
+	      with-anchor: with-anchor)))
+
+(define (resize! box::pair
+		 width::real
+		 height::real
+		 ending::LineEnding)::void
+  (let* ((painter ::Painter (the-painter))
+	 (min-line-height ::real (painter:min-line-height))
+	 (space-width ::real (painter:space-width))
+	 (paren-width ::real (painter:paren-width))
+	 (last-space ::Space (last-space box))
+	 (prior ::Extent (extent box)))
+    (define (set-width!)
+      (traverse
+       box doing:
+       (lambda (item::Element t::Traversal)
+	 (and-let* ((space ::Space item))
+	   (for-each-pair (lambda (cell::pair)
+			    (and-let* ((`(,,@integer?
+					  ,,@integer?
+					  . ,_) cell))
+			      (set-car! cell 0)))
+			  space:fragments))))
+      (let* ((break (last-pair-before ending:index
+				      ending:space:fragments))
+	     (coda ::pair (last-pair last-space:fragments))
+	     (new-width (as int (quotient (- width ending:reach
+					     paren-width
+					     paren-width)
+					  space-width))))
+	(when (is (car coda) integer?)
+	  (set! (car coda) 0))
+	(set! (car break) (max 0 new-width))))
+    
+    (define (set-height!)::void
+      (let ((increment (- height prior:height)))
+	(if (is increment > 0)
+	    (let* ((lines ::int (quotient increment
+					  min-line-height)))
+	      (set-cdr! ending:space:fragments
+			(let ((tip (cdr ending:space:fragments)))
+			  (times lines (lambda ()
+					 (set! tip (cons 0 tip))))
+			  tip)))
+	    (let ((lines ::int (quotient (- increment)
+					 min-line-height)))
+	      (call/cc
+	       (lambda (return)
+		 (traverse
+		  box doing:
+		  (lambda (item::Element t::Traversal)
+		    (and-let* ((space ::Space item))
+		      (let remove-line ((fragments space:fragments))
+			(if (is lines <= 0)
+			    (return)
+			    (match fragments
+			      (`(,,@integer? ,,@integer? ,,@integer?
+					     . ,_)
+			       (set-cdr! fragments (cddr fragments))
+			       (set! lines (- lines 1))
+			       (remove-line fragments))
+			      (`(,,@integer? ,,@integer?)
+			       (if (eq? space last-space)
+				   (set-cdr! fragments '())
+				   (values)))
+			      (`(,head . ,tail)
+			       (remove-line tail))
+			      (_
+			       (values))
+			      ))))))))))))
+    (set-width!)
+    (set-height!)))
 
 (define-object (History document::pair)
   (define fronts ::(list-of (list-of Edit)) '())

@@ -67,6 +67,10 @@
   
   (define (draw!)::void
     (parameterize ((the-document items))
+      #;(when (pair? (car items))
+	(let ((items-position (screen-position (car items))))
+	  (set! items-position:left 0)
+	  (set! items-position:top 0)))
       (with-translation (position:left position:top)
 	  (draw-sequence! items)))))
 
@@ -107,105 +111,31 @@
 
   (overlay:add! selected))
 
-(define-object (Resize box::cons anchor::Position)::Drag
+(define-object (Resize box::cons path::Cursor anchor::real)::Drag
 
   (define position ::Position (screen-position box))
 
-  (define initial ::Extent
-    (let ((extent ::Extent (extent box)))
-      (extent:clone)))
+  (define initial ::Extent (copy (extent box)))
   
   (define ending ::LineEnding
-    (line-ending-embracing anchor:top #;from box))
+    (line-ending-embracing anchor #;from box))
 
-  (define (set-width! width::real)::void
-    (traverse
-     box doing:
-     (lambda (item::Element t::Traversal)
-       (and-let* ((space ::Space item))
-	 (for-each-pair (lambda (cell::pair)
-			  (and-let* ((`(,,@integer?
-					,,@integer?
-					. ,_) cell))
-			    (set-car! cell 0)))
-			space:fragments))))
-    (let* ((break (last-pair-before ending:index
-				    ending:space:fragments))
-	   (last-space ::Space (last-space box))
-	   (coda ::pair (last-pair last-space:fragments))
-	   (painter (the-painter))
-	   (new-value (as int (quotient (- width ending:reach)
-					(painter:space-width)))))
-      (when (is (car coda) integer?)
-	(set! (car coda) 0))
-      
-      (set! (head break) (max 0 new-value))))
-
-  (define (set-height! height::real)::void
-    (let* ((painter ::Painter (the-painter))
-	   (min-line-height ::real (painter:min-line-height))
-	   (last-space ::Space (last-space box))
-	   (prior ::Extent (extent box))
-	   (increment (- height prior:height)))
-      (if (is increment > 0)
-	  (let* ((lines ::int (quotient increment
-					min-line-height)))
-	    (set-cdr! ending:space:fragments
-		      (let ((tip (cdr ending:space:fragments)))
-			(times lines (lambda ()
-				       (set! tip (cons 0 tip))))
-			tip)))
-	  (let ((lines ::int (quotient (- increment)
-				       min-line-height)))
-	    (call/cc
-	     (lambda (return)
-	       (traverse
-		box doing:
-		(lambda (item::Element t::Traversal)
-		  (and-let* ((space ::Space item))
-		    (let remove-line ((fragments space:fragments))
-		      (if (is lines <= 0)
-			  (return)
-			  (match fragments
-			    (`(,,@integer?
-			       ,,@integer?
-			       ,,@integer? . ,_)
-			     (set-cdr! fragments (cddr fragments))
-			     (set! lines (- lines 1))
-			     (remove-line fragments))
-			    (`(,,@integer?
-			       ,,@integer?)
-			     (if (eq? space last-space)
-				 (set-cdr! fragments '())
-				 (values)))
-			    (`(,head . ,tail)
-			     (remove-line tail))
-			    (_
-			     (values))
-			    ))))))))))))
-  
   (define (move! x::real y::real dx::real dy::real)::void
     (safely
      (let* ((target-width ::real (- x position:left))
 	    (target-height ::real (+ initial:height
-				     (- y position:top anchor:top))))
-       (set-width! target-width)
-       (set-height! target-height))))
-
-    (define p ::Point (Point (+ position:left ending:reach
-				(invoke (the-painter) 'paren-width))
-			     (+ position:top anchor:top)))
+				     (- y position:top anchor))))
+       (resize! box target-width target-height ending))))
   
   (define (drop! x::real y::real vx::real vy::real)::void
-    ;; jezeli predkosc byla odpowiednio duza, to powinnismy
-    ;; wysplice'owac wszystkie elementy w liscie nadrzednej
-    ;; (ewentualnie - gdyby ten element byl wlasnie przeciagany
-    ;; - powinnismy raczej zamienic go w selekcje. Ale nie
-    ;; wiadomo, czy zechcemy obsluzyc ten kejs)
-    (values)
-    #;(overlay:remove! p))
-
-  #;(overlay:add! p))
+    (let ((final ::Extent (extent box))
+	  (history ::History (history (the-document))))
+      (when (isnt final equal? initial)
+	(history:record! (ResizeBox at: path
+				    from: initial
+				    to: (copy final)
+				    with-anchor: anchor)))))
+  )
 
 (define-mapping (dragging finger::byte)::Drag #!null)
 
@@ -428,26 +358,30 @@
 	   
 	   ((or (is target Atom?)
 		(and (is target cons?)
-		     (eqv? tip (target:first-index))))
+		     (eqv? tip (target:first-index)))
+		(is target EmptyListProxy?))
 	    ;; powinnismy powiekszyc spacje poprzedzajaca
 	    ;; wydobywany element o szerokosc tego elementu
 	    ;; podzielona przez (painter:space-width)
 	    (let* ((removed ::Remove (remove-element! at: subpath))
+		   (position (screen-position (head removed:element)))
 		   (selection (Selected removed:element
-					(screen-position
-					 (head removed:element)))))
+					(copy position))))
+	      (unset! (screen-position removed:element))
+	      (unset! (screen-position (head removed:element)))
 	      (set! (dragging 0) (DragAround selection))))
 
 	   ((and (is target cons?)
 		 (eqv? tip (target:last-index)))
 	    (let ((extent ::Extent (extent target)))
 	      (set! (dragging 0)
-		    (Resize target
-			    (Position left: extent:width
-				      top: (- y position:top))))))
+		    (Resize target subpath (- y position:top)))))
 	    (else
-	     (WARN "really don't know what to do")))
-	  #t))))
+	     (WARN "really don't know what to do; parent: "parent
+		   ", target: "target", position: "position
+		   ", path: "path)
+	     )))
+	#t)))
 
   (define (release! finger::byte #;at x::real y::real
 		    #;with vx::real vy::real)
