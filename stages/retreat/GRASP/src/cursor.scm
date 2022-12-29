@@ -21,11 +21,7 @@
   (cond ((= index 0)
          (pre-head-space cell))
         ((= index 1)
-	 (let ((item (car cell)))
-	   (if (null? item)
-	       (empty-list-proxy
-		(null-head-space cell))
-	       item)))
+	 (car cell))
         ((= index 2)
          (post-head-space cell))
         ((dotted? cell)
@@ -34,11 +30,7 @@
                ((= index 4)
                 (pre-tail-space cell))
                ((= index 5)
-		(let ((item (cdr cell)))
-		  (if (null? item)
-		      (empty-list-proxy
-		       (null-head-space cell))
-		      item)))
+		(cdr cell))
                ((= index 6)
                 (post-tail-space cell))))
         (else
@@ -110,13 +102,7 @@
      tile)
     (`(,head . ,tail)
      (let ((parent (cursor-ref tile tail)))
-       (if (and (null? parent)
-		(number? head)
-		(pair? tail))
-	   (let* ((grand (cursor-ref tile (cdr tail)))
-		  (space (null-space-ref grand (car tail))))
-	     space)
-	   (part-at head parent))))
+       (part-at head parent)))
     (_
      (error "Unable to refer to cursor "cursor
 	    " in "tile))))

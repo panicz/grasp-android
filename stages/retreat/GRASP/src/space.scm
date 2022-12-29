@@ -13,7 +13,6 @@
 (import (for))
 (import (functions))
 (import (assert))
-(import (print))
 (import (conversions))
 (import (srfi :11))
 (import (painter))
@@ -322,7 +321,6 @@
 			     (quotient (- x t:left)
 				       space-width))
 			  path)))))))
-  
   ((print out::gnu.lists.Consumer)::void
    (let process ((input fragments))
      (match input
@@ -352,7 +350,7 @@
 	(out:append #\;)
 	(invoke (as Space spaces) 'print out)
 	(for expression in expressions
-	     (show expression))
+	  (show expression))
 	(process rest))
 
        (`((block-comment . ,comment) . ,rest)
@@ -525,22 +523,6 @@
 (define-property+ (post-tail-space cell::pair)::Space
   (Space fragments: (cons 0 '())))
 
-;; `null-head-space` only concerns a situation
-;; where the head of a list is `null?`.
-;; Since all empty lists are considered the same
-;; in Lisp, the only way to set the size
-;; of a particular 
-
-(define-property+ (null-head-space cell::pair)::Space
-  (Space fragments: (cons 0 '())))
-
-;; the `null-tail-space` property only concerns
-;; a situation when a cell is stipulated to be
-;; `dotted?` and its tail is `null?`.
-
-(define-property+ (null-tail-space cell::pair)::Space
-  (Space fragments: (cons 0 '())))
-
 (define (last-space sequence::pair)::Space
   (let ((cell ::pair (last-pair sequence)))
     (if (dotted? cell)
@@ -616,7 +598,9 @@
 (define-property (head-tail-separator cell)
   head/tail-separator)
 
-(define-object (EmptyListProxy space::Space)::Tile  
+(define-object (EmptyListProxy space::Space)::ShadowedTile
+  (define (value) '())
+  
   (define (hashCode)::int
     (java.lang.System:identityHashCode (this)))
   
@@ -674,7 +658,12 @@
       (painter:draw-box! outer:width outer:height context)
       (with-translation ((painter:paren-width) 0)
 	  (space:draw! (hash-cons 0 context)))))
-  
+
+  (define (print out::gnu.lists.Consumer)::void
+    (out:append #\()
+    (space:print out)
+    (out:append #\)))
+
   (gnu.lists.LList))
 
 (define-cache (empty-list-proxy space::Space)
@@ -686,9 +675,7 @@
    pre-head-space
    post-head-space
    pre-tail-space
-   post-tail-space
-   null-head-space
-   null-tail-space))
+   post-tail-space))
 
 (define (copy-properties properties original cell)
   (for property in properties
@@ -700,8 +687,6 @@
 	   (pre-tail-space original))
   (update! (post-head-space cell)
 	   (post-tail-space original))
-  (update! (null-head-space cell)
-	   (null-tail-space original))
   cell)
 
 (define (head-space-to-tail original cell)
@@ -709,8 +694,6 @@
 	   (pre-head-space original))
   (update! (post-tail-space cell)
 	   (post-head-space original))
-  (update! (null-tail-space cell)
-	   (null-head-space original))
   cell)
 
 (define (tree-map/preserve properties f l)
@@ -723,22 +706,6 @@
 	(tree-map/preserve properties f (cdr l))))
       (f l)))
 
-(define (null-space-ref grandparent::pair
-			parent-index::int)
-  (match parent-index
-    (0 (pre-head-space grandparent))
-    (1 (null-head-space grandparent))
-    (2 (post-head-space grandparent))
-    (_
-     (if (dotted? grandparent)
-	 (match parent-index
-	   (3 (head-tail-separator grandparent))
-	   (4 (pre-tail-space grandparent))
-	   (5 (null-tail-space grandparent))
-	   (6 (post-tail-space grandparent)))
-	 (null-space-ref (cdr grandparent)
-			 (- parent-index 2))))))
-
 (define (print-space space::Space
 		     #!optional (port (current-output-port)))
   #;(write space:fragments port)
@@ -749,21 +716,14 @@
   (print-space space)
   (write-char #\)))
 
-(define (show-head p::pair)::void
-  (if (null? (head p))
-      (show-empty-list (null-head-space p))
-      (show (car p))))
-
 (define (show-dotted-tail p::pair)::void
   (write-char #\.)
   (print-space (pre-tail-space p))
-  (if (null? (cdr p))
-      (show-empty-list (null-tail-space p))
-      (show (cdr p)))
+  (show (cdr p))
   (print-space (post-tail-space p)))
 
 (define (show-pair p::pair)::void
-  (show-head p)
+  (show (car p))
   (print-space (post-head-space p))
   (cond ((dotted? p)
 	 (show-dotted-tail p))
@@ -777,15 +737,24 @@
     (print-space (pre-head-space p))
     (show-pair p)
     (write-char #\)))
+   
+   ((EmptyListProxy? p)
+    (invoke (as EmptyListProxy p) 'print (current-output-port)))
+   
    (else
     (write p))))
 
 (define (show-document d::pair)
-  (cond ((null? (car d))
-	 (print-space (null-head-space d)))
-	((pair? (car d))
-	 (print-space (pre-head-space (car d)))
-	 (show-pair (car d)))))
+  (cond
+   ((EmptyListProxy? (car d))
+    (let ((proxy (as EmptyListProxy (car d))))
+      (proxy:space:print (current-output-port))))
+   ((pair? (car d))
+    (print-space (pre-head-space (car d)))
+    (show-pair (car d)))
+   
+   (else
+    (display (car d)))))
 
 (define (show->string p)::string
   (with-output-to-string

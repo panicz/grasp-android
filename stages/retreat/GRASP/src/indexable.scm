@@ -34,6 +34,9 @@
   (index< a::Index b::Index)::boolean
   )
 
+(define-interface Shadowed ()
+  (value)::Object)
+
 (define-interface Element (Indexable)
   (draw! context::Cursor)::void
   (cursor-under* x::real y::real path::Cursor)::Cursor*
@@ -64,6 +67,7 @@
 (define-interface Tile (Element)
   (extent)::Extent)
 
+(define-interface ShadowedTile (Shadowed Tile))
 
 #|
 `the-cursor` and `the-document` are parameters

@@ -39,17 +39,17 @@
 
 ;; The two modes of operation are "editing mode"
 ;; and "evaluating mode". The difference is in the
-;; treatment of Atoms: when we are (evaluating?),
-;; Atoms behave as if they were transparent,
+;; treatment of Shadowed elements: when we are (evaluating?),
+;; Shadowed elements behave as if they were transparent,
 ;; so that we can only see their (value).
 ;; But if we're not (evaluating?), then we can
-;; see (and operate on) Atoms themselves.
+;; see (and operate on) Shadowed elements  themselves.
 (define-parameter (evaluating?) ::boolean #f)
 
 (define (editing?) ::boolean
   (not (evaluating?)))
 
-(define-property+ (screen-position element::Element)::Position
+(define-property+ (screen-position element #|::Element|#)::Position
   (Position))
 
 ;; The purpose of Atoms is to solve the problem that
@@ -61,7 +61,7 @@
 ;; edited objects, even though the "value" of
 ;; those atoms can be a different kind of object
 ;; on every query.
-(define-object (Atom source-string::String)::Tile
+(define-object (Atom source-string::String)::ShadowedTile
   (define builder :: java.lang.StringBuilder)
   (define source :: String "")
   
@@ -229,15 +229,15 @@
   (define (getCar)
     (let ((element (invoke-special pair (this) 'getCar)))
       (if (and (evaluating?)
-	       (is element instance? Atom))
-	  (invoke (as Atom element) 'value)
+	       (is element Shadowed?))
+	  (invoke (as Shadowed element) 'value)
 	  element)))
 
   (define (getCdr)
     (let ((element (invoke-special pair (this) 'getCdr)))
       (if (and (evaluating?)
-	       (is element instance? Atom))
-	  (invoke (as Atom element) 'value)
+	       (is element Shadowed?))
+	  (invoke (as Shadowed element) 'value)
 	  element)))
 
   (pair a d))
@@ -283,28 +283,6 @@
 	  height: (* (invoke (the-painter) 'min-line-height)
 		     (length space:fragments))))
 
-(define (head-extent pair::cons)
-  ::Extent
-  (if (null? (head pair))
-      (let ((inner (empty-space-extent
-		    (null-head-space pair))))
-	(Extent width: (+ inner:width
-			  (* 2 (invoke (the-painter)
-				       'paren-width)))
-		height: inner:height))
-      (extent (head pair))))
-
-(define (tail-extent pair::cons)
-  ::Extent
-  (if (null? (tail pair))
-      (let ((inner (empty-space-extent
-		    (null-head-space pair))))
-	(Extent width: (+ inner:width
-			  (* 2 (invoke (the-painter)
-				       'paren-width)))
-		height: inner:height))
-      (extent (tail pair))))
-
 (define (advance-traversal! traversal::Traversal
 			    element::Element)
   ::void
@@ -325,16 +303,6 @@
 		     (painter:min-line-height))))
 
     (parameterize ((the-traversal traversal))
-      
-      (define (head* pair::pair)::Tile
-	(if (null? (head pair))
-            (empty-list-proxy (null-head-space pair))
-            (head pair)))
-
-      (define (tail* pair::pair)::Tile
-	(if (null? (tail pair))
-            (empty-list-proxy (null-tail-space pair))
-            (tail pair)))
 
       (define (step-over-dotted-tail! pair::pair)::void
 	(let* ((horizontal? (should-the-bar-be-horizontal? pair))
@@ -345,7 +313,7 @@
                              (skip-first-line
 			      (pre-tail-space pair))
                              (pre-tail-space pair)))
-               (item (tail* pair))
+               (item (tail pair))
 	       (post-tail (post-tail-space pair)))
           (doing bar traversal)
           (advance-traversal! traversal bar)
@@ -359,7 +327,7 @@
           (advance-traversal! traversal post-tail)))
 
       (define (step! pair::pair)
-	(let ((item (head* pair))
+	(let ((item (head pair))
               (post-head (post-head-space pair)))
           (doing item traversal)
           (advance-traversal! traversal item)
@@ -408,14 +376,15 @@
 		 (painter:exit-selection-drawing-mode!)))))))))
 
 (define (draw-document! document::pair)
-  (cond ((null? (head document))
-	 (draw! (null-head-space document)))
+  (cond ((EmptyListProxy? (head document))
+	 (let ((proxy (as EmptyListProxy (head document))))
+	   (draw! proxy:space)))
 	((pair? (head document))
 	 (draw! (pre-head-space (head document)))
 	 (draw-sequence! (head document)))))
 
 (define (draw! object #!key
-	       (context::Cursor '()))
+	      (context::Cursor '()))
   ::void
   (let ((painter (the-painter)))
     (cond ((instance? object Element)

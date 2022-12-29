@@ -203,11 +203,10 @@
 		 ((eq? c #\()
 		  (let-values (((result* spaces*)
 				(read-list)))
-                    (when (null? result*)
-                      (update! (null-tail-space growth-cone)
-                               spaces*))
-                    (set-cdr! growth-cone result*)))
-
+                    (set-cdr! growth-cone
+			      (if (null? result*)
+				  (EmptyListProxy spaces*)
+				  result*))))
 		 (else ;;an atom
 		  (let ((output (cons c '())))
                     (read-atom-chars-into output)
@@ -222,10 +221,10 @@
 
              ((eq? c #\()
               (let-values (((result* spaces*) (read-list)))
-		(add-element! result* (read-space))
-		(when (null? result*)
-		  (update! (null-head-space growth-cone)
-			   spaces*))
+		(add-element! (if (null? result*)
+				  (EmptyListProxy spaces*)
+				  result*)
+			      (read-space))
 		(read-next)))
 
 	     ((eq? c #\")
@@ -290,10 +289,10 @@
 			(port (current-input-port)))
   (parameterize ((current-input-port port))
     (let-values (((result spaces) (read-list)))
-      (let ((document (cons result '())))
-	(when (null? result)
-	  (set! (null-head-space document) spaces))
-	document))))
+      (cons (if (null? result)
+		(EmptyListProxy spaces)
+		result)
+	    '()))))
 
 (define (string->document s::string)::list
   (call-with-input-string s parse-document))
