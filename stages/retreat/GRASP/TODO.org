@@ -1,3 +1,32 @@
+* 28.12.2022
+
+mamy blad z przenoszeniem wyrazenia, na ktorym jest kursor
+- ale chyba mamy tez jakies wyobrazenie skad sie on bierze
+
+W kazdym razie tym sie dzisiaj jeszcze nie przejmujemy
+(choc docelowo bedzie trzeba: przy wyodrebnianiu wyrazenia
+bedziemy musieli sprawdzic, czy kursor jest jego czescia,
+i jezeli tak, to go przeniesc do overlaya)
+
+zamiast tego chcielibysmy w ogole usunac wlasciwosci
+null-head-space i null-tail-space, a zamiast nich
+uzyc EmptyListProxy
+
+Zmiany przebiegalyby w nastepujacy sposob:
+1. dodajemy do parsera konstrukcje EmptyListProxy
+2. usuwamy odniesienie do null-head-space i null-tail-space
+z traverse
+
+Wydaje sie, ze podmianka na EmptyListProxy poszla
+gladko. Mamy jeszcze 3 dni commitowania:
+
+1. czwartek - dodajemy dzisiejsze zmiany (i to koniec)
+2. piatek - tworzymy repozytorium github.com/panicz/grasp
+i dodajemy do niego zrodla (+ plik README.org)
+3. sobota - aktualizujemy plik README.org w grasp-android,
+archiwizujemy repozytorium, piszemy notatki w mediach
+spolecznosciowych
+
 * 27.12.2022
 
 Udalo sie dodac edycje ResizeBox.
