@@ -4,11 +4,12 @@ This is the repository of the GRASP project, which
 is intended to be an extensible editor of s-expressions
 optimized for interacting via touch screen.
 
-The work is still in progress, and it has been divided
-into stages. 
+*NOTE* This repository is archived.
+The development of GRASP now takes place on
+[[https://github.com/panicz/grasp]].
 
 The most mature build of the prototype for Android
-is probably the one from [[https://github.com/panicz/grasp-android/raw/b0a2a0875810d0b03aae076370db62d9f4e5e08e/stages/stage6/org.scheme.GRASP.apk][September 30, 2021)]]
+is probably the one from [[https://github.com/panicz/grasp-android/raw/b0a2a0875810d0b03aae076370db62d9f4e5e08e/stages/stage6/org.scheme.GRASP.apk][September 30, 2021]]
 
 A brief overview of the current capabilities of GRASP were
 presented in [[https://www.youtube.com/watch?v=FlOghAlCDA4][this lightning talk from 2021 Scheme Workshop]].
