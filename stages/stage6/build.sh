@@ -6,7 +6,7 @@
 #####################################################################
 set -x
 [ -z "${RDR:-}" ] && RDR=".." # "$HOME/buildAPKs"
-for CMD in aapt apksigner dx ecj
+for CMD in aapt apksigner d8 ecj
 do
        	[ -z "$(command -v "$CMD")" ] && printf "%s\\n" " \"$CMD\" not found" && NOTFOUND=1
 done
@@ -76,7 +76,7 @@ set -x
 ecj -d obj -sourcepath . $JAVAFILES -classpath $CLASSFILES -source 1.5 -target 1.5 || _UNTP_
 
 
-dx --dex --output=bin/classes.dex obj $JARFILES || _UNTP_
+d8 --lib $ANDROID_JAR `find obj -name '*.class'`  `find lib -name '*.dex'` `|| _UNTP_
 
 aapt package -f \
        	--min-sdk-version 1 \
@@ -86,7 +86,7 @@ aapt package -f \
        	-A assets \
        	-F bin/"$PKGNAME.apk" || _UNTP_
 
-
+mv classes.dex bin/
 cd bin || _UNTP_
 aapt add -f "$PKGNAME.apk" classes.dex || { cd ..; _UNTP_; }
 
