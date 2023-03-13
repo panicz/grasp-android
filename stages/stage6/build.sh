@@ -76,7 +76,7 @@ set -x
 ecj -d obj -sourcepath . $JAVAFILES -classpath $CLASSFILES -source 1.5 -target 1.5 || _UNTP_
 
 
-d8 --lib $ANDROID_JAR `find obj -name '*.class'`  `find lib -name '*.dex'` `|| _UNTP_
+d8 --lib $ANDROID_JAR `find obj -name '*.class'`  `find lib -name '*.dex'` || _UNTP_
 
 aapt package -f \
        	--min-sdk-version 1 \
