@@ -881,7 +881,7 @@ class Box implements Bit {
 	    line = interline.following_line;
 
 	    if (line == null) {
-		GRASP.log("line for "+index+" in "+this+" is null");
+		//GRASP.log("line for "+index+" in "+this+" is null");
 		return null;
 	    }
 		
