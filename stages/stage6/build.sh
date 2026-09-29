@@ -31,7 +31,7 @@ _UNTP_() {
 }
 
 PKGNAME="$(grep -o "package=.*" AndroidManifest.xml | cut -d\" -f2)"
-ANDROID_JAR='/data/data/com.termux/files/usr/share/java/android.jar'
+ANDROID_JAR=`realpath ~/grasp/tools/android.jar`
 KAWA_JAR=lib/kawa-1.13.jar
 
 rm -rf obj
@@ -44,6 +44,7 @@ mkdir -p obj
 
 
 aapt package -f -m \
+        -I $ANDROID_JAR \
        	-M "AndroidManifest.xml" \
        	-J "gen" \
        	-S "res" || _UNTP_
@@ -73,14 +74,15 @@ done
 set -x
 
 
-ecj -d obj -sourcepath . $JAVAFILES -classpath $CLASSFILES -source 1.5 -target 1.5 || _UNTP_
+ecj -d obj -sourcepath . $JAVAFILES -classpath $CLASSFILES -source 1.6 -target 1.6 || _UNTP_
 
 
 d8 --lib $ANDROID_JAR `find obj -name '*.class'`  `find lib -name '*.dex'` || _UNTP_
 
 aapt package -f \
+        -I $ANDROID_JAR \
        	--min-sdk-version 1 \
-       	--target-sdk-version 23 \
+       	--target-sdk-version 24 \
        	-M AndroidManifest.xml \
        	-S res \
        	-A assets \
@@ -88,7 +90,7 @@ aapt package -f \
 
 mv classes.dex bin/
 cd bin || _UNTP_
-aapt add -f "$PKGNAME.apk" classes.dex || { cd ..; _UNTP_; }
+aapt -I $ANDROID_JAR add -f "$PKGNAME.apk" classes.dex || { cd ..; _UNTP_; }
 
 
 apksigner sign --cert "$RDR/opt/key/certificate.pem" --key "$RDR/opt/key/key.pk8" "$PKGNAME.apk" || { cd ..; _UNTP_; }
