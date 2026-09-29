@@ -6,11 +6,23 @@
 #####################################################################
 set -e
 [ -z "${RDR:-}" ] && RDR=".." # "$HOME/buildAPKs"
-for CMD in aapt apksigner dx ecj
+for CMD in aapt apksigner d8 ecj
 do
        	[ -z "$(command -v "$CMD")" ] && printf "%s\\n" " \"$CMD\" not found" && NOTFOUND=1
 done
 [ "$NOTFOUND" = "1" ] && exit
+
+# android.jar (with resources.arsc) for aapt, ecj and d8
+if [ -z "${ANDROID_JAR:-}" ]
+then
+	for JAR in /data/data/com.termux/files/usr/share/java/android.jar \
+		   "$HOME/grasp/tools/android.jar"
+	do
+		[ -f "$JAR" ] && ANDROID_JAR="$JAR" && break
+	done
+fi
+[ -f "${ANDROID_JAR:-}" ] || { printf "%s\\n" " android.jar not found (set ANDROID_JAR)"; exit 1; }
+ANDROID_JAR="$(realpath "$ANDROID_JAR")"
 [ "$1" ] && [ -f "$1/AndroidManifest.xml" ] && cd "$1"
 [ -f AndroidManifest.xml ] || exit
 
@@ -44,6 +56,7 @@ mkdir -p obj
 
 printf "%s\\n" "aapt: started..."
 aapt package -f -m \
+       	-I "$ANDROID_JAR" \
        	-M "AndroidManifest.xml" \
        	-J "gen" \
        	-S "res" || _UNTP_
@@ -64,17 +77,18 @@ done
 
 
 
-ecj -d obj -sourcepath . $JAVAFILES $CLASSFILES -source 1.5 -target 1.5 || _UNTP_
+ecj -bootclasspath "$ANDROID_JAR" -d obj -sourcepath . $JAVAFILES $CLASSFILES -source 1.6 -target 1.6 -proc:none || _UNTP_
 printf "%s\\n\\n" "ecj: done"
 
 
-printf "%s\\n" "dx: started..."
-dx --dex --output=bin/classes.dex obj $JARFILES || _UNTP_
-printf "%s\\n\\n" "dx: done"
+printf "%s\\n" "d8: started..."
+d8 --min-api 14 --lib "$ANDROID_JAR" --output bin $(find obj -name "*.class") $JARFILES || _UNTP_
+printf "%s\\n\\n" "d8: done"
 
 
 printf "%s\\n" "Making $PKGNAME.apk..."
 aapt package -f \
+       	-I "$ANDROID_JAR" \
        	--min-sdk-version 1 \
        	--target-sdk-version 23 \
        	-M AndroidManifest.xml \
@@ -86,6 +100,13 @@ aapt package -f \
 printf "\n%s\\n" "Adding classes.dex to $PKGNAME.apk..."
 cd bin || _UNTP_
 aapt add -f "$PKGNAME.apk" classes.dex || { cd ..; _UNTP_; }
+
+# zipalign must happen before signing (v2+ signatures cover the whole file)
+if [ -n "$(command -v zipalign)" ]
+then
+	zipalign -f -p 4 "$PKGNAME.apk" "$PKGNAME.aligned.apk" || { cd ..; _UNTP_; }
+	mv "$PKGNAME.aligned.apk" "$PKGNAME.apk"
+fi
 
 printf "\n%s" "Signing $PKGNAME.apk: "
 apksigner sign --cert "$RDR/opt/key/certificate.pem" --key "$RDR/opt/key/key.pk8" "$PKGNAME.apk" || { cd ..; _UNTP_; }
