@@ -15,8 +15,8 @@ done
 # android.jar (with resources.arsc) for aapt, ecj and d8
 if [ -z "${ANDROID_JAR:-}" ]
 then
-	for JAR in /data/data/com.termux/files/usr/share/java/android.jar \
-		   "$HOME/grasp/tools/android.jar"
+	for JAR in "$HOME/grasp/tools/android.jar" \
+		   /data/data/com.termux/files/usr/share/java/android.jar
 	do
 		[ -f "$JAR" ] && ANDROID_JAR="$JAR" && break
 	done
@@ -90,7 +90,7 @@ printf "%s\\n" "Making $PKGNAME.apk..."
 aapt package -f \
        	-I "$ANDROID_JAR" \
        	--min-sdk-version 1 \
-       	--target-sdk-version 23 \
+       	--target-sdk-version 24 \
        	-M AndroidManifest.xml \
        	-S res \
        	-A assets \
